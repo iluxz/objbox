@@ -1866,12 +1866,13 @@ function(){cubePrint('obj: the cube is not a button. but here we are.');for(var 
 function(){cubePrint('obj: the void is flattered.');document.getElementById('main').style.filter='brightness(1.5)';setTimeout(function(){document.getElementById('main').style.filter=''},200)},
 function(){cubePrint('obj: click again. i dare you.');curShape=curShape==='cube'?'sphere':curShape==='sphere'?'tetra':curShape==='tetra'?'cyl':'cube';rebuild(curShape)}
 ];
-canvas.addEventListener('click',function(e){
+document.addEventListener('click',function(e){
+if(studioOpen)return;
 if(wasDrag)return;
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
-if(dd<0.15){var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()}
+if(dd<0.3){var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()}
 });
 
 // === HOVER INNER CUBES ===
