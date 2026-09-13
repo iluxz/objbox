@@ -2005,10 +2005,10 @@ var currentZone='void';
 var zones={
 source:{name:'source',desc:'the original page — before the void took over',bg:[0.94,0.94,0.96,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
 void:{name:'void',desc:'the void — where obj waits',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
-farlands:{name:'farlands',desc:'the farlands — floating point starts to decay',bg:null,particleAlpha:1,particleSpeed:1.5,cubeJitter:0.02,glitchIntensity:0,filter:'',renderOverride:false},
+farlands:{name:'farlands',desc:'the farlands — floating point starts to decay',bg:null,particleAlpha:1,particleSpeed:1.5,cubeJitter:0.15,glitchIntensity:0,filter:'',renderOverride:false},
 geometry:{name:'geometry void',desc:'geometry void — the void before matter existed',bg:[0.95,0.95,0.97,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:true},
-breakdown:{name:'the beginning of the end',desc:'you have gone too far — the renderer is failing',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0.08,glitchIntensity:0.3,filter:'',renderOverride:false},
-fringenlands:{name:'fringenlands',desc:'the rendering is almost gone — fragments remain',bg:null,particleAlpha:0.3,particleSpeed:2,cubeJitter:0.15,glitchIntensity:0.7,filter:'contrast(2) saturate(0)',renderOverride:false},
+breakdown:{name:'the beginning of the end',desc:'you have gone too far — the renderer is failing',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0.12,glitchIntensity:0.5,filter:'',renderOverride:false},
+fringenlands:{name:'fringenlands',desc:'the rendering is almost gone — fragments remain',bg:null,particleAlpha:0.3,particleSpeed:2,cubeJitter:0.2,glitchIntensity:1,filter:'contrast(1.5) saturate(0.3)',renderOverride:false},
 end:{name:'end',desc:'nothing renders here — only the terminal survives',bg:[0,0,0,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:true},
 x:{name:'X',desc:'no entrance — this place does not want you',bg:[0,0,0,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:true}
 };
@@ -2331,19 +2331,104 @@ gl.deleteBuffer(sbuf);gl.deleteBuffer(scbuf);
 }
 }
 
-// fringenlands screen corruption overlay
-if(zr.zone==='fringenlands'){
+// === ZONE CORRUPTION EFFECTS ===
+if(zr.zone==='farlands'){
+// floating point color drift on cubes - red/blue channel separation
+var drift=Math.sin(time*0.003)*0.15;
+document.getElementById('main').style.filter='hue-rotate('+drift*100+'deg) saturate('+(1.2+Math.sin(time*0.005)*0.3)+')';
+// vertex wobble overlay - draw random jittered lines
+gl.useProgram(lprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
+gl.uniformMatrix4fv(lPr,false,proj);gl.uniformMatrix4fv(lVw,false,view);
+var fVerts=[];var fCols=[];
+for(var fi=0;fi<8;fi++){
+var fx=(Math.random()-0.5)*10;
+var fy=(Math.random()-0.5)*6;
+var fz=-3-Math.random()*10;
+var len=0.3+Math.random()*0.5;
+var alpha=0.15+Math.random()*0.2;
+fVerts.push(fx,fy,fz,fx+Math.random()*len-Math.random()*len,fy+Math.random()*len-Math.random()*len,fz);
+fCols.push(0.3,0.8,0.9,alpha,0.3,0.8,0.9,0);
+}
+if(fVerts.length>0){
+var fb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,fb);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(fVerts),gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(lAP);gl.vertexAttribPointer(lAP,3,gl.FLOAT,false,0,0);
+var fcb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,fcb);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(fCols),gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(lAC);gl.vertexAttribPointer(lAC,4,gl.FLOAT,false,0,0);
+gl.drawArrays(gl.LINES,0,fVerts.length/3);
+gl.deleteBuffer(fb);gl.deleteBuffer(fcb);
+}
+gl.disable(gl.BLEND);gl.depthMask(true);
+}
+
+if(zr.zone==='breakdown'){
+// WebGL corruption: random screen tearing strips
 gl.disable(gl.BLEND);
-var stripCount=3+Math.floor(Math.random()*5);
-for(var s=0;s<stripCount;s++){
+var tearCount=2+Math.floor(Math.random()*4);
+for(var ti=0;ti<tearCount;ti++){
+var ty=Math.random()*canvas.height;
+var th=2+Math.random()*15;
+var shift=(Math.random()-0.5)*40;
+gl.clearColor(Math.random()*0.4,Math.random()*0.2,Math.random()*0.4,1);
+gl.enable(gl.SCISSOR_TEST);
+gl.scissor(Math.max(0,shift),ty,canvas.width,th);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.disable(gl.SCISSOR_TEST);
+}
+// random brightness flash
+if(Math.random()<0.08){
+document.getElementById('main').style.filter='brightness('+(1.5+Math.random()*2)+') contrast('+(1+Math.random())+')';
+setTimeout(function(){if(currentZone==='breakdown')document.getElementById('main').style.filter=''},80);
+}
+// Z-fighting flicker - randomly dim the cube
+if(Math.random()<0.12){
+gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+gl.clearColor(0,0,0,0.3);gl.enable(gl.SCISSOR_TEST);
+gl.scissor(0,0,canvas.width,canvas.height);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.disable(gl.SCISSOR_TEST);gl.disable(gl.BLEND);
+}
+}
+
+if(zr.zone==='fringenlands'){
+// heavy corruption: many thick strips, scanlines, inversion patches
+gl.disable(gl.BLEND);
+var stripCount=8+Math.floor(Math.random()*12);
+for(var si=0;si<stripCount;si++){
 var sy=Math.random()*canvas.height;
-var sh=1+Math.random()*8;
-gl.clearColor(Math.random()*0.3,Math.random()*0.1,Math.random()*0.3,1);
+var sh=3+Math.random()*20;
+var r=Math.random(),g=Math.random()*0.3,b=Math.random();
+if(Math.random()<0.3){r=1-r;g=1-g;b=1-b}
+gl.clearColor(r,g,b,1);
 gl.enable(gl.SCISSOR_TEST);
 gl.scissor(0,sy,canvas.width,sh);
 gl.clear(gl.COLOR_BUFFER_BIT);
 gl.disable(gl.SCISSOR_TEST);
 }
+// scanlines
+gl.clearColor(0,0,0,0.5);
+gl.enable(gl.SCISSOR_TEST);
+for(var sl=0;sl<canvas.height;sl+=4){
+gl.scissor(0,sl,canvas.width,1);
+gl.clear(gl.COLOR_BUFFER_BIT);
+}
+gl.disable(gl.SCISSOR_TEST);
+// random inversion patch
+if(Math.random()<0.15){
+var px=Math.random()*canvas.width;
+var py=Math.random()*canvas.height;
+var pw=50+Math.random()*200;
+var ph=30+Math.random()*100;
+gl.clearColor(1,1,1,0.8);
+gl.enable(gl.SCISSOR_TEST);
+gl.scissor(px,py,pw,ph);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.disable(gl.SCISSOR_TEST);
+}
+// chromatic aberration via CSS
+var ca=Math.sin(time*0.01)*3;
+document.getElementById('main').style.filter='contrast(1.5) saturate(0.3) blur(0.5px)';
 }
 }
 
