@@ -202,6 +202,7 @@ END LOG
 <button id="studioSave">SAVE .VSC</button>
 <button id="studioKill" class="kill">KILL</button>
 <button id="studioRun" class="run">&#9654; RUN</button>
+<button id="studioPreviewToggle">PREVIEW ON</button>
 <button id="studioHelp">HELP</button>
 <button id="studioExit">EXIT</button>
 </div>
@@ -693,7 +694,15 @@ return true}},
 'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();return true}},
 'shape':{help:'shape <name> — change shape (cube/sphere/tetra/cyl)',fn:function(a){if(a[0]){curShape=a[0];rebuild(a[0])}return true}},
 'warn':{help:'warn <text> — print a warning',fn:function(a){cubeWarn(a.join(' '));return true}},
-'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}}
+'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}},
+'rm':{help:'rm [-rf] <path> — remove a virtual file or directory',fn:function(a){cubeEval('rm '+a.join(' '));return true}},
+'pwd':{help:'pwd — print the virtual working directory',fn:function(){cubeEval('pwd');return true}},
+'ls':{help:'ls [path] — list a virtual directory',fn:function(a){cubeEval('ls '+a.join(' '));return true}},
+'cat':{help:'cat <path> — read a virtual file',fn:function(a){cubeEval('cat '+a.join(' '));return true}},
+'cd':{help:'cd <path> — change the virtual working directory',fn:function(a){cubeEval('cd '+a.join(' '));return true}},
+'mkdir':{help:'mkdir <dir> — create a virtual directory',fn:function(a){cubeEval('mkdir '+a.join(' '));return true}},
+'touch':{help:'touch <file> — create a virtual file',fn:function(a){cubeEval('touch '+a.join(' '));return true}},
+'echo':{help:'echo <text> > <file> — write to a virtual file',fn:function(a){cubeEval('echo '+a.join(' '));return true}}
 };
 var vsCancel=false;
 
@@ -747,7 +756,7 @@ guiWins[id]={el:win,content:ct,title:tb};
 activeWin=id;
 return id;
 }
-function guiGetActive(){if(!activeWin||!guiWins[activeWin]){cubeError('no active gui window — create one with: gui window "title" 400 300');return null}return guiWins[activeWin]}
+function guiGetActive(){if(typeof studioOpen!=='undefined'&&studioOpen&&!studioPreviewEnabled)return null;if(!activeWin||!guiWins[activeWin]){cubeError('no active gui window — create one with: gui window "title" 400 300');return null}return guiWins[activeWin]}
 function normalizeVoidScriptAction(action){
 if(!action)return '';
 return String(action).trim().replace(/^['"]+|['"]+$/g,'');
@@ -2647,6 +2656,7 @@ window.addEventListener('resize',function(){var dpr=Math.min(window.devicePixelR
 // voidscript studio
 var studioOpen=false;
 var studioRunning=false;
+var studioPreviewEnabled=true;
 var studioOutputLines=0;
 var studioOrigPrint=cubePrint;
 var studioOrigError=cubeError;
@@ -2677,6 +2687,17 @@ document.getElementById('studio').classList.remove('active');
 document.getElementById('studioPreviewArea').innerHTML='';
 document.getElementById('studioTerminalBody').innerHTML='';
 document.getElementById('studioHelpPanel').classList.remove('active');
+}
+function setStudioPreviewEnabled(enabled){
+studioPreviewEnabled=enabled;
+var preview=document.getElementById('studioPreview');
+var toggle=document.getElementById('studioPreviewToggle');
+if(preview)preview.style.display=enabled?'flex':'none';
+if(toggle)toggle.textContent=enabled?'PREVIEW ON':'PREVIEW OFF';
+if(!enabled){
+document.getElementById('studioPreviewArea').innerHTML='';
+activeWin=null;
+}
 }
 function studioSwitchTab(tab){
 var tabs=document.querySelectorAll('.output-tab');
@@ -2744,6 +2765,7 @@ var origGuiAddCheck=guiAddCheck;
 var origGuiAddImage=guiAddImage;
 var previewArea=document.getElementById('studioPreviewArea');
 guiCreateWin=function(title,w,h,rndPos){
+if(!studioPreviewEnabled)return null;
 var id='gw_'+Date.now()+'_'+Math.floor(Math.random()*999);
 var win=document.createElement('div');win.className='gui-window';win.id=id;
 var wx,wy;
@@ -2795,6 +2817,7 @@ function livePreview(code){
 if(studioRunning)return;
 var area=document.getElementById('studioPreviewArea');
 area.innerHTML='';
+if(!studioPreviewEnabled)return;
 var lines=code.split('\n');
 var expanded=[];
 var loopStack=[];
@@ -2907,6 +2930,7 @@ if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveStudioFile()}
 if(e.key==='Escape'){closeStudio()}
 });
 document.getElementById('studioRun').onclick=runStudioScript;
+document.getElementById('studioPreviewToggle').onclick=function(){setStudioPreviewEnabled(!studioPreviewEnabled)};
 document.getElementById('studioKill').onclick=function(){vsCancel=true;studioRunning=false;document.getElementById('studioProcess').textContent='idle';studioPrintColor('script terminated by the void.','rgba(255,200,50,0.6)')};
 document.getElementById('studioExit').onclick=closeStudio;
 document.getElementById('studioHelp').onclick=function(){var p=document.getElementById('studioHelpPanel');p.classList.toggle('active')};
