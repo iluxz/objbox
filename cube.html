@@ -733,7 +733,7 @@ else if(prop==='width'){w.el.style.width=val+'px';w.content.style.width=val+'px'
 else if(prop==='height'){w.content.style.height=val+'px';w.el.style.height=(parseInt(val)+30)+'px'}
 else if(prop==='color'){w.el.style.borderColor=val;w.content.style.color=val}
 }
-function runVoidScript(code,rp){
+function runVoidScript(code,rp,doneCallback){
 cubePrint('running '+rp+' through the void interpreter...');
 var lines=code.split('\n').map(function(l){return l.replace(/\/\/.*$/,'').trim()}).filter(function(l){return l.length});
 var i=0;
@@ -741,15 +741,16 @@ var loopStack=[];
 function step(){
 if(vsCancel){
 cubeWarn('script terminated by the void.');
+if(doneCallback)doneCallback();
 return;
 }
-if(i>=lines.length){if(loopStack.length){cubeError('loop: missing endloop');loopStack=[]}cubeOk(rp+': finished. it left a faint signal.');return}
+if(i>=lines.length){if(loopStack.length){cubeError('loop: missing endloop');loopStack=[]}cubeOk(rp+': finished. it left a faint signal.');if(doneCallback)doneCallback();return}
 var ln=lines[i];
-if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');return}
+if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');if(doneCallback)doneCallback();return}
 var sp=ln.split(/\s+/);
 var op=sp[0].toLowerCase();
 var args=sp.slice(1);
-if(ln==='end'||ln==='halt'){cubeOk(rp+': halted.');return}
+if(ln==='end'||ln==='halt'){cubeOk(rp+': halted.');if(doneCallback)doneCallback();return}
 if(op==='loop'){
 var count=parseInt(args[0],10)||0;
 if(count<1){cubeError('loop: count must be > 0');i++;setTimeout(step,50);return}
@@ -2633,8 +2634,9 @@ guiAddInput=function(placeholder,x,y){var w=guiGetActive();if(!w)return;var inp=
 guiAddCheck=function(labelText,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';var cb=document.createElement('input');cb.type='checkbox';lbl.appendChild(cb);lbl.appendChild(document.createTextNode(labelText));w.content.appendChild(lbl)};
 guiAddImage=function(url,x,y,imgW,imgH){var w=guiGetActive();if(!w)return;var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';if(imgW)img.style.width=imgW+'px';if(imgH)img.style.height=imgH+'px';w.content.appendChild(img)};
 vsCancel=false;
-runVoidScript(code,'studio script');
-setTimeout(function(){
+voidScriptDone=false;
+runVoidScript(code,'studio script',function(){
+voidScriptDone=true;
 cubePrint=studioOrigPrint;
 cubeError=studioOrigError;
 cubeWarn=studioOrigWarn;
@@ -2647,7 +2649,7 @@ guiAddCheck=origGuiAddCheck;
 guiAddImage=origGuiAddImage;
 studioRunning=false;
 document.getElementById('studioProcess').textContent='idle';
-},50);
+});
 }
 function livePreview(code){
 if(studioRunning)return;
