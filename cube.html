@@ -161,6 +161,14 @@ the source code is a lie. the render is the truth.
 <button onclick="document.getElementById('exportLabel').style.display='none'" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.4);border-radius:4px;color:rgba(255,80,80,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">close</button>
 </div>
 </div>
+<div id="importLabel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.94);border:1px solid rgba(43,208,208,0.6);border-radius:8px;padding:16px;z-index:100; width:min(500px,calc(100vw - 40px));font-family:'Consolas',monospace">
+<div style="color:rgba(43,208,208,0.9);font-size:12px;margin-bottom:8px">import vsc1 packet</div>
+<textarea id="importData" spellcheck="false" placeholder="paste vsc1:name:base64 here" style="width:100%;height:100px;background:rgba(0,0,0,0.6);border:1px solid rgba(43,208,208,0.3);border-radius:4px;color:rgba(255,255,255,0.9);font-family:'Consolas',monospace;font-size:12px;padding:8px;resize:vertical;outline:none"></textarea>
+<div style="display:flex;gap:8px;margin-top:8px">
+<button id="importConfirm" style="background:rgba(43,208,208,0.15);border:1px solid rgba(43,208,208,0.4);border-radius:4px;color:rgba(43,208,208,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">import</button>
+<button id="importCancel" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.4);border-radius:4px;color:rgba(255,80,80,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">cancel</button>
+</div>
+</div>
 <div id="missingTex"><div class="msg"><div class="title">DISPLAY DRIVER NOT FOUND</div><div>display mode 2 requires a display driver that is no longer supported.</div><div style="margin-top:8px">try: <span style="color:#ff66ff">winget install display-driver-deprecated</span></div><div class="code">ERROR 0x000000FF :: MISSING_TEXTURE :: DRIVER_DEPRECATED :: HEX #FF00FF</div></div></div>
 <div id="displayMsg"></div>
 <div id="themeIndicator">theme: void</div>
@@ -2954,6 +2962,8 @@ inp.click();
 document.getElementById('studioSave').onclick=saveStudioFile;
 document.getElementById('studioShare').onclick=shareStudioPacket;
 document.getElementById('studioImport').onclick=importStudioPacket;
+document.getElementById('importConfirm').onclick=processStudioPacket;
+document.getElementById('importCancel').onclick=function(){document.getElementById('importLabel').style.display='none'};
 }
 function saveStudioFile(){
 var code=document.getElementById('studioCode').value;
@@ -2977,8 +2987,16 @@ ta.select();
 studioPrint('share packet shown — select all + copy');
 }
 function importStudioPacket(){
-var packet=window.prompt('paste a vsc1 packet:');
-if(!packet)return;
+var modal=document.getElementById('importLabel');
+var input=document.getElementById('importData');
+modal.style.display='block';
+input.value='';
+input.focus();
+}
+function processStudioPacket(){
+var packet=document.getElementById('importData').value.trim();
+var modal=document.getElementById('importLabel');
+if(!packet){studioPrintColor('cannot import an empty packet.','rgba(255,200,50,0.8)');return}
 packet=packet.trim();
 if(packet.indexOf('vsc1:')!==0){studioPrintColor('invalid packet format — expected vsc1:name:base64','rgba(255,80,80,0.8)');return}
 var parts=packet.split(':');
@@ -2990,6 +3008,7 @@ code.value=content;
 updateStudioLineNums();
 if(studioPreviewEnabled)livePreview(content);
 studioPrint('imported '+parts[1]+' ('+content.length+' chars)');
+modal.style.display='none';
 }catch(e){studioPrintColor('import failed — invalid base64 data','rgba(255,80,80,0.8)')}
 }
 initStudioEvents();
