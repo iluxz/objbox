@@ -47,6 +47,12 @@ canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 .gui-input:focus{border-color:rgba(43,208,208,0.8);box-shadow:0 0 8px rgba(43,208,208,0.2)}
 .gui-checkbox{position:absolute;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.8);font-family:'Consolas',monospace;font-size:12px;cursor:pointer}
 .gui-checkbox input{accent-color:rgba(43,208,208,0.8)}
+#vignette{position:fixed;top:0;left:0;right:0;bottom:0;z-index:15;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.7) 100%)}
+#filmGrain{position:fixed;top:0;left:0;right:0;bottom:0;z-index:16;pointer-events:none;opacity:0.06;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px 128px;animation:grainShift 0.5s steps(4) infinite}
+@keyframes grainShift{0%{transform:translate(0,0)}25%{transform:translate(-2px,3px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-1px,-3px)}100%{transform:translate(2px,1px)}}
+#chromAb{position:fixed;top:0;left:0;right:0;bottom:0;z-index:17;pointer-events:none;opacity:0;transition:opacity 0.15s}
+#chromAb.active{opacity:1;animation:chromPulse 0.3s ease-out}
+@keyframes chromPulse{0%{opacity:0.8}100%{opacity:0}}
 </style>
 </head>
 <!--
@@ -69,6 +75,9 @@ the source code is a lie. the render is the truth.
 <!-- END LOG // SESSION 404 // STATUS: IRREVERSIBLE -->
 <body>
 <canvas id="main"></canvas>
+<div id="vignette"></div>
+<div id="filmGrain"></div>
+<div id="chromAb"></div>
 <div id="overlay"><div class="clock" id="clock">00:00</div><div class="date" id="date"></div></div>
 <div class="stats" id="stats"></div>
 <div class="hint">drag to rotate | scroll to zoom | click shapes to morph | 1-5 for themes | click terminal to type</div>
@@ -204,6 +213,7 @@ function getAudioLevel(){if(!audioAnalyser)return 0;audioAnalyser.getByteFrequen
 
 // === GLITCH EFFECT ===
 var glitchEl=document.getElementById('glitch');
+var chromAbEl=document.getElementById('chromAb');
 var lastFps=60;
 function triggerGlitch(){
 glitchEl.style.opacity='1';
@@ -211,6 +221,8 @@ glitchEl.style.background='repeating-linear-gradient(0deg,rgba(255,0,0,0.2) 0px,
 glitchEl.style.transform='translateX('+(Math.random()*80-40)+'px) skewX('+(Math.random()*20-10)+'deg)';
 var mainC=document.getElementById('main');
 if(mainC)mainC.style.filter='hue-rotate('+(Math.random()*90-45)+'deg) saturate('+(1+Math.random()*2)+')';
+chromAbEl.classList.add('active');
+chromAbEl.style.background='linear-gradient('+(Math.random()*360)+'deg,rgba(255,0,0,0.15),rgba(0,255,255,0.15))';
 setTimeout(function(){
 glitchEl.style.background='repeating-linear-gradient(0deg,rgba(255,0,0,0.3) 0px,transparent 3px,rgba(0,255,255,0.2) 6px,transparent 9px)';
 glitchEl.style.transform='translateX('+(Math.random()*100-50)+'px) skewX('+(Math.random()*25-12.5)+'deg)';
@@ -220,6 +232,7 @@ setTimeout(function(){
 glitchEl.style.opacity='0';
 glitchEl.style.transform='';
 if(mainC)mainC.style.filter='';
+chromAbEl.classList.remove('active');
 },200+Math.random()*400);
 }
 
@@ -1410,7 +1423,62 @@ d.push(0,hh,0,0,1,0,r,g,b);d.push(x0,hh,z0,0,1,0,r,g,b);d.push(x1,hh,z1,0,1,0,r,
 d.push(0,-hh,0,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x1,-hh,z1,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x0,-hh,z0,0,-1,0,r*0.5,g*0.5,b*0.5)}
 return new Float32Array(d)
 }
-var shapeGens={cube:geoCube,tetra:geoTetra,sphere:geoSphere,cyl:geoCyl};
+function geoTorus(R,rad,seg,r,g,b){
+var d=[],hh=rad;
+for(var i=0;i<seg;i++){var a0=i/seg*Math.PI*2,a1=(i+1)/seg*Math.PI*2;
+for(var j=0;j<seg;j++){
+var b0=j/seg*Math.PI*2,b1=(j+1)/seg*Math.PI*2;
+function tp(a,b){var cr=R+hh*Math.cos(b);return[cr*Math.cos(a),hh*Math.sin(b),cr*Math.sin(a)]}
+var v0=tp(a0,b0),v1=tp(a1,b0),v2=tp(a1,b1),v3=tp(a0,b1);
+var n0=[Math.cos(b0)*Math.cos(a0),Math.sin(b0),Math.cos(b0)*Math.sin(a0)];
+var n1=[Math.cos(b0)*Math.cos(a1),Math.sin(b0),Math.cos(b0)*Math.sin(a1)];
+var n2=[Math.cos(b1)*Math.cos(a1),Math.sin(b1),Math.cos(b1)*Math.sin(a1)];
+var n3=[Math.cos(b1)*Math.cos(a0),Math.sin(b1),Math.cos(b1)*Math.sin(a0)];
+var sh=0.5+0.5*Math.cos(b0);
+d.push(v0[0],v0[1],v0[2],n0[0],n0[1],n0[2],r*sh,g*sh,b*sh);
+d.push(v1[0],v1[1],v1[2],n1[0],n1[1],n1[2],r*sh,g*sh,b*sh);
+d.push(v2[0],v2[1],v2[2],n2[0],n2[1],n2[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
+d.push(v0[0],v0[1],v0[2],n0[0],n0[1],n0[2],r*sh,g*sh,b*sh);
+d.push(v2[0],v2[1],v2[2],n2[0],n2[1],n2[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
+d.push(v3[0],v3[1],v3[2],n3[0],n3[1],n3[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
+}}
+return new Float32Array(d)
+}
+function geoKnot(R,rad,seg,p,q,r,g,b){
+var d=[];
+for(var i=0;i<seg*4;i++){var a0=i/(seg*4)*Math.PI*2,a1=(i+1)/(seg*4)*Math.PI*2;
+var b0=(i%seg)/seg*Math.PI*2,b1=((i+1)%seg)/seg*Math.PI*2;
+function kp(a){var rr=R+rad*Math.cos(q*a);return[rr*Math.cos(p*a),rad*Math.sin(q*a),rr*Math.sin(p*a)]}
+var v0=kp(a0),v1=kp(a1);
+var nd=[(v1[0]-v0[0])*0.1,(v1[1]-v0[1])*0.1,(v1[2]-v0[2])*0.1];
+var nl=Math.sqrt(nd[0]*nd[0]+nd[1]*nd[1]+nd[2]*nd[2])||1;
+var no=[nd[0]/nl,nd[1]/nl,nd[2]/nl];
+var sh=0.5+0.5*Math.cos(b0);
+d.push(v0[0],v0[1],v0[2],no[0],no[1],no[2],r*sh,g*sh,b*sh);
+d.push(v1[0],v1[1],v1[2],no[0],no[1],no[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
+d.push((v0[0]+v1[0])/2+no[0]*rad*0.3,(v0[1]+v1[1])/2+no[1]*rad*0.3,(v0[2]+v1[2])/2+no[2]*rad*0.3,no[0],no[1],no[2],r*sh*0.6,g*sh*0.6,b*sh*0.6);
+}
+return new Float32Array(d)
+}
+function geoIcosa(s,r,g,b){
+var t=(1+Math.sqrt(5))/2,d=[];
+var V=[[-1,t,0],[1,t,0],[-1,-t,0],[1,-t,0],[0,-1,t],[0,1,t],[0,-1,-t],[0,1,-t],[t,0,-1],[t,0,1],[-t,0,-1],[-t,0,1]];
+var F=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+var nl=s/Math.sqrt(1+t*t);
+for(var fi=0;fi<20;fi++){
+var v0=V[F[fi][0]],v1=V[F[fi][1]],v2=V[F[fi][2]];
+var e1=[(v1[0]-v0[0])*nl,(v1[1]-v0[1])*nl,(v1[2]-v0[2])*nl];
+var e2=[(v2[0]-v0[0])*nl,(v2[1]-v0[1])*nl,(v2[2]-v0[2])*nl];
+var no=[e1[1]*e2[2]-e1[2]*e2[1],e1[2]*e2[0]-e1[0]*e2[2],e1[0]*e2[1]-e1[1]*e2[0]];
+var nll=Math.sqrt(no[0]*no[0]+no[1]*no[1]+no[2]*no[2])||1;no[0]/=nll;no[1]/=nll;no[2]/=nll;
+var sh=0.5+0.5*no[1];
+d.push(v0[0]*nl,v0[1]*nl,v0[2]*nl,no[0],no[1],no[2],r*sh,g*sh,b*sh);
+d.push(v1[0]*nl,v1[1]*nl,v1[2]*nl,no[0],no[1],no[2],r*sh*0.9,g*sh*0.9,b*sh*0.9);
+d.push(v2[0]*nl,v2[1]*nl,v2[2]*nl,no[0],no[1],no[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
+}
+return new Float32Array(d)
+}
+var shapeGens={cube:geoCube,tetra:geoTetra,sphere:geoSphere,cyl:geoCyl,torus:geoTorus,knot:geoKnot,icosa:geoIcosa};
 
 // === WEBGL ===
 var canvas=document.getElementById('main');
@@ -1465,7 +1533,18 @@ var innerC=[
 {c:[1,.6,.1],o:.45,s:.7,p:3*Math.PI/2,sp:1.3},{c:[.6,.2,1],o:.45,s:.7,p:7*Math.PI/4,sp:-1.7}
 ];
 var iBufs=[],iCnts=[];
-function rebuild(shape){iBufs=[];iCnts=[];for(var i=0;i<innerC.length;i++){var d=shapeGens[shape](0.35,innerC[i].c[0],innerC[i].c[1],innerC[i].c[2]);iBufs.push(upBuf(d));iCnts.push(d.length/9)}}
+function rebuild(shape){
+iBufs=[];iCnts=[];
+for(var i=0;i<innerC.length;i++){
+var c=innerC[i],r=c.c[0],g=c.c[1],b=c.c[2];
+var d;
+if(shape==='torus')d=shapeGens[shape](0.25,0.1,16,r,g,b);
+else if(shape==='knot')d=shapeGens[shape](0.2,0.08,24,2,3,r,g,b);
+else if(shape==='icosa')d=shapeGens[shape](0.35,r,g,b);
+else d=shapeGens[shape](0.35,r,g,b);
+iBufs.push(upBuf(d));iCnts.push(d.length/9);
+}
+}
 rebuild('cube');
 
 var outerBuf=upBuf(geoCube(1.3,0.15,0.15,0.15));
@@ -1518,6 +1597,55 @@ var mouseX=0,mouseY=0;
 window.addEventListener('mousemove',function(e){mouseX=(e.clientX/window.innerWidth)*2-1;mouseY=-(e.clientY/window.innerHeight)*2+1});
 canvas.addEventListener('wheel',function(e){zZ+=e.deltaY*.005;zZ=Math.max(-15,Math.min(-3,zZ));e.preventDefault()},{passive:false});
 
+// === MOUSE TRAIL ===
+var trailPts=[];var TRAIL_N=20;
+for(var i=0;i<TRAIL_N;i++)trailPts.push({x:0,y:0,z:0,a:1-i/TRAIL_N});
+var rawMX=0,rawMY=0;
+window.addEventListener('mousemove',function(e){rawMX=e.clientX;rawMY=e.clientY});
+function updateTrail(){
+for(var i=trailPts.length-1;i>0;i--){trailPts[i].x=trailPts[i-1].x;trailPts[i].y=trailPts[i-1].y;trailPts[i].z=trailPts[i-1].z}
+trailPts[0].x=(rawMX/window.innerWidth)*2-1;
+trailPts[0].y=-(rawMY/window.innerHeight)*2+1;
+trailPts[0].z=0;
+}
+
+// === CLICKABLE CENTER CUBE ===
+var clickActions=[
+function(){cubePrint('[obj] you clicked the cube. the cube felt that.')},
+function(){cubePrint('[obj] ow.');triggerGlitch()},
+function(){cubePrint('[obj] curiosity. the void respects that.');applyTheme(String(Math.ceil(Math.random()*5)))},
+function(){cubePrint('[obj] the cube is not a button. but here we are.');for(var i=0;i<15;i++){var p=document.createElement('div');p.style.cssText='position:fixed;width:3px;height:3px;background:rgba(43,208,208,0.8);border-radius:50%;pointer-events:none;z-index:9999;left:50%;top:50%;transition:all 0.8s';document.body.appendChild(p);var a=Math.random()*Math.PI*2,d=100+Math.random()*200;p.style.transform='translate('+(Math.cos(a)*d)+'px,'+(Math.sin(a)*d)+'px)';p.style.opacity='0';setTimeout(function(){p.remove()},800)}},
+function(){cubePrint('[obj] the void is flattered.');document.getElementById('main').style.filter='brightness(1.5)';setTimeout(function(){document.getElementById('main').style.filter=''},200)},
+function(){cubePrint('[obj] click again. i dare you.');curShape=curShape==='cube'?'sphere':curShape==='sphere'?'tetra':curShape==='tetra'?'cyl':'cube';rebuild(curShape)}
+];
+canvas.addEventListener('click',function(e){
+if(drag)return;
+var ndcX=(e.clientX/window.innerWidth)*2-1;
+var ndcY=-(e.clientY/window.innerHeight)*2+1;
+var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
+if(dd<0.15){var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()}
+});
+
+// === HOVER INNER CUBES ===
+var hoverCubeEl=null;
+canvas.addEventListener('mousemove',function(e){
+var ndcX=(e.clientX/window.innerWidth)*2-1;
+var ndcY=-(e.clientY/window.innerHeight)*2+1;
+var closest=-1,closestD=0.3;
+for(var i=0;i<innerC.length;i++){
+var c=innerC[i],oa=t*c.s+c.p;
+var ox=Math.cos(oa)*c.o/3,oy=Math.sin(oa*.7)*c.o*.5/3,oz=Math.sin(oa)*c.o/3;
+var d=Math.sqrt((ndcX-ox)*(ndcX-ox)+(ndcY-oy)*(ndcY-oy));
+if(d<closestD){closestD=d;closest=i}
+}
+if(closest>=0){
+if(!hoverCubeEl){hoverCubeEl=document.createElement('div');hoverCubeEl.style.cssText='position:fixed;padding:4px 8px;background:rgba(0,0,0,0.8);border:1px solid rgba(43,208,208,0.5);border-radius:4px;color:rgba(43,208,208,0.9);font:11px Consolas,monospace;pointer-events:none;z-index:60;white-space:nowrap;transition:opacity 0.2s';document.body.appendChild(hoverCubeEl)}
+var names=['red fragment','green fragment','blue fragment','yellow fragment','magenta fragment','cyan fragment','orange fragment','purple fragment'];
+hoverCubeEl.textContent=names[closest]+' ['+closest+']';
+hoverCubeEl.style.left=(e.clientX+12)+'px';hoverCubeEl.style.top=(e.clientY-8)+'px';hoverCubeEl.style.opacity='1';
+}else if(hoverCubeEl){hoverCubeEl.style.opacity='0'}
+});
+
 // === COLOR THEMES ===
 var themes={
 '1':{name:'void',bg:[0.005,0.005,0.015],inner:[[1,.2,.3],[.2,1,.3],[.2,.3,1],[1,1,.2],[1,.2,1],[.2,1,1],[1,.6,.1],[.6,.2,1]],outer:[.15,.15,.15],particle:[.2,.8,1]},
@@ -1550,7 +1678,10 @@ var pvList=[
 {n:'cube',l:'cube',co:[.2,.8,1],g:geoCube},
 {n:'tetra',l:'tri',co:[1,.3,.3],g:geoTetra},
 {n:'sphere',l:'sphere',co:[.3,1,.5],g:geoSphere},
-{n:'cyl',l:'cyl',co:[1,.8,.2],g:geoCyl}
+{n:'cyl',l:'cyl',co:[1,.8,.2],g:geoCyl},
+{n:'torus',l:'torus',co:[.8,.3,1],g:geoTorus},
+{n:'knot',l:'knot',co:[1,.6,.2],g:geoKnot},
+{n:'icosa',l:'icosa',co:[.2,1,.8],g:geoIcosa}
 ];
 for(var pi=0;pi<pvList.length;pi++){(function(pv){
 var btn=document.createElement('div');
@@ -1589,6 +1720,17 @@ if(fps<lastFps-10&&fps<40)triggerGlitch();lastFps=fps}
 if(!drag){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if(Math.abs(vY)<.0001)vY=0}
 var audioLevel=getAudioLevel();
 var audioPulse=1.0+audioLevel*0.08;
+
+// audio visualizer background pulse
+var th=themes[curTheme]||themes['1'];
+var bgPulse=audioLevel*0.03;
+var hueShift=Math.sin(time*0.00008)*0.008;
+gl.clearColor(
+Math.max(0,Math.min(1,th.bg[0]+bgPulse+hueShift)),
+Math.max(0,Math.min(1,th.bg[1]+bgPulse*0.5)),
+Math.max(0,Math.min(1,th.bg[2]+bgPulse-hueShift)),
+1);
+
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 var asp=canvas.width/canvas.height,proj=mPersp(Math.PI/4,asp,.1,100);
 var view=mMul(mTrans(0,0,zZ),mMul(mRotY(rY),mRotX(rX)));
@@ -1599,6 +1741,7 @@ if(pkgEffects.cubeDance)t*=3;
 if(pkgEffects.entropy)t*=(1+Math.sin(time*0.001)*0.5);
 
 // particles
+updateTrail();
 updateParticles(time);
 gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
 gl.uniformMatrix4fv(ppPJ,false,proj);gl.uniformMatrix4fv(ppVW,false,view);
@@ -1608,6 +1751,23 @@ gl.enableVertexAttribArray(ppAS);gl.vertexAttribPointer(ppAS,1,gl.FLOAT,false,32
 gl.enableVertexAttribArray(ppAC);gl.vertexAttribPointer(ppAC,3,gl.FLOAT,false,32,16);
 gl.enableVertexAttribArray(ppAA);gl.vertexAttribPointer(ppAA,1,gl.FLOAT,false,32,28);
 gl.drawArrays(gl.POINTS,0,NP);
+
+// mouse trail
+var tData=new Float32Array(TRAIL_N*8);
+for(var i=0;i<TRAIL_N;i++){
+var tp=trailPts[i];
+tData[i*8]=tp.x*4;tData[i*8+1]=tp.y*4;tData[i*8+2]=-8;
+tData[i*8+3]=0.05+tp.a*0.15;
+tData[i*8+4]=0.2;tData[i*8+5]=0.8+t.a*0.2;tData[i*8+6]=1;
+tData[i*8+7]=tp.a*0.6;
+}
+var tBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,tBuf);gl.bufferData(gl.ARRAY_BUFFER,tData,gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(ppAP);gl.vertexAttribPointer(ppAP,3,gl.FLOAT,false,32,0);
+gl.enableVertexAttribArray(ppAS);gl.vertexAttribPointer(ppAS,1,gl.FLOAT,false,32,12);
+gl.enableVertexAttribArray(ppAC);gl.vertexAttribPointer(ppAC,3,gl.FLOAT,false,32,16);
+gl.enableVertexAttribArray(ppAA);gl.vertexAttribPointer(ppAA,1,gl.FLOAT,false,32,28);
+gl.drawArrays(gl.POINTS,0,TRAIL_N);
+
 gl.depthMask(true);gl.disable(gl.BLEND);
 
 // cubes
