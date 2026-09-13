@@ -92,7 +92,7 @@ background-color:#ff00ff;background-image:url("data:image/png;base64,iVBORw0KGgo
 #studioCode::selection{background:rgba(43,208,208,0.3)}
 #studioPreview{width:45%;border-left:1px solid rgba(43,208,208,0.15);background:rgba(5,10,20,0.6);position:relative;overflow:hidden;display:flex;flex-direction:column}
 #studioPreview .preview-header{padding:8px 12px;border-bottom:1px solid rgba(43,208,208,0.1);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;flex-shrink:0}
-#studioPreviewArea{flex:1;position:relative;overflow:hidden}
+#studioPreviewArea{flex:1;position:relative;overflow:auto}
 #studioPreviewArea .gui-window{position:absolute}
 #studioOutput{height:160px;border-top:1px solid rgba(43,208,208,0.15);background:rgba(0,0,0,0.4);display:flex;flex-direction:column;flex-shrink:0}
 #studioOutput .output-header{padding:6px 12px;border-bottom:1px solid rgba(43,208,208,0.1);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;flex-shrink:0;display:flex;justify-content:space-between}
@@ -250,6 +250,7 @@ END LOG
 <div class="help-cmd"><span class="hl">shape</span> &lt;name&gt; — change shape (cube/sphere/tetra/cyl)</div>
 <div class="help-cmd"><span class="hl">bgm</span> — toggle background music</div>
 <div class="help-cmd"><span class="hl">clear</span> — clear the output log</div>
+<div class="help-cmd"><span class="hl">travel</span> &lt;zone&gt; — travel through the void</div>
 </div>
 <div class="help-section">
 <div class="help-title">logic</div>
@@ -281,6 +282,12 @@ END LOG
 <div class="help-cmd"><span class="hl">mkdir</span> &lt;name&gt; — create directory</div>
 <div class="help-cmd"><span class="hl">echo</span> &gt; &lt;file&gt; — write to file</div>
 <div class="help-cmd"><span class="hl">rm</span> &lt;path&gt; — remove file</div>
+</div>
+<div class="help-section">
+<div class="help-title">variables</div>
+<div class="help-cmd"><span class="hl">set</span> &lt;name&gt; &lt;value&gt; — store a variable</div>
+<div class="help-cmd"><span class="hl">var</span> &lt;name&gt; &lt;value&gt; — store a variable (alias)</div>
+<div class="help-cmd"><span class="hl">get</span> &lt;name&gt; — recall a variable</div>
 </div>
 <div class="help-section">
 <div class="help-title">tips</div>
@@ -659,7 +666,20 @@ if(gs==='image'){guiAddImage(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,
 if(gs==='close'||gs==='destroy'){if(activeWin){guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null}return true}
 if(gs==='set'){if(a.length>=3)guiSetWindow(a[1],a.slice(2).join(' '));return true}
 if(gs==='list'){var k=Object.keys(guiWins);for(var i=0;i<k.length;i++)cubePrint(k[i]);return true}
-return true}}
+return true}},
+'travel':{help:'travel <zone> — travel through the void',fn:function(a){
+if(!a.length){cubePrint('current zone: '+zones[currentZone].name);var allowed=zoneTransitions[currentZone];for(var i=0;i<allowed.length;i++)cubePrint('  '+zones[allowed[i]].name);return true}
+var dest=a.join(' ').toLowerCase();
+var zoneAliases={'the beginning of the end':'breakdown','beginning of the end':'breakdown','beginning':'breakdown','the geometry void':'geometry','geometry void':'geometry','the fringenlands':'fringenlands','the farlands':'farlands','the source':'source','the void':'void','the end':'end','the x':'x'};
+var resolved=zoneAliases[dest]||dest;
+travelTo(resolved);
+return true}},
+'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}vsVars[a[0]]=a.slice(1).join(' ');return true}},
+'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
+'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();return true}},
+'shape':{help:'shape <name> — change shape (cube/sphere/tetra/cyl)',fn:function(a){if(a[0]){curShape=a[0];rebuild(a[0])}return true}},
+'warn':{help:'warn <text> — print a warning',fn:function(a){cubeWarn(a.join(' '));return true}},
+'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}}
 };
 var vsVars={};
 var vsCancel=false;
@@ -947,15 +967,22 @@ cubePrint('');
 cubePrint('  all ops:');
 cubePrint('  print <txt>    — output to the void');
 cubePrint('  say <txt>      — obj says it');
+cubePrint('  warn <txt>     — print a warning');
+cubePrint('  error <txt>    — print an error');
 cubePrint('  calc <expr>    — safe math');
-cubePrint('  var <n> <v>    — store a variable');
+cubePrint('  set <n> <v>    — store a variable');
+cubePrint('  var <n> <v>    — store a variable (alias)');
 cubePrint('  get <n>        — recall a variable');
 cubePrint('  theme <1-5>    — cube color');
 cubePrint('  morph <0-3>    — inner shape');
+cubePrint('  shape <name>   — change shape (cube/sphere/tetra/cyl)');
 cubePrint('  glitch         — short circuit');
 cubePrint('  vglitch        — deeper corruption');
 cubePrint('  wait <ms>      — sleep');
 cubePrint('  time           — void clock');
+cubePrint('  bgm            — toggle music');
+cubePrint('  clear          — clear output');
+cubePrint('  travel <zone>  — travel through the void');
 cubePrint('  void           — the void acknowledges');
 cubePrint('  ps             — peek at processes');
 cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/image/close/set/destroy/list)');
@@ -2093,15 +2120,15 @@ x:{name:'X',desc:'no entrance — this place does not want you',bg:[0,0,0,1],par
 };
 var zoneTransitions={
 source:['void'],
-void:['source','farlands'],
-farlands:['void','geometry'],
-geometry:['farlands','breakdown'],
-breakdown:['geometry','fringenlands'],
+void:['source','geometry'],
+geometry:['void','farlands'],
+farlands:['geometry','breakdown'],
+breakdown:['farlands','fringenlands'],
 fringenlands:['breakdown','end'],
-end:['fringenlands'],
-x:[]
+end:['fringenlands','x'],
+x:['end']
 };
-var zoneOrder=['source','void','farlands','geometry','breakdown','fringenlands','end'];
+var zoneOrder=['source','void','geometry','farlands','breakdown','fringenlands','end','x'];
 function zoneDistance(a,b){
 var ia=zoneOrder.indexOf(a),ib=zoneOrder.indexOf(b);
 if(ia===-1||ib===-1)return 1;
@@ -2669,8 +2696,9 @@ if(sub==='window'){
 var title=parts[2]?parts[2].replace(/"/g,''):'untitled';
 var w=parseInt(parts[3])||300,h=parseInt(parts[4])||200;
 var wid='lp_'+i;
+var wIdx=Object.keys(wins).length;
 var win=document.createElement('div');win.className='gui-window';win.id=wid;
-win.style.cssText='width:'+w+'px;height:'+(h+30)+'px;left:'+(20+(Object.keys(wins).length%3)*20)+'px;top:'+(20+(Object.keys(wins).length*2)%5)*15+'px;display:flex;flex-direction:column;position:relative';
+win.style.cssText='width:'+w+'px;height:'+(h+30)+'px;left:'+(10+(wIdx%2)*220)+'px;top:'+(10+Math.floor(wIdx/2)*180)+'px;display:flex;flex-direction:column;position:relative';
 var tb=document.createElement('div');tb.className='gui-title';
 tb.innerHTML='<span>'+title+'</span>';
 win.appendChild(tb);
