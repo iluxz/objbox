@@ -772,7 +772,7 @@ wy=60+Math.random()*100;
 }
 win.style.cssText='width:'+w+'px;height:'+(parseInt(h)+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column';
 var tb=document.createElement('div');tb.className='gui-title';
-var tl=document.createElement('span');tl.textContent=title;
+var tl=document.createElement('span');tl.textContent=formatGuiText(title);
 var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
 cb.onclick=function(){win.remove();delete guiWins[id];if(activeWin===id)activeWin=null};
 tb.appendChild(tl);tb.appendChild(cb);
@@ -785,18 +785,19 @@ activeWin=id;
 return id;
 }
 function guiGetActive(){if(typeof studioOpen!=='undefined'&&studioOpen&&!studioPreviewEnabled)return null;if(!activeWin||!guiWins[activeWin]){cubeError('no active gui window — create one with: gui window "title" 400 300');return null}return guiWins[activeWin]}
+function formatGuiText(text){return String(text||'').replace(/_/g,' ')}
 function normalizeVoidScriptAction(action){
 if(!action)return '';
 return String(action).trim().replace(/^['"]+|['"]+$/g,'');
 }
 function guiAddLabel(text,x,y){
 var w=guiGetActive();if(!w)return;
-var el=document.createElement('div');el.className='gui-label';el.textContent=text;
+var el=document.createElement('div');el.className='gui-label';el.textContent=formatGuiText(text);
 el.style.left=x+'px';el.style.top=y+'px';w.content.appendChild(el);
 }
 function guiAddButton(text,x,y,action){
 var w=guiGetActive();if(!w)return;
-var el=document.createElement('button');el.className='gui-button';el.textContent=text;
+var el=document.createElement('button');el.className='gui-button';el.textContent=formatGuiText(text);
 el.style.left=x+'px';el.style.top=y+'px';
 el.onclick=function(){
 var cleaned=normalizeVoidScriptAction(action);
@@ -808,7 +809,7 @@ w.content.appendChild(el);
 }
 function guiAddInput(placeholder,x,y){
 var w=guiGetActive();if(!w)return;
-var el=document.createElement('input');el.className='gui-input';el.placeholder=placeholder;
+var el=document.createElement('input');el.className='gui-input';el.placeholder=formatGuiText(placeholder);
 el.style.left=x+'px';el.style.top=y+'px';el.style.width='180px';
 el.addEventListener('keydown',function(e){e.stopPropagation()});
 w.content.appendChild(el);
@@ -818,7 +819,7 @@ var w=guiGetActive();if(!w)return;
 var wrap=document.createElement('label');wrap.className='gui-checkbox';
 wrap.style.left=x+'px';wrap.style.top=y+'px';
 var cb=document.createElement('input');cb.type='checkbox';
-wrap.appendChild(cb);wrap.appendChild(document.createTextNode(labelText));
+wrap.appendChild(cb);wrap.appendChild(document.createTextNode(formatGuiText(labelText)));
 w.content.appendChild(wrap);
 }
 function guiAddImage(url,x,y,imgW,imgH){
@@ -2911,7 +2912,7 @@ wy=20+Math.random()*50;
 }
 win.style.cssText='width:'+w+'px;height:'+(parseInt(h)+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column;z-index:'+(10+Object.keys(guiWins).length);
 var tb=document.createElement('div');tb.className='gui-title';
-var tl=document.createElement('span');tl.textContent=title;
+var tl=document.createElement('span');tl.textContent=formatGuiText(title);
 var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
 cb.onclick=function(){win.remove();delete guiWins[id];if(activeWin===id)activeWin=null};
 tb.appendChild(tl);tb.appendChild(cb);
@@ -2923,10 +2924,10 @@ guiWins[id]={el:win,content:ct,title:tb};
 activeWin=id;
 return id;
 };
-guiAddLabel=function(text,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=text;lbl.style.left=x+'px';lbl.style.top=y+'px';w.content.appendChild(lbl)};
-guiAddButton=function(text,x,y,action){var w=guiGetActive();if(!w)return;var btn=document.createElement('button');btn.className='gui-button';btn.textContent=text;btn.style.left=x+'px';btn.style.top=y+'px';btn.onclick=function(){var cleaned=normalizeVoidScriptAction(action);var vsFn=voidScriptLang[cleaned.split(/\s+/)[0].toLowerCase()];if(vsFn){runVoidScript(cleaned,'button action')}else{cubeEval(cleaned)}};w.content.appendChild(btn)};
-guiAddInput=function(placeholder,x,y){var w=guiGetActive();if(!w)return;var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=placeholder;inp.style.left=x+'px';inp.style.top=y+'px';w.content.appendChild(inp)};
-guiAddCheck=function(labelText,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';var cb=document.createElement('input');cb.type='checkbox';lbl.appendChild(cb);lbl.appendChild(document.createTextNode(labelText));w.content.appendChild(lbl)};
+guiAddLabel=function(text,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=formatGuiText(text);lbl.style.left=x+'px';lbl.style.top=y+'px';w.content.appendChild(lbl)};
+guiAddButton=function(text,x,y,action){var w=guiGetActive();if(!w)return;var btn=document.createElement('button');btn.className='gui-button';btn.textContent=formatGuiText(text);btn.style.left=x+'px';btn.style.top=y+'px';btn.onclick=function(){var cleaned=normalizeVoidScriptAction(action);var vsFn=voidScriptLang[cleaned.split(/\s+/)[0].toLowerCase()];if(vsFn){runVoidScript(cleaned,'button action')}else{cubeEval(cleaned)}};w.content.appendChild(btn)};
+guiAddInput=function(placeholder,x,y){var w=guiGetActive();if(!w)return;var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=formatGuiText(placeholder);inp.style.left=x+'px';inp.style.top=y+'px';w.content.appendChild(inp)};
+guiAddCheck=function(labelText,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';var cb=document.createElement('input');cb.type='checkbox';lbl.appendChild(cb);lbl.appendChild(document.createTextNode(formatGuiText(labelText)));w.content.appendChild(lbl)};
 guiAddImage=function(url,x,y,imgW,imgH){var w=guiGetActive();if(!w)return;var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';if(imgW)img.style.width=imgW+'px';if(imgH)img.style.height=imgH+'px';img.onerror=function(){cubeError('image failed to load: '+url)};w.content.appendChild(img)};
 vsCancel=false;
 voidScriptDone=false;
@@ -2989,7 +2990,7 @@ var cmd=parts[0].toLowerCase();
 if(cmd==='gui'){
 var sub=parts[1]?parts[1].replace(/"/g,'').toLowerCase():'';
 if(sub==='window'){
-var title=parts[2]?parts[2].replace(/"/g,''):'untitled';
+var title=parts[2]?formatGuiText(parts[2].replace(/"/g,'')):'untitled';
 var w=parseInt(parts[3])||300,h=parseInt(parts[4])||200;
 var rndPos=parts[5]?parts[5].toLowerCase():'';
 var wid='lp_'+i;
@@ -3015,25 +3016,25 @@ wins[wid]={el:win,content:ct};
 activeWinId=wid;
 }
 if(sub==='label'&&activeWinId&&wins[activeWinId]){
-var text=parts[2]?parts[2].replace(/"/g,''):'';
+var text=parts[2]?formatGuiText(parts[2].replace(/"/g,'')):'';
 var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
-var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=text;lbl.style.left=x+'px';lbl.style.top=y+'px';
+var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=formatGuiText(text);lbl.style.left=x+'px';lbl.style.top=y+'px';
 wins[activeWinId].content.appendChild(lbl);
 }
 if(sub==='button'&&activeWinId&&wins[activeWinId]){
-var text=parts[2]?parts[2].replace(/"/g,''):'btn';
+var text=parts[2]?formatGuiText(parts[2].replace(/"/g,'')):'btn';
 var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
-var btn=document.createElement('button');btn.className='gui-button';btn.textContent=text;btn.style.left=x+'px';btn.style.top=y+'px';
+var btn=document.createElement('button');btn.className='gui-button';btn.textContent=formatGuiText(text);btn.style.left=x+'px';btn.style.top=y+'px';
 wins[activeWinId].content.appendChild(btn);
 }
 if(sub==='input'&&activeWinId&&wins[activeWinId]){
-var ph=parts[2]?parts[2].replace(/"/g,''):'';
+var ph=parts[2]?formatGuiText(parts[2].replace(/"/g,'')):'';
 var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
-var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=ph;inp.style.left=x+'px';inp.style.top=y+'px';
+var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=formatGuiText(ph);inp.style.left=x+'px';inp.style.top=y+'px';
 wins[activeWinId].content.appendChild(inp);
 }
 if(sub==='check'&&activeWinId&&wins[activeWinId]){
-var text=parts[2]?parts[2].replace(/"/g,''):'option';
+var text=parts[2]?formatGuiText(parts[2].replace(/"/g,'')):'option';
 var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
 var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';
 lbl.innerHTML='<input type="checkbox"> '+text;
