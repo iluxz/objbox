@@ -2089,35 +2089,28 @@ cubePrint=studioPrint;
 cubeError=function(txt){studioPrintColor('error: '+txt,'rgba(255,80,80,0.8)')};
 cubeWarn=function(txt){studioPrintColor(txt,'rgba(255,200,50,0.6)')};
 cubeOk=function(txt){studioPrintColor(txt,'rgba(100,255,100,0.6)')};
-var origGuiAdd=guiAdd;
+var origGuiAddLabel=guiAddLabel;
+var origGuiAddButton=guiAddButton;
+var origGuiAddInput=guiAddInput;
+var origGuiAddCheck=guiAddCheck;
+var origGuiAddImage=guiAddImage;
 var previewArea=document.getElementById('studioPreviewArea');
-guiAdd=function(type,args,opts){
-var win=document.createElement('div');
-win.className='gui-window';
-win.style.left=(opts.x||20)+'px';
-win.style.top=(opts.y||20)+'px';
-if(opts.w)win.style.width=opts.w+'px';
-if(opts.h)win.style.height=opts.h+'px';
-var title=document.createElement('div');
-title.className='gui-title';
-title.innerHTML='<span>'+(opts.label||type)+'</span>';
-var closeBtn=document.createElement('div');
-closeBtn.className='gui-close';
-closeBtn.textContent='×';
-closeBtn.onclick=function(){win.remove()};
-title.appendChild(closeBtn);
-win.appendChild(title);
-var content=document.createElement('div');
-content.className='gui-content';
-if(opts.label){var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=opts.label;lbl.style.left=(opts.x2||10)+'px';lbl.style.top=(opts.y2||10)+'px';content.appendChild(lbl)}
-if(opts.text){var lbl2=document.createElement('div');lbl2.className='gui-label';lbl2.textContent=opts.text;lbl2.style.left=(opts.x2||10)+'px';lbl2.style.top=(opts.y2||10)+'px';content.appendChild(lbl2)}
-if(opts.placeholder){var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=opts.placeholder;inp.style.left=(opts.x2||10)+'px';inp.style.top=(opts.y2||10)+'px';if(opts.w2)inp.style.width=opts.w2+'px';content.appendChild(inp)}
-if(opts.checked!==undefined){var chk=document.createElement('label');chk.className='gui-checkbox';chk.style.left=(opts.x2||10)+'px';chk.style.top=(opts.y2||10)+'px';var cb=document.createElement('input');cb.type='checkbox';cb.checked=opts.checked;chk.appendChild(cb);chk.appendChild(document.createTextNode(opts.label||''));content.appendChild(chk)}
-if(opts.src){var img=document.createElement('img');img.className='gui-image';img.src=opts.src;img.style.left=(opts.x2||10)+'px';img.style.top=(opts.y2||10)+'px';if(opts.w2)img.style.width=opts.w2+'px';if(opts.h2)img.style.height=opts.h2+'px';content.appendChild(img)}
-win.appendChild(content);
-previewArea.appendChild(win);
-guiWindows.push({el:win,content:content,id:'studio_'+Date.now()});
-};
+function studioMakeWin(label){
+var win=document.createElement('div');win.className='gui-window';win.style.left='20px';win.style.top='20px';
+var title=document.createElement('div');title.className='gui-title';
+title.innerHTML='<span>'+(label||'void app')+'</span>';
+var closeBtn=document.createElement('div');closeBtn.className='gui-close';closeBtn.textContent='×';
+closeBtn.onclick=function(){win.remove()};title.appendChild(closeBtn);win.appendChild(title);
+var content=document.createElement('div');content.className='gui-content';win.appendChild(content);
+previewArea.appendChild(win);return content;
+}
+var studioWin=null;
+function getStudioWin(){if(!studioWin)studioWin=studioMakeWin('voidscript');return studioWin}
+guiAddLabel=function(text,x,y){var c=getStudioWin();var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=text;lbl.style.left=x+'px';lbl.style.top=y+'px';c.appendChild(lbl)};
+guiAddButton=function(text,x,y,action){var c=getStudioWin();var btn=document.createElement('button');btn.className='gui-button';btn.textContent=text;btn.style.left=x+'px';btn.style.top=y+'px';btn.onclick=function(){cubeEval(action)};c.appendChild(btn)};
+guiAddInput=function(placeholder,x,y){var c=getStudioWin();var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=placeholder;inp.style.left=x+'px';inp.style.top=y+'px';c.appendChild(inp)};
+guiAddCheck=function(labelText,x,y){var c=getStudioWin();var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';var cb=document.createElement('input');cb.type='checkbox';lbl.appendChild(cb);lbl.appendChild(document.createTextNode(labelText));c.appendChild(lbl)};
+guiAddImage=function(url,x,y,imgW,imgH){var c=getStudioWin();var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';if(imgW)img.style.width=imgW+'px';if(imgH)img.style.height=imgH+'px';c.appendChild(img)};
 vsCancel=false;
 runVoidScript(code,'studio script');
 setTimeout(function(){
@@ -2125,7 +2118,12 @@ cubePrint=studioOrigPrint;
 cubeError=studioOrigError;
 cubeWarn=studioOrigWarn;
 cubeOk=studioOrigOk;
-guiAdd=origGuiAdd;
+guiAddLabel=origGuiAddLabel;
+guiAddButton=origGuiAddButton;
+guiAddInput=origGuiAddInput;
+guiAddCheck=origGuiAddCheck;
+guiAddImage=origGuiAddImage;
+studioWin=null;
 studioRunning=false;
 document.getElementById('studioProcess').textContent='idle';
 },50);
