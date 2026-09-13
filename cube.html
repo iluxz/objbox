@@ -253,6 +253,7 @@ END LOG
 <div class="help-section">
 <div class="help-title">timing</div>
 <div class="help-cmd"><span class="hl">wait</span> &lt;ms&gt; — pause execution (milliseconds)</div>
+<div class="help-cmd"><span class="hl">sleep</span> &lt;ms&gt; — alias for wait</div>
 </div>
 <div class="help-section">
 <div class="help-title">system</div>
@@ -276,6 +277,9 @@ END LOG
 <div class="help-cmd"><span class="hl">fn</span> name args ... <span class="hl">endfn</span> — define a reusable function</div>
 <div class="help-cmd"><span class="hl">macro</span> name args ... <span class="hl">endmacro</span> — define a reusable macro</div>
 <div class="help-cmd"><span class="hl">call</span> name args — invoke a function or macro</div>
+<div class="help-cmd"><span class="hl">return</span> — stop the current script</div>
+<div class="help-cmd"><span class="hl">random</span> name min max — store a random integer</div>
+<div class="help-cmd"><span class="hl">assert</span> name value — stop when a variable does not match</div>
 <div class="help-cmd"><span class="hl">calc</span> &lt;expr&gt; — evaluate math (e.g. calc 2+2)</div>
 <div class="help-cmd"><span class="hl">set</span> &lt;var&gt; &lt;val&gt; — set a variable</div>
 <div class="help-cmd"><span class="hl">get</span> &lt;var&gt; — get a variable value</div>
@@ -298,6 +302,7 @@ END LOG
 <div class="help-section">
 <div class="help-title">gui — create windows</div>
 <div class="help-cmd"><span class="hl">gui window</span> "title" &lt;w&gt; &lt;h&gt; [random] — create window</div>
+<div class="help-cmd"><span class="hl">gui clear</span> — close every generated GUI window</div>
 <div class="help-cmd"><span class="hl">gui label</span> "text" &lt;x&gt; &lt;y&gt; — add a label</div>
 <div class="help-cmd"><span class="hl">gui button</span> "text" &lt;x&gt; &lt;y&gt; "cmd" — add button</div>
 <div class="help-cmd"><span class="hl">gui input</span> "placeholder" &lt;x&gt; &lt;y&gt; — add text input</div>
@@ -334,6 +339,7 @@ END LOG
 <div class="help-cmd">if conditions: if x >= 1, if x <= 100, if myvar (truthy check)</div>
 <div class="help-cmd">gui commands create elements in the preview panel.</div>
 <div class="help-cmd">disable PREVIEW before running GUI-heavy scripts to avoid creating preview windows.</div>
+<div class="help-cmd">safety limits: 100 iterations per loop, 100 GUI windows, 10000 script operations.</div>
 <div class="help-cmd">press Ctrl+Enter to run. Ctrl+S to save. Esc to exit.</div>
 </div>
 </div>
@@ -689,6 +695,7 @@ cubePrint(a[0]+': '+(cubeVars[a[0]]!==undefined?cubeVars[a[0]]:'undefined'));ret
 'morph':{help:'morph <n> — change inner shape',fn:function(a){var m=parseInt(a[0],10);if(m>=0&&m<=3){curShape=['cube','tetra','sphere','cyl'][m];rebuild(curShape)}else{cubeWarn('morph: out of range 0-3')};return true}},
 'glitch':{help:'glitch — short circuit the renderer',fn:function(){triggerGlitch();return true}},
 'wait':{help:'wait <ms> — sleep the void',fn:function(a){return {wait:Math.max(0,parseInt(a[0],10)||0)}}},
+'sleep':{help:'sleep <ms> — alias for wait',fn:function(a){return {wait:Math.max(0,parseInt(a[0],10)||0)}}},
 'vglitch':{help:'vglitch — deeper corruption',fn:function(){triggerGlitch();setTimeout(function(){triggerGlitch()},120);return true}},
 'time':{help:'time — void clock',fn:function(){var n=new Date();cubePrint(String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0'));return true}},
 'void':{help:'void — the void acknowledges',fn:function(){cubePrint('the void heard your script.');return true}},
@@ -703,6 +710,7 @@ if(gs==='input'){guiAddInput(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,
 if(gs==='check'){guiAddCheck(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
 if(gs==='image'){guiAddImage(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,parseInt(a[4],10)||0,parseInt(a[5],10)||0);return true}
 if(gs==='close'||gs==='destroy'){if(activeWin){guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null}return true}
+if(gs==='clear'){guiClearAll();return true}
 if(gs==='set'){if(a.length>=3)guiSetWindow(a[1],a.slice(2).join(' '));return true}
 if(gs==='list'){var k=Object.keys(guiWins);for(var i=0;i<k.length;i++)cubePrint(k[i]);return true}
 return true}},
@@ -719,6 +727,9 @@ return true}},
 'shape':{help:'shape <name> — change shape (cube/sphere/tetra/cyl)',fn:function(a){if(a[0]){curShape=a[0];rebuild(a[0])}return true}},
 'warn':{help:'warn <text> — print a warning',fn:function(a){cubeWarn(a.join(' '));return true}},
 'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}},
+'random':{help:'random <name> <min> <max> — store a random integer',fn:function(a){if(a.length<3){cubeError('random: usage random <name> <min> <max>');return true}var lo=parseInt(a[1],10),hi=parseInt(a[2],10);if(isNaN(lo)||isNaN(hi)||hi<lo){cubeError('random: invalid range');return true}cubeVars[a[0]]=String(Math.floor(Math.random()*(hi-lo+1))+lo);return true}},
+'assert':{help:'assert <name> <value> — stop if a variable does not match',fn:function(a){if(a.length<2){cubeError('assert: usage assert <name> <value>');return true}if(String(cubeVars[a[0]]||'')!==a.slice(1).join(' ')){cubeError('assertion failed: '+a[0]);return {halt:true}}return true}},
+'return':{help:'return — stop the current script',fn:function(){return {halt:true}}},
 'rm':{help:'rm [-rf] <path> — remove a virtual file or directory',fn:function(a){cubeEval('rm '+a.join(' '));return true}},
 'pwd':{help:'pwd — print the virtual working directory',fn:function(){cubeEval('pwd');return true}},
 'ls':{help:'ls [path] — list a virtual directory',fn:function(a){cubeEval('ls '+a.join(' '));return true}},
@@ -732,6 +743,8 @@ return true}},
 'tree':{help:'tree [path] — print the virtual filesystem tree',fn:function(a){cubeEval('tree '+a.join(' '));return true}}
 };
 var MAX_LOOP_ITERATIONS=100;
+var MAX_SCRIPT_OPERATIONS=10000;
+var MAX_GUI_WINDOWS=100;
 var vsCancel=false;
 
 var guiWins={};
@@ -760,6 +773,7 @@ el.style.left=nx+'px';el.style.top=ny+'px';
 document.addEventListener('mouseup',function(){dragging=false});
 }
 function guiCreateWin(title,w,h,rndPos){
+if(Object.keys(guiWins).length>=MAX_GUI_WINDOWS){cubeWarn('gui: window limit reached ('+MAX_GUI_WINDOWS+').');return null}
 var id='gw_'+Date.now()+'_'+Math.floor(Math.random()*999);
 var win=document.createElement('div');win.className='gui-window';win.id=id;
 var wx,wy;
@@ -785,6 +799,11 @@ activeWin=id;
 return id;
 }
 function guiGetActive(){if(typeof studioOpen!=='undefined'&&studioOpen&&!studioPreviewEnabled)return null;if(!activeWin||!guiWins[activeWin]){cubeError('no active gui window — create one with: gui window "title" 400 300');return null}return guiWins[activeWin]}
+function guiClearAll(){
+var ids=Object.keys(guiWins);
+for(var gi=0;gi<ids.length;gi++)if(guiWins[ids[gi]].el)guiWins[ids[gi]].el.remove();
+guiWins={};activeWin=null;
+}
 function formatGuiText(text){return String(text||'').replace(/_/g,' ')}
 function normalizeVoidScriptAction(action){
 if(!action)return '';
@@ -874,6 +893,7 @@ return cubeVars[key]!==undefined?cubeVars[key]:'';
 });
 }
 var i=0;
+var operationCount=0;
 var loopStack=[];
 var ifStack=[];
 function evalIfCondition(args){
@@ -894,6 +914,12 @@ var val=cubeVars[expr];
 return val!==undefined&&val!==''&&val!=='0'&&val!=='false'&&val!=='undefined';
 }
 function step(){
+operationCount++;
+if(operationCount>MAX_SCRIPT_OPERATIONS){
+cubeError(rp+': operation limit reached ('+MAX_SCRIPT_OPERATIONS+').');
+if(doneCallback)doneCallback();
+return;
+}
 if(vsCancel){
 cubeWarn('script terminated by the void.');
 if(doneCallback)doneCallback();
@@ -905,7 +931,7 @@ if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');if(doneC
 var sp=ln.split(/\s+/);
 var op=sp[0].toLowerCase();
 var args=sp.slice(1);
-if(ln==='end'||ln==='halt'){cubeOk(rp+': halted.');if(doneCallback)doneCallback();return}
+if(ln==='end'||ln==='halt'||op==='return'){cubeOk(rp+': halted.');if(doneCallback)doneCallback();return}
 if(op==='loop'){
 var count=parseInt(args[0],10)||0;
 if(count<1){cubeError('loop: count must be > 0');i++;setTimeout(step,50);return}
@@ -966,6 +992,7 @@ i++;setTimeout(step,50);return;
 var fn=voidScriptLang[op];
 if(!fn){cubeWarn('line '+i+': unknown op "'+op+'" — skipped');i++;setTimeout(step,50);return}
 var r=fn.fn(args);
+if(r&&r.halt){cubeOk(rp+': halted.');if(doneCallback)doneCallback();return}
 if(r&&r.wait){i++;setTimeout(step,r.wait);}
 else{i++;setTimeout(step,60)}
 }
@@ -1179,6 +1206,9 @@ cubePrint('  shape <name>   — change shape (cube/sphere/tetra/cyl)');
 cubePrint('  glitch         — short circuit');
 cubePrint('  vglitch        — deeper corruption');
 cubePrint('  wait <ms>      — sleep');
+cubePrint('  sleep <ms>     — wait alias');
+cubePrint('  random <n> <min> <max> — random integer variable');
+cubePrint('  assert <n> <v> — stop when a variable differs');
 cubePrint('  time           — void clock');
 cubePrint('  bgm            — toggle music');
 cubePrint('  clear          — clear output');
@@ -1186,6 +1216,7 @@ cubePrint('  travel <zone>  — travel through the void');
 cubePrint('  void           — the void acknowledges');
 cubePrint('  ps             — peek at processes');
 cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/image/close/set/destroy/list)');
+cubePrint('  gui clear      — close all generated windows');
 cubePrint('  studio         — open voidscript studio');
 cubePrint('  loop <n>       — repeat block n times');
 cubePrint('  loop limit      — '+MAX_LOOP_ITERATIONS+' iterations per loop');
@@ -1198,6 +1229,7 @@ cubePrint('  continue       — jump to the next loop iteration');
 cubePrint('  fn <name> ... endfn — define a reusable function');
 cubePrint('  macro <name> ... endmacro — define a reusable macro');
 cubePrint('  call <name> [args] — invoke a function or macro');
+cubePrint('  return         — stop the current script');
 cubePrint('  end / halt     — stop the script');
 cubePrint('  kill           — self-terminate');
 cubePrint('');
@@ -1211,6 +1243,7 @@ cubePrint('  if x <= 100    — less or equal');
 cubePrint('  if myvar       — truthy (exists, not 0/false/empty)');
 cubePrint('  strings are case-sensitive. "hello" != "Hello".');
 cubePrint('  variables expand as $name or ${name} inside script lines.');
+cubePrint('  safety limits: 100 loop iterations, 100 GUI windows, 10000 operations.');
 cubePrint('  function example: fn greet name / say hello $name / endfn / call greet obj');
 cubePrint('  macros use the same syntax with macro/endmacro.');
 }
