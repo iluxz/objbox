@@ -906,7 +906,7 @@ return}
 if(sub2==='run'){
 if(!parts[2]){cubeError('usage: void run <file.vsc>');return}
 var rp=resolvePath(parts[2]);
-if(!fs[rp]||fs[rp].type==='file'){cubeError(rp+': no such file');return}
+if(!fs[rp]||fs[rp].type==='dir'){cubeError(rp+': no such file');return}
 runVoidScript(fs[rp].content,rp);
 return}
 }
