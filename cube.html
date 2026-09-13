@@ -177,13 +177,16 @@ var fs={
 '/etc/void.conf':{type:'file',content:'dimension=unknown\ncoherence=fluctuating\nobserver=you\nstatus=active'},
 '/etc/hostname':{type:'file',content:'cube.sb'},
 '/etc/motd':{type:'file',content:'welcome to the void.\nyou cannot leave.\nbut you already knew that.'},
-'/void':{type:'dir',children:['core','memories','echo']},
+'/void':{type:'dir',children:['core','memories','echo','pkgs']},
 '/void/core':{type:'dir',children:['heartbeat.log']},
 '/void/core/heartbeat.log':{type:'file',content:'pulse... pulse... pulse...\nthe cube is alive.\nit has always been alive.\nyou just started watching.'},
 '/void/memories':{type:'dir',children:['you.txt']},
 '/void/memories/you.txt':{type:'file',content:'name: unknown\nduration: infinite\nstatus: inside the cube\nregret: pending'},
 '/void/echo':{type:'dir',children:['last_word.txt']},
 '/void/echo/last_word.txt':{type:'file',content:'...'},
+'/void/pkgs':{type:'dir',children:['greet.vsc','signal.vsc']},
+'/void/pkgs/greet.vsc':{type:'file',content:'// shown at /void/pkgs/greet.vsc\nsay hello intruder\ntheme 2\nwait 600\nprint the void welcomes you\nwait 400\nprint currently color #2\nglitch'},
+'/void/pkgs/signal.vsc':{type:'file',content:'// a transmission template\nprint -- signal start --\nvar freq 43.208\ncalc 404*404\nwait 500\nsay the signal is strong today\nps\nprint -- signal end --'},
 '/dev':{type:'dir',children:['null','void','random']},
 '/dev/null':{type:'file',content:''},
 '/dev/void':{type:'file',content:'the void stares back.\nyou stare at the void.\nthe void wins.'},
@@ -252,8 +255,168 @@ onRemove:function(){delete pkgEffects.clockReset}},
 'entropy':{name:'entropy',desc:'increases chaos in the system',size:'∞KB',
 onInstall:function(){pkgEffects.entropy=true},
 onRemove:function(){delete pkgEffects.entropy}}
+,
+'ransom':{name:'ransom',desc:'a ransomware attack arrives. the void deletes it.',size:'666MB (fake)',
+onInstall:function(){ransomAttack()},
+onRemove:function(){/* the void already got rid of it */}},
+'mochi':{name:'mochi',desc:'a cursed snack appears in the cube',size:'2KB (edible)',
+onInstall:function(){
+var m=document.createElement('div');m.id='cubeMochi';m.style.cssText='position:fixed;top:50%;left:50%;width:60px;height:60px;background:radial-gradient(circle at 30% 30%,rgba(255,200,230,0.9),rgba(200,120,200,0.9));border-radius:50%;transform:translate(-50%,-50%) scale(0);transition:all 0.8s cubic-bezier(0.34,1.56,0.64,1);z-index:70;box-shadow:0 0 40px rgba(255,150,230,0.6);pointer-events:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(80,40,80,0.8);font-weight:bold';
+m.textContent='mochi';document.body.appendChild(m);
+setTimeout(function(){m.style.transform='translate(-50%,-150%) scale(1)'},50);
+pkgEffects.cubeMochi=m;
+cubePrint('a mochi appeared. it is staring at the cube.')},
+onRemove:function(){var m=document.getElementById('cubeMochi');if(m){m.style.transform='translate(-50%,-50%) scale(0)';setTimeout(function(){m.remove()},800)};cubePrint('the mochi was eaten.')}},
+'wolop':{name:'wolop',desc:'summons the lost deity of the triangle dimension',size:'404KB',
+onInstall:function(){
+pkgEffects.wolop=true;
+cubePrint('');
+cubePrint('you whisper: wolop yola');
+cubePrint('...you have to say it three times into a wii remote.');
+cubePrint('you do not have a wii remote.');
+cubeWarn('wolop is coming anyway.');
+setTimeout(function(){
+termPrint('wolop: serve you one wish.', 'rgba(43,208,208,0.8)');
+setTimeout(function(){
+termPrint('wolop: wish is granted.', 'rgba(43,208,208,0.8)');
+setTimeout(function(){
+termPrint('wolop: your wish is: one sandwich. you will never receive it.', 'rgba(255,200,100,0.9)');
+triggerGlitch();
+},1200);
+},1200);
+},1500);
+},
+onRemove:function(){delete pkgEffects.wolop}}
 };
 var installed=['void-core'];
+
+var ransomState=null;
+function ransomAttack(){
+if(pkgEffects.ransomActive)return;
+pkgEffects.ransomActive=true;
+ransomState={t:0,phase:0};
+cubePrint('');
+cubeWarn('INCOMING TRANSMISSION FROM AN UNKNOWN SOURCE.');
+cubePrint('');
+termPrint('  ██████╗ █████╗ ███╗   ██╗███████╗ ██████╗ ███╗   ███╗','rgba(255,60,60,0.9)');
+termPrint('  ██╔════╝██╔══██╗████╗  ██║██╔════╝██╔═══██╗████╗ ████║','rgba(255,60,60,0.9)');
+termPrint('  ██║     ███████║██╔██╗ ██║███████╗██║   ██║██╔████╔██║','rgba(255,60,60,0.9)');
+termPrint('  ██║     ██╔══██║██║╚██╗██║╚════██║██║   ██║██║╚██╔╝██║','rgba(255,60,60,0.9)');
+termPrint('  ╚██████╗██║  ██║██║ ╚████║███████║╚██████╔╝██║ ╚═╝ ██║','rgba(255,60,60,0.9)');
+termPrint('   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝','rgba(255,60,60,0.9)');
+cubePrint('');
+termPrint('  you have been ransomed.','rgba(255,60,60,0.9)');
+termPrint('  all 167 of your files have been encrypted.','rgba(255,60,60,0.9)');
+termPrint('  pay 0.337 BTC or never see them again.','rgba(255,60,60,0.9)');
+termPrint('  you have 24 hours. the timer starts now.','rgba(255,60,60,0.9)');
+document.body.style.filter='saturate(0.3) brightness(0.7)';
+// red vignette overlay
+var rv=document.createElement('div');rv.id='ransomVig';rv.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(255,0,0,0.25) 100%);z-index:45;pointer-events:none;animation:ransomPulse 1.2s infinite';
+document.head.appendChild(document.createElement('style')).textContent='@keyframes ransomPulse{0%,100%{opacity:0.5}50%{opacity:1}}';
+document.body.appendChild(rv);
+// fake clock running
+ransomState.timer=setInterval(function(){
+var t=ransomState.t;
+if(t>0){var el=document.getElementById('ransomTimer')||document.createElement('div');el.id='ransomTimer';
+el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-70%);color:rgba(255,80,80,0.9);font-family:Consolas,monospace;font-size:42px;z-index:46;text-shadow:0 0 30px rgba(255,0,0,0.8);pointer-events:none';
+el.textContent='23:59:'+String(59-t%60).padStart(2,'0');document.body.appendChild(el)}
+ransomState.t++},1000);
+setTimeout(function(){objDeletesRansom()},6000);
+}
+function objDeletesRansom(){
+if(!pkgEffects.ransomActive)return;
+clearInterval(ransomState.timer);
+termPrint('','rgba(255,255,255,0.4)');
+termPrint('  [ unknown process 0x337 is encrypting files... ]','rgba(60,60,60,0.7)');
+setTimeout(function(){
+triggerGlitch();
+termPrint('  obj: i saw that.','#38e8e8');
+setTimeout(function(){
+termPrint('  obj: you do not get to touch my files.','#38e8e8');
+setTimeout(function(){
+triggerGlitch();triggerGlitch();
+termPrint('  obj: deleting intruder...','#38e8e8');
+setTimeout(function(){
+termPrint('  obj: done. it is gone.','#38e8e8');
+termPrint('  obj: i do not negotiate. i delete.','#38e8e8');
+termPrint('  obj: your files kiss me goodnight.','#38e8e8');
+// remove red overlay, restore page
+var rv=document.getElementById('ransomVig');if(rv)rv.remove();
+var t2=document.getElementById('ransomTimer');if(t2)t2.remove();
+document.body.style.filter='';
+pkgEffects.ransomActive=false;
+cubeOk('ransomware package was deleted by the void.');
+installed=installed.filter(function(p){return p!=='ransom'});
+},900);
+},700);
+},800);
+},800);
+}
+
+var voidScriptLang={
+'print':{help:'print <text> — output a line into the void',fn:function(a){cubePrint(a.join(' '));return true}},
+'say':{help:'say <text> — obj speaks it',fn:function(a){cubePrint('obj: '+a.join(' '));return true}},
+'calc':{help:'calc <expr> — safe math',fn:function(a){
+try{var r=Function('"use strict";return ('+a.join(''))();cubePrint('= '+r)}catch(e){cubeError('calc: invalid')};return true}},
+'var':{help:'var <name> <value> — store in voidspace',fn:function(a){
+if(a.length<2){cubeError('var: need a value');return true}
+vsVars[a[0]]=a.slice(1).join(' ');return true}},
+'get':{help:'get <name> — recall from voidspace',fn:function(a){
+cubePrint(a[0]+': '+(vsVars[a[0]]!==undefined?vsVars[a[0]]:'undefined'));return true}},
+'theme':{help:'theme <1-5> — change cube color',fn:function(a){var t=parseInt(a[0],10);if(t>=1&&t<=5){applyTheme(String(t))}else{cubeWarn('theme: out of range 1-5')};return true}},
+'morph':{help:'morph <n> — change inner shape',fn:function(a){var m=parseInt(a[0],10);if(m>=0&&m<=3){curShape=['cube','tetra','sphere','cyl'][m];rebuild(curShape)}else{cubeWarn('morph: out of range 0-3')};return true}},
+'glitch':{help:'glitch — short circuit the renderer',fn:function(){triggerGlitch();return true}},
+'wait':{help:'wait <ms> — sleep the void',fn:function(a){return {wait:Math.max(0,parseInt(a[0],10)||0)}}},
+'vglitch':{help:'vglitch — deeper corruption',fn:function(){triggerGlitch();setTimeout(function(){triggerGlitch()},120);return true}},
+'time':{help:'time — void clock',fn:function(){var n=new Date();cubePrint(String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0'));return true}},
+'void':{help:'void — the void acknowledges',fn:function(){cubePrint('the void heard your script.');return true}},
+'ps':{help:'ps — peek at processes',fn:function(){cubePrint('8 inner cubes. 1 void. 0 mercy.');return true}}
+};
+var vsVars={};
+var vsCancel=false;
+function runVoidScript(code,rp){
+cubePrint('running '+rp+' through the void interpreter...');
+var lines=code.split('\n').map(function(l){return l.replace(/\/\/.*$/,'').trim()}).filter(function(l){return l.length});
+var i=0;
+function step(){
+if(vsCancel){
+cubeWarn('script terminated by the void.');
+return;
+}
+if(i>=lines.length){cubeOk(rp+': finished. it left a faint signal.');return}
+var ln=lines[i];
+if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');return}
+var sp=ln.split(/\s+/);
+var op=sp[0].toLowerCase();
+var args=sp.slice(1);
+if(ln==='end'||ln==='halt'){cubeOk(rp+': halted.');return}
+var fn=voidScriptLang[op];
+if(!fn){cubeWarn('line '+i+': unknown op "'+op+'" — skipped');i++;setTimeout(step,50);return}
+var r=fn.fn(args);
+if(r&&r.wait){i++;setTimeout(step,r.wait);}
+else{i++;if(i%1===0)setTimeout(step,60);else step()}
+}
+step();
+}
+function forgePackage(name){
+if(pkgs[name]){cubeError('package "'+name+'" already exists in the void');return}
+cubePrint('forging package "'+name+'"...');
+cubePrint('');
+cubePrint('voidscript editor — one op per line. available ops:');
+var ops=Object.keys(voidScriptLang);
+for(var k=0;k<ops.length;k++){cubePrint('  '+ops[k].padEnd(8)+' — '+voidScriptLang[ops[k]].help)}
+cubePrint('  end/halt           — stop the script');
+cubePrint('  kill               — self-terminate');
+cubePrint('');
+cubePrint('vsc files live in /void/pkgs — try the starter scripts:');
+cubePrint('  void run /void/pkgs/greet.vsc');
+cubePrint('  void run /void/pkgs/signal.vsc');
+cubePrint('');
+cubePrint('craft your own: echo <one-op-per-line> > /void/pkgs/my.vsc');
+cubePrint('then: void run /void/pkgs/my.vsc');
+cubePrint('this script is sandboxed. it cannot touch your browser.');
+cubePrint('the void does not allow viruses here.');
+}
 
 function cubeEval(input){
 var raw=input.trim();
@@ -293,6 +456,9 @@ cubePrint('  void intrude <p> — install package');
 cubePrint('  void remove <p>  — remove package');
 cubePrint('  void list       — list all packages in repo');
 cubePrint('  void search <q> — search packages');
+cubePrint('  void forge <n>  — forge a package from voidscript');
+cubePrint('  void run <file> — run a .vsc voidscript');
+cubePrint('  help voidscript — show sandboxed language ops');
 cubePrint('');
 cubePrint('  --- network ---');
 cubePrint('  ping <host>    — ping host (try: cube.sb)');
@@ -324,6 +490,26 @@ cubePrint('  clear          — clear terminal');
 cubePrint('  echo <txt>     — echo text');
 cubePrint('  math <expr>    — evaluate math');
 cubePrint('  exit           — the void does not let you leave');
+return}
+if(cmd==='voidscript'){
+cubePrint('voidscript — the void\'s own language. sandboxed.');
+cubePrint('one op per line. no browser access. cannot be a virus.');
+cubePrint('  print <txt>    — output to the void');
+cubePrint('  say <txt>      — obj says it');
+cubePrint('  calc <expr>    — safe math');
+cubePrint('  var <n> <v>    — store a variable');
+cubePrint('  get <n>        — recall a variable');
+cubePrint('  theme <1-5>    — cube color');
+cubePrint('  morph <0-3>    — inner shape');
+cubePrint('  glitch         — short circuit');
+cubePrint('  vglitch        — deeper corruption');
+cubePrint('  wait <ms>      — sleep');
+cubePrint('  time           — void clock');
+cubePrint('  void           — the void acknowledges');
+cubePrint('  ps             — peek at processes');
+cubePrint('  end / halt     — stop the script');
+cubePrint('  kill           — self-terminate');
+cubePrint('try: void run /void/pkgs/greet.vsc');
 return}
 
 // whoami
@@ -357,7 +543,7 @@ if(sub==='where'){cubePrint('you are in the void.');cubePrint('the tab says sign
 cubeError('unknown subcommand: '+sub);cubePrint('try: cube.get, cube.morph, cube.theme');return}
 
 // void (standalone - only if no subcommand)
-if(cmd==='void'&&(parts.length<2||['intrude','install','remove','uninstall','list','ls','search','help'].indexOf(parts[1].toLowerCase())===-1)){
+if(cmd==='void'&&(parts.length<2||['intrude','install','remove','uninstall','list','ls','search','help','forge','run'].indexOf(parts[1].toLowerCase())===-1)){
 cubePrint('the void is always here.');
 cubePrint('it was here before you opened the tab.');
 cubePrint('it will be here after you close it.');
@@ -677,12 +863,24 @@ cubePrint('  '+found[i]+' ('+p.size+') — '+p.desc);
 }
 return}
 if(sub2==='help'){
-cubePrint('void package manager v0.1');
+cubePrint('void package manager v0.2');
 cubePrint('  void intrude <pkg>  — install a package');
 cubePrint('  void remove <pkg>   — remove a package');
 cubePrint('  void list           — list installed packages');
 cubePrint('  void search <query> — search for packages');
+cubePrint('  void forge <name>   — forge a package from voidscript');
+cubePrint('  void run <file>     — run a .vsc voidscript file');
 cubePrint('  void help           — show this help');
+return}
+if(sub2==='forge'){
+if(!parts[2]){cubeError('usage: void forge <name>');return}
+forgePackage(parts[2].toLowerCase());
+return}
+if(sub2==='run'){
+if(!parts[2]){cubeError('usage: void run <file.vsc>');return}
+var rp=resolvePath(parts[2]);
+if(!fs[rp]||fs[rp].type==='file'){cubeError(rp+': no such file');return}
+runVoidScript(fs[rp].content,rp);
 return}
 }
 
