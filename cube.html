@@ -83,6 +83,14 @@ the source code is a lie. the render is the truth.
 <div class="hint">drag to rotate | scroll to zoom | click shapes to morph | 1-5 for themes | click terminal to type</div>
 <div id="shapePalette"></div>
 <div id="glitch"></div>
+<div id="exportLabel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.92);border:1px solid rgba(43,208,208,0.6);border-radius:8px;padding:16px;z-index:100;max-width:500px;font-family:'Consolas',monospace">
+<div style="color:rgba(43,208,208,0.9);font-size:12px;margin-bottom:8px">export data — select all + copy (Ctrl+C)</div>
+<textarea id="exportData" readonly style="width:100%;height:80px;background:rgba(0,0,0,0.6);border:1px solid rgba(43,208,208,0.3);border-radius:4px;color:rgba(255,255,255,0.9);font-family:'Consolas',monospace;font-size:12px;padding:8px;resize:none;outline:none"></textarea>
+<div style="display:flex;gap:8px;margin-top:8px">
+<button onclick="document.getElementById('exportData').select();document.execCommand('copy')" style="background:rgba(43,208,208,0.15);border:1px solid rgba(43,208,208,0.4);border-radius:4px;color:rgba(43,208,208,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">copy</button>
+<button onclick="document.getElementById('exportLabel').style.display='none'" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.4);border-radius:4px;color:rgba(255,80,80,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">close</button>
+</div>
+</div>
 <div id="themeIndicator">theme: void</div>
 <div id="terminal">
 <div id="termHeader">cube# interpreter v.1.5<br>sourcebox runtime</div>
@@ -593,7 +601,16 @@ if(cur.trim())cmds.push(cur);
 for(var cj=0;cj<cmds.length;cj++){cubeEval(cmds[cj].trim())}
 return;
 }
-var parts=raw.split(/\s+/);
+function splitArgs(s){
+var parts=[];var cur='';var inQ=false;var qChar='';
+for(var i=0;i<s.length;i++){var ch=s[i];
+if(!inQ&&(ch==='"'||ch==="'")){inQ=true;qChar=ch;cur+=ch}
+else if(inQ&&ch===qChar){inQ=false;qChar='';cur+=ch}
+else if(!inQ&&/\s/.test(ch)){if(cur)parts.push(cur);cur=''}
+else{cur+=ch}}
+if(cur)parts.push(cur);return parts;
+}
+var parts=splitArgs(raw);
 var cmd=parts[0].toLowerCase();
 if(!cmd)return;
 
@@ -1186,12 +1203,13 @@ if(!fs[rp]||fs[rp].type==='dir'){cubeError(rp+': no such file');return}
 var fname=rp.split('/').pop();
 var encoded=vscEncode(fs[rp].content);
 var packet='vsc1:'+fname+':'+encoded;
-cubePrint('');
-cubePrint('--- copy everything below ---');
-cubePrint(packet);
-cubePrint('--- copy everything above ---');
-cubePrint('');
-cubePrint('share this with a friend. they run: void import <packet>');
+var el=document.getElementById('exportLabel');
+var ta=document.getElementById('exportData');
+ta.value=packet;
+el.style.display='block';
+ta.select();
+cubePrint('export data shown in label above — select all + copy');
+cubePrint('share with a friend: void import <packet>');
 return}
 if(sub2==='import'){
 if(!parts[2]){cubeError('usage: void import <vsc1:name:base64>');return}
