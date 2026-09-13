@@ -140,19 +140,17 @@ function triggerGlitch(){
 glitchEl.style.opacity='1';
 glitchEl.style.background='repeating-linear-gradient(0deg,rgba(255,0,0,0.2) 0px,rgba(0,255,0,0.1) 2px,rgba(0,0,255,0.2) 4px,transparent 6px)';
 glitchEl.style.transform='translateX('+(Math.random()*80-40)+'px) skewX('+(Math.random()*20-10)+'deg)';
-document.body.style.transform='translate('+(Math.random()*20-10)+'px,'+(Math.random()*20-10)+'px)';
-document.body.style.filter='hue-rotate('+(Math.random()*90-45)+'deg) saturate('+(1+Math.random()*2)+')';
+var mainC=document.getElementById('main');
+if(mainC)mainC.style.filter='hue-rotate('+(Math.random()*90-45)+'deg) saturate('+(1+Math.random()*2)+')';
 setTimeout(function(){
 glitchEl.style.background='repeating-linear-gradient(0deg,rgba(255,0,0,0.3) 0px,transparent 3px,rgba(0,255,255,0.2) 6px,transparent 9px)';
 glitchEl.style.transform='translateX('+(Math.random()*100-50)+'px) skewX('+(Math.random()*25-12.5)+'deg)';
-document.body.style.transform='translate('+(Math.random()*25-12.5)+'px,'+(Math.random()*25-12.5)+'px)';
-document.body.style.filter='hue-rotate('+(Math.random()*180-90)+'deg) saturate('+(1+Math.random()*3)+')';
+if(mainC)mainC.style.filter='hue-rotate('+(Math.random()*180-90)+'deg) saturate('+(1+Math.random()*3)+')';
 },30);
 setTimeout(function(){
 glitchEl.style.opacity='0';
 glitchEl.style.transform='';
-document.body.style.transform='';
-document.body.style.filter='';
+if(mainC)mainC.style.filter='';
 },200+Math.random()*400);
 }
 
@@ -309,7 +307,8 @@ termPrint('  you have been ransomed.','rgba(255,60,60,0.9)');
 termPrint('  all 167 of your files have been encrypted.','rgba(255,60,60,0.9)');
 termPrint('  pay 0.337 BTC or never see them again.','rgba(255,60,60,0.9)');
 termPrint('  you have 24 hours. the timer starts now.','rgba(255,60,60,0.9)');
-document.body.style.filter='saturate(0.3) brightness(0.7)';
+var mainC=document.getElementById('main');
+if(mainC)mainC.style.filter='saturate(0.3) brightness(0.7)';
 // red vignette overlay
 var rv=document.createElement('div');rv.id='ransomVig';rv.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(255,0,0,0.25) 100%);z-index:45;pointer-events:none;animation:ransomPulse 1.2s infinite';
 document.head.appendChild(document.createElement('style')).textContent='@keyframes ransomPulse{0%,100%{opacity:0.5}50%{opacity:1}}';
@@ -343,7 +342,7 @@ termPrint('  obj: your files kiss me goodnight.','#38e8e8');
 // remove red overlay, restore page
 var rv=document.getElementById('ransomVig');if(rv)rv.remove();
 var t2=document.getElementById('ransomTimer');if(t2)t2.remove();
-document.body.style.filter='';
+var mc2=document.getElementById('main');if(mc2)mc2.style.filter='';
 pkgEffects.ransomActive=false;
 cubeOk('ransomware package was deleted by the void.');
 installed=installed.filter(function(p){return p!=='ransom'});
@@ -496,7 +495,32 @@ return}
 if(cmd==='voidscript'){showVoidScriptHelp();return}
 function showVoidScriptHelp(){
 cubePrint('voidscript — the void\'s own language. sandboxed.');
-cubePrint('one op per line. no browser access. cannot be a virus.');
+cubePrint('scripts are files in /void/pkgs. one op per line.');
+cubePrint('it cannot touch your browser. it cannot be a virus.');
+cubePrint('');
+cubePrint('  step 1: see how it works');
+cubePrint('  void run /void/pkgs/greet.vsc');
+cubePrint('');
+cubePrint('  step 2: read a script to learn the syntax');
+cubePrint('  cat /void/pkgs/greet.vsc');
+cubePrint('');
+cubePrint('  step 3: write your own');
+cubePrint('  echo print hello void > /void/pkgs/mine.vsc');
+cubePrint('  echo wait 500 >> /void/pkgs/mine.vsc');
+cubePrint('  echo say i am a script >> /void/pkgs/mine.vsc');
+cubePrint('  void run /void/pkgs/mine.vsc');
+cubePrint('');
+cubePrint('  step 4: break things on purpose');
+cubePrint('  echo wait 30 >> /void/pkgs/mine.vsc');
+cubePrint('  echo calc 6*7 >> /void/pkgs/mine.vsc');
+cubePrint('  echo theme 3 >> /void/pkgs/mine.vsc');
+cubePrint('  echo glitch >> /void/pkgs/mine.vsc');
+cubePrint('  void run /void/pkgs/mine.vsc');
+cubePrint('');
+cubePrint('  note: >> appends a line. > replaces the file.');
+cubePrint('  every line is one op. blank lines + // comments are ignored.');
+cubePrint('');
+cubePrint('  all ops:');
 cubePrint('  print <txt>    — output to the void');
 cubePrint('  say <txt>      — obj says it');
 cubePrint('  calc <expr>    — safe math');
@@ -512,7 +536,6 @@ cubePrint('  void           — the void acknowledges');
 cubePrint('  ps             — peek at processes');
 cubePrint('  end / halt     — stop the script');
 cubePrint('  kill           — self-terminate');
-cubePrint('try: void run /void/pkgs/greet.vsc');
 }
 
 // whoami
@@ -662,16 +685,17 @@ var fp=resolvePath(parts[1]);
 if(!fs[fp]){fs[fp]={type:'file',content:''};var parent=getParent(fp);
 if(fs[parent]&&fs[parent].type==='dir')fs[parent].children.push(getBase(fp))}
 cubeOk('touched '+parts[1]);return}
-if(cmd==='echo'&&parts.indexOf('>')!==-1){
-var arrowIdx=parts.indexOf('>');
+if((cmd==='echo')&&(parts.indexOf('>')!==-1||parts.indexOf('>>')!==-1)){
+var appendMode=parts.indexOf('>>')!==-1;
+var arrowIdx=appendMode?parts.indexOf('>>'):parts.indexOf('>');
 var filePath=parts[arrowIdx+1];
 var content=parts.slice(1,arrowIdx).join(' ');
-if(!filePath){cubeError('usage: echo <text> > <file>');return}
+if(!filePath){cubeError('usage: echo <text> [>|>>] <file>');return}
 var fp=resolvePath(filePath);
 if(!fs[fp]){fs[fp]={type:'file',content:content};var parent=getParent(fp);
 if(fs[parent]&&fs[parent].type==='dir')fs[parent].children.push(getBase(fp))}
-else{fs[fp].content=content}
-cubeOk('wrote to '+filePath);return}
+else{fs[fp].content=appendMode?(fs[fp].content+'\n'+content):content}
+cubeOk((appendMode?'appended to ':'wrote to ')+filePath);return}
 if(cmd==='rm'){
 var flags=[];
 var files=[];
