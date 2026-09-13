@@ -793,7 +793,16 @@ else if(prop==='color'){w.el.style.borderColor=val;w.content.style.color=val}
 }
 function runVoidScript(code,rp,doneCallback){
 cubePrint('running '+rp+' through the void interpreter...');
-var lines=code.split('\n').map(function(l){return l.replace(/\/\/.*$/,'').trim()}).filter(function(l){return l.length});
+var lines=code.split('\n').map(function(l){
+var stripped='';var inQ=false;var qCh='';
+for(var c=0;c<l.length;c++){
+var ch=l[c];
+if(inQ){stripped+=ch;if(ch===qCh)inQ=false}
+else if(ch==='"'||ch==="'"){inQ=true;qCh=ch;stripped+=ch}
+else if(ch==='/'&&c+1<l.length&&l[c+1]==='/'){break}
+else{stripped+=ch}
+}
+return stripped.trim()}).filter(function(l){return l.length});
 var i=0;
 var loopStack=[];
 var ifStack=[];
@@ -2663,8 +2672,11 @@ document.getElementById('studioHelpPanel').classList.remove('active');
 function studioSwitchTab(tab){
 var tabs=document.querySelectorAll('.output-tab');
 for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('active');if(tabs[i].getAttribute('data-tab')===tab)tabs[i].classList.add('active')}
-document.getElementById('studioOutputBody').style.display=tab==='output'?'block':'none';
-document.getElementById('studioTerminalBody').style.display=tab==='terminal'?'block':'none';
+var ob=document.getElementById('studioOutputBody');
+var tb=document.getElementById('studioTerminalBody');
+ob.style.display=tab==='output'?'block':'none';
+tb.style.display=tab==='terminal'?'block':'none';
+if(tab==='terminal')tb.scrollTop=tb.scrollHeight;
 }
 function studioTerminalPrint(txt,cls){
 var termBody=document.getElementById('studioTerminalBody');
