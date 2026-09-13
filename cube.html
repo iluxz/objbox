@@ -63,6 +63,43 @@ background-color:#ff00ff;background-image:url("data:image/png;base64,iVBORw0KGgo
 #missingTex .msg .code{font-size:11px;color:rgba(255,0,255,0.5);margin-top:10px}
 #displayMsg{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:41;pointer-events:none;opacity:0;transition:opacity 0.3s;color:rgba(43,208,208,0.9);font-family:'Consolas',monospace;font-size:13px;background:rgba(0,0,0,0.8);border:1px solid rgba(43,208,208,0.4);border-radius:6px;padding:8px 16px}
 #displayMsg.active{opacity:1}
+#studio{position:fixed;top:0;left:0;right:0;bottom:0;z-index:60;background:rgba(0,0,0,0.95);display:none;flex-direction:column;font-family:'Consolas',monospace;color:rgba(43,208,208,0.9)}
+#studio.active{display:flex}
+#studioTop{display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(43,208,208,0.2);background:rgba(0,0,0,0.5);flex-shrink:0;gap:16px}
+#studioTop .logo{display:flex;align-items:center;gap:8px}
+#studioTop .logo svg{width:28px;height:28px}
+#studioTop .logo .title{font-size:16px;font-weight:bold;color:rgba(43,208,208,1);letter-spacing:2px}
+#studioTop .logo .sub{font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px}
+#studioTop .status{flex:1;display:flex;gap:20px;font-size:11px;color:rgba(255,255,255,0.3)}
+#studioTop .status span{display:flex;align-items:center;gap:4px}
+#studioTop .status .val{color:rgba(43,208,208,0.8)}
+#studioTop .actions{display:flex;gap:8px}
+#studioTop .actions button{background:rgba(43,208,208,0.1);border:1px solid rgba(43,208,208,0.3);border-radius:4px;color:rgba(43,208,208,0.9);font-family:'Consolas',monospace;font-size:11px;padding:6px 14px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px}
+#studioTop .actions button:hover{background:rgba(43,208,208,0.25);border-color:rgba(43,208,208,0.7)}
+#studioTop .actions button.run{background:rgba(43,208,208,0.2);border-color:rgba(43,208,208,0.5);font-weight:bold}
+#studioTop .actions button.run:hover{background:rgba(43,208,208,0.4)}
+#studioTop .actions button.kill{border-color:rgba(255,80,80,0.4);color:rgba(255,80,80,0.9)}
+#studioTop .actions button.kill:hover{background:rgba(255,80,80,0.2)}
+#studioBody{display:flex;flex:1;overflow:hidden}
+#studioEditor{display:flex;flex:1;min-width:0}
+#studioLineNums{width:44px;background:rgba(0,0,0,0.3);border-right:1px solid rgba(43,208,208,0.1);padding:12px 0;overflow:hidden;font-size:12px;color:rgba(255,255,255,0.15);text-align:right;user-select:none;flex-shrink:0}
+#studioLineNums .ln{padding:0 8px 0 0;line-height:20px;height:20px}
+#studioCode{flex:1;background:transparent;border:none;outline:none;color:rgba(255,255,255,0.9);font-family:'Consolas',monospace;font-size:12px;line-height:20px;padding:12px;resize:none;tab-size:2;white-space:pre;overflow:auto;scrollbar-width:thin;scrollbar-color:rgba(43,208,208,0.2) transparent}
+#studioCode::-webkit-scrollbar{width:6px}
+#studioCode::-webkit-scrollbar-track{background:transparent}
+#studioCode::-webkit-scrollbar-thumb{background:rgba(43,208,208,0.2);border-radius:3px}
+#studioCode::selection{background:rgba(43,208,208,0.3)}
+#studioPreview{width:45%;border-left:1px solid rgba(43,208,208,0.15);background:rgba(5,10,20,0.6);position:relative;overflow:hidden;display:flex;flex-direction:column}
+#studioPreview .preview-header{padding:8px 12px;border-bottom:1px solid rgba(43,208,208,0.1);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;flex-shrink:0}
+#studioPreviewArea{flex:1;position:relative;overflow:hidden}
+#studioPreviewArea .gui-window{position:absolute}
+#studioOutput{height:160px;border-top:1px solid rgba(43,208,208,0.15);background:rgba(0,0,0,0.4);display:flex;flex-direction:column;flex-shrink:0}
+#studioOutput .output-header{padding:6px 12px;border-bottom:1px solid rgba(43,208,208,0.1);font-size:10px;color:rgba(255,255,255,0.25);letter-spacing:1px;flex-shrink:0;display:flex;justify-content:space-between}
+#studioOutput .output-body{flex:1;overflow-y:auto;padding:8px 12px;font-size:12px;color:rgba(43,208,208,0.7);white-space:pre-wrap;word-wrap:break-word;scrollbar-width:thin;scrollbar-color:rgba(43,208,208,0.2) transparent}
+#studioOutput .output-body::-webkit-scrollbar{width:6px}
+#studioOutput .output-body::-webkit-scrollbar-track{background:transparent}
+#studioOutput .output-body::-webkit-scrollbar-thumb{background:rgba(43,208,208,0.2);border-radius:3px}
+.studio-hint{position:absolute;bottom:8px;right:12px;font-size:10px;color:rgba(255,255,255,0.15);pointer-events:none}
 </style>
 </head>
 <!--
@@ -125,6 +162,42 @@ INTERLOPER is not a bug. it is a feature. it is the only real thing in this file
 the shape labels are wrong on purpose. the void decided what they are. you have no say.
 if you change the code, the void will notice. it always notices.
 END LOG
+</div>
+<div id="studio">
+<div id="studioTop">
+<div class="logo">
+<svg viewBox="0 0 28 28" fill="none"><rect x="4" y="4" width="20" height="20" rx="3" stroke="rgba(43,208,208,0.8)" stroke-width="1.5" fill="rgba(43,208,208,0.05)"/><rect x="9" y="9" width="10" height="10" rx="1.5" stroke="rgba(43,208,208,0.5)" stroke-width="1" fill="rgba(43,208,208,0.03)"/></svg>
+<div><div class="title">VOIDSCRIPT STUDIO</div><div class="sub">sourcebox runtime // sandbox build</div></div>
+</div>
+<div class="status">
+<span>runtime: <span class="val">voidscript/1.0</span></span>
+<span>process: <span class="val" id="studioProcess">idle</span></span>
+<span>theme: <span class="val" id="studioTheme">void</span></span>
+<span>shape: <span class="val" id="studioShape">cube</span></span>
+</div>
+<div class="actions">
+<button id="studioOpen">OPEN .VSC</button>
+<button id="studioSave">SAVE .VSC</button>
+<button id="studioKill" class="kill">KILL</button>
+<button id="studioRun" class="run">&#9654; RUN</button>
+<button id="studioExit">EXIT</button>
+</div>
+</div>
+<div id="studioBody">
+<div id="studioEditor">
+<div id="studioLineNums"></div>
+<textarea id="studioCode" spellcheck="false" placeholder="// voidscript goes here..."></textarea>
+</div>
+<div id="studioPreview">
+<div class="preview-header">PREVIEW</div>
+<div id="studioPreviewArea"></div>
+</div>
+</div>
+<div id="studioOutput">
+<div class="output-header"><span>cube# output — runtime log</span><span id="studioOutputCount">0 lines</span></div>
+<div class="output-body" id="studioOutputBody"></div>
+</div>
+<div class="studio-hint">Ctrl+Enter: run | Ctrl+S: save | Esc: exit</div>
 </div>
 <audio id="bgm" loop preload="auto"><source src="drone2lp.wav" type="audio/wav"></audio>
 <script>
@@ -389,7 +462,10 @@ triggerGlitch();
 },1200);
 },1500);
 },
-onRemove:function(){delete pkgEffects.wolop}}
+onRemove:function(){delete pkgEffects.wolop}},
+'voidscript-studio':{name:'voidscript-studio',desc:'visual ide for voidscript development',size:'420KB',
+onInstall:function(){pkgEffects.studio=true;cubePrint('voidscript studio installed.');cubePrint('run "studio" to open the ide.')},
+onRemove:function(){delete pkgEffects.studio;cubePrint('voidscript studio removed.')}}
 };
 var installed=['void-core'];
 
@@ -591,7 +667,7 @@ if(op==='endloop'){
 if(!loopStack.length){cubeError('endloop: no matching loop');i++;setTimeout(step,50);return}
 var top=loopStack[loopStack.length-1];
 top.count--;
-if(top.count>0){i=top.startLine}else{loopStack.pop()}
+if(top.count>0){i=top.startLine-1}else{loopStack.pop()}
 i++;setTimeout(step,50);return;
 }
 var fn=voidScriptLang[op];
@@ -740,6 +816,7 @@ cubePrint('  --- misc ---');
 cubePrint('  loop <n> <cmd> — run a command n times');
 cubePrint('  display <0-4>  — change display mode');
 cubePrint('  clear          — clear terminal');
+cubePrint('  studio         — open voidscript studio (requires package)');
 cubePrint('  echo <txt>     — echo text');
 cubePrint('  math <expr>    — evaluate math');
 cubePrint('  exit           — the void does not let you leave');
@@ -787,6 +864,7 @@ cubePrint('  time           — void clock');
 cubePrint('  void           — the void acknowledges');
 cubePrint('  ps             — peek at processes');
 cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/image/close/set/destroy/list)');
+cubePrint('  studio         — open voidscript studio');
 cubePrint('  loop <n>       — repeat block n times');
 cubePrint('  endloop        — end of loop block');
 cubePrint('  end / halt     — stop the script');
@@ -1276,6 +1354,7 @@ return}
 }
 
 if(cmd==='echo'){cubePrint(parts.slice(1).join(' '));return}
+if(cmd==='studio'){openStudio();return}
 if(cmd==='clear'){termOutput.innerHTML='';return}
 
 // display modes
@@ -1935,6 +2014,161 @@ gl.disable(gl.BLEND);requestAnimationFrame(render)}
 requestAnimationFrame(render);
 
 window.addEventListener('resize',function(){var dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';gl.viewport(0,0,canvas.width,canvas.height)});
+
+// voidscript studio
+var studioOpen=false;
+var studioRunning=false;
+var studioOutputLines=0;
+var studioOrigPrint=cubePrint;
+var studioOrigError=cubeError;
+var studioOrigWarn=cubeWarn;
+var studioOrigOk=cubeOk;
+function openStudio(){
+if(!pkgEffects.studio){cubeError('package "voidscript-studio" not installed. run "void intrude voidscript-studio"');return}
+studioOpen=true;
+document.getElementById('terminal').style.display='none';
+document.getElementById('overlay').style.display='none';
+document.getElementById('shapePalette').style.display='none';
+document.getElementById('themeIndicator').style.display='none';
+document.getElementById('stats').style.display='none';
+document.getElementById('hint').style.display='none';
+document.getElementById('studio').classList.add('active');
+updateStudioLineNums();
+document.getElementById('studioCode').focus();
+}
+function closeStudio(){
+studioOpen=false;
+document.getElementById('terminal').style.display='flex';
+document.getElementById('overlay').style.display='flex';
+document.getElementById('shapePalette').style.display='flex';
+document.getElementById('themeIndicator').style.display='block';
+document.getElementById('stats').style.display='block';
+document.getElementById('hint').style.display='block';
+document.getElementById('studio').classList.remove('active');
+document.getElementById('studioPreviewArea').innerHTML='';
+}
+function updateStudioLineNums(){
+var code=document.getElementById('studioCode').value;
+var lines=code.split('\n');
+var nums=document.getElementById('studioLineNums');
+var html='';
+for(var i=1;i<=lines.length;i++){html+='<div class="ln">'+i+'</div>'}
+nums.innerHTML=html;
+}
+function studioPrint(txt){
+var body=document.getElementById('studioOutputBody');
+var line=document.createElement('div');
+line.textContent='> '+txt;
+line.style.color='rgba(43,208,208,0.7)';
+body.appendChild(line);
+studioOutputLines++;
+document.getElementById('studioOutputCount').textContent=studioOutputLines+' lines';
+body.scrollTop=body.scrollHeight;
+}
+function studioPrintColor(txt,color){
+var body=document.getElementById('studioOutputBody');
+var line=document.createElement('div');
+line.textContent='> '+txt;
+line.style.color=color;
+body.appendChild(line);
+studioOutputLines++;
+document.getElementById('studioOutputCount').textContent=studioOutputLines+' lines';
+body.scrollTop=body.scrollHeight;
+}
+function runStudioScript(){
+if(studioRunning)return;
+var code=document.getElementById('studioCode').value;
+if(!code.trim())return;
+studioRunning=true;
+document.getElementById('studioProcess').textContent='running';
+document.getElementById('studioOutputBody').innerHTML='';
+studioOutputLines=0;
+document.getElementById('studioOutputCount').textContent='0 lines';
+document.getElementById('studioPreviewArea').innerHTML='';
+cubePrint=studioPrint;
+cubeError=function(txt){studioPrintColor('error: '+txt,'rgba(255,80,80,0.8)')};
+cubeWarn=function(txt){studioPrintColor(txt,'rgba(255,200,50,0.6)')};
+cubeOk=function(txt){studioPrintColor(txt,'rgba(100,255,100,0.6)')};
+var origGuiAdd=guiAdd;
+var previewArea=document.getElementById('studioPreviewArea');
+guiAdd=function(type,args,opts){
+var win=document.createElement('div');
+win.className='gui-window';
+win.style.left=(opts.x||20)+'px';
+win.style.top=(opts.y||20)+'px';
+if(opts.w)win.style.width=opts.w+'px';
+if(opts.h)win.style.height=opts.h+'px';
+var title=document.createElement('div');
+title.className='gui-title';
+title.innerHTML='<span>'+(opts.label||type)+'</span>';
+var closeBtn=document.createElement('div');
+closeBtn.className='gui-close';
+closeBtn.textContent='×';
+closeBtn.onclick=function(){win.remove()};
+title.appendChild(closeBtn);
+win.appendChild(title);
+var content=document.createElement('div');
+content.className='gui-content';
+if(opts.label){var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=opts.label;lbl.style.left=(opts.x2||10)+'px';lbl.style.top=(opts.y2||10)+'px';content.appendChild(lbl)}
+if(opts.text){var lbl2=document.createElement('div');lbl2.className='gui-label';lbl2.textContent=opts.text;lbl2.style.left=(opts.x2||10)+'px';lbl2.style.top=(opts.y2||10)+'px';content.appendChild(lbl2)}
+if(opts.placeholder){var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=opts.placeholder;inp.style.left=(opts.x2||10)+'px';inp.style.top=(opts.y2||10)+'px';if(opts.w2)inp.style.width=opts.w2+'px';content.appendChild(inp)}
+if(opts.checked!==undefined){var chk=document.createElement('label');chk.className='gui-checkbox';chk.style.left=(opts.x2||10)+'px';chk.style.top=(opts.y2||10)+'px';var cb=document.createElement('input');cb.type='checkbox';cb.checked=opts.checked;chk.appendChild(cb);chk.appendChild(document.createTextNode(opts.label||''));content.appendChild(chk)}
+if(opts.src){var img=document.createElement('img');img.className='gui-image';img.src=opts.src;img.style.left=(opts.x2||10)+'px';img.style.top=(opts.y2||10)+'px';if(opts.w2)img.style.width=opts.w2+'px';if(opts.h2)img.style.height=opts.h2+'px';content.appendChild(img)}
+win.appendChild(content);
+previewArea.appendChild(win);
+guiWindows.push({el:win,content:content,id:'studio_'+Date.now()});
+};
+vsCancel=false;
+runVoidScript(code,'studio script');
+setTimeout(function(){
+cubePrint=studioOrigPrint;
+cubeError=studioOrigError;
+cubeWarn=studioOrigWarn;
+cubeOk=studioOrigOk;
+guiAdd=origGuiAdd;
+studioRunning=false;
+document.getElementById('studioProcess').textContent='idle';
+},50);
+}
+function initStudioEvents(){
+var code=document.getElementById('studioCode');
+code.addEventListener('input',function(){updateStudioLineNums()});
+code.addEventListener('keydown',function(e){
+if(e.key==='Tab'){e.preventDefault();var s=this.selectionStart;var end=this.selectionEnd;this.value=this.value.substring(0,s)+'  '+this.value.substring(end);this.selectionStart=this.selectionEnd=s+2;updateStudioLineNums()}
+if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();runStudioScript()}
+if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveStudioFile()}
+if(e.key==='Escape'){closeStudio()}
+});
+document.getElementById('studioRun').onclick=runStudioScript;
+document.getElementById('studioKill').onclick=function(){vsCancel=true;studioRunning=false;document.getElementById('studioProcess').textContent='idle';studioPrintColor('script terminated by the void.','rgba(255,200,50,0.6)')};
+document.getElementById('studioExit').onclick=closeStudio;
+document.getElementById('studioOpen').onclick=function(){
+var inp=document.createElement('input');inp.type='file';inp.accept='.vsc,.txt';
+inp.onchange=function(e){
+var file=e.target.files[0];if(!file)return;
+var reader=new FileReader();
+reader.onload=function(ev){
+code.value=ev.target.result;
+updateStudioLineNums();
+studioPrint('opened: '+file.name);
+};
+reader.readAsText(file);
+};
+inp.click();
+};
+document.getElementById('studioSave').onclick=saveStudioFile;
+}
+function saveStudioFile(){
+var code=document.getElementById('studioCode').value;
+var blob=new Blob([code],{type:'text/plain'});
+var a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download='untitled.vsc';
+a.click();
+URL.revokeObjectURL(a.href);
+studioPrint('saved: untitled.vsc');
+}
+initStudioEvents();
 </script>
 </body>
 </html>
