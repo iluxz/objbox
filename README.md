@@ -2,7 +2,7 @@
 
 a signal, rendered through a browser.
 
-you ever open a new tab and get a cube instead of your start page? no? well. this is that.
+you ever open a new tab and get a cube instead of your start page? no? um, well... uhh.. yeah. this is that.
 
 the page title says "signal detected". the file on disk is `cube.html`. somewhere along the way the old new tab url was pointing at `localhost:8080/newtab.html` but the file was `cube.html` now. nobody remembers renaming it. it's fine. it's fine.
 
@@ -26,11 +26,11 @@ the page title says "signal detected". the file on disk is `cube.html`. somewher
 
 cube# interpreter on the left. it's got a fake filesystem, a package manager, and obj lives in it.
 
-- `ls`, `cd`, `cat` — explore. `/home/intruder` has notes. `/void` has things you shouldn't read
+- `ls`, `cd`, `cat` — explore. `/home/intruder` has notes. `/void` has things you shouldn't read probably (DONT READ IT)
 - `ping cube.sb` — cube.sb answers. cryptically
 - `transmit <words>` — talk to obj. keyword-based responses. obj taunts you. obj knows things
 - `cube.theme` `cube.glitch` `cube.morph` etc — poke the cube itself
-- `void intrude doom` — installs a void package. "doom" turns the sky red. "interloper" opens a portal. "entropy" makes everything chaotic and obj installs that one itself on reboot
+- `void intrude doom` — installs a void package.
 - `rm -rf /` — it refuses. the void does not delete itself
 
 ## the clock
