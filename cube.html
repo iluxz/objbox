@@ -748,6 +748,10 @@ activeWin=id;
 return id;
 }
 function guiGetActive(){if(!activeWin||!guiWins[activeWin]){cubeError('no active gui window — create one with: gui window "title" 400 300');return null}return guiWins[activeWin]}
+function normalizeVoidScriptAction(action){
+if(!action)return '';
+return String(action).trim().replace(/^['"]+|['"]+$/g,'');
+}
 function guiAddLabel(text,x,y){
 var w=guiGetActive();if(!w)return;
 var el=document.createElement('div');el.className='gui-label';el.textContent=text;
@@ -757,7 +761,12 @@ function guiAddButton(text,x,y,action){
 var w=guiGetActive();if(!w)return;
 var el=document.createElement('button');el.className='gui-button';el.textContent=text;
 el.style.left=x+'px';el.style.top=y+'px';
-el.onclick=function(){cubeEval(action)};
+el.onclick=function(){
+var cleaned=normalizeVoidScriptAction(action);
+var vsFn=voidScriptLang[cleaned.split(/\s+/)[0].toLowerCase()];
+if(vsFn){runVoidScript(cleaned,'button action')}
+else{cubeEval(cleaned)};
+};
 w.content.appendChild(el);
 }
 function guiAddInput(placeholder,x,y){
@@ -920,6 +929,9 @@ if(cur)parts.push(cur);return parts;
 var parts=splitArgs(raw);
 var cmd=parts[0].toLowerCase();
 if(!cmd)return;
+
+// allow voidscript commands to run directly in the terminal too
+if(voidScriptLang[cmd]){runVoidScript(raw,'inline command');return;}
 
 // handle dot notation: cube.get -> cmd='cube', sub='get'
 var sub='';
@@ -2760,7 +2772,7 @@ activeWin=id;
 return id;
 };
 guiAddLabel=function(text,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=text;lbl.style.left=x+'px';lbl.style.top=y+'px';w.content.appendChild(lbl)};
-guiAddButton=function(text,x,y,action){var w=guiGetActive();if(!w)return;var btn=document.createElement('button');btn.className='gui-button';btn.textContent=text;btn.style.left=x+'px';btn.style.top=y+'px';btn.onclick=function(){cubeEval(action)};w.content.appendChild(btn)};
+guiAddButton=function(text,x,y,action){var w=guiGetActive();if(!w)return;var btn=document.createElement('button');btn.className='gui-button';btn.textContent=text;btn.style.left=x+'px';btn.style.top=y+'px';btn.onclick=function(){var cleaned=normalizeVoidScriptAction(action);var vsFn=voidScriptLang[cleaned.split(/\s+/)[0].toLowerCase()];if(vsFn){runVoidScript(cleaned,'button action')}else{cubeEval(cleaned)}};w.content.appendChild(btn)};
 guiAddInput=function(placeholder,x,y){var w=guiGetActive();if(!w)return;var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=placeholder;inp.style.left=x+'px';inp.style.top=y+'px';w.content.appendChild(inp)};
 guiAddCheck=function(labelText,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';var cb=document.createElement('input');cb.type='checkbox';lbl.appendChild(cb);lbl.appendChild(document.createTextNode(labelText));w.content.appendChild(lbl)};
 guiAddImage=function(url,x,y,imgW,imgH){var w=guiGetActive();if(!w)return;var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';if(imgW)img.style.width=imgW+'px';if(imgH)img.style.height=imgH+'px';img.onerror=function(){cubeError('image failed to load: '+url)};w.content.appendChild(img)};
