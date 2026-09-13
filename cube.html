@@ -1371,6 +1371,23 @@ return}
 if(cmd==='echo'){cubePrint(parts.slice(1).join(' '));return}
 if(cmd==='studio'){openStudio();return}
 if(cmd==='clear'){termOutput.innerHTML='';return}
+if(cmd==='travel'){
+var dest=parts[1]?parts[1].toLowerCase():'';
+if(!dest){
+cubePrint('current zone: '+zones[currentZone].name);
+cubePrint('');
+cubePrint('available destinations:');
+var allowed=zoneTransitions[currentZone];
+for(var i=0;i<allowed.length;i++){
+cubePrint('  '+zones[allowed[i]].name+' — '+zones[allowed[i]].desc);
+}
+cubePrint('');
+cubePrint('usage: travel <zone>');
+return;
+}
+travelTo(dest);
+return;
+}
 
 // display modes
 if(cmd==='display'){
@@ -1595,6 +1612,7 @@ termField.focus();
 // === MATH ===
 function mPersp(f,asp,nr,fr){var t=1/Math.tan(f/2),nf=1/(nr-fr);return new Float32Array([t/asp,0,0,0,0,t,0,0,0,0,(fr+nr)*nf,-1,0,0,2*fr*nr*nf,0])}
 function mMul(a,b){var r=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){r[j*4+i]=0;for(var k=0;k<4;k++)r[j*4+i]+=a[k*4+i]*b[j*4+k]}return r}
+function mTransform(m,v){return[m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12]*v[3],m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13]*v[3],m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]*v[3],m[3]*v[0]+m[7]*v[1]+m[11]*v[2]+m[15]*v[3]]}
 function mRotX(a){var c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1])}
 function mRotY(a){var c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1])}
 function mRotZ(a){var c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1])}
@@ -1730,6 +1748,9 @@ var PFS='precision highp float;varying vec3 vC;varying float vA;void main(){vec2
 
 var prog=mkP(gl,VS,FS);
 var pprog=mkP(gl,PVS,PFS);
+var LVS='attribute vec3 aP;attribute vec4 aC;uniform mat4 uPr,uVw;varying vec4 vC;void main(){gl_Position=uPr*uVw*vec4(aP,1.0);vC=aC;}';
+var LFS='precision highp float;varying vec4 vC;void main(){gl_FragColor=vC;}';
+var lprog=mkP(gl,LVS,LFS);
 
 var S=36;
 var aPos=gl.getAttribLocation(prog,'aPos');
@@ -1742,6 +1763,10 @@ var uCam=gl.getUniformLocation(prog,'uCam');
 var uEm=gl.getUniformLocation(prog,'uEm');
 var uAl=gl.getUniformLocation(prog,'uAl');
 var uInv=gl.getUniformLocation(prog,'uInv');
+var lAP=gl.getAttribLocation(lprog,'aP');
+var lAC=gl.getAttribLocation(lprog,'aC');
+var lPr=gl.getUniformLocation(lprog,'uPr');
+var lVw=gl.getUniformLocation(lprog,'uVw');
 
 var ppAP=gl.getAttribLocation(pprog,'aP');
 var ppAS=gl.getAttribLocation(pprog,'aS');
@@ -1960,6 +1985,156 @@ btn.addEventListener('click',function(){curShape=pv.n;rebuild(pv.n);var bs=docum
 palette.appendChild(btn);
 })(pvList[pi])}
 
+// === ZONES ===
+var currentZone='void';
+var zones={
+source:{name:'source',desc:'the original page — before the void took over',bg:[0.94,0.94,0.96,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
+void:{name:'void',desc:'the void — where obj waits',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
+farlands:{name:'farlands',desc:'the farlands — floating point starts to decay',bg:null,particleAlpha:1,particleSpeed:1.5,cubeJitter:0.02,glitchIntensity:0,filter:'',renderOverride:false},
+geometry:{name:'geometry void',desc:'geometry void — the void before matter existed',bg:[0.95,0.95,0.97,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:true},
+breakdown:{name:'the beginning of the end',desc:'you have gone too far — the renderer is failing',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0.08,glitchIntensity:0.3,filter:'',renderOverride:false},
+fringenlands:{name:'fringenlands',desc:'the rendering is almost gone — fragments remain',bg:null,particleAlpha:0.3,particleSpeed:2,cubeJitter:0.15,glitchIntensity:0.7,filter:'contrast(2) saturate(0)',renderOverride:false},
+end:{name:'end',desc:'nothing renders here — only the terminal survives',bg:[0,0,0,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:true},
+x:{name:'X',desc:'no entrance — this place does not want you',bg:[0,0,0,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:true}
+};
+var zoneTransitions={
+source:['void'],
+void:['source','farlands'],
+farlands:['void','geometry'],
+geometry:['farlands','breakdown'],
+breakdown:['geometry','fringenlands'],
+fringenlands:['breakdown','end'],
+end:['fringenlands'],
+x:[]
+};
+var travelOverlay=null;
+function createTravelOverlay(){
+if(travelOverlay)return travelOverlay;
+travelOverlay=document.createElement('div');
+travelOverlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:100;display:none;align-items:center;justify-content:center;flex-direction:column;font-family:Consolas,monospace;color:rgba(43,208,208,0.9);pointer-events:none';
+travelOverlay.innerHTML='<div id="travelZoneName" style="font-size:24px;letter-spacing:8px;margin-bottom:12px"></div><div id="travelZoneDesc" style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:2px"></div>';
+document.body.appendChild(travelOverlay);
+return travelOverlay;
+}
+function travelTo(zone){
+if(zone==='x'){cubeError('travel: no entrance. the void rejects you.');cubePrint('X does not respond to commands.');return}
+if(!zones[zone]){cubeError('travel: unknown zone "'+zone+'"');return}
+if(zone===currentZone){cubePrint('you are already in '+zones[zone].name);return}
+var allowed=zoneTransitions[currentZone];
+if(allowed.indexOf(zone)===-1){cubeError('travel: cannot reach "'+zones[zone].name+'" from here');cubePrint('available destinations: '+allowed.map(function(z){return zones[z].name}).join(', '));return}
+var ov=createTravelOverlay();
+var zn=document.getElementById('travelZoneName');
+var zd=document.getElementById('travelZoneDesc');
+zn.textContent='travelling...';
+zd.textContent='';
+ov.style.display='flex';
+ov.style.opacity='0';
+ov.style.transition='opacity 0.8s';
+setTimeout(function(){ov.style.opacity='1'},10);
+setTimeout(function(){
+currentZone=zone;
+zn.textContent=zones[zone].name;
+zd.textContent=zones[zone].desc;
+applyZoneEffects(zone);
+},900);
+setTimeout(function(){ov.style.opacity='0'},2500);
+setTimeout(function(){ov.style.display='none'},3300);
+cubeOk('travel: arriving at '+zones[zone].name);
+}
+function applyZoneEffects(zone){
+var z=zones[zone];
+var mainC=document.getElementById('main');
+if(z.filter){mainC.style.filter=z.filter}
+else if(zone==='void'){mainC.style.filter=''}
+else if(zone==='source'){mainC.style.filter='brightness(1.15) saturate(0.3)'}
+else{mainC.style.filter=''}
+}
+var geoShapes=[];
+function initGeoShapes(){
+for(var i=0;i<40;i++){
+geoShapes.push({
+x:(Math.random()-0.5)*20,y:(Math.random()-0.5)*12,z:-5-Math.random()*20,
+rx:Math.random()*Math.PI*2,ry:Math.random()*Math.PI*2,rz:Math.random()*Math.PI*2,
+sp:0.2+Math.random()*0.8,sz:0.3+Math.random()*0.7,
+type:Math.floor(Math.random()*3)
+});
+}
+}
+initGeoShapes();
+function drawGeometryVoid(proj,view,time){
+var t=time*0.001;
+gl.useProgram(lprog);
+gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+gl.depthMask(false);
+gl.uniformMatrix4fv(lPr,false,proj);
+gl.uniformMatrix4fv(lVw,false,view);
+for(var i=0;i<geoShapes.length;i++){
+var s=geoShapes[i];
+var mod=mMul(mMul(mTrans(s.x,s.y+s.z*0.05,s.z),mMul(mMul(mRotX(t*s.sp+s.rx),mRotY(t*s.sp*0.7+s.ry)),mRotZ(t*s.sp*0.3+s.rz))),mScale(s.sz,s.sz,s.sz));
+var col=[
+0.2+Math.sin(t+i)*0.1,
+0.4+Math.cos(t*0.5+i)*0.2,
+0.6+Math.sin(t*0.3+i*0.5)*0.2,
+0.3+Math.sin(t*0.2+i)*0.15
+];
+var verts=[];var colors=[];
+function addVert(x,y,z){
+var w=mTransform(mod,[x,y,z,1]);
+verts.push(w[0],w[1],w[2]);
+colors.push(col[0],col[1],col[2],col[3]);
+}
+if(s.type===0){
+for(var f=0;f<3;f++){
+var a1=f/3*Math.PI*2,a2=(f+1)/3*Math.PI*2;
+addVert(0,0,0);addVert(Math.cos(a1),Math.sin(a1),0);
+addVert(Math.cos(a1),Math.sin(a1),0);addVert(Math.cos(a2),Math.sin(a2),0);
+addVert(Math.cos(a2),Math.sin(a2),0);addVert(0,0,0);
+}
+}else if(s.type===1){
+var c=[[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],[-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
+var edges=[[0,1],[0,2],[0,4],[1,3],[1,5],[2,3],[2,6],[3,7],[4,5],[4,6],[5,7],[6,7]];
+for(var e=0;e<edges.length;e++){
+addVert(c[edges[e][0]][0],c[edges[e][0]][1],c[edges[e][0]][2]);
+addVert(c[edges[e][1]][0],c[edges[e][1]][1],c[edges[e][1]][2]);
+}
+}else{
+for(var f=0;f<4;f++){
+var a1=f/4*Math.PI*2,a2=(f+1)/4*Math.PI*2;
+addVert(0,0.8,0);addVert(Math.cos(a1),-0.5,Math.sin(a1));
+addVert(Math.cos(a1),-0.5,Math.sin(a1));addVert(Math.cos(a2),-0.5,Math.sin(a2));
+addVert(Math.cos(a2),-0.5,Math.sin(a2));addVert(0,0.8,0);
+addVert(Math.cos(a1),-0.5,Math.sin(a1));addVert(0,-0.8,0);
+addVert(Math.cos(a2),-0.5,Math.sin(a2));addVert(0,-0.8,0);
+}
+}
+var buf=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(lAP);
+gl.vertexAttribPointer(lAP,3,gl.FLOAT,false,0,0);
+var cbuf=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,cbuf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(colors),gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(lAC);
+gl.vertexAttribPointer(lAC,4,gl.FLOAT,false,0,0);
+gl.drawArrays(gl.LINES,0,verts.length/3);
+gl.deleteBuffer(buf);gl.deleteBuffer(cbuf);
+}
+gl.disable(gl.BLEND);gl.depthMask(true);
+}
+function getZoneRenderFlags(){
+var z=zones[currentZone];
+return{
+bgOverride:z.bg,
+particleAlpha:z.particleAlpha,
+particleSpeed:z.particleSpeed,
+cubeJitter:z.cubeJitter,
+glitchBoost:z.glitchIntensity,
+renderOff:z.renderOverride,
+zone:currentZone
+};
+}
+
 // === RENDER ===
 var frames=0,lastT=performance.now(),fps=0,maxFps=0,statsEl=document.getElementById('stats');
 function render(time){
@@ -1974,11 +2149,16 @@ var audioPulse=1.0+audioLevel*0.08;
 var th=themes[curTheme]||themes['1'];
 var bgPulse=audioLevel*0.03;
 var hueShift=Math.sin(time*0.00008)*0.008;
+var zr=getZoneRenderFlags();
+if(zr.bgOverride){
+gl.clearColor(zr.bgOverride[0],zr.bgOverride[1],zr.bgOverride[2],zr.bgOverride[3]);
+}else{
 gl.clearColor(
 Math.max(0,Math.min(1,th.bg[0]+bgPulse+hueShift)),
 Math.max(0,Math.min(1,th.bg[1]+bgPulse*0.5)),
 Math.max(0,Math.min(1,th.bg[2]+bgPulse-hueShift)),
 1);
+}
 
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 var asp=canvas.width/canvas.height,proj=mPersp(Math.PI/4,asp,.1,100);
@@ -1993,6 +2173,9 @@ if(pkgEffects.entropy)t*=(1+Math.sin(time*0.001)*0.5);
 updateTrail();
 drawTrail();
 updateParticles(time);
+if(zr.zone==='geometry'){
+drawGeometryVoid(proj,view,time);
+}else if(!zr.renderOff){
 gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
 gl.uniformMatrix4fv(ppPJ,false,proj);gl.uniformMatrix4fv(ppVW,false,view);
 gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);
@@ -2001,16 +2184,22 @@ gl.enableVertexAttribArray(ppAS);gl.vertexAttribPointer(ppAS,1,gl.FLOAT,false,32
 gl.enableVertexAttribArray(ppAC);gl.vertexAttribPointer(ppAC,3,gl.FLOAT,false,32,16);
 gl.enableVertexAttribArray(ppAA);gl.vertexAttribPointer(ppAA,1,gl.FLOAT,false,32,28);
 gl.drawArrays(gl.POINTS,0,NP);
+}
 
 gl.depthMask(true);gl.disable(gl.BLEND);
 
 // cubes
+if(!zr.renderOff){
 gl.useProgram(prog);gl.uniform3f(uCam,0,0,-zZ);
 
 // outer
 var oMod=mMul(mMul(mRotX(t*.15),mRotY(t*.2)),mRotZ(t*.1));
+if(zr.cubeJitter){
+var jt=zr.cubeJitter;
+oMod[12]+=(Math.random()-0.5)*jt;oMod[13]+=(Math.random()-0.5)*jt;oMod[14]+=(Math.random()-0.5)*jt;
+}
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),oMod));
-gl.uniformMatrix4fv(uMod,false,oMod);gl.uniformMatrix3fv(uNM,false,mNorm(oMod));
+gl.uniformMatrix4fv(uMod,false,oMod);gl.uniform3fv(uNM,false,mNorm(oMod));
 gl.uniform1f(uEm,audioLevel*0.05);gl.uniform1f(uAl,.25+audioLevel*0.05);
 gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
@@ -2021,11 +2210,31 @@ gl.depthMask(true);gl.uniform1f(uAl,1);
 for(var i=0;i<innerC.length;i++){
 var c=innerC[i],oa=t*c.s+c.p;
 var ox=Math.cos(oa)*c.o,oy=Math.sin(oa*.7)*c.o*.5,oz=Math.sin(oa)*c.o;
+if(zr.cubeJitter){
+var jit=zr.cubeJitter*3;
+ox+=(Math.random()-0.5)*jit;oy+=(Math.random()-0.5)*jit;oz+=(Math.random()-0.5)*jit;
+}
 var iMod=mMul(mMul(mTrans(ox,oy,oz),mMul(mMul(mRotX(t*c.sp),mRotY(t*c.sp*.7)),mRotZ(t*c.sp*.3))),mScale(1,1,1));
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),iMod));
-gl.uniformMatrix4fv(uMod,false,iMod);gl.uniformMatrix3fv(uNM,false,mNorm(iMod));
+gl.uniformMatrix4fv(uMod,false,iMod);gl.uniform3fv(uNM,false,mNorm(iMod));
 gl.uniform1f(uEm,.15*audioPulse);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 bindM(iBufs[i]);gl.drawArrays(gl.TRIANGLES,0,iCnts[i])}
+
+// fringenlands screen corruption overlay
+if(zr.zone==='fringenlands'){
+gl.disable(gl.BLEND);
+var stripCount=3+Math.floor(Math.random()*5);
+for(var s=0;s<stripCount;s++){
+var sy=Math.random()*canvas.height;
+var sh=1+Math.random()*8;
+gl.clearColor(Math.random()*0.3,Math.random()*0.1,Math.random()*0.3,1);
+gl.enable(gl.SCISSOR_TEST);
+gl.scissor(0,sy,canvas.width,sh);
+gl.clear(gl.COLOR_BUFFER_BIT);
+gl.disable(gl.SCISSOR_TEST);
+}
+}
+}
 
 gl.disable(gl.BLEND);requestAnimationFrame(render)}
 requestAnimationFrame(render);
