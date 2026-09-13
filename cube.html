@@ -53,6 +53,14 @@ canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 #chromAb{position:fixed;top:0;left:0;right:0;bottom:0;z-index:17;pointer-events:none;opacity:0;transition:opacity 0.15s}
 #chromAb.active{opacity:1;animation:chromPulse 0.3s ease-out}
 @keyframes chromPulse{0%{opacity:0.8}100%{opacity:0}}
+#missingTex{position:fixed;top:0;left:0;right:0;bottom:0;z-index:40;pointer-events:none;opacity:0;transition:opacity 0.3s;
+background-color:#ff00ff;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAHklEQVQ4T2P8z8BQz0BFwMgwmKGeAdnR2BDZBIMRDAQAQ+gDAS9APhQAAAAASUVORK5CYII=");background-size:32px 32px}
+#missingTex.active{opacity:0.85}
+#missingTex .msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);border:2px solid #ff00ff;border-radius:8px;padding:20px 30px;color:#ff00ff;font-family:'Consolas',monospace;font-size:14px;text-align:center;max-width:400px;pointer-events:auto}
+#missingTex .msg .title{font-size:18px;font-weight:bold;margin-bottom:10px;color:#ff66ff}
+#missingTex .msg .code{font-size:11px;color:rgba(255,0,255,0.5);margin-top:10px}
+#displayMsg{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:41;pointer-events:none;opacity:0;transition:opacity 0.3s;color:rgba(43,208,208,0.9);font-family:'Consolas',monospace;font-size:13px;background:rgba(0,0,0,0.8);border:1px solid rgba(43,208,208,0.4);border-radius:6px;padding:8px 16px}
+#displayMsg.active{opacity:1}
 </style>
 </head>
 <!--
@@ -92,6 +100,8 @@ the source code is a lie. the render is the truth.
 <button onclick="document.getElementById('exportLabel').style.display='none'" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.4);border-radius:4px;color:rgba(255,80,80,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">close</button>
 </div>
 </div>
+<div id="missingTex"><div class="msg"><div class="title">DISPLAY DRIVER NOT FOUND</div><div>display mode 2 requires a display driver that is no longer supported.</div><div style="margin-top:8px">try: <span style="color:#ff66ff">winget install display-driver-deprecated</span></div><div class="code">ERROR 0x000000FF :: MISSING_TEXTURE :: DRIVER_DEPRECATED :: HEX #FF00FF</div></div></div>
+<div id="displayMsg"></div>
 <div id="themeIndicator">theme: void</div>
 <div id="terminal">
 <div id="termHeader">cube# interpreter v.1.5<br>sourcebox runtime</div>
@@ -699,6 +709,7 @@ cubePrint('  gui close / destroy   — close window');
 cubePrint('  gui list              — list open windows');
 cubePrint('');
 cubePrint('  --- misc ---');
+cubePrint('  display <0-4>  — change display mode');
 cubePrint('  clear          — clear terminal');
 cubePrint('  echo <txt>     — echo text');
 cubePrint('  math <expr>    — evaluate math');
@@ -1235,6 +1246,51 @@ return}
 
 if(cmd==='echo'){cubePrint(parts.slice(1).join(' '));return}
 if(cmd==='clear'){termOutput.innerHTML='';return}
+
+// display modes
+if(cmd==='display'){
+var mode=parseInt(parts[1],10);
+var mt=document.getElementById('missingTex');
+var dm=document.getElementById('displayMsg');
+var mainC=document.getElementById('main');
+if(!parts[1]||isNaN(mode)){
+cubePrint('display modes:');
+cubePrint('  display 0 — reset (default)');
+cubePrint('  display 1 — high contrast filter');
+cubePrint('  display 2 — [REQUIRES DEPRECATED DRIVER]');
+cubePrint('  display 3 — inverted void');
+cubePrint('  display 4 — dream mode');
+return}
+if(mode===0){
+mt.classList.remove('active');dm.classList.remove('active');
+mainC.style.filter='';mainC.style.transform='';
+cubeOk('display reset to default');return}
+if(mode===1){
+mainC.style.filter='contrast(1.4) brightness(1.1) saturate(1.3)';
+cubeOk('display 1: high contrast — the void is sharper now');return}
+if(mode===2){
+if(pkgEffects&&pkgEffects.displayDriver){
+mt.classList.remove('active');
+mainC.style.filter='contrast(0.6) brightness(0.8) saturate(0.4) hue-rotate(15deg)';
+mainC.style.transform='skewX(0.5deg)';
+dm.textContent='display 2: deprecated driver active — everything is broken';
+dm.classList.add('active');
+cubeWarn('display 2: the deprecated driver is loaded. missing textures everywhere.');
+}else{
+mt.classList.add('active');
+cubeError('display 2: no display driver found.');
+cubePrint('display mode 2 requires a legacy driver that is no longer supported.');
+cubePrint('install it: winget install display-driver-deprecated');
+}
+return}
+if(mode===3){
+mainC.style.filter='invert(1) hue-rotate(180deg)';
+cubeOk('display 3: inverted void — the void sees itself');return}
+if(mode===4){
+mainC.style.filter='brightness(1.2) saturate(0.7) hue-rotate(20deg) blur(0.5px)';
+cubeOk('display 4: dream mode — reality is softer here');return}
+cubeError('display: unknown mode '+mode);return}
+
 if(cmd==='math'){
 try{var expr=parts.slice(1).join('');
 var result=Function('"use strict";return ('+expr+')')();
@@ -1257,16 +1313,30 @@ cubePrint('reason: the void does not need security.');
 cubePrint('the void is the security.');
 cubePrint('');
 cubeWarn('use "void intrude paranoia" instead.');
+}else if(pkg==='display-driver-deprecated'){
+cubePrint('found display-driver-deprecated v0.0.2 [Deprecated]');
+cubePrint(' Description: legacy display driver for cube-os render modes');
+cubePrint(' Publisher: void-display');
+cubePrint('');
+cubeWarn('this driver is deprecated and unsupported.');
+cubePrint('installing anyway because you insisted...');
+setTimeout(function(){
+if(typeof pkgEffects!=='undefined')pkgEffects.displayDriver=true;
+cubeOk('display-driver-deprecated v0.0.2 installed.');
+cubeWarn('warning: display mode 2 is now active. expect missing textures.');
+cubePrint('run: display 2');
+},1500);
 }else{
 cubeError('No package found matching "'+pkg+'"');
 }
 return}
 if(sub3==='search'){
-cubePrint('Name                  Id          Version  Source');
-cubePrint('----                  --          -------  ------');
-cubePrint('opsec                 void.sec    0.1.0    voidrepo  [Deprecated]');
+cubePrint('Name                        Id                      Version  Source');
+cubePrint('----                        --                      -------  ------');
+cubePrint('opsec                       void.sec                0.1.0    voidrepo  [Deprecated]');
+cubePrint('display-driver-deprecated   void.display            0.0.2    voidrepo  [Deprecated]');
 cubePrint('');
-cubeWarn('1 package deprecated. the void moves on.');
+cubeWarn('2 packages deprecated. the void moves on.');
 return}
 cubePrint('Windows Package Manager (void edition)');
 cubePrint('Winget has been deprecated in favor of the void package manager.');
