@@ -2684,7 +2684,7 @@ guiAddLabel=function(text,x,y){var w=guiGetActive();if(!w)return;var lbl=documen
 guiAddButton=function(text,x,y,action){var w=guiGetActive();if(!w)return;var btn=document.createElement('button');btn.className='gui-button';btn.textContent=text;btn.style.left=x+'px';btn.style.top=y+'px';btn.onclick=function(){cubeEval(action)};w.content.appendChild(btn)};
 guiAddInput=function(placeholder,x,y){var w=guiGetActive();if(!w)return;var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=placeholder;inp.style.left=x+'px';inp.style.top=y+'px';w.content.appendChild(inp)};
 guiAddCheck=function(labelText,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';var cb=document.createElement('input');cb.type='checkbox';lbl.appendChild(cb);lbl.appendChild(document.createTextNode(labelText));w.content.appendChild(lbl)};
-guiAddImage=function(url,x,y,imgW,imgH){var w=guiGetActive();if(!w)return;var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';if(imgW)img.style.width=imgW+'px';if(imgH)img.style.height=imgH+'px';w.content.appendChild(img)};
+guiAddImage=function(url,x,y,imgW,imgH){var w=guiGetActive();if(!w)return;var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';if(imgW)img.style.width=imgW+'px';if(imgH)img.style.height=imgH+'px';img.onerror=function(){cubeError('image failed to load: '+url)};w.content.appendChild(img)};
 vsCancel=false;
 voidScriptDone=false;
 runVoidScript(code,'studio script',function(){
@@ -2796,8 +2796,8 @@ wins[activeWinId].content.appendChild(lbl);
 if(sub==='image'&&activeWinId&&wins[activeWinId]){
 var url=parts[2]?parts[2].replace(/"/g,''):'';
 var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
-var imgW=parseInt(parts[5])||100,imgH=parseInt(parts[6])||100;
-var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';img.style.width=imgW+'px';img.style.height=imgH+'px';
+var imgW=parseInt(parts[5])||0,imgH=parseInt(parts[6])||0;
+var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';if(imgW)img.style.width=imgW+'px';if(imgH)img.style.height=imgH+'px';img.onerror=function(){img.style.border='1px solid rgba(255,80,80,0.5)';img.alt='failed'};
 wins[activeWinId].content.appendChild(img);
 }
 }
