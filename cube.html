@@ -2146,9 +2146,10 @@ var hoverCubeEl=null;
 canvas.addEventListener('mousemove',function(e){
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
+var hoverTime=performance.now()*0.001;
 var closest=-1,closestD=0.3;
 for(var i=0;i<innerC.length;i++){
-var c=innerC[i],oa=t*c.s+c.p;
+var c=innerC[i],oa=hoverTime*c.s+c.p;
 var ox=Math.cos(oa)*c.o/3,oy=Math.sin(oa*.7)*c.o*.5/3,oz=Math.sin(oa)*c.o/3;
 var d=Math.sqrt((ndcX-ox)*(ndcX-ox)+(ndcY-oy)*(ndcY-oy));
 if(d<closestD){closestD=d;closest=i}
