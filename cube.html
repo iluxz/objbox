@@ -2007,39 +2007,93 @@ fringenlands:['breakdown','end'],
 end:['fringenlands'],
 x:[]
 };
-var travelOverlay=null;
-function createTravelOverlay(){
-if(travelOverlay)return travelOverlay;
-travelOverlay=document.createElement('div');
-travelOverlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:100;display:none;align-items:center;justify-content:center;flex-direction:column;font-family:Consolas,monospace;color:rgba(43,208,208,0.9);pointer-events:none';
-travelOverlay.innerHTML='<div id="travelZoneName" style="font-size:24px;letter-spacing:8px;margin-bottom:12px"></div><div id="travelZoneDesc" style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:2px"></div>';
-document.body.appendChild(travelOverlay);
-return travelOverlay;
+var zoneOrder=['source','void','farlands','geometry','breakdown','fringenlands','end'];
+function zoneDistance(a,b){
+var ia=zoneOrder.indexOf(a),ib=zoneOrder.indexOf(b);
+if(ia===-1||ib===-1)return 1;
+return Math.abs(ia-ib);
 }
+
+// === TRAVEL ANIMATION ===
+var travelling=false;
+var travelProgress=0;
+var travelFrom='void';
+var travelTo_zone='void';
+var travelDuration=0;
+var travelSpeedLines=[];
+var travelShakeX=0;
+var travelShakeY=0;
+var travelPhase='idle';
+var travelFadeEl=null;
+function initTravelFade(){
+if(travelFadeEl)return;
+travelFadeEl=document.createElement('div');
+travelFadeEl.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:90;pointer-events:none;background:#000;opacity:0;transition:none';
+document.body.appendChild(travelFadeEl);
+}
+initTravelFade();
 function travelTo(zone){
+if(travelling)return;
 if(zone==='x'){cubeError('travel: no entrance. the void rejects you.');cubePrint('X does not respond to commands.');return}
 if(!zones[zone]){cubeError('travel: unknown zone "'+zone+'"');return}
 if(zone===currentZone){cubePrint('you are already in '+zones[zone].name);return}
 var allowed=zoneTransitions[currentZone];
 if(allowed.indexOf(zone)===-1){cubeError('travel: cannot reach "'+zones[zone].name+'" from here');cubePrint('available destinations: '+allowed.map(function(z){return zones[z].name}).join(', '));return}
-var ov=createTravelOverlay();
-var zn=document.getElementById('travelZoneName');
-var zd=document.getElementById('travelZoneDesc');
-zn.textContent='travelling...';
-zd.textContent='';
-ov.style.display='flex';
-ov.style.opacity='0';
-ov.style.transition='opacity 0.8s';
-setTimeout(function(){ov.style.opacity='1'},10);
-setTimeout(function(){
-currentZone=zone;
-zn.textContent=zones[zone].name;
-zd.textContent=zones[zone].desc;
-applyZoneEffects(zone);
-},900);
-setTimeout(function(){ov.style.opacity='0'},2500);
-setTimeout(function(){ov.style.display='none'},3300);
-cubeOk('travel: arriving at '+zones[zone].name);
+var dist=zoneDistance(currentZone,zone);
+travelDuration=1500+dist*1200;
+travelling=true;
+travelFrom=currentZone;
+travelTo_zone=zone;
+travelProgress=0;
+travelPhase='accelerate';
+travelShakeX=0;travelShakeY=0;
+travelSpeedLines=[];
+for(var i=0;i<20+dist*8;i++){
+travelSpeedLines.push({x:Math.random(),y:Math.random(),speed:0.5+Math.random()*2,offset:Math.random()*1000,thickness:0.5+Math.random()*2});
+}
+cubeOk('travel: pulling towards '+zones[zone].name+' ('+dist+' zone'+(dist>1?'s':'')+')');
+}
+function updateTravel(dt){
+if(!travelling)return;
+travelProgress+=dt;
+var t=Math.min(travelProgress/travelDuration,1);
+var eased;
+if(t<0.2)eased=t/0.2*0.2;
+else if(t<0.8)eased=0.2+(t-0.2)/0.6*0.6;
+else eased=0.8+(t-0.8)/0.2*0.2;
+eased=eased*eased*(3-2*eased);
+if(travelProgress<travelDuration*0.15)travelPhase='accelerate';
+else if(travelProgress<travelDuration*0.85)travelPhase='cruise';
+else if(travelProgress<travelDuration)travelPhase='decelerate';
+else travelPhase='arrive';
+if(travelPhase==='accelerate'||travelPhase==='cruise'){
+var intensity=travelPhase==='accelerate'?eased:1;
+travelShakeX=(Math.random()-0.5)*3*intensity;
+travelShakeY=(Math.random()-0.5)*3*intensity;
+var blur=travelPhase==='cruise'?1.5:intensity*1;
+document.getElementById('main').style.filter='blur('+blur+'px) brightness('+(1+intensity*0.3)+')';
+}else if(travelPhase==='decelerate'){
+var fade=(1-eased)*2;
+travelShakeX=(Math.random()-0.5)*1.5*fade;
+travelShakeY=(Math.random()-0.5)*1.5*fade;
+document.getElementById('main').style.filter='blur('+(fade*1.5)+'px)';
+}else{
+travelShakeX*=0.9;travelShakeY*=0.9;
+}
+var fadeIn=Math.min(t*4,1);
+var fadeOut=Math.max(0,Math.min((1-t)*4,1));
+var midFade=Math.min(fadeIn,fadeOut);
+travelFadeEl.style.opacity=String(1-midFade);
+if(travelProgress>=travelDuration){
+travelling=false;
+currentZone=travelTo_zone;
+applyZoneEffects(travelTo_zone);
+travelPhase='idle';
+travelFadeEl.style.opacity='0';
+document.getElementById('main').style.filter='';
+cubePrint('obj: you have arrived at '+zones[travelTo_zone].name+'.');
+cubePrint(zones[travelTo_zone].desc);
+}
 }
 function applyZoneEffects(zone){
 var z=zones[zone];
@@ -2137,10 +2191,13 @@ zone:currentZone
 
 // === RENDER ===
 var frames=0,lastT=performance.now(),fps=0,maxFps=0,statsEl=document.getElementById('stats');
+var lastRenderTime=0;
 function render(time){
+var dt=time-lastRenderTime;lastRenderTime=time;
 frames++;var now=performance.now();
-if(now-lastT>=1000){fps=frames;if(fps>maxFps)maxFps=fps;frames=0;lastT=now;statsEl.textContent='FPS: '+fps+' | MAX: '+maxFps+' | SHAPES: '+innerC.length+' | PARTICLES: '+NP;
+if(now-lastT>=1000){fps=frames;if(fps>maxFps)maxFps=fps;frames=0;lastT=now;statsEl.textContent='FPS: '+fps+' | MAX: '+maxFps+' | SHAPES: '+innerC.length+' | PARTICLES: '+NP+(travelling?' | TRAVELLING: '+Math.floor(travelProgress/travelDuration*100)+'%':'');
 if(fps<lastFps-10&&fps<40)triggerGlitch();lastFps=fps}
+updateTravel(dt);
 if(!drag){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if(Math.abs(vY)<.0001)vY=0}
 var audioLevel=getAudioLevel();
 var audioPulse=1.0+audioLevel*0.08;
@@ -2163,6 +2220,14 @@ Math.max(0,Math.min(1,th.bg[2]+bgPulse-hueShift)),
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 var asp=canvas.width/canvas.height,proj=mPersp(Math.PI/4,asp,.1,100);
 var view=mMul(mTrans(0,0,zZ),mMul(mRotY(rY),mRotX(rX)));
+if(travelling){
+var travelT=travelProgress/travelDuration;
+var travelZ=-travelT*8;
+var shakeAmt=travelPhase==='cruise'?3:travelPhase==='accelerate'?travelT*5:travelPhase==='decelerate'?(1-travelT)*3:0;
+travelShakeX=(Math.random()-0.5)*shakeAmt;
+travelShakeY=(Math.random()-0.5)*shakeAmt;
+view=mMul(mTrans(travelShakeX,travelShakeY,zZ+travelZ),mMul(mRotY(rY),mRotX(rX)));
+}
 var t=time*.001;
 
 // package effects
@@ -2219,6 +2284,37 @@ gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),iMod));
 gl.uniformMatrix4fv(uMod,false,iMod);gl.uniform3fv(uNM,false,mNorm(iMod));
 gl.uniform1f(uEm,.15*audioPulse);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 bindM(iBufs[i]);gl.drawArrays(gl.TRIANGLES,0,iCnts[i])}
+
+// travel speed lines
+if(travelling){
+var travelT=travelProgress/travelDuration;
+gl.useProgram(lprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
+gl.uniformMatrix4fv(lPr,false,proj);gl.uniformMatrix4fv(lVw,false,view);
+var spd=travelPhase==='cruise'?1.5:travelPhase==='accelerate'?travelT*1.2:travelPhase==='decelerate'?(1-travelT)*1.5:0.3;
+var lineVerts=[];var lineCols=[];
+for(var si=0;si<travelSpeedLines.length;si++){
+var sl=travelSpeedLines[si];
+sl.y+=sl.speed*spd*0.02;
+if(sl.y>1.2){sl.y=-0.2;sl.x=Math.random()}
+var lx=(sl.x-0.5)*16;
+var ly=(sl.y-0.5)*12;
+var lz=-5-Math.random()*15;
+var alpha=spd*0.6*(1-Math.abs(sl.y-0.5)*2);
+if(alpha<=0)continue;
+lineVerts.push(lx,ly,lz,lx,ly+0.3+spd*0.4,lz+0.5);
+lineCols.push(0.3,0.8,0.9,alpha,0.3,0.8,0.9,alpha*0.3);
+}
+if(lineVerts.length>0){
+var sbuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,sbuf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(lineVerts),gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(lAP);gl.vertexAttribPointer(lAP,3,gl.FLOAT,false,0,0);
+var scbuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,scbuf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(lineCols),gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(lAC);gl.vertexAttribPointer(lAC,4,gl.FLOAT,false,0,0);
+gl.drawArrays(gl.LINES,0,lineVerts.length/3);
+gl.deleteBuffer(sbuf);gl.deleteBuffer(scbuf);
+}
+}
 
 // fringenlands screen corruption overlay
 if(zr.zone==='fringenlands'){
