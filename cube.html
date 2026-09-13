@@ -691,6 +691,23 @@ handle.onmousedown=function(e){dragging=true;sx=e.clientX;sy=e.clientY;ox=el.off
 document.addEventListener('mousemove',function(e){if(!dragging)return;el.style.left=ox+(e.clientX-sx)+'px';el.style.top=oy+(e.clientY-sy)+'px'});
 document.addEventListener('mouseup',function(){dragging=false});
 }
+function previewMakeDraggable(el,handle,container){
+var ox,oy,sx,sy,dragging=false;
+handle.onmousedown=function(e){dragging=true;sx=e.clientX;sy=e.clientY;ox=el.offsetLeft;oy=el.offsetTop;e.preventDefault();e.stopPropagation()};
+document.addEventListener('mousemove',function(e){
+if(!dragging)return;
+var nx=ox+(e.clientX-sx);
+var ny=oy+(e.clientY-sy);
+var cw=container.clientWidth;
+var ch=container.clientHeight;
+var ww=el.offsetWidth;
+var wh=el.offsetHeight;
+nx=Math.max(0,Math.min(nx,cw-ww));
+ny=Math.max(0,Math.min(ny-ch+30,ch-wh-30));
+el.style.left=nx+'px';el.style.top=ny+'px';
+});
+document.addEventListener('mouseup',function(){dragging=false});
+}
 function guiCreateWin(title,w,h,rndPos){
 var id='gw_'+Date.now()+'_'+Math.floor(Math.random()*999);
 var win=document.createElement('div');win.className='gui-window';win.id=id;
@@ -2747,6 +2764,7 @@ tb.innerHTML='<span>'+title+'</span>';
 win.appendChild(tb);
 var ct=document.createElement('div');ct.className='gui-content';ct.style.height=h+'px';
 win.appendChild(ct);area.appendChild(win);
+previewMakeDraggable(win,tb,area);
 wins[wid]={el:win,content:ct};
 activeWinId=wid;
 }
