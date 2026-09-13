@@ -99,7 +99,15 @@ background-color:#ff00ff;background-image:url("data:image/png;base64,iVBORw0KGgo
 #studioOutput .output-body::-webkit-scrollbar{width:6px}
 #studioOutput .output-body::-webkit-scrollbar-track{background:transparent}
 #studioOutput .output-body::-webkit-scrollbar-thumb{background:rgba(43,208,208,0.2);border-radius:3px}
+#studioTerminalBody .outLine{padding:1px 0;font-family:'Consolas',monospace;font-size:12px}
+#studioTerminalBody .outLine.print{color:rgba(43,208,208,0.8)}
+#studioTerminalBody .outLine.error{color:rgba(255,80,80,0.8)}
+#studioTerminalBody .outLine.ok{color:rgba(100,255,100,0.6)}
+#studioTerminalBody .outLine.warn{color:rgba(255,200,50,0.6)}
 .studio-hint{position:absolute;bottom:8px;right:12px;font-size:10px;color:rgba(255,255,255,0.15);pointer-events:none}
+.output-tab{background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.3);font-family:'Consolas',monospace;font-size:10px;padding:4px 12px;cursor:pointer;letter-spacing:1px;transition:all 0.2s}
+.output-tab:hover{color:rgba(43,208,208,0.6)}
+.output-tab.active{color:rgba(43,208,208,0.9);border-bottom-color:rgba(43,208,208,0.6)}
 </style>
 </head>
 <!--
@@ -194,8 +202,15 @@ END LOG
 </div>
 </div>
 <div id="studioOutput">
-<div class="output-header"><span>cube# output — runtime log</span><span id="studioOutputCount">0 lines</span></div>
+<div class="output-header">
+<div style="display:flex;gap:0">
+<button class="output-tab active" data-tab="output" onclick="studioSwitchTab('output')">cube# output</button>
+<button class="output-tab" data-tab="terminal" onclick="studioSwitchTab('terminal')">terminal</button>
+</div>
+<span id="studioOutputCount">0 lines</span>
+</div>
 <div class="output-body" id="studioOutputBody"></div>
+<div class="output-body" id="studioTerminalBody" style="display:none"></div>
 </div>
 <div class="studio-hint">Ctrl+Enter: run | Ctrl+S: save | Esc: exit</div>
 </div>
@@ -391,10 +406,10 @@ termOutput.appendChild(line);
 termOutput.scrollTop=termOutput.scrollHeight;
 }
 
-function cubePrint(txt){termPrint(txt,'rgba(43,208,208,0.8)')}
-function cubeError(txt){termPrint('error: '+txt,'rgba(255,80,80,0.8)')}
-function cubeOk(txt){termPrint(txt,'rgba(100,255,100,0.6)')}
-function cubeWarn(txt){termPrint(txt,'rgba(255,200,50,0.6)')}
+function cubePrint(txt){termPrint(txt,'rgba(43,208,208,0.8)');if(studioOpen)studioTerminalPrint(txt,'print')}
+function cubeError(txt){termPrint('error: '+txt,'rgba(255,80,80,0.8)');if(studioOpen)studioTerminalPrint('error: '+txt,'error')}
+function cubeOk(txt){termPrint(txt,'rgba(100,255,100,0.6)');if(studioOpen)studioTerminalPrint(txt,'ok')}
+function cubeWarn(txt){termPrint(txt,'rgba(255,200,50,0.6)');if(studioOpen)studioTerminalPrint(txt,'warn')}
 
 // package effects (global scope for render loop)
 var pkgEffects={};
@@ -1804,9 +1819,10 @@ gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);gl.bufferData(gl.ARRAY_BUFFER,pData,gl.DYNAM
 
 // === MOUSE ===
 var drag=false,rX=0.3,rY=0.5,vX=0,vY=0,zZ=-9,lX=0,lY=0;
-canvas.addEventListener('mousedown',function(e){drag=true;lX=e.clientX;lY=e.clientY;vX=vY=0;document.body.classList.add('dragging')});
+var mouseDownX=0,mouseDownY=0,wasDrag=false;
+canvas.addEventListener('mousedown',function(e){drag=true;wasDrag=false;mouseDownX=e.clientX;mouseDownY=e.clientY;lX=e.clientX;lY=e.clientY;vX=vY=0;document.body.classList.add('dragging')});
 window.addEventListener('mouseup',function(){drag=false;document.body.classList.remove('dragging')});
-window.addEventListener('mousemove',function(e){if(!drag)return;vY=(e.clientX-lX)*.005;vX=(e.clientY-lY)*.005;rY+=vY;rX+=vX;lX=e.clientX;lY=e.clientY});
+window.addEventListener('mousemove',function(e){if(!drag)return;var dx=e.clientX-mouseDownX,dy=e.clientY-mouseDownY;if(Math.sqrt(dx*dx+dy*dy)>5)wasDrag=true;vY=(e.clientX-lX)*.005;vX=(e.clientY-lY)*.005;rY+=vY;rX+=vX;lX=e.clientX;lY=e.clientY});
 var mouseX=0,mouseY=0;
 window.addEventListener('mousemove',function(e){mouseX=(e.clientX/window.innerWidth)*2-1;mouseY=-(e.clientY/window.innerHeight)*2+1});
 canvas.addEventListener('wheel',function(e){zZ+=e.deltaY*.005;zZ=Math.max(-15,Math.min(-3,zZ));e.preventDefault()},{passive:false});
@@ -1851,7 +1867,7 @@ function(){cubePrint('obj: the void is flattered.');document.getElementById('mai
 function(){cubePrint('obj: click again. i dare you.');curShape=curShape==='cube'?'sphere':curShape==='sphere'?'tetra':curShape==='tetra'?'cyl':'cube';rebuild(curShape)}
 ];
 canvas.addEventListener('click',function(e){
-if(drag)return;
+if(wasDrag)return;
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
@@ -2046,6 +2062,20 @@ document.getElementById('stats').style.display='block';
 document.getElementById('hint').style.display='block';
 document.getElementById('studio').classList.remove('active');
 document.getElementById('studioPreviewArea').innerHTML='';
+document.getElementById('studioTerminalBody').innerHTML='';
+}
+function studioSwitchTab(tab){
+var tabs=document.querySelectorAll('.output-tab');
+for(var i=0;i<tabs.length;i++){tabs[i].classList.remove('active');if(tabs[i].getAttribute('data-tab')===tab)tabs[i].classList.add('active')}
+document.getElementById('studioOutputBody').style.display=tab==='output'?'block':'none';
+document.getElementById('studioTerminalBody').style.display=tab==='terminal'?'block':'none';
+}
+function studioTerminalPrint(txt,cls){
+var termBody=document.getElementById('studioTerminalBody');
+if(!termBody)return;
+var line=document.createElement('div');line.className='outLine '+(cls||'');
+line.textContent=txt;termBody.appendChild(line);termBody.scrollTop=termBody.scrollHeight;
+var lines=termBody.querySelectorAll('.outLine');if(lines.length>500)lines[0].remove();
 }
 function updateStudioLineNums(){
 var code=document.getElementById('studioCode').value;
@@ -2134,9 +2164,77 @@ studioRunning=false;
 document.getElementById('studioProcess').textContent='idle';
 },50);
 }
+function livePreview(code){
+if(studioRunning)return;
+var area=document.getElementById('studioPreviewArea');
+area.innerHTML='';
+var lines=code.split('\n');
+var wins={};var activeWinId=null;
+for(var i=0;i<lines.length;i++){
+var ln=lines[i].trim();
+if(!ln||ln.charAt(0)==='#')continue;
+var parts=ln.match(/(?:[^\s"]+|"[^"]*")+/g);
+if(!parts||!parts.length)continue;
+var cmd=parts[0].toLowerCase();
+if(cmd==='gui'){
+var sub=parts[1]?parts[1].replace(/"/g,'').toLowerCase():'';
+if(sub==='window'){
+var title=parts[2]?parts[2].replace(/"/g,''):'untitled';
+var w=parseInt(parts[3])||300,h=parseInt(parts[4])||200;
+var wid='lp_'+i;
+var win=document.createElement('div');win.className='gui-window';win.id=wid;
+win.style.cssText='width:'+w+'px;height:'+(h+30)+'px;left:'+(20+(Object.keys(wins).length%3)*20)+'px;top:'+(20+(Object.keys(wins).length*2)%5)*15+'px;display:flex;flex-direction:column;position:relative';
+var tb=document.createElement('div');tb.className='gui-title';
+tb.innerHTML='<span>'+title+'</span>';
+win.appendChild(tb);
+var ct=document.createElement('div');ct.className='gui-content';ct.style.height=h+'px';
+win.appendChild(ct);area.appendChild(win);
+wins[wid]={el:win,content:ct};
+activeWinId=wid;
+}
+if(sub==='label'&&activeWinId&&wins[activeWinId]){
+var text=parts[2]?parts[2].replace(/"/g,''):'';
+var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
+var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=text;lbl.style.left=x+'px';lbl.style.top=y+'px';
+wins[activeWinId].content.appendChild(lbl);
+}
+if(sub==='button'&&activeWinId&&wins[activeWinId]){
+var text=parts[2]?parts[2].replace(/"/g,''):'btn';
+var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
+var btn=document.createElement('button');btn.className='gui-button';btn.textContent=text;btn.style.left=x+'px';btn.style.top=y+'px';
+wins[activeWinId].content.appendChild(btn);
+}
+if(sub==='input'&&activeWinId&&wins[activeWinId]){
+var ph=parts[2]?parts[2].replace(/"/g,''):'';
+var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
+var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=ph;inp.style.left=x+'px';inp.style.top=y+'px';
+wins[activeWinId].content.appendChild(inp);
+}
+if(sub==='check'&&activeWinId&&wins[activeWinId]){
+var text=parts[2]?parts[2].replace(/"/g,''):'option';
+var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
+var lbl=document.createElement('label');lbl.className='gui-checkbox';lbl.style.left=x+'px';lbl.style.top=y+'px';
+lbl.innerHTML='<input type="checkbox"> '+text;
+wins[activeWinId].content.appendChild(lbl);
+}
+if(sub==='image'&&activeWinId&&wins[activeWinId]){
+var url=parts[2]?parts[2].replace(/"/g,''):'';
+var x=parseInt(parts[3])||10,y=parseInt(parts[4])||10;
+var imgW=parseInt(parts[5])||100,imgH=parseInt(parts[6])||100;
+var img=document.createElement('img');img.className='gui-image';img.src=url;img.style.left=x+'px';img.style.top=y+'px';img.style.width=imgW+'px';img.style.height=imgH+'px';
+wins[activeWinId].content.appendChild(img);
+}
+}
+}
+}
 function initStudioEvents(){
 var code=document.getElementById('studioCode');
-code.addEventListener('input',function(){updateStudioLineNums()});
+var livePreviewTimer=null;
+code.addEventListener('input',function(){
+updateStudioLineNums();
+clearTimeout(livePreviewTimer);
+livePreviewTimer=setTimeout(function(){livePreview(code.value)},300);
+});
 code.addEventListener('keydown',function(e){
 if(e.key==='Tab'){e.preventDefault();var s=this.selectionStart;var end=this.selectionEnd;this.value=this.value.substring(0,s)+'  '+this.value.substring(end);this.selectionStart=this.selectionEnd=s+2;updateStudioLineNums()}
 if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();runStudioScript()}
