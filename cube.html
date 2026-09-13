@@ -1372,7 +1372,7 @@ if(cmd==='echo'){cubePrint(parts.slice(1).join(' '));return}
 if(cmd==='studio'){openStudio();return}
 if(cmd==='clear'){termOutput.innerHTML='';return}
 if(cmd==='travel'){
-var dest=parts[1]?parts[1].toLowerCase():'';
+var dest=parts.slice(1).join(' ').toLowerCase();
 if(!dest){
 cubePrint('current zone: '+zones[currentZone].name);
 cubePrint('');
@@ -1385,7 +1385,21 @@ cubePrint('');
 cubePrint('usage: travel <zone>');
 return;
 }
-travelTo(dest);
+var zoneAliases={
+'the beginning of the end':'breakdown',
+'beginning of the end':'breakdown',
+'beginning':'breakdown',
+'the geometry void':'geometry',
+'geometry void':'geometry',
+'the fringenlands':'fringenlands',
+'the farlands':'farlands',
+'the source':'source',
+'the void':'void',
+'the end':'end',
+'the x':'x'
+};
+var resolved=zoneAliases[dest]||dest;
+travelTo(resolved);
 return;
 }
 
@@ -2264,7 +2278,7 @@ var jt=zr.cubeJitter;
 oMod[12]+=(Math.random()-0.5)*jt;oMod[13]+=(Math.random()-0.5)*jt;oMod[14]+=(Math.random()-0.5)*jt;
 }
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),oMod));
-gl.uniformMatrix4fv(uMod,false,oMod);gl.uniform3fv(uNM,false,mNorm(oMod));
+gl.uniformMatrix4fv(uMod,false,oMod);gl.uniformMatrix3fv(uNM,false,mNorm(oMod));
 gl.uniform1f(uEm,audioLevel*0.05);gl.uniform1f(uAl,.25+audioLevel*0.05);
 gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
@@ -2281,7 +2295,7 @@ ox+=(Math.random()-0.5)*jit;oy+=(Math.random()-0.5)*jit;oz+=(Math.random()-0.5)*
 }
 var iMod=mMul(mMul(mTrans(ox,oy,oz),mMul(mMul(mRotX(t*c.sp),mRotY(t*c.sp*.7)),mRotZ(t*c.sp*.3))),mScale(1,1,1));
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),iMod));
-gl.uniformMatrix4fv(uMod,false,iMod);gl.uniform3fv(uNM,false,mNorm(iMod));
+gl.uniformMatrix4fv(uMod,false,iMod);gl.uniformMatrix3fv(uNM,false,mNorm(iMod));
 gl.uniform1f(uEm,.15*audioPulse);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 bindM(iBufs[i]);gl.drawArrays(gl.TRIANGLES,0,iCnts[i])}
 
