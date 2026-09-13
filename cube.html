@@ -254,13 +254,25 @@ END LOG
 </div>
 <div class="help-section">
 <div class="help-title">logic</div>
-<div class="help-cmd"><span class="hl">loop</span> &lt;n&gt; — start loop (endloop to close)</div>
+<div class="help-cmd"><span class="hl">loop</span> &lt;n&gt; — repeat block n times (close with endloop)</div>
 <div class="help-cmd"><span class="hl">endloop</span> — close loop block</div>
-<div class="help-cmd"><span class="hl">if</span> &lt;condition&gt; — conditional (endif to close)</div>
+<div class="help-cmd"><span class="hl">if</span> &lt;condition&gt; — conditional block (close with endif)</div>
 <div class="help-cmd"><span class="hl">endif</span> — close if block</div>
-<div class="help-cmd"><span class="hl">calc</span> &lt;expr&gt; — evaluate math expression</div>
+<div class="help-cmd"><span class="hl">calc</span> &lt;expr&gt; — evaluate math (e.g. calc 2+2)</div>
 <div class="help-cmd"><span class="hl">set</span> &lt;var&gt; &lt;val&gt; — set a variable</div>
 <div class="help-cmd"><span class="hl">get</span> &lt;var&gt; — get a variable value</div>
+</div>
+<div class="help-section">
+<div class="help-title">if conditions</div>
+<div class="help-cmd"><span class="hl">if x == 5</span> — equals</div>
+<div class="help-cmd"><span class="hl">if x != 0</span> — not equals</div>
+<div class="help-cmd"><span class="hl">if x > 10</span> — greater than</div>
+<div class="help-cmd"><span class="hl">if x < 5</span> — less than</div>
+<div class="help-cmd"><span class="hl">if x >= 1</span> — greater or equal</div>
+<div class="help-cmd"><span class="hl">if x <= 100</span> — less or equal</div>
+<div class="help-cmd"><span class="hl">if myvar</span> — truthy (exists, not 0/false/empty)</div>
+<div class="help-cmd">conditions are case-sensitive. strings must match exactly.</div>
+<div class="help-cmd">example: set count 3 — if count == 3 — print yes — endif</div>
 </div>
 <div class="help-section">
 <div class="help-title">gui — create windows</div>
@@ -294,6 +306,8 @@ END LOG
 <div class="help-cmd">one command per line. commands are case-sensitive.</div>
 <div class="help-cmd">use quotes around strings with spaces.</div>
 <div class="help-cmd">loop/endloop and if/endif must be on their own lines.</div>
+<div class="help-cmd">if conditions: if x == 5, if x != 0, if x > 10, if x < 5</div>
+<div class="help-cmd">if conditions: if x >= 1, if x <= 100, if myvar (truthy check)</div>
 <div class="help-cmd">gui commands create elements in the preview panel.</div>
 <div class="help-cmd">press Ctrl+Enter to run. Ctrl+S to save. Esc to exit.</div>
 </div>
@@ -782,13 +796,31 @@ cubePrint('running '+rp+' through the void interpreter...');
 var lines=code.split('\n').map(function(l){return l.replace(/\/\/.*$/,'').trim()}).filter(function(l){return l.length});
 var i=0;
 var loopStack=[];
+var ifStack=[];
+function evalIfCondition(args){
+var expr=args.join(' ');
+var m=expr.match(/^(\S+)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
+if(m){
+var val=cubeVars[m[1]]!==undefined?cubeVars[m[1]]:'';
+var cmp=m[3].replace(/^"|"$/g,'');
+var op=m[2];
+if(op==='==')return val===cmp;
+if(op==='!=')return val!==cmp;
+if(op==='>')return parseFloat(val)>parseFloat(cmp);
+if(op==='<')return parseFloat(val)<parseFloat(cmp);
+if(op==='>=')return parseFloat(val)>=parseFloat(cmp);
+if(op==='<=')return parseFloat(val)<=parseFloat(cmp);
+}
+var val=cubeVars[expr];
+return val!==undefined&&val!==''&&val!=='0'&&val!=='false'&&val!=='undefined';
+}
 function step(){
 if(vsCancel){
 cubeWarn('script terminated by the void.');
 if(doneCallback)doneCallback();
 return;
 }
-if(i>=lines.length){if(loopStack.length){cubeError('loop: missing endloop');loopStack=[]}cubeOk(rp+': finished. it left a faint signal.');if(doneCallback)doneCallback();return}
+if(i>=lines.length){if(loopStack.length){cubeError('loop: missing endloop');loopStack=[]}if(ifStack.length){cubeError('if: missing endif');ifStack=[]}cubeOk(rp+': finished. it left a faint signal.');if(doneCallback)doneCallback();return}
 var ln=lines[i];
 if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');if(doneCallback)doneCallback();return}
 var sp=ln.split(/\s+/);
@@ -808,6 +840,19 @@ top.count--;
 if(top.count>0){i=top.startLine-1}else{loopStack.pop()}
 i++;setTimeout(step,50);return;
 }
+if(op==='if'){
+var cond=evalIfCondition(args);
+ifStack.push({cond:cond,startLine:i+1});
+i++;setTimeout(step,50);return;
+}
+if(op==='endif'){
+if(!ifStack.length){cubeError('endif: no matching if');i++;setTimeout(step,50);return}
+ifStack.pop();
+i++;setTimeout(step,50);return;
+}
+if(ifStack.length&&!ifStack[ifStack.length-1].cond){
+i++;setTimeout(step,50);return;
+}
 var fn=voidScriptLang[op];
 if(!fn){cubeWarn('line '+i+': unknown op "'+op+'" — skipped');i++;setTimeout(step,50);return}
 var r=fn.fn(args);
@@ -825,6 +870,7 @@ var ops=Object.keys(voidScriptLang);
 for(var k=0;k<ops.length;k++){cubePrint('  '+ops[k].padEnd(8)+' — '+voidScriptLang[ops[k]].help)}
 cubePrint('  end/halt           — stop the script');
 cubePrint('  loop <n>/endloop   — repeat a block');
+cubePrint('  if <cond>/endif    — conditional block');
 cubePrint('  kill               — self-terminate');
 cubePrint('');
 cubePrint('vsc files live in /void/pkgs — try the starter scripts:');
@@ -1013,8 +1059,20 @@ cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/i
 cubePrint('  studio         — open voidscript studio');
 cubePrint('  loop <n>       — repeat block n times');
 cubePrint('  endloop        — end of loop block');
+cubePrint('  if <cond>      — conditional block (endif to close)');
+cubePrint('  endif          — end of if block');
 cubePrint('  end / halt     — stop the script');
 cubePrint('  kill           — self-terminate');
+cubePrint('');
+cubePrint('  if conditions:');
+cubePrint('  if x == 5      — equals');
+cubePrint('  if x != 0      — not equals');
+cubePrint('  if x > 10      — greater than');
+cubePrint('  if x < 5       — less than');
+cubePrint('  if x >= 1      — greater or equal');
+cubePrint('  if x <= 100    — less or equal');
+cubePrint('  if myvar       — truthy (exists, not 0/false/empty)');
+cubePrint('  strings are case-sensitive. "hello" != "Hello".');
 }
 
 // whoami
@@ -2653,10 +2711,10 @@ document.getElementById('studioOutputBody').innerHTML='';
 studioOutputLines=0;
 document.getElementById('studioOutputCount').textContent='0 lines';
 document.getElementById('studioPreviewArea').innerHTML='';
-cubePrint=studioPrint;
-cubeError=function(txt){studioPrintColor('error: '+txt,'rgba(255,80,80,0.8)')};
-cubeWarn=function(txt){studioPrintColor(txt,'rgba(255,200,50,0.6)')};
-cubeOk=function(txt){studioPrintColor(txt,'rgba(100,255,100,0.6)')};
+cubePrint=function(txt){studioPrint(txt);studioTerminalPrint(txt,'print')};
+cubeError=function(txt){studioPrintColor('error: '+txt,'rgba(255,80,80,0.8)');studioTerminalPrint('error: '+txt,'error')};
+cubeWarn=function(txt){studioPrintColor(txt,'rgba(255,200,50,0.6)');studioTerminalPrint(txt,'warn')};
+cubeOk=function(txt){studioPrintColor(txt,'rgba(100,255,100,0.6)');studioTerminalPrint(txt,'ok')};
 var origGuiCreateWin=guiCreateWin;
 var origGuiAddLabel=guiAddLabel;
 var origGuiAddButton=guiAddButton;
