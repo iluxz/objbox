@@ -1,0 +1,11 @@
+[package]
+name = "signal-native"
+version = "0.1.0"
+edition = "2021"
+description = "A native egui shell for the Signal Detected cube experience"
+license = "MIT"
+
+[dependencies]
+eframe = "0.29"
+egui = "0.29"
+
