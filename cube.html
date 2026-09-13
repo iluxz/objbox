@@ -608,9 +608,9 @@ triggerGlitch();
 },1500);
 },
 onRemove:function(){delete pkgEffects.wolop}},
-'voidscript-studio':{name:'voidscript-studio',desc:'visual ide for voidscript development',size:'420KB',
-onInstall:function(){pkgEffects.studio=true;cubePrint('voidscript studio installed.');cubePrint('run "studio" to open the ide.')},
-onRemove:function(){delete pkgEffects.studio;cubePrint('voidscript studio removed.')}}
+'voidstudio':{name:'voidstudio',desc:'visual ide for voidscript development',size:'420KB',
+onInstall:function(){pkgEffects.studio=true;cubePrint('voidstudio installed.');cubePrint('run "studio" to open the ide.')},
+onRemove:function(){delete pkgEffects.studio;cubePrint('voidstudio removed.')}}
 };
 var installed=['void-core'];
 
@@ -1158,7 +1158,7 @@ cubePrint('  loop <n> <cmd> — run a command n times');
 cubePrint('  display <0-4>  — change display mode');
 cubePrint('  travel <zone>  — travel through the void');
 cubePrint('  clear          — clear terminal');
-cubePrint('  studio         — open voidscript studio (requires package)');
+cubePrint('  studio         — open voidscript studio (requires voidstudio package)');
 cubePrint('  echo <txt>     — echo text');
 cubePrint('  math <expr>    — evaluate math');
 cubePrint('  exit           — the void does not let you leave');
@@ -1217,7 +1217,7 @@ cubePrint('  void           — the void acknowledges');
 cubePrint('  ps             — peek at processes');
 cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/image/close/set/destroy/list)');
 cubePrint('  gui clear      — close all generated windows');
-cubePrint('  studio         — open voidscript studio');
+cubePrint('  studio         — open voidscript studio (install voidstudio first)');
 cubePrint('  loop <n>       — repeat block n times');
 cubePrint('  loop limit      — '+MAX_LOOP_ITERATIONS+' iterations per loop');
 cubePrint('  endloop        — end of loop block');
@@ -2830,7 +2830,7 @@ var studioOrigError=cubeError;
 var studioOrigWarn=cubeWarn;
 var studioOrigOk=cubeOk;
 function openStudio(){
-if(!pkgEffects.studio){cubeError('package "voidscript-studio" not installed. run "void intrude voidscript-studio"');return}
+if(!pkgEffects.studio){cubeError('package "voidstudio" not installed. run "void intrude voidstudio"');return}
 studioOpen=true;
 document.getElementById('terminal').style.display='none';
 document.getElementById('overlay').style.display='none';
