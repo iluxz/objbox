@@ -436,6 +436,8 @@ parts=[cmd,sub].concat(parts);
 
 // help
 if(cmd==='help'){
+if(parts[1]&&parts[1].toLowerCase()==='voidscript'){
+showVoidScriptHelp();return}
 cubePrint('cube# commands:');
 cubePrint('');
 cubePrint('  --- cube ---');
@@ -491,7 +493,8 @@ cubePrint('  echo <txt>     — echo text');
 cubePrint('  math <expr>    — evaluate math');
 cubePrint('  exit           — the void does not let you leave');
 return}
-if(cmd==='voidscript'){
+if(cmd==='voidscript'){showVoidScriptHelp();return}
+function showVoidScriptHelp(){
 cubePrint('voidscript — the void\'s own language. sandboxed.');
 cubePrint('one op per line. no browser access. cannot be a virus.');
 cubePrint('  print <txt>    — output to the void');
@@ -510,7 +513,7 @@ cubePrint('  ps             — peek at processes');
 cubePrint('  end / halt     — stop the script');
 cubePrint('  kill           — self-terminate');
 cubePrint('try: void run /void/pkgs/greet.vsc');
-return}
+}
 
 // whoami
 if(cmd==='whoami'){cubePrint('an intruder');return}
