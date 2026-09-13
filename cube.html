@@ -566,10 +566,18 @@ cubePrint('the void does not allow viruses here.');
 
 function cubeEval(input){
 var raw=input.trim();
-// semicolon chaining: run multiple commands in sequence
+// semicolon chaining: run multiple commands in sequence (respects quotes)
 if(raw.indexOf(';')!==-1){
-var cmds=raw.split(';');
-for(var ci=0;ci<cmds.length;ci++){var c=cmds[ci].trim();if(c)cubeEval(c)}
+var cmds=[];var cur='';var inQ=false;var qChar='';
+for(var ci=0;ci<raw.length;ci++){
+var ch=raw[ci];
+if(!inQ&&(ch==='"'||ch==="'")){inQ=true;qChar=ch;cur+=ch}
+else if(inQ&&ch===qChar){inQ=false;qChar='';cur+=ch}
+else if(!inQ&&ch===';'){if(cur.trim())cmds.push(cur);cur=''}
+else{cur+=ch}
+}
+if(cur.trim())cmds.push(cur);
+for(var cj=0;cj<cmds.length;cj++){cubeEval(cmds[cj].trim())}
 return;
 }
 var parts=raw.split(/\s+/);
