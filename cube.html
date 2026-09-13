@@ -47,6 +47,8 @@ canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 .gui-input:focus{border-color:rgba(43,208,208,0.8);box-shadow:0 0 8px rgba(43,208,208,0.2)}
 .gui-checkbox{position:absolute;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.8);font-family:'Consolas',monospace;font-size:12px;cursor:pointer}
 .gui-checkbox input{accent-color:rgba(43,208,208,0.8)}
+.gui-image{position:absolute;border:1px solid rgba(43,208,208,0.3);border-radius:4px;object-fit:cover;max-width:100%;pointer-events:auto;transition:border-color 0.2s}
+.gui-image:hover{border-color:rgba(43,208,208,0.8)}
 #vignette{position:fixed;top:0;left:0;right:0;bottom:0;z-index:15;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.7) 100%)}
 #filmGrain{position:fixed;top:0;left:0;right:0;bottom:0;z-index:16;pointer-events:none;opacity:0.06;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px 128px;animation:grainShift 0.5s steps(4) infinite}
 @keyframes grainShift{0%{transform:translate(0,0)}25%{transform:translate(-2px,3px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-1px,-3px)}100%{transform:translate(2px,1px)}}
@@ -477,13 +479,14 @@ cubePrint(a[0]+': '+(vsVars[a[0]]!==undefined?vsVars[a[0]]:'undefined'));return 
 'void':{help:'void — the void acknowledges',fn:function(){cubePrint('the void heard your script.');return true}},
 'ps':{help:'ps — peek at processes',fn:function(){cubePrint('8 inner cubes. 1 void. 0 mercy.');return true}},
 'gui':{help:'gui <window|label|button|input|check|close|set|destroy|list>',fn:function(a){
-if(!a.length){cubePrint('gui: subcommand needed (window, label, button, input, close, set, destroy, list)');return true}
+if(!a.length){cubePrint('gui: subcommand needed (window, label, button, input, check, image, close, set, destroy, list)');return true}
 var gs=a[0].toLowerCase();
 if(gs==='window'){guiCreateWin(a[1]?a[1].replace(/"/g,''):'untitled',parseInt(a[2],10)||300,parseInt(a[3],10)||200);return true}
 if(gs==='label'){guiAddLabel(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
 if(gs==='button'){guiAddButton(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
 if(gs==='input'){guiAddInput(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
 if(gs==='check'){guiAddCheck(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
+if(gs==='image'){guiAddImage(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,parseInt(a[4],10)||0,parseInt(a[5],10)||0);return true}
 if(gs==='close'||gs==='destroy'){if(activeWin){guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null}return true}
 if(gs==='set'){if(a.length>=3)guiSetWindow(a[1],a.slice(2).join(' '));return true}
 if(gs==='list'){var k=Object.keys(guiWins);for(var i=0;i<k.length;i++)cubePrint(k[i]);return true}
@@ -545,6 +548,15 @@ var cb=document.createElement('input');cb.type='checkbox';
 wrap.appendChild(cb);wrap.appendChild(document.createTextNode(labelText));
 w.content.appendChild(wrap);
 }
+function guiAddImage(url,x,y,imgW,imgH){
+var w=guiGetActive();if(!w)return;
+var el=document.createElement('img');el.className='gui-image';
+el.src=url;el.style.left=x+'px';el.style.top=y+'px';
+if(imgW)el.style.width=imgW+'px';
+if(imgH)el.style.height=imgH+'px';
+el.onerror=function(){cubeError('image: failed to load — check the URL')};
+w.content.appendChild(el);
+}
 function guiSetWindow(prop,val){
 var w=guiGetActive();if(!w)return;
 if(prop==='title'){w.title.querySelector('span').textContent=val}
@@ -556,23 +568,37 @@ function runVoidScript(code,rp){
 cubePrint('running '+rp+' through the void interpreter...');
 var lines=code.split('\n').map(function(l){return l.replace(/\/\/.*$/,'').trim()}).filter(function(l){return l.length});
 var i=0;
+var loopStack=[];
 function step(){
 if(vsCancel){
 cubeWarn('script terminated by the void.');
 return;
 }
-if(i>=lines.length){cubeOk(rp+': finished. it left a faint signal.');return}
+if(i>=lines.length){if(loopStack.length){cubeError('loop: missing endloop');loopStack=[]}cubeOk(rp+': finished. it left a faint signal.');return}
 var ln=lines[i];
 if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');return}
 var sp=ln.split(/\s+/);
 var op=sp[0].toLowerCase();
 var args=sp.slice(1);
 if(ln==='end'||ln==='halt'){cubeOk(rp+': halted.');return}
+if(op==='loop'){
+var count=parseInt(args[0],10)||0;
+if(count<1){cubeError('loop: count must be > 0');i++;setTimeout(step,50);return}
+loopStack.push({count:count,startLine:i+1});
+i++;setTimeout(step,50);return;
+}
+if(op==='endloop'){
+if(!loopStack.length){cubeError('endloop: no matching loop');i++;setTimeout(step,50);return}
+var top=loopStack[loopStack.length-1];
+top.count--;
+if(top.count>0){i=top.startLine}else{loopStack.pop()}
+i++;setTimeout(step,50);return;
+}
 var fn=voidScriptLang[op];
 if(!fn){cubeWarn('line '+i+': unknown op "'+op+'" — skipped');i++;setTimeout(step,50);return}
 var r=fn.fn(args);
 if(r&&r.wait){i++;setTimeout(step,r.wait);}
-else{i++;if(i%1===0)setTimeout(step,60);else step()}
+else{i++;setTimeout(step,60)}
 }
 step();
 }
@@ -584,6 +610,7 @@ cubePrint('voidscript editor — one op per line. available ops:');
 var ops=Object.keys(voidScriptLang);
 for(var k=0;k<ops.length;k++){cubePrint('  '+ops[k].padEnd(8)+' — '+voidScriptLang[ops[k]].help)}
 cubePrint('  end/halt           — stop the script');
+cubePrint('  loop <n>/endloop   — repeat a block');
 cubePrint('  kill               — self-terminate');
 cubePrint('');
 cubePrint('vsc files live in /void/pkgs — try the starter scripts:');
@@ -704,11 +731,13 @@ cubePrint('  gui label "txt" <x> <y> — add label');
 cubePrint('  gui button "txt" <x> <y> "cmd" — add button');
 cubePrint('  gui input "ph" <x> <y> — add text input');
 cubePrint('  gui check "lbl" <x> <y> — add checkbox');
+cubePrint('  gui image "url" <x> <y> [w] [h] — add image from URL');
 cubePrint('  gui set <prop> <val> — set window property');
 cubePrint('  gui close / destroy   — close window');
 cubePrint('  gui list              — list open windows');
 cubePrint('');
 cubePrint('  --- misc ---');
+cubePrint('  loop <n> <cmd> — run a command n times');
 cubePrint('  display <0-4>  — change display mode');
 cubePrint('  clear          — clear terminal');
 cubePrint('  echo <txt>     — echo text');
@@ -757,7 +786,9 @@ cubePrint('  wait <ms>      — sleep');
 cubePrint('  time           — void clock');
 cubePrint('  void           — the void acknowledges');
 cubePrint('  ps             — peek at processes');
-cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/close/set/destroy/list)');
+cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/image/close/set/destroy/list)');
+cubePrint('  loop <n>       — repeat block n times');
+cubePrint('  endloop        — end of loop block');
 cubePrint('  end / halt     — stop the script');
 cubePrint('  kill           — self-terminate');
 }
@@ -1395,6 +1426,11 @@ if(parts.length<5){cubeError('usage: gui check "label" <x> <y>');return}
 var lt=parts[2].replace(/"/g,'');
 guiAddCheck(lt,parseInt(parts[3],10),parseInt(parts[4],10));
 return}
+if(gs==='image'){
+if(parts.length<5){cubeError('usage: gui image "url" <x> <y> [width] [height]');return}
+var url=parts[2].replace(/"/g,'');
+guiAddImage(url,parseInt(parts[3],10),parseInt(parts[4],10),parseInt(parts[5],10)||0,parseInt(parts[6],10)||0);
+return}
 if(gs==='set'){
 if(parts.length<4){cubeError('usage: gui set <property> <value>');return}
 var prop=parts[2];var val=parts.slice(3).join(' ').replace(/^"|"$/g,'');
@@ -1409,6 +1445,16 @@ if(!keys.length){cubePrint('no windows open');return}
 for(var i=0;i<keys.length;i++){var w2=guiWins[keys[i]];cubePrint('  '+keys[i]+' — '+w2.title.querySelector('span').textContent+(keys[i]===activeWin?' [active]':''))}
 return}
 cubeError('unknown gui subcommand: '+gs);return}
+
+// loop
+if(cmd==='loop'){
+var count=parseInt(parts[1],10);
+var loopCmd=parts.slice(2).join(' ');
+if(!count||count<1){cubeError('usage: loop <count> <command>');cubePrint('example: loop 5 glitch');return}
+if(!loopCmd){cubeError('loop: no command to repeat');return}
+cubePrint('looping '+loopCmd+' x'+count+'...');
+for(var li=0;li<count;li++){cubeEval(loopCmd)}
+return}
 
 cubeError('unknown command: '+cmd);
 cubePrint('type "help" for commands');
