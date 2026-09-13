@@ -200,6 +200,8 @@ END LOG
 <div class="actions">
 <button id="studioOpen">OPEN .VSC</button>
 <button id="studioSave">SAVE .VSC</button>
+<button id="studioShare">SHARE VSC1</button>
+<button id="studioImport">IMPORT VSC1</button>
 <button id="studioKill" class="kill">KILL</button>
 <button id="studioRun" class="run">&#9654; RUN</button>
 <button id="studioPreviewToggle">PREVIEW ON</button>
@@ -2950,6 +2952,8 @@ reader.readAsText(file);
 inp.click();
 };
 document.getElementById('studioSave').onclick=saveStudioFile;
+document.getElementById('studioShare').onclick=shareStudioPacket;
+document.getElementById('studioImport').onclick=importStudioPacket;
 }
 function saveStudioFile(){
 var code=document.getElementById('studioCode').value;
@@ -2960,6 +2964,33 @@ a.download='untitled.vsc';
 a.click();
 URL.revokeObjectURL(a.href);
 studioPrint('saved: untitled.vsc');
+}
+function shareStudioPacket(){
+var code=document.getElementById('studioCode').value;
+if(!code.trim()){studioPrintColor('cannot share an empty script.','rgba(255,200,50,0.8)');return}
+var packet='vsc1:untitled.vsc:'+vscEncode(code);
+var el=document.getElementById('exportLabel');
+var ta=document.getElementById('exportData');
+ta.value=packet;
+el.style.display='block';
+ta.select();
+studioPrint('share packet shown — select all + copy');
+}
+function importStudioPacket(){
+var packet=window.prompt('paste a vsc1 packet:');
+if(!packet)return;
+packet=packet.trim();
+if(packet.indexOf('vsc1:')!==0){studioPrintColor('invalid packet format — expected vsc1:name:base64','rgba(255,80,80,0.8)');return}
+var parts=packet.split(':');
+if(parts.length<3||!parts[1]){studioPrintColor('invalid packet — missing name or data','rgba(255,80,80,0.8)');return}
+try{
+var content=vscDecode(parts.slice(2).join(':'));
+var code=document.getElementById('studioCode');
+code.value=content;
+updateStudioLineNums();
+if(studioPreviewEnabled)livePreview(content);
+studioPrint('imported '+parts[1]+' ('+content.length+' chars)');
+}catch(e){studioPrintColor('import failed — invalid base64 data','rgba(255,80,80,0.8)')}
 }
 initStudioEvents();
 </script>
