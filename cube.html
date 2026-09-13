@@ -2664,10 +2664,18 @@ var origGuiAddInput=guiAddInput;
 var origGuiAddCheck=guiAddCheck;
 var origGuiAddImage=guiAddImage;
 var previewArea=document.getElementById('studioPreviewArea');
-guiCreateWin=function(title,w,h){
+guiCreateWin=function(title,w,h,rndPos){
 var id='gw_'+Date.now()+'_'+Math.floor(Math.random()*999);
 var win=document.createElement('div');win.className='gui-window';win.id=id;
-win.style.cssText='width:'+w+'px;height:'+(parseInt(h)+30)+'px;left:'+(20+Math.random()*100)+'px;top:'+(20+Math.random()*50)+'px;display:flex;flex-direction:column';
+var wx,wy;
+if(rndPos){
+wx=10+Math.random()*(Math.max(200,previewArea.clientWidth-w-20));
+wy=10+Math.random()*(Math.max(150,previewArea.clientHeight-h-50));
+}else{
+wx=20+Math.random()*100;
+wy=20+Math.random()*50;
+}
+win.style.cssText='width:'+w+'px;height:'+(parseInt(h)+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column;z-index:'+(10+Object.keys(guiWins).length);
 var tb=document.createElement('div');tb.className='gui-title';
 var tl=document.createElement('span');tl.textContent=title;
 var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
@@ -2676,6 +2684,7 @@ tb.appendChild(tl);tb.appendChild(cb);
 var ct=document.createElement('div');ct.className='gui-content';ct.style.height=h+'px';
 win.appendChild(tb);win.appendChild(ct);
 previewArea.appendChild(win);
+previewMakeDraggable(win,tb,previewArea);
 guiWins[id]={el:win,content:ct,title:tb};
 activeWin=id;
 return id;
@@ -2755,10 +2764,11 @@ if(rndPos==='true'||rndPos==='random'){
 wx=10+Math.random()*(Math.max(200,area.clientWidth-w-20));
 wy=10+Math.random()*(Math.max(150,area.clientHeight-h-50));
 }else{
-wx=10+(wIdx%2)*220;
-wy=10+Math.floor(wIdx/2)*180;
+var wIdx=Object.keys(wins).length;
+wx=20+wIdx*15;
+wy=20+wIdx*15;
 }
-win.style.cssText='width:'+w+'px;height:'+(h+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column;position:relative';
+win.style.cssText='width:'+w+'px;height:'+(h+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column;position:relative;z-index:'+(10+wIdx);
 var tb=document.createElement('div');tb.className='gui-title';
 tb.innerHTML='<span>'+title+'</span>';
 win.appendChild(tb);
