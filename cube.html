@@ -77,6 +77,7 @@ background-color:#ff00ff;background-image:url("data:image/png;base64,iVBORw0KGgo
 #studioTop .actions button{background:rgba(43,208,208,0.1);border:1px solid rgba(43,208,208,0.3);border-radius:4px;color:rgba(43,208,208,0.9);font-family:'Consolas',monospace;font-size:11px;padding:6px 14px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px}
 #studioTop .actions button:hover{background:rgba(43,208,208,0.25);border-color:rgba(43,208,208,0.7)}
 #studioTop .actions button.run{background:rgba(43,208,208,0.2);border-color:rgba(43,208,208,0.5);font-weight:bold}
+#studioTop .actions button#studioHelp{border-color:rgba(255,200,50,0.4);color:rgba(255,200,50,0.9)}
 #studioTop .actions button.run:hover{background:rgba(43,208,208,0.4)}
 #studioTop .actions button.kill{border-color:rgba(255,80,80,0.4);color:rgba(255,80,80,0.9)}
 #studioTop .actions button.kill:hover{background:rgba(255,80,80,0.2)}
@@ -105,6 +106,19 @@ background-color:#ff00ff;background-image:url("data:image/png;base64,iVBORw0KGgo
 #studioTerminalBody .outLine.ok{color:rgba(100,255,100,0.6)}
 #studioTerminalBody .outLine.warn{color:rgba(255,200,50,0.6)}
 .studio-hint{position:absolute;bottom:8px;right:12px;font-size:10px;color:rgba(255,255,255,0.15);pointer-events:none}
+#studioHelpPanel{position:absolute;top:50px;right:20px;width:420px;max-height:calc(100vh - 80px);background:rgba(10,10,20,0.96);border:1px solid rgba(255,200,50,0.3);border-radius:8px;z-index:65;display:none;flex-direction:column;font-family:'Consolas',monospace;overflow:hidden}
+#studioHelpPanel.active{display:flex}
+.help-header{padding:10px 14px;border-bottom:1px solid rgba(255,200,50,0.15);font-size:12px;color:rgba(255,200,50,0.9);letter-spacing:2px;display:flex;justify-content:space-between;align-items:center}
+#studioHelpClose{background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;padding:0 4px}
+#studioHelpClose:hover{color:rgba(255,255,255,0.8)}
+.help-body{padding:12px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:rgba(255,200,50,0.2) transparent}
+.help-body::-webkit-scrollbar{width:6px}
+.help-body::-webkit-scrollbar-track{background:transparent}
+.help-body::-webkit-scrollbar-thumb{background:rgba(255,200,50,0.2);border-radius:3px}
+.help-section{margin-bottom:14px}
+.help-title{font-size:10px;color:rgba(255,200,50,0.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;border-bottom:1px solid rgba(255,200,50,0.1);padding-bottom:3px}
+.help-cmd{font-size:11px;color:rgba(255,255,255,0.5);padding:2px 0;line-height:1.5}
+.help-cmd .hl{color:rgba(43,208,208,0.9);font-weight:bold}
 .output-tab{background:none;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.3);font-family:'Consolas',monospace;font-size:10px;padding:4px 12px;cursor:pointer;letter-spacing:1px;transition:all 0.2s}
 .output-tab:hover{color:rgba(43,208,208,0.6)}
 .output-tab.active{color:rgba(43,208,208,0.9);border-bottom-color:rgba(43,208,208,0.6)}
@@ -188,6 +202,7 @@ END LOG
 <button id="studioSave">SAVE .VSC</button>
 <button id="studioKill" class="kill">KILL</button>
 <button id="studioRun" class="run">&#9654; RUN</button>
+<button id="studioHelp">HELP</button>
 <button id="studioExit">EXIT</button>
 </div>
 </div>
@@ -213,6 +228,69 @@ END LOG
 <div class="output-body" id="studioTerminalBody" style="display:none"></div>
 </div>
 <div class="studio-hint">Ctrl+Enter: run | Ctrl+S: save | Esc: exit</div>
+</div>
+<div id="studioHelpPanel">
+<div class="help-header">voidscript command reference<button id="studioHelpClose">&times;</button></div>
+<div class="help-body">
+<div class="help-section">
+<div class="help-title">output</div>
+<div class="help-cmd"><span class="hl">print</span> &lt;text&gt; — print text to output</div>
+<div class="help-cmd"><span class="hl">say</span> &lt;text&gt; — say something (with delay)</div>
+<div class="help-cmd"><span class="hl">warn</span> &lt;text&gt; — print a warning</div>
+<div class="help-cmd"><span class="hl">error</span> &lt;text&gt; — print an error</div>
+</div>
+<div class="help-section">
+<div class="help-title">timing</div>
+<div class="help-cmd"><span class="hl">wait</span> &lt;ms&gt; — pause execution (milliseconds)</div>
+</div>
+<div class="help-section">
+<div class="help-title">system</div>
+<div class="help-cmd"><span class="hl">theme</span> &lt;1-5&gt; — switch color theme</div>
+<div class="help-cmd"><span class="hl">glitch</span> — trigger glitch effect</div>
+<div class="help-cmd"><span class="hl">shape</span> &lt;name&gt; — change shape (cube/sphere/tetra/cyl)</div>
+<div class="help-cmd"><span class="hl">bgm</span> — toggle background music</div>
+<div class="help-cmd"><span class="hl">clear</span> — clear the output log</div>
+</div>
+<div class="help-section">
+<div class="help-title">logic</div>
+<div class="help-cmd"><span class="hl">loop</span> &lt;n&gt; — start loop (endloop to close)</div>
+<div class="help-cmd"><span class="hl">endloop</span> — close loop block</div>
+<div class="help-cmd"><span class="hl">if</span> &lt;condition&gt; — conditional (endif to close)</div>
+<div class="help-cmd"><span class="hl">endif</span> — close if block</div>
+<div class="help-cmd"><span class="hl">calc</span> &lt;expr&gt; — evaluate math expression</div>
+<div class="help-cmd"><span class="hl">set</span> &lt;var&gt; &lt;val&gt; — set a variable</div>
+<div class="help-cmd"><span class="hl">get</span> &lt;var&gt; — get a variable value</div>
+</div>
+<div class="help-section">
+<div class="help-title">gui — create windows</div>
+<div class="help-cmd"><span class="hl">gui window</span> "title" &lt;w&gt; &lt;h&gt; — create window</div>
+<div class="help-cmd"><span class="hl">gui label</span> "text" &lt;x&gt; &lt;y&gt; — add a label</div>
+<div class="help-cmd"><span class="hl">gui button</span> "text" &lt;x&gt; &lt;y&gt; "cmd" — add button</div>
+<div class="help-cmd"><span class="hl">gui input</span> "placeholder" &lt;x&gt; &lt;y&gt; — add text input</div>
+<div class="help-cmd"><span class="hl">gui check</span> "label" &lt;x&gt; &lt;y&gt; — add checkbox</div>
+<div class="help-cmd"><span class="hl">gui image</span> "url" &lt;x&gt; &lt;y&gt; [w] [h] — add image</div>
+<div class="help-cmd"><span class="hl">gui close</span> — close active window</div>
+</div>
+<div class="help-section">
+<div class="help-title">filesystem</div>
+<div class="help-cmd"><span class="hl">cat</span> &lt;path&gt; — read file</div>
+<div class="help-cmd"><span class="hl">ls</span> [path] — list directory</div>
+<div class="help-cmd"><span class="hl">pwd</span> — current directory</div>
+<div class="help-cmd"><span class="hl">cd</span> &lt;path&gt; — change directory</div>
+<div class="help-cmd"><span class="hl">touch</span> &lt;name&gt; — create file</div>
+<div class="help-cmd"><span class="hl">mkdir</span> &lt;name&gt; — create directory</div>
+<div class="help-cmd"><span class="hl">echo</span> &gt; &lt;file&gt; — write to file</div>
+<div class="help-cmd"><span class="hl">rm</span> &lt;path&gt; — remove file</div>
+</div>
+<div class="help-section">
+<div class="help-title">tips</div>
+<div class="help-cmd">one command per line. commands are case-sensitive.</div>
+<div class="help-cmd">use quotes around strings with spaces.</div>
+<div class="help-cmd">loop/endloop and if/endif must be on their own lines.</div>
+<div class="help-cmd">gui commands create elements in the preview panel.</div>
+<div class="help-cmd">press Ctrl+Enter to run. Ctrl+S to save. Esc to exit.</div>
+</div>
+</div>
 </div>
 <audio id="bgm" loop preload="auto"><source src="drone2lp.wav" type="audio/wav"></audio>
 <script>
@@ -2469,6 +2547,7 @@ document.getElementById('hint').style.display='block';
 document.getElementById('studio').classList.remove('active');
 document.getElementById('studioPreviewArea').innerHTML='';
 document.getElementById('studioTerminalBody').innerHTML='';
+document.getElementById('studioHelpPanel').classList.remove('active');
 }
 function studioSwitchTab(tab){
 var tabs=document.querySelectorAll('.output-tab');
@@ -2650,6 +2729,8 @@ if(e.key==='Escape'){closeStudio()}
 document.getElementById('studioRun').onclick=runStudioScript;
 document.getElementById('studioKill').onclick=function(){vsCancel=true;studioRunning=false;document.getElementById('studioProcess').textContent='idle';studioPrintColor('script terminated by the void.','rgba(255,200,50,0.6)')};
 document.getElementById('studioExit').onclick=closeStudio;
+document.getElementById('studioHelp').onclick=function(){var p=document.getElementById('studioHelpPanel');p.classList.toggle('active')};
+document.getElementById('studioHelpClose').onclick=function(){document.getElementById('studioHelpPanel').classList.remove('active')};
 document.getElementById('studioOpen').onclick=function(){
 var inp=document.createElement('input');inp.type='file';inp.accept='.vsc,.txt';
 inp.onchange=function(e){
