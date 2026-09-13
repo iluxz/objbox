@@ -264,7 +264,7 @@ END LOG
 </div>
 <div class="help-section">
 <div class="help-title">gui — create windows</div>
-<div class="help-cmd"><span class="hl">gui window</span> "title" &lt;w&gt; &lt;h&gt; — create window</div>
+<div class="help-cmd"><span class="hl">gui window</span> "title" &lt;w&gt; &lt;h&gt; [random] — create window</div>
 <div class="help-cmd"><span class="hl">gui label</span> "text" &lt;x&gt; &lt;y&gt; — add a label</div>
 <div class="help-cmd"><span class="hl">gui button</span> "text" &lt;x&gt; &lt;y&gt; "cmd" — add button</div>
 <div class="help-cmd"><span class="hl">gui input</span> "placeholder" &lt;x&gt; &lt;y&gt; — add text input</div>
@@ -643,9 +643,9 @@ var voidScriptLang={
 try{var r=Function('"use strict";return ('+a.join(''))();cubePrint('= '+r)}catch(e){cubeError('calc: invalid')};return true}},
 'var':{help:'var <name> <value> — store in voidspace',fn:function(a){
 if(a.length<2){cubeError('var: need a value');return true}
-vsVars[a[0]]=a.slice(1).join(' ');return true}},
+cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'get':{help:'get <name> — recall from voidspace',fn:function(a){
-cubePrint(a[0]+': '+(vsVars[a[0]]!==undefined?vsVars[a[0]]:'undefined'));return true}},
+cubePrint(a[0]+': '+(cubeVars[a[0]]!==undefined?cubeVars[a[0]]:'undefined'));return true}},
 'theme':{help:'theme <1-5> — change cube color',fn:function(a){var t=parseInt(a[0],10);if(t>=1&&t<=5){applyTheme(String(t))}else{cubeWarn('theme: out of range 1-5')};return true}},
 'morph':{help:'morph <n> — change inner shape',fn:function(a){var m=parseInt(a[0],10);if(m>=0&&m<=3){curShape=['cube','tetra','sphere','cyl'][m];rebuild(curShape)}else{cubeWarn('morph: out of range 0-3')};return true}},
 'glitch':{help:'glitch — short circuit the renderer',fn:function(){triggerGlitch();return true}},
@@ -657,7 +657,7 @@ cubePrint(a[0]+': '+(vsVars[a[0]]!==undefined?vsVars[a[0]]:'undefined'));return 
 'gui':{help:'gui <window|label|button|input|check|close|set|destroy|list>',fn:function(a){
 if(!a.length){cubePrint('gui: subcommand needed (window, label, button, input, check, image, close, set, destroy, list)');return true}
 var gs=a[0].toLowerCase();
-if(gs==='window'){guiCreateWin(a[1]?a[1].replace(/"/g,''):'untitled',parseInt(a[2],10)||300,parseInt(a[3],10)||200);return true}
+if(gs==='window'){guiCreateWin(a[1]?a[1].replace(/"/g,''):'untitled',parseInt(a[2],10)||300,parseInt(a[3],10)||200,a[4]&&(a[4].toLowerCase()==='true'||a[4].toLowerCase()==='random'));return true}
 if(gs==='label'){guiAddLabel(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
 if(gs==='button'){guiAddButton(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
 if(gs==='input'){guiAddInput(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
@@ -674,14 +674,13 @@ var zoneAliases={'the beginning of the end':'breakdown','beginning of the end':'
 var resolved=zoneAliases[dest]||dest;
 travelTo(resolved);
 return true}},
-'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}vsVars[a[0]]=a.slice(1).join(' ');return true}},
+'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
 'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();return true}},
 'shape':{help:'shape <name> — change shape (cube/sphere/tetra/cyl)',fn:function(a){if(a[0]){curShape=a[0];rebuild(a[0])}return true}},
 'warn':{help:'warn <text> — print a warning',fn:function(a){cubeWarn(a.join(' '));return true}},
 'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}}
 };
-var vsVars={};
 var vsCancel=false;
 
 var guiWins={};
@@ -692,10 +691,18 @@ handle.onmousedown=function(e){dragging=true;sx=e.clientX;sy=e.clientY;ox=el.off
 document.addEventListener('mousemove',function(e){if(!dragging)return;el.style.left=ox+(e.clientX-sx)+'px';el.style.top=oy+(e.clientY-sy)+'px'});
 document.addEventListener('mouseup',function(){dragging=false});
 }
-function guiCreateWin(title,w,h){
+function guiCreateWin(title,w,h,rndPos){
 var id='gw_'+Date.now()+'_'+Math.floor(Math.random()*999);
 var win=document.createElement('div');win.className='gui-window';win.id=id;
-win.style.cssText='width:'+w+'px;height:'+(parseInt(h)+30)+'px;left:'+(60+Math.random()*200)+'px;top:'+(60+Math.random()*100)+'px;display:flex;flex-direction:column';
+var wx,wy;
+if(rndPos){
+wx=60+Math.random()*(window.innerWidth-w-120);
+wy=60+Math.random()*(window.innerHeight-h-120);
+}else{
+wx=60+Math.random()*200;
+wy=60+Math.random()*100;
+}
+win.style.cssText='width:'+w+'px;height:'+(parseInt(h)+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column';
 var tb=document.createElement('div');tb.className='gui-title';
 var tl=document.createElement('span');tl.textContent=title;
 var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
@@ -916,7 +923,7 @@ cubePrint('  rmvar <k>      — delete a variable');
 cubePrint('  vars           — list all variables');
 cubePrint('');
 cubePrint('  --- gui ---');
-cubePrint('  gui window "t" <w> <h> — create a window');
+cubePrint('  gui window "t" <w> <h> [random] — create a window');
 cubePrint('  gui label "txt" <x> <y> — add label');
 cubePrint('  gui button "txt" <x> <y> "cmd" — add button');
 cubePrint('  gui input "ph" <x> <y> — add text input');
@@ -1626,11 +1633,12 @@ cubePrint('  gui destroy                 — destroy active window');
 cubePrint('  gui list                    — list open windows');
 return}
 if(gs==='window'){
-if(parts.length<5){cubeError('usage: gui window "title" <width> <height>');return}
+if(parts.length<5){cubeError('usage: gui window "title" <width> <height> [random]');return}
 var t=parts[2].replace(/"/g,'');
 var w=parseInt(parts[3],10);var h=parseInt(parts[4],10);
+var rndPos=parts[5]?parts[5].toLowerCase():'';
 if(isNaN(w)||isNaN(h)){cubeError('gui window: width and height must be numbers');return}
-var wid=guiCreateWin(t,w,h);
+var wid=guiCreateWin(t,w,h,rndPos==='true'||rndPos==='random');
 cubeOk('window "'+t+'" opened ('+w+'x'+h+') id:'+wid);
 return}
 if(gs==='close'){
@@ -2683,10 +2691,36 @@ if(studioRunning)return;
 var area=document.getElementById('studioPreviewArea');
 area.innerHTML='';
 var lines=code.split('\n');
-var wins={};var activeWinId=null;
+var expanded=[];
+var loopStack=[];
 for(var i=0;i<lines.length;i++){
 var ln=lines[i].trim();
 if(!ln||ln.charAt(0)==='#')continue;
+var sp=ln.split(/\s+/);
+var op=sp[0]?sp[0].toLowerCase():'';
+if(op==='loop'){
+var count=parseInt(sp[1],10)||1;
+loopStack.push({count:count,startLine:expanded.length});
+expanded.push({type:'loop',count:count});
+continue;
+}
+if(op==='endloop'){
+if(loopStack.length){
+var top=loopStack.pop();
+var body=expanded.splice(top.startLine);
+for(var rep=0;rep<top.count;rep++){
+for(var b=0;b<body.length;b++)expanded.push(body[b]);
+}
+}
+continue;
+}
+expanded.push({type:'line',text:ln});
+}
+var wins={};var activeWinId=null;
+for(var i=0;i<expanded.length;i++){
+var item=expanded[i];
+if(item.type!=='line')continue;
+var ln=item.text;
 var parts=ln.match(/(?:[^\s"]+|"[^"]*")+/g);
 if(!parts||!parts.length)continue;
 var cmd=parts[0].toLowerCase();
@@ -2695,10 +2729,19 @@ var sub=parts[1]?parts[1].replace(/"/g,'').toLowerCase():'';
 if(sub==='window'){
 var title=parts[2]?parts[2].replace(/"/g,''):'untitled';
 var w=parseInt(parts[3])||300,h=parseInt(parts[4])||200;
+var rndPos=parts[5]?parts[5].toLowerCase():'';
 var wid='lp_'+i;
 var wIdx=Object.keys(wins).length;
 var win=document.createElement('div');win.className='gui-window';win.id=wid;
-win.style.cssText='width:'+w+'px;height:'+(h+30)+'px;left:'+(10+(wIdx%2)*220)+'px;top:'+(10+Math.floor(wIdx/2)*180)+'px;display:flex;flex-direction:column;position:relative';
+var wx,wy;
+if(rndPos==='true'||rndPos==='random'){
+wx=10+Math.random()*(Math.max(200,area.clientWidth-w-20));
+wy=10+Math.random()*(Math.max(150,area.clientHeight-h-50));
+}else{
+wx=10+(wIdx%2)*220;
+wy=10+Math.floor(wIdx/2)*180;
+}
+win.style.cssText='width:'+w+'px;height:'+(h+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column;position:relative';
 var tb=document.createElement('div');tb.className='gui-title';
 tb.innerHTML='<span>'+title+'</span>';
 win.appendChild(tb);
