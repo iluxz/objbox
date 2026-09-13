@@ -268,7 +268,13 @@ END LOG
 <div class="help-cmd"><span class="hl">loop</span> &lt;n&gt; — repeat block n times (close with endloop)</div>
 <div class="help-cmd"><span class="hl">endloop</span> — close loop block</div>
 <div class="help-cmd"><span class="hl">if</span> &lt;condition&gt; — conditional block (close with endif)</div>
+<div class="help-cmd"><span class="hl">else</span> — run the alternate branch when the if is false</div>
 <div class="help-cmd"><span class="hl">endif</span> — close if block</div>
+<div class="help-cmd"><span class="hl">break</span> — leave the current loop</div>
+<div class="help-cmd"><span class="hl">continue</span> — jump to the next loop iteration</div>
+<div class="help-cmd"><span class="hl">fn</span> name args ... <span class="hl">endfn</span> — define a reusable function</div>
+<div class="help-cmd"><span class="hl">macro</span> name args ... <span class="hl">endmacro</span> — define a reusable macro</div>
+<div class="help-cmd"><span class="hl">call</span> name args — invoke a function or macro</div>
 <div class="help-cmd"><span class="hl">calc</span> &lt;expr&gt; — evaluate math (e.g. calc 2+2)</div>
 <div class="help-cmd"><span class="hl">set</span> &lt;var&gt; &lt;val&gt; — set a variable</div>
 <div class="help-cmd"><span class="hl">get</span> &lt;var&gt; — get a variable value</div>
@@ -284,6 +290,9 @@ END LOG
 <div class="help-cmd"><span class="hl">if myvar</span> — truthy (exists, not 0/false/empty)</div>
 <div class="help-cmd">conditions are case-sensitive. strings must match exactly.</div>
 <div class="help-cmd">example: set count 3 — if count == 3 — print yes — endif</div>
+<div class="help-cmd">variables expand with $name or ${name}; missing variables become empty text.</div>
+<div class="help-cmd">function example: fn greet name / say hello $name / endfn / call greet intruder</div>
+<div class="help-cmd">definitions are collected before execution, so functions may be written anywhere.</div>
 </div>
 <div class="help-section">
 <div class="help-title">gui — create windows</div>
@@ -305,6 +314,9 @@ END LOG
 <div class="help-cmd"><span class="hl">mkdir</span> &lt;name&gt; — create directory</div>
 <div class="help-cmd"><span class="hl">echo</span> &gt; &lt;file&gt; — write to file</div>
 <div class="help-cmd"><span class="hl">rm</span> &lt;path&gt; — remove file</div>
+<div class="help-cmd"><span class="hl">cp</span> &lt;source&gt; &lt;destination&gt; — copy a file</div>
+<div class="help-cmd"><span class="hl">mv</span> &lt;source&gt; &lt;destination&gt; — move or rename a file</div>
+<div class="help-cmd"><span class="hl">tree</span> [path] — show the virtual filesystem tree</div>
 </div>
 <div class="help-section">
 <div class="help-title">variables</div>
@@ -320,6 +332,7 @@ END LOG
 <div class="help-cmd">if conditions: if x == 5, if x != 0, if x > 10, if x < 5</div>
 <div class="help-cmd">if conditions: if x >= 1, if x <= 100, if myvar (truthy check)</div>
 <div class="help-cmd">gui commands create elements in the preview panel.</div>
+<div class="help-cmd">disable PREVIEW before running GUI-heavy scripts to avoid creating preview windows.</div>
 <div class="help-cmd">press Ctrl+Enter to run. Ctrl+S to save. Esc to exit.</div>
 </div>
 </div>
@@ -712,7 +725,10 @@ return true}},
 'cd':{help:'cd <path> — change the virtual working directory',fn:function(a){cubeEval('cd '+a.join(' '));return true}},
 'mkdir':{help:'mkdir <dir> — create a virtual directory',fn:function(a){cubeEval('mkdir '+a.join(' '));return true}},
 'touch':{help:'touch <file> — create a virtual file',fn:function(a){cubeEval('touch '+a.join(' '));return true}},
-'echo':{help:'echo <text> > <file> — write to a virtual file',fn:function(a){cubeEval('echo '+a.join(' '));return true}}
+'echo':{help:'echo <text> > <file> — write to a virtual file',fn:function(a){cubeEval('echo '+a.join(' '));return true}},
+'cp':{help:'cp <source> <destination> — copy a virtual file',fn:function(a){cubeEval('cp '+a.join(' '));return true}},
+'mv':{help:'mv <source> <destination> — move a virtual file',fn:function(a){cubeEval('mv '+a.join(' '));return true}},
+'tree':{help:'tree [path] — print the virtual filesystem tree',fn:function(a){cubeEval('tree '+a.join(' '));return true}}
 };
 var vsCancel=false;
 
@@ -831,6 +847,29 @@ else if(ch==='/'&&c+1<l.length&&l[c+1]==='/'){break}
 else{stripped+=ch}
 }
 return stripped.trim()}).filter(function(l){return l.length});
+var scriptDefs={};
+var executableLines=[];
+for(var di=0;di<lines.length;di++){
+var defParts=lines[di].split(/\s+/);
+var defType=defParts[0].toLowerCase();
+if(defType==='fn'||defType==='macro'){
+var defName=defParts[1];
+var defArgs=defParts.slice(2);
+var endOp=defType==='fn'?'endfn':'endmacro';
+var body=[];
+di++;
+while(di<lines.length&&lines[di].toLowerCase()!==endOp){body.push(lines[di]);di++}
+if(!defName||di>=lines.length){cubeError(defType+': missing name or '+endOp);continue}
+scriptDefs[defName.toLowerCase()]={args:defArgs,body:body};
+}else executableLines.push(lines[di]);
+}
+lines=executableLines;
+function expandVars(text){
+return text.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g,function(_,braced,bare){
+var key=braced||bare;
+return cubeVars[key]!==undefined?cubeVars[key]:'';
+});
+}
 var i=0;
 var loopStack=[];
 var ifStack=[];
@@ -858,7 +897,7 @@ if(doneCallback)doneCallback();
 return;
 }
 if(i>=lines.length){if(loopStack.length){cubeError('loop: missing endloop');loopStack=[]}if(ifStack.length){cubeError('if: missing endif');ifStack=[]}cubeOk(rp+': finished. it left a faint signal.');if(doneCallback)doneCallback();return}
-var ln=lines[i];
+var ln=expandVars(lines[i]);
 if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');if(doneCallback)doneCallback();return}
 var sp=ln.split(/\s+/);
 var op=sp[0].toLowerCase();
@@ -878,8 +917,16 @@ if(top.count>0){i=top.startLine-1}else{loopStack.pop()}
 i++;setTimeout(step,50);return;
 }
 if(op==='if'){
-var cond=evalIfCondition(args);
-ifStack.push({cond:cond,startLine:i+1});
+var parentActive=!ifStack.length||ifStack[ifStack.length-1].active;
+var cond=parentActive&&evalIfCondition(args);
+ifStack.push({active:cond,parentActive:parentActive,branchTaken:cond});
+i++;setTimeout(step,50);return;
+}
+if(op==='else'){
+if(!ifStack.length){cubeError('else: no matching if');i++;setTimeout(step,50);return}
+var branch=ifStack[ifStack.length-1];
+branch.active=branch.parentActive&&!branch.branchTaken;
+branch.branchTaken=true;
 i++;setTimeout(step,50);return;
 }
 if(op==='endif'){
@@ -887,7 +934,26 @@ if(!ifStack.length){cubeError('endif: no matching if');i++;setTimeout(step,50);r
 ifStack.pop();
 i++;setTimeout(step,50);return;
 }
-if(ifStack.length&&!ifStack[ifStack.length-1].cond){
+if(ifStack.length&&!ifStack[ifStack.length-1].active){
+i++;setTimeout(step,50);return;
+}
+if(op==='break'||op==='continue'){
+if(!loopStack.length){cubeError(op+': no matching loop');i++;setTimeout(step,50);return}
+var depth=1,endIndex=i;
+for(var bi=i+1;bi<lines.length;bi++){
+var bop=expandVars(lines[bi]).split(/\s+/)[0].toLowerCase();
+if(bop==='loop')depth++;
+if(bop==='endloop'){depth--;if(depth===0){endIndex=bi;break}}
+}
+if(op==='break'){loopStack.pop();i=endIndex+1}
+else{i=endIndex}
+setTimeout(step,50);return;
+}
+if(op==='call'){
+var definition=scriptDefs[(args.shift()||'').toLowerCase()];
+if(!definition){cubeError('call: unknown function or macro');i++;setTimeout(step,50);return}
+for(var pi=0;pi<definition.args.length;pi++)cubeVars[definition.args[pi]]=args[pi]||'';
+lines.splice.apply(lines,[i+1,0].concat(definition.body));
 i++;setTimeout(step,50);return;
 }
 var fn=voidScriptLang[op];
@@ -908,6 +974,11 @@ for(var k=0;k<ops.length;k++){cubePrint('  '+ops[k].padEnd(8)+' — '+voidScript
 cubePrint('  end/halt           — stop the script');
 cubePrint('  loop <n>/endloop   — repeat a block');
 cubePrint('  if <cond>/endif    — conditional block');
+cubePrint('  else               — alternate if branch');
+cubePrint('  break/continue     — loop control');
+cubePrint('  fn/name/endfn      — define and call reusable functions');
+cubePrint('  macro/name/endmacro — define reusable macros');
+cubePrint('  call <name> [args] — invoke a definition');
 cubePrint('  kill               — self-terminate');
 cubePrint('');
 cubePrint('vsc files live in /void/pkgs — try the starter scripts:');
@@ -963,6 +1034,16 @@ parts=[cmd,sub].concat(parts);
 if(cmd==='help'){
 if(parts[1]&&parts[1].toLowerCase()==='voidscript'){
 showVoidScriptHelp();return}
+if(parts[1]&&parts[1].toLowerCase()==='void'){
+cubePrint('void package manager:');
+cubePrint('  void intrude <package> — install a package');
+cubePrint('  void remove <package>  — remove a package');
+cubePrint('  void list [--installed] — list packages');
+cubePrint('  void search <query>    — search packages');
+cubePrint('  void run <file.vsc>    — run a script');
+cubePrint('  void export <file.vsc> — create a vsc1 packet');
+cubePrint('  void import <packet>   — import a vsc1 packet');
+return}
 cubePrint('cube# commands:');
 cubePrint('');
 cubePrint('  --- cube ---');
@@ -988,6 +1069,7 @@ cubePrint('  void run <file> — run a .vsc voidscript');
 cubePrint('  void export <f> — export a .vsc as a shareable vsc1 packet');
 cubePrint('  void import <p> — import a shared vsc1 packet');
 cubePrint('  help voidscript — show sandboxed language ops');
+cubePrint('  help void       — show void package manager help');
 cubePrint('');
 cubePrint('  --- network ---');
 cubePrint('  ping <host>    — ping host (try: cube.sb)');
@@ -1015,6 +1097,9 @@ cubePrint('  mkdir <dir>    — create directory');
 cubePrint('  touch <file>   — create file');
 cubePrint('  echo <txt> > f — write to file');
 cubePrint('  rm [-rf] <p>   — remove file/dir');
+cubePrint('  cp <src> <dst> — copy a virtual file');
+cubePrint('  mv <src> <dst> — move or rename a virtual file');
+cubePrint('  tree [path]     — show the virtual filesystem tree');
 cubePrint('');
 cubePrint('  --- variables ---');
 cubePrint('  set <k> <v>    — set a variable');
@@ -1097,7 +1182,13 @@ cubePrint('  studio         — open voidscript studio');
 cubePrint('  loop <n>       — repeat block n times');
 cubePrint('  endloop        — end of loop block');
 cubePrint('  if <cond>      — conditional block (endif to close)');
+cubePrint('  else           — alternate branch inside an if');
 cubePrint('  endif          — end of if block');
+cubePrint('  break          — leave the current loop');
+cubePrint('  continue       — jump to the next loop iteration');
+cubePrint('  fn <name> ... endfn — define a reusable function');
+cubePrint('  macro <name> ... endmacro — define a reusable macro');
+cubePrint('  call <name> [args] — invoke a function or macro');
 cubePrint('  end / halt     — stop the script');
 cubePrint('  kill           — self-terminate');
 cubePrint('');
@@ -1110,6 +1201,9 @@ cubePrint('  if x >= 1      — greater or equal');
 cubePrint('  if x <= 100    — less or equal');
 cubePrint('  if myvar       — truthy (exists, not 0/false/empty)');
 cubePrint('  strings are case-sensitive. "hello" != "Hello".');
+cubePrint('  variables expand as $name or ${name} inside script lines.');
+cubePrint('  function example: fn greet name / say hello $name / endfn / call greet obj');
+cubePrint('  macros use the same syntax with macro/endmacro.');
 }
 
 // whoami
@@ -1343,6 +1437,26 @@ if(!fs[fp]){fs[fp]={type:'file',content:content};var parent=getParent(fp);
 if(fs[parent]&&fs[parent].type==='dir')fs[parent].children.push(getBase(fp))}
 else{fs[fp].content=appendMode?(fs[fp].content+'\n'+content):content}
 cubeOk((appendMode?'appended to ':'wrote to ')+filePath);return}
+if(cmd==='cp'||cmd==='mv'){
+if(parts.length<3){cubeError('usage: '+cmd+' <source> <destination>');return}
+var sourcePath=resolvePath(parts[1]),destPath=resolvePath(parts[2]);
+if(!fs[sourcePath]){cubeError(sourcePath+': no such file or directory');return}
+if(fs[sourcePath].type==='dir'){cubeError(sourcePath+': directory copying is not supported');return}
+if(fs[destPath]&&fs[destPath].type==='dir')destPath=(destPath==='/'?'':destPath)+'/'+getBase(sourcePath);
+var destParent=getParent(destPath);
+if(!fs[destParent]||fs[destParent].type!=='dir'){cubeError(destParent+': no such directory');return}
+fs[destPath]={type:'file',content:fs[sourcePath].content};
+if(fs[destParent].children.indexOf(getBase(destPath))===-1)fs[destParent].children.push(getBase(destPath));
+if(cmd==='mv'){var sourceParent=getParent(sourcePath);if(fs[sourceParent]){var sourceIndex=fs[sourceParent].children.indexOf(getBase(sourcePath));if(sourceIndex!==-1)fs[sourceParent].children.splice(sourceIndex,1)}delete fs[sourcePath]}
+cubeOk((cmd==='cp'?'copied ':'moved ')+parts[1]+' to '+parts[2]);return}
+if(cmd==='tree'){
+var treeTarget=parts[1]?resolvePath(parts[1]):cwd;
+if(!fs[treeTarget]){cubeError(treeTarget+': no such file or directory');return}
+function printTree(path,prefix){
+var node=fs[path];cubePrint(prefix+getBase(path)+(node.type==='dir'?'/':''));
+if(node.type==='dir')for(var ti=0;ti<node.children.length;ti++){var child=path==='/'?'/'+node.children[ti]:path+'/'+node.children[ti];printTree(child,prefix+'  ')}
+}
+printTree(treeTarget,'');return}
 if(cmd==='rm'){
 var flags=[];
 var files=[];
