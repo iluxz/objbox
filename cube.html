@@ -930,9 +930,6 @@ var parts=splitArgs(raw);
 var cmd=parts[0].toLowerCase();
 if(!cmd)return;
 
-// allow voidscript commands to run directly in the terminal too
-if(voidScriptLang[cmd]){runVoidScript(raw,'inline command');return;}
-
 // handle dot notation: cube.get -> cmd='cube', sub='get'
 var sub='';
 if(cmd.indexOf('.')!==-1){
