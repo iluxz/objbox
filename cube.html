@@ -111,6 +111,7 @@ updateClock();setInterval(updateClock,1000);
 
 // === LORE TRANSMISSIONS ===
 var transmissions=[
+// creepy
 'you are not supposed to be here',
 'the geometry remembers',
 'INTERLOPER',
@@ -125,9 +126,62 @@ var transmissions=[
 'error: dimension mismatch',
 'you cannot leave through the back button',
 'the clock is not yours',
-'who taught you to render?'
+'who taught you to render?',
+// verity messages (from the roller)
+'hey its me its verity',
+'im still rolling up here',
+'its cold at 29032 feet',
+'please let me down',
+'i can see your cursor from here',
+'the ball remembers what you did',
+'dont install entropy. trust me.',
+'verity says hi',
+'im not a package. im a person.',
+'you abandoned me on the obby again',
+'i rolled 48 years for this',
+// developer chaos
+'console.log("the void was here")',
+'error: coffee not found',
+'void.emit("vibe check")',
+'the semicolons are watching',
+'git commit -m "i am inside the cube"',
+'if(void) return fear',
+'// TODO: escape the simulation',
+'rm -rf /your/sanity',
+'npm install void-reality',
+'404: exit not found',
+'while(alive) { suffer() }',
+'echo "help" > /dev/soul',
+'the compiler knows what you did',
+'undefined is not a function (neither are you)',
+'node: segmentation fault (core dumped into void)',
+'press F to pay respects to your productivity',
+// random unhinged
+'the cube just blinked. cubes dont blink.',
+'is that a pixel or am i hallucinating',
+'your screen just flickered. or did it.',
+'i smell rain. you dont have a nose.',
+'the void prefers dark mode',
+'obj says you are valid',
+'one of the inner cubes just looked at you',
+'the particles are whispering about you',
+'the clock ticked backwards. just once.',
+'you are the 100th visitor. you win nothing.',
+'the void tried to autocorrect your code. it gave up.',
+'if you stare long enough the cube stares back. hi.',
+'the void is buffering.',
+'danger: reality leak detected in sector 7',
+'the void knows what you had for breakfast',
+'has anyone seen my keys? - obj',
+'objective assessment: you are a nerd',
+'the void is having a moment. give it space.',
+'the void.exe has stopped working. the void has never worked.',
+'your code is... creative.',
+'have you tried turning the void off and on again',
+'the void is legally distinct from a haunted house'
 ];
 function showTransmission(){
+if(pkgEffects&&pkgEffects.voidMute)return;
 var msg=transmissions[Math.floor(Math.random()*transmissions.length)];
 termPrintHTML('<span style="color:rgba(80,80,80,0.7)">['+(new Date()).toLocaleTimeString()+' void]</span> <span style="color:#38e8e8">'+msg+'</span>');
 }
@@ -267,8 +321,10 @@ onInstall:function(){pkgEffects.clockReset=true;var h=Math.floor(Math.random()*2
 onRemove:function(){delete pkgEffects.clockReset}},
 'entropy':{name:'entropy',desc:'increases chaos in the system',size:'∞KB',
 onInstall:function(){pkgEffects.entropy=true},
-onRemove:function(){delete pkgEffects.entropy}}
-,
+onRemove:function(){delete pkgEffects.entropy}},
+'void-mute':{name:'void-mute',desc:'shuts the void up. for peace and quiet.',size:'0KB',
+onInstall:function(){pkgEffects.voidMute=true;cubeOk('void transmissions silenced.')},
+onRemove:function(){delete pkgEffects.voidMute;cubePrint('the void has opinions again.')}},
 'ransom':{name:'ransom',desc:'a gift from the void',size:'666MB',
 onInstall:function(){ransomAttack()},
 onRemove:function(){/* the void already got rid of it */}},
