@@ -266,6 +266,7 @@ END LOG
 <div class="help-section">
 <div class="help-title">logic</div>
 <div class="help-cmd"><span class="hl">loop</span> &lt;n&gt; — repeat block n times (close with endloop)</div>
+<div class="help-cmd">loop counts are capped at 100 iterations for browser safety</div>
 <div class="help-cmd"><span class="hl">endloop</span> — close loop block</div>
 <div class="help-cmd"><span class="hl">if</span> &lt;condition&gt; — conditional block (close with endif)</div>
 <div class="help-cmd"><span class="hl">else</span> — run the alternate branch when the if is false</div>
@@ -730,6 +731,7 @@ return true}},
 'mv':{help:'mv <source> <destination> — move a virtual file',fn:function(a){cubeEval('mv '+a.join(' '));return true}},
 'tree':{help:'tree [path] — print the virtual filesystem tree',fn:function(a){cubeEval('tree '+a.join(' '));return true}}
 };
+var MAX_LOOP_ITERATIONS=100;
 var vsCancel=false;
 
 var guiWins={};
@@ -906,6 +908,10 @@ if(ln==='end'||ln==='halt'){cubeOk(rp+': halted.');if(doneCallback)doneCallback(
 if(op==='loop'){
 var count=parseInt(args[0],10)||0;
 if(count<1){cubeError('loop: count must be > 0');i++;setTimeout(step,50);return}
+if(count>MAX_LOOP_ITERATIONS){
+cubeWarn('loop: capped at '+MAX_LOOP_ITERATIONS+' iterations for safety (requested '+count+')');
+count=MAX_LOOP_ITERATIONS;
+}
 loopStack.push({count:count,startLine:i+1});
 i++;setTimeout(step,50);return;
 }
@@ -973,6 +979,7 @@ var ops=Object.keys(voidScriptLang);
 for(var k=0;k<ops.length;k++){cubePrint('  '+ops[k].padEnd(8)+' — '+voidScriptLang[ops[k]].help)}
 cubePrint('  end/halt           — stop the script');
 cubePrint('  loop <n>/endloop   — repeat a block');
+cubePrint('  loop limit         — '+MAX_LOOP_ITERATIONS+' iterations per loop');
 cubePrint('  if <cond>/endif    — conditional block');
 cubePrint('  else               — alternate if branch');
 cubePrint('  break/continue     — loop control');
@@ -1180,6 +1187,7 @@ cubePrint('  ps             — peek at processes');
 cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/image/close/set/destroy/list)');
 cubePrint('  studio         — open voidscript studio');
 cubePrint('  loop <n>       — repeat block n times');
+cubePrint('  loop limit      — '+MAX_LOOP_ITERATIONS+' iterations per loop');
 cubePrint('  endloop        — end of loop block');
 cubePrint('  if <cond>      — conditional block (endif to close)');
 cubePrint('  else           — alternate branch inside an if');
@@ -2953,6 +2961,7 @@ var sp=ln.split(/\s+/);
 var op=sp[0]?sp[0].toLowerCase():'';
 if(op==='loop'){
 var count=parseInt(sp[1],10)||1;
+count=Math.min(count,MAX_LOOP_ITERATIONS);
 loopStack.push({count:count,startLine:expanded.length});
 expanded.push({type:'loop',count:count});
 continue;
