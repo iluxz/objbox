@@ -344,6 +344,8 @@ END LOG
 <div class="help-cmd"><span class="hl">noclip</span> &lt;on|off&gt; — drag windows anywhere, even offscreen</div>
 <div class="help-cmd"><span class="hl">override</span> theme &lt;1-8&gt; — access hidden themes</div>
 <div class="help-cmd"><span class="hl">eval</span> &lt;code&gt; — run raw javascript (dangerous)</div>
+<div class="help-cmd"><span class="hl">relay</span> &lt;url&gt; [sender-id] — connect to broadcast relay</div>
+<div class="help-cmd"><span class="hl">unlisten</span> — stop receiving broadcasts</div>
 </div>
 <div class="help-section">
 <div class="help-title">tips</div>
@@ -788,11 +790,20 @@ return true}},
 if(!isAdmin){cubeError('admin access required');return true}
 var msg=a.length?a.join(' '):'the void echoes.';
 cubePrint('transmission: "'+msg+'"');
+// show locally
+function showBroadcast(b){
 var el=document.createElement('div');
-el.className='transmission';el.textContent=msg;
-el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(43,208,208,0.9);font-size:24px;font-family:Consolas,monospace;text-shadow:0 0 20px rgba(43,208,208,0.5);z-index:99999;pointer-events:none;animation:fadeInOut 4s forwards';
+el.className='transmission';
+el.innerHTML='<span style="color:rgba(255,200,50,0.6);font-size:14px">['+b.sender+']</span> '+b.message;
+el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(43,208,208,0.9);font-size:24px;font-family:Consolas,monospace;text-shadow:0 0 20px rgba(43,208,208,0.5);z-index:99999;pointer-events:none;animation:fadeInOut 4s forwards;text-align:center;max-width:80vw';
 document.body.appendChild(el);
 setTimeout(function(){el.remove()},4000);
+}
+showBroadcast({message:msg,sender:'admin'});
+// send to relay
+if(window._broadcastRelay){
+fetch(window._broadcastRelay,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,sender:window._broadcastSenderId||'void-admin'})}).catch(function(){cubeWarn('broadcast: relay unreachable')});
+}
 return true}},
 'debug':{help:'debug — show internal state',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
@@ -839,6 +850,40 @@ if(!a.length){cubeError('eval: usage eval <code>');return true}
 var code=a.join(' ');
 try{var result=Function('"use strict";return ('+code+')')();cubePrint('eval: '+String(result))}
 catch(e){cubeError('eval: '+e.message)}
+return true}},
+'relay':{help:'relay <url> — set the broadcast relay URL',fn:function(a){
+if(!isAdmin){cubeError('admin access required');return true}
+if(!a.length){cubePrint('relay: '+(window._broadcastRelay||'not set'));return true}
+window._broadcastRelay=a[0];
+window._broadcastSenderId=a[1]||'void-admin';
+cubePrint('relay: connected to '+a[0]);
+cubePrint('relay: sender id = '+window._broadcastSenderId);
+// start listening
+if(window._broadcastListener)clearInterval(window._broadcastListener);
+var seen={};
+window._broadcastListener=setInterval(function(){
+fetch(window._broadcastRelay).then(function(r){return r.json()}).then(function(msgs){
+for(var m=0;m<msgs.length;m++){
+var b=msgs[m];
+var key=b.time+':'+b.sender;
+if(!seen[key]){
+seen[key]=true;
+if(b.sender!==(window._broadcastSenderId||'void-admin')){
+cubePrint('broadcast from '+b.sender+': '+b.message);
+var el=document.createElement('div');
+el.className='transmission';
+el.innerHTML='<span style="color:rgba(255,200,50,0.6);font-size:14px">['+b.sender+']</span> '+b.message;
+el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(43,208,208,0.9);font-size:24px;font-family:Consolas,monospace;text-shadow:0 0 20px rgba(43,208,208,0.5);z-index:99999;pointer-events:none;animation:fadeInOut 4s forwards;text-align:center;max-width:80vw';
+document.body.appendChild(el);
+setTimeout(function(){el.remove()},4000);
+}}
+}
+}).catch(function(){});
+},3000);
+return true}},
+'unlisten':{help:'unlisten — stop receiving broadcasts',fn:function(a){
+if(window._broadcastListener){clearInterval(window._broadcastListener);window._broadcastListener=null;cubePrint('unlisten: stopped.')}
+else{cubePrint('unlisten: not listening.')}
 return true}}
 };
 var MAX_LOOP_ITERATIONS=100;
