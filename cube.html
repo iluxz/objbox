@@ -311,6 +311,9 @@ END LOG
 <div class="help-cmd"><span class="hl">gui check</span> "label" &lt;x&gt; &lt;y&gt; — add checkbox</div>
 <div class="help-cmd"><span class="hl">gui image</span> "url" &lt;x&gt; &lt;y&gt; [w] [h] — add image</div>
 <div class="help-cmd"><span class="hl">gui close</span> — close active window</div>
+<div class="help-cmd"><span class="hl">slider</span> &lt;min&gt; &lt;max&gt; &lt;value&gt; &lt;var&gt; — add a range slider</div>
+<div class="help-cmd"><span class="hl">dropdown</span> &lt;var&gt; "opt1,opt2,..." &lt;default&gt; — add a dropdown select</div>
+<div class="help-cmd"><span class="hl">colorpicker</span> &lt;var&gt; "#hex" — add a color picker</div>
 </div>
 <div class="help-section">
 <div class="help-title">filesystem</div>
@@ -346,6 +349,8 @@ END LOG
 <div class="help-cmd"><span class="hl">eval</span> &lt;code&gt; — run raw javascript (dangerous)</div>
 <div class="help-cmd"><span class="hl">relay</span> &lt;url&gt; [sender-id] — connect to broadcast relay</div>
 <div class="help-cmd"><span class="hl">unlisten</span> — stop receiving broadcasts</div>
+<div class="help-cmd"><span class="hl">danger</span> list — view available advanced scripts</div>
+<div class="help-cmd"><span class="hl">danger run</span> &lt;name&gt; — launch a danger zone script</div>
 </div>
 <div class="help-section">
 <div class="help-title">tips</div>
@@ -897,6 +902,185 @@ return true}},
 'unlisten':{help:'unlisten — stop receiving broadcasts',fn:function(a){
 if(window._broadcastListener){clearInterval(window._broadcastListener);window._broadcastListener=null;cubePrint('unlisten: stopped.')}
 else{cubePrint('unlisten: not listening.')}
+return true}},
+'danger':{help:'danger [list|run <name>] — access the danger zone',fn:function(a){
+if(!isAdmin){cubeError('admin access required. this is the danger zone.');return true}
+var dz={
+'wm':{name:'window manager',desc:'auto-tile all windows',fn:function(){
+var ids=Object.keys(guiWins);if(!ids.length){cubePrint('wm: no windows to tile');return}
+var cols=Math.ceil(Math.sqrt(ids.length));var rows=Math.ceil(ids.length/cols);
+var cw=Math.floor(window.innerWidth/cols);var ch=Math.floor((window.innerHeight-200)/rows);
+for(var i=0;i<ids.length;i++){
+var w=guiWins[ids[i]].el;var col=i%cols;var row=Math.floor(i/cols);
+w.style.left=(col*cw+10)+'px';w.style.top=(50+row*ch)+'px';
+w.style.width=(cw-20)+'px';w.style.height=(ch-20)+'px';
+w.style.zIndex=String(10+i);
+}
+cubePrint('wm: tiled '+ids.length+' windows ('+cols+'x'+rows+')');
+}},
+'terminal2':{name:'second terminal',desc:'terminal inside a gui window',fn:function(){
+guiCreateWin('terminal 2',500,300);
+var w=guiGetActive();if(!w)return;
+var term=document.createElement('div');
+term.style.cssText='width:100%;height:100%;background:#0a0a0a;color:rgba(43,208,208,0.8);font-family:Consolas,monospace;font-size:12px;padding:8px;overflow:auto;white-space:pre-wrap';
+term.innerHTML='<span style="color:rgba(100,255,100,0.6)">void terminal 2 online</span>\n<span style="color:rgba(255,255,255,0.3)">type commands below</span>\n\n';
+var inp=document.createElement('input');
+inp.style.cssText='width:100%;background:transparent;border:none;color:rgba(43,208,208,0.8);font-family:Consolas,monospace;font-size:12px;outline:none;margin-top:4px';
+inp.placeholder='> ';
+inp.addEventListener('keydown',function(e){
+if(e.key==='Enter'&&inp.value.trim()){
+var cmd=inp.value.trim();inp.value='';
+term.innerHTML+='> '+cmd+'\n';
+try{
+var lines=cmd.split('\n');
+for(var l=0;l<lines.length;l++){
+var sp=lines[l].trim().split(/\s+/);var op=sp[0].toLowerCase();var args=sp.slice(1);
+var vsFn=voidScriptLang[op];
+if(vsFn)vsFn.fn(args);
+else term.innerHTML+='unknown: '+op+'\n';
+}
+}catch(err){term.innerHTML+='error: '+err.message+'\n'}
+term.scrollTop=term.scrollHeight;
+}
+});
+w.content.appendChild(term);w.content.appendChild(inp);
+}},
+'dashboard':{name:'dashboard',desc:'live monitoring panel',fn:function(){
+guiCreateWin('void dashboard',450,350);
+var w=guiGetActive();if(!w)return;
+var dash=document.createElement('div');
+dash.style.cssText='width:100%;height:100%;background:#0a0a0a;color:rgba(43,208,208,0.7);font-family:Consolas,monospace;font-size:11px;padding:10px;overflow:auto';
+w.content.appendChild(dash);
+function updateDash(){
+var mem=performance.memory;
+dash.innerHTML='';
+dash.innerHTML+='<div style="color:rgba(255,200,50,0.8);margin-bottom:8px">VOID DASHBOARD</div>';
+dash.innerHTML+='<div>zone: '+zones[currentZone].name+'</div>';
+dash.innerHTML+='<div>shape: '+curShape+'</div>';
+dash.innerHTML+='<div>theme: '+currentTheme+'</div>';
+dash.innerHTML+='<div>windows: '+Object.keys(guiWins).length+'/'+MAX_GUI_WINDOWS+'</div>';
+dash.innerHTML+='<div>vars: '+Object.keys(cubeVars).length+'</div>';
+dash.innerHTML+='<div>admin: '+isAdmin+'</div>';
+dash.innerHTML+='<div>frozen: '+isFrozen+'</div>';
+dash.innerHTML+='<div>speed: '+scriptSpeed+'x</div>';
+if(mem)dash.innerHTML+='<div>memory: '+Math.round(mem.usedJSHeapSize/1048576)+'MB</div>';
+dash.innerHTML+='<div>fps: '+(typeof fps!=='undefined'?fps:'?')+'</div>';
+dash.innerHTML+='<div style="margin-top:8px;color:rgba(255,255,255,0.2)">refreshes every 1s</div>';
+}
+updateDash();
+setInterval(updateDash,1000);
+}},
+'theme-editor':{name:'theme editor',desc:'create custom color themes',fn:function(){
+guiCreateWin('theme editor',400,300);
+var w=guiGetActive();if(!w)return;
+var colors={bg:'#0a0a0a',primary:'#2bd0d0',accent:'#ff5050',text:'#ffffff'};
+function renderEditor(){
+w.content.innerHTML='';
+var keys=Object.keys(colors);
+for(var k=0;k<keys.length;k++){
+(function(key){
+var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;margin:4px 0';
+var lbl=document.createElement('span');lbl.textContent=key;lbl.style.cssText='width:80px;color:rgba(43,208,208,0.7)';
+var picker=document.createElement('input');picker.type='color';picker.value=colors[key];
+picker.style.cssText='width:40px;height:25px;border:none;cursor:pointer;background:transparent';
+picker.oninput=function(){colors[key]=this.value;renderPreview()};
+var hex=document.createElement('span');hex.textContent=colors[key];hex.style.cssText='font-size:10px;color:rgba(255,255,255,0.4)';
+row.appendChild(lbl);row.appendChild(picker);row.appendChild(hex);
+w.content.appendChild(row);
+})(keys[k]);
+}
+renderPreview();
+var btn=document.createElement('button');btn.textContent='apply theme';btn.className='gui-button';
+btn.style.cssText='margin-top:10px;left:10px;top:auto;position:relative';
+btn.onclick=function(){
+var css=':root{--bg:'+colors.bg+';--primary:'+colors.primary+';--accent:'+colors.accent+';--text:'+colors.text+'}';
+cubePrint('theme editor colors: bg='+colors.bg+' primary='+colors.primary+' accent='+colors.accent);
+cubeOk('custom theme noted. (full CSS injection not implemented yet)');
+};
+w.content.appendChild(btn);
+}
+function renderPreview(){
+var pv=w.content.querySelector('#themePreview');
+if(pv){pv.style.background=colors.bg;pv.style.color=colors.text;pv.style.borderColor=colors.primary}
+}
+var preview=document.createElement('div');preview.id='themePreview';
+preview.style.cssText='width:100%;height:60px;margin-top:10px;border:2px solid '+colors.primary+';border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;background:'+colors.bg+';color:'+colors.text;
+preview.textContent='preview';
+w.content.appendChild(preview);
+renderEditor();
+}},
+'particles':{name:'particle editor',desc:'customize particle effects',fn:function(){
+guiCreateWin('particle editor',350,250);
+var w=guiGetActive();if(!w)return;
+var editor=document.createElement('div');
+editor.style.cssText='width:100%;height:100%;background:#0a0a0a;color:rgba(43,208,208,0.7);font-family:Consolas,monospace;font-size:12px;padding:10px;overflow:auto';
+editor.innerHTML='<div style="color:rgba(255,200,50,0.8);margin-bottom:8px">PARTICLE SETTINGS</div>';
+editor.innerHTML+='<div>count: '+NP+'</div>';
+var countSlider=document.createElement('input');countSlider.type='range';countSlider.min='50';countSlider.max='800';countSlider.value=String(NP);
+countSlider.style.cssText='width:100%;margin:4px 0';
+countSlider.oninput=function(){NP=parseInt(this.value);editor.children[1].textContent='count: '+NP};
+editor.appendChild(countSlider);
+var applyBtn=document.createElement('button');applyBtn.textContent='rebuild particles';applyBtn.className='gui-button';
+applyBtn.style.cssText='margin-top:8px;left:0;top:auto;position:relative';
+applyBtn.onclick=function(){initParticles();cubeOk('particles: rebuilt with '+NP+' particles')};
+editor.appendChild(applyBtn);
+w.content.appendChild(editor);
+}},
+'crash':{name:'crash test',desc:'spawn 100 windows (careful)',fn:function(){
+for(var i=0;i<100;i++){guiCreateWin('window '+i,200,150)}
+cubeWarn('crash: spawned 100 windows. good luck.')
+}}
+};
+if(!a.length||a[0]==='list'){
+cubePrint('--- danger zone ---');
+var names=Object.keys(dz);
+for(var n=0;n<names.length;n++)cubePrint('  '+names[n].padEnd(14)+' — '+dz[names[n]].name+': '+dz[names[n]].desc);
+cubePrint('usage: danger run <name>');
+return true;
+}
+if(a[0]==='run'&&a[1]&&dz[a[1]]){
+cubePrint('danger zone: launching '+dz[a[1]].name+'...');
+setTimeout(function(){dz[a[1]].fn()},300);
+return true;
+}
+cubeError('danger: unknown script. use "danger list"');
+return true}},
+'slider':{help:'slider <min> <max> <value> <var> — add a range slider',fn:function(a){
+var w=guiGetActive();if(!w){cubeError('slider: no active window');return true}
+var min=parseInt(a[0],10)||0,max=parseInt(a[1],10)||100,val=parseInt(a[2],10)||0,varName=a[3]||'';
+var s=document.createElement('input');s.type='range';s.min=min;s.max=max;s.value=val;
+s.className='gui-slider';s.style.cssText='position:absolute;left:10px;top:'+(a[4]||Object.keys(w.content.children).length*30+10)+'px;width:calc(100% - 20px)';
+var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=varName+': '+val;
+lbl.style.cssText='position:absolute;left:10px;top:'+(parseInt(s.style.top)-15)+'px;font-size:10px;color:rgba(43,208,208,0.6)';
+s.oninput=function(){lbl.textContent=varName+': '+this.value;if(varName)cubeVars[varName]=this.value};
+w.content.appendChild(lbl);w.content.appendChild(s);
+if(varName)cubeVars[varName]=String(val);
+return true}},
+'dropdown':{help:'dropdown <var> "opt1,opt2,..." <value> — add a dropdown select',fn:function(a){
+var w=guiGetActive();if(!w){cubeError('dropdown: no active window');return true}
+var varName=a[0]||'';var opts=(a[1]||'').replace(/"/g,'').split(',');var def=a[2]||'';
+var sel=document.createElement('select');sel.className='gui-dropdown';
+sel.style.cssText='position:absolute;left:10px;top:'+(a[3]||Object.keys(w.content.children).length*30+10)+'px;padding:4px 8px;background:rgba(0,0,0,0.5);color:rgba(43,208,208,0.8);border:1px solid rgba(43,208,208,0.3);border-radius:4px;font-family:Consolas,monospace;font-size:12px';
+for(var o=0;o<opts.length;o++){
+var opt=document.createElement('option');opt.value=opts[o];opt.textContent=opts[o];
+if(opts[o]===def)opt.selected=true;
+sel.appendChild(opt);
+}
+if(varName)cubeVars[varName]=def||opts[0]||'';
+sel.onchange=function(){if(varName)cubeVars[varName]=this.value};
+w.content.appendChild(sel);
+return true}},
+'colorpicker':{help:'colorpicker <var> "#hex" — add a color picker',fn:function(a){
+var w=guiGetActive();if(!w){cubeError('colorpicker: no active window');return true}
+var varName=a[0]||'';var def=(a[1]||'#2bd0d0').replace(/"/g,'');
+var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:8px;position:absolute;left:10px;top:'+(a[2]||Object.keys(w.content.children).length*30+10)+'px';
+var picker=document.createElement('input');picker.type='color';picker.value=def;
+picker.style.cssText='width:40px;height:25px;border:none;cursor:pointer;background:transparent';
+var hex=document.createElement('span');hex.textContent=def;hex.style.cssText='font-size:10px;color:rgba(43,208,208,0.6)';
+picker.oninput=function(){hex.textContent=this.value;if(varName)cubeVars[varName]=this.value};
+row.appendChild(picker);row.appendChild(hex);
+w.content.appendChild(row);
+if(varName)cubeVars[varName]=def;
 return true}}
 };
 var MAX_LOOP_ITERATIONS=100;
@@ -3030,6 +3214,7 @@ document.getElementById('themeIndicator').style.display='none';
 document.getElementById('stats').style.display='none';
 document.getElementById('hint').style.display='none';
 document.getElementById('studio').classList.add('active');
+try{var saved=localStorage.getItem('cube_autosave');if(saved&&saved.trim()){document.getElementById('studioCode').value=saved;cubePrint('studio: restored autosave')}}catch(e){}
 updateStudioLineNums();
 document.getElementById('studioCode').focus();
 }
@@ -3297,6 +3482,7 @@ code.addEventListener('input',function(){
 updateStudioLineNums();
 clearTimeout(livePreviewTimer);
 livePreviewTimer=setTimeout(function(){livePreview(code.value)},300);
+try{localStorage.setItem('cube_autosave',code.value)}catch(e){}
 });
 code.addEventListener('keydown',function(e){
 if(e.key==='Tab'){e.preventDefault();var s=this.selectionStart;var end=this.selectionEnd;this.value=this.value.substring(0,s)+'  '+this.value.substring(end);this.selectionStart=this.selectionEnd=s+2;updateStudioLineNums()}
