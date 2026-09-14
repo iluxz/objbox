@@ -1095,6 +1095,117 @@ var BROADCAST_GIST_ID='7915e15f4542091944fd92596ab5e19d';
 var BROADCAST_RAW_URL='https://gist.githubusercontent.com/iluxz/7915e15f4542091944fd92596ab5e19d/raw/broadcasts.json';
 var vsCancel=false;
 
+var DAYS=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+var DAY_NAMES=['sun','mon','tue','wed','thu','fri','sat'];
+var MONTHS=['january','february','march','april','may','june','july','august','september','october','november','december'];
+var SEASONS=['winter','spring','summer','autumn'];
+function getSeason(m){if(m>=2&&m<=4)return 1;if(m>=5&&m<=7)return 2;if(m>=8&&m<=10)return 3;return 0}
+function getDayData(){
+var now=new Date();
+return{day:now.getDay(),dayName:DAYS[now.getDay()],dayShort:DAY_NAMES[now.getDay()],month:now.getMonth(),monthName:MONTHS[now.getMonth()],date:now.getDate(),year:now.getFullYear(),season:SEASONS[getSeason(now.getMonth())],seasonIdx:getSeason(now.getMonth()),timestamp:now.getTime(),isWeekend:now.getDay()===0||now.getDay()===6,isFriday13:now.getDay()===5&&now.getDate()===13,isMonday:now.getDay()===1,isNewYear:now.getMonth()===0&&now.getDate()===1,isHalloween:now.getMonth()===9&&now.getDate()===31,isXmas:now.getMonth()===11&&(now.getDate()===24||now.getDate()===25),isLeapDay:now.getMonth()===1&&now.getDate()===29};
+}
+var currentDayData=getDayData();
+var lastVisit=parseInt(localStorage.getItem('cube_last_visit_day'),-1);
+var lastVisitDate=localStorage.getItem('cube_last_visit_date')||'';
+
+function checkDayChange(){
+var today=currentDayData.dayName;
+var todayStr=currentDayData.year+'-'+currentDayData.month+'-'+currentDayData.date;
+if(lastVisitDate&&lastVisitDate!==todayStr&&lastVisit>=0){
+var lastDayIdx=lastVisit;var todayIdx=currentDayData.day;
+var diff=todayIdx-lastDayIdx;if(diff<0)diff+=7;
+showDayTransition(lastDayIdx,todayIdx,diff);
+return true;
+}
+localStorage.setItem('cube_last_visit_day',String(currentDayData.day));
+localStorage.setItem('cube_last_visit_date',todayStr);
+return false;
+}
+
+function showDayTransition(fromIdx,toIdx,daysPassed){
+var overlay=document.createElement('div');overlay.id='dayOverlay';
+overlay.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 1.5s;font-family:Consolas,monospace';
+var greeting=document.createElement('div');
+var hour=new Date().getHours();
+var timeGreet=hour<6?'still awake?':hour<12?'good morning':hour<18?'good afternoon':'good evening';
+greeting.textContent=timeGreet+', intruder.';
+greeting.style.cssText='color:rgba(43,208,208,0.4);font-size:14px;margin-bottom:20px;opacity:0;animation:fadeInDelay 1s 0.5s forwards';
+var dayName=document.createElement('div');
+dayName.textContent=currentDayData.dayName;
+dayName.style.cssText='color:rgba(43,208,208,0.9);font-size:48px;text-shadow:0 0 30px rgba(43,208,208,0.5);letter-spacing:8px;text-transform:uppercase;opacity:0;animation:fadeInDelay 1s 1s forwards';
+var sub=document.createElement('div');
+sub.style.cssText='color:rgba(255,255,255,0.3);font-size:12px;margin-top:15px;opacity:0;animation:fadeInDelay 1s 1.5s forwards';
+if(daysPassed>1)sub.textContent='you were gone for '+daysPassed+' days.';
+else sub.textContent='the void noticed your absence.';
+var seasonTag=document.createElement('div');
+seasonTag.textContent=currentDayData.season;
+seasonTag.style.cssText='color:rgba(200,100,255,0.5);font-size:11px;margin-top:8px;text-transform:uppercase;letter-spacing:4px;opacity:0;animation:fadeInDelay 1s 1.8s forwards';
+var special=getSpecialMessage();
+var specialEl=document.createElement('div');
+if(special){specialEl.textContent=special;specialEl.style.cssText='color:rgba(255,200,50,0.6);font-size:13px;margin-top:15px;opacity:0;animation:fadeInDelay 1s 2.2s forwards'}
+var skip=document.createElement('div');
+skip.textContent='click to skip';
+skip.style.cssText='color:rgba(255,255,255,0.15);font-size:10px;position:absolute;bottom:30px;opacity:0;animation:fadeInDelay 1s 3s forwards;cursor:pointer';
+overlay.appendChild(greeting);overlay.appendChild(dayName);overlay.appendChild(sub);overlay.appendChild(seasonTag);
+if(special)overlay.appendChild(specialEl);
+overlay.appendChild(skip);
+document.body.appendChild(overlay);
+setTimeout(function(){overlay.style.opacity='1'},50);
+function dismiss(){overlay.style.opacity='0';setTimeout(function(){overlay.remove()},1500)}
+overlay.onclick=dismiss;
+setTimeout(dismiss,6000);
+applySeasonEffects();
+}
+
+function getSpecialMessage(){
+var d=currentDayData;
+if(d.isNewYear)return 'a new year begins. the void resets.';
+if(d.isHalloween)return 'the veil is thin tonight.';
+if(d.isXmas)return 'even the void gives gifts. sometimes.';
+if(d.isFriday13)return 'friday the 13th. the void is cautious.';
+if(d.isMonday)return 'mondays are rough. even for voids.';
+if(d.isWeekend&&d.day===6)return 'saturday. the void relaxes.';
+if(d.isWeekend&&d.day===0)return 'sundays. the void reflects.';
+if(d.month===3&&d.date===1)return 'april fools. trust nothing.';
+if(d.month===5&&d.date===18)return 'happy birthday, void. (it was born today. probably.)';
+if(d.season==='winter')return 'the cold seeps through the geometry.';
+if(d.season==='summer')return 'the void is overheating.';
+return null;
+}
+
+function applySeasonEffects(){
+var s=currentDayData.seasonIdx;
+if(s===0)winterEffects();
+else if(s===2)summerEffects();
+}
+function winterEffects(){if(typeof particles!=='undefined')particles.forEach(function(p){p.vy+=0.02;p.color='rgba(200,220,255,0.5)'})}
+function summerEffects(){if(typeof particles!=='undefined')particles.forEach(function(p){p.size*=1.3;p.color='rgba(255,200,100,0.5)'})}
+
+var SPECIAL_DAYS={
+'default':{cubeColor:'rgba(43,208,208,0.8)',glowColor:'rgba(43,208,208,0.3)',particleMod:null},
+'friday':{cubeColor:'rgba(43,208,208,1.0)',glowColor:'rgba(43,208,208,0.5)',particleMod:function(p){p.size*=1.2}},
+'monday':{cubeColor:'rgba(150,150,150,0.6)',glowColor:'rgba(150,150,150,0.2)',particleMod:function(p){p.vy*=0.5}},
+'saturday':{cubeColor:'rgba(100,255,200,0.9)',glowColor:'rgba(100,255,200,0.4)',particleMod:function(p){p.vx+=Math.random()*0.1-0.05}},
+'halloween':{cubeColor:'rgba(255,100,0,0.9)',glowColor:'rgba(255,50,0,0.4)',particleMod:function(p){p.color='rgba(255,100,0,0.5)'}},
+'xmas':{cubeColor:'rgba(255,50,50,0.9)',glowColor:'rgba(50,255,50,0.4)',particleMod:function(p){p.color=Math.random()>0.5?'rgba(255,50,50,0.5)':'rgba(50,255,50,0.5)'}},
+'newyear':{cubeColor:'rgba(255,215,0,1.0)',glowColor:'rgba(255,215,0,0.5)',particleMod:function(p){p.size*=1.5;p.vy-=0.03}},
+'winter':{cubeColor:'rgba(150,200,255,0.8)',glowColor:'rgba(150,200,255,0.3)',particleMod:function(p){p.color='rgba(200,220,255,0.5)';p.vy+=0.02}},
+'summer':{cubeColor:'rgba(255,200,100,0.8)',glowColor:'rgba(255,150,50,0.3)',particleMod:function(p){p.size*=1.3;p.color='rgba(255,200,100,0.5)'}}
+};
+function getDayStyle(){
+var d=currentDayData;
+if(d.isHalloween)return SPECIAL_DAYS.halloween;
+if(d.isXmas)return SPECIAL_DAYS.xmas;
+if(d.isNewYear)return SPECIAL_DAYS.newyear;
+if(d.season==='winter')return SPECIAL_DAYS.winter;
+if(d.season==='summer')return SPECIAL_DAYS.summer;
+return SPECIAL_DAYS[d.dayName]||SPECIAL_DAYS.default;
+}
+
+var cssAnim=document.createElement('style');
+cssAnim.textContent='@keyframes fadeInDelay{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}';
+document.head.appendChild(cssAnim);
+
 var guiWins={};
 var activeWin=null;
 function guiMakeDraggable(el,handle){
@@ -3570,6 +3681,25 @@ modal.style.display='none';
 }catch(e){studioPrintColor('import failed — invalid base64 data','rgba(255,80,80,0.8)')}
 }
 initStudioEvents();
+// === DAY TRACKING ===
+function applyDayEffectsToParticles(){
+var style=getDayStyle();
+if(!style)return;
+var h=currentDayData.day;
+for(var i=0;i<NP;i++){
+var i8=i*8;
+if(h===5){pData[i8+4]*=1.2;pData[i8+5]*=1.1;pData[i8+6]*=1.2}
+else if(h===1){pData[i8+4]*=0.7;pData[i8+5]*=0.7;pData[i8+6]*=0.7}
+else if(h===6){pData[i8+4]*=0.9;pData[i8+5]*=1.2;pData[i8+6]*=1.0}
+if(currentDayData.isHalloween){pData[i8+4]=1;pData[i8+5]=Math.random()*0.3;pData[i8+6]=0}
+if(currentDayData.isXmas){pData[i8+4]=Math.random()>0.5?1:0;pData[i8+5]=Math.random()>0.5?1:0;pData[i8+6]=0.2}
+if(currentDayData.isNewYear){pData[i8+4]=1;pData[i8+5]=0.85;pData[i8+6]=0}
+if(currentDayData.season==='winter'){pData[i8+4]=0.8;pData[i8+5]=0.9;pData[i8+6]=1}
+if(currentDayData.season==='summer'){pData[i8+4]=1;pData[i8+5]=0.8;pData[i8+6]=0.4}
+}
+}
+applyDayEffectsToParticles();
+checkDayChange();
 </script>
 </body>
 </html>
