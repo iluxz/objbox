@@ -3322,7 +3322,8 @@ return;
 }
 var reader=new FileReader();
 reader.onload=function(ev){
-code.value=ev.target.result;
+var ta=document.getElementById('studioCode');
+ta.value=ev.target.result;
 updateStudioLineNums();
 studioPrint('opened: '+file.name);
 };
