@@ -1105,16 +1105,24 @@ var now=new Date();
 return{day:now.getDay(),dayName:DAYS[now.getDay()],dayShort:DAY_NAMES[now.getDay()],month:now.getMonth(),monthName:MONTHS[now.getMonth()],date:now.getDate(),year:now.getFullYear(),season:SEASONS[getSeason(now.getMonth())],seasonIdx:getSeason(now.getMonth()),timestamp:now.getTime(),isWeekend:now.getDay()===0||now.getDay()===6,isFriday13:now.getDay()===5&&now.getDate()===13,isMonday:now.getDay()===1,isNewYear:now.getMonth()===0&&now.getDate()===1,isHalloween:now.getMonth()===9&&now.getDate()===31,isXmas:now.getMonth()===11&&(now.getDate()===24||now.getDate()===25),isLeapDay:now.getMonth()===1&&now.getDate()===29};
 }
 var currentDayData=getDayData();
-var lastVisit=parseInt(localStorage.getItem('cube_last_visit_day'),-1);
+var lastVisit=parseInt(localStorage.getItem('cube_last_visit_day'),10);
 var lastVisitDate=localStorage.getItem('cube_last_visit_date')||'';
 
 function checkDayChange(){
 var today=currentDayData.dayName;
 var todayStr=currentDayData.year+'-'+currentDayData.month+'-'+currentDayData.date;
-if(lastVisitDate&&lastVisitDate!==todayStr&&lastVisit>=0){
+if(!lastVisitDate){
+showDayTransition(-1,currentDayData.day,0);
+localStorage.setItem('cube_last_visit_day',String(currentDayData.day));
+localStorage.setItem('cube_last_visit_date',todayStr);
+return true;
+}
+if(lastVisitDate!==todayStr&&lastVisit>=0){
 var lastDayIdx=lastVisit;var todayIdx=currentDayData.day;
 var diff=todayIdx-lastDayIdx;if(diff<0)diff+=7;
 showDayTransition(lastDayIdx,todayIdx,diff);
+localStorage.setItem('cube_last_visit_day',String(currentDayData.day));
+localStorage.setItem('cube_last_visit_date',todayStr);
 return true;
 }
 localStorage.setItem('cube_last_visit_day',String(currentDayData.day));
