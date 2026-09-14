@@ -302,6 +302,7 @@ END LOG
 <div class="help-section">
 <div class="help-title">gui — create windows</div>
 <div class="help-cmd"><span class="hl">gui window</span> "title" &lt;w&gt; &lt;h&gt; [random] — create window</div>
+<div class="help-cmd"><span class="hl">gui taskbar</span> "title" [h] — full-width bottom taskbar</div>
 <div class="help-cmd"><span class="hl">gui clear</span> — close every generated GUI window</div>
 <div class="help-cmd"><span class="hl">gui label</span> "text" &lt;x&gt; &lt;y&gt; — add a label</div>
 <div class="help-cmd"><span class="hl">gui button</span> "text" &lt;x&gt; &lt;y&gt; "cmd" — add button</div>
@@ -329,6 +330,11 @@ END LOG
 <div class="help-cmd"><span class="hl">set</span> &lt;name&gt; &lt;value&gt; — store a variable</div>
 <div class="help-cmd"><span class="hl">var</span> &lt;name&gt; &lt;value&gt; — store a variable (alias)</div>
 <div class="help-cmd"><span class="hl">get</span> &lt;name&gt; — recall a variable</div>
+</div>
+<div class="help-section">
+<div class="help-title">admin</div>
+<div class="help-cmd"><span class="hl">admin</span> &lt;passphrase&gt; — unlock admin mode (bypasses safety limits)</div>
+<div class="help-cmd"><span class="hl">alwaysontop</span> &lt;on|off&gt; — make active window stay on top of everything</div>
 </div>
 <div class="help-section">
 <div class="help-title">tips</div>
@@ -700,10 +706,11 @@ cubePrint(a[0]+': '+(cubeVars[a[0]]!==undefined?cubeVars[a[0]]:'undefined'));ret
 'time':{help:'time — void clock',fn:function(){var n=new Date();cubePrint(String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0'));return true}},
 'void':{help:'void — the void acknowledges',fn:function(){cubePrint('the void heard your script.');return true}},
 'ps':{help:'ps — peek at processes',fn:function(){cubePrint('8 inner cubes. 1 void. 0 mercy.');return true}},
-'gui':{help:'gui <window|label|button|input|check|close|set|destroy|list>',fn:function(a){
-if(!a.length){cubePrint('gui: subcommand needed (window, label, button, input, check, image, close, set, destroy, list)');return true}
+'gui':{help:'gui <window|taskbar|label|button|input|check|close|set|destroy|list>',fn:function(a){
+if(!a.length){cubePrint('gui: subcommand needed (window, taskbar, label, button, input, check, image, close, set, destroy, list)');return true}
 var gs=a[0].toLowerCase();
 if(gs==='window'){guiCreateWin(a[1]?a[1].replace(/"/g,''):'untitled',parseInt(a[2],10)||300,parseInt(a[3],10)||200,a[4]&&(a[4].toLowerCase()==='true'||a[4].toLowerCase()==='random'));return true}
+if(gs==='taskbar'){guiCreateTaskbar(a[1]?a[1].replace(/"/g,''):'voidbar',parseInt(a[2],10)||52);return true}
 if(gs==='label'){guiAddLabel(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
 if(gs==='button'){guiAddButton(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
 if(gs==='input'){guiAddInput(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
@@ -740,11 +747,26 @@ return true}},
 'echo':{help:'echo <text> > <file> — write to a virtual file',fn:function(a){cubeEval('echo '+a.join(' '));return true}},
 'cp':{help:'cp <source> <destination> — copy a virtual file',fn:function(a){cubeEval('cp '+a.join(' '));return true}},
 'mv':{help:'mv <source> <destination> — move a virtual file',fn:function(a){cubeEval('mv '+a.join(' '));return true}},
-'tree':{help:'tree [path] — print the virtual filesystem tree',fn:function(a){cubeEval('tree '+a.join(' '));return true}}
+'tree':{help:'tree [path] — print the virtual filesystem tree',fn:function(a){cubeEval('tree '+a.join(' '));return true}},
+'admin':{help:'admin <passphrase> — unlock admin mode',fn:function(a){
+if(isAdmin){cubePrint('admin: already authenticated.');return true}
+if(!a.length){cubeError('admin: usage admin <passphrase>');return true}
+var attempt=a.join(' ');
+var hash=function(s){var h=0;for(var ci=0;ci<s.length;ci++){h=((h<<5)-h)+s.charCodeAt(ci);h|=0}return h.toString(16)};
+cubePrint('authenticating...');
+setTimeout(function(){if(hash(attempt)==='49ef8096'){isAdmin=true;cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
+return true}},
+'alwaysontop':{help:'alwaysontop <on|off> — make active window stay on top',fn:function(a){
+if(!activeWin||!guiWins[activeWin]){cubeError('alwaysontop: no active window');return true}
+var state=a[0]?a[0].toLowerCase():'on';
+guiWins[activeWin].el.style.zIndex=state==='on'?'9999':'10';
+cubePrint('alwaysontop: '+state);
+return true}}
 };
 var MAX_LOOP_ITERATIONS=100;
 var MAX_SCRIPT_OPERATIONS=10000;
 var MAX_GUI_WINDOWS=100;
+var isAdmin=false;
 var vsCancel=false;
 
 var guiWins={};
@@ -773,7 +795,7 @@ el.style.left=nx+'px';el.style.top=ny+'px';
 document.addEventListener('mouseup',function(){dragging=false});
 }
 function guiCreateWin(title,w,h,rndPos){
-if(Object.keys(guiWins).length>=MAX_GUI_WINDOWS){cubeWarn('gui: window limit reached ('+MAX_GUI_WINDOWS+').');return null}
+if(Object.keys(guiWins).length>=MAX_GUI_WINDOWS&&!isAdmin){cubeWarn('gui: window limit reached ('+MAX_GUI_WINDOWS+'). use admin to bypass.');return null}
 var id='gw_'+Date.now()+'_'+Math.floor(Math.random()*999);
 var win=document.createElement('div');win.className='gui-window';win.id=id;
 var wx,wy;
@@ -797,6 +819,20 @@ guiMakeDraggable(win,tb);
 guiWins[id]={el:win,content:ct,title:tb};
 activeWin=id;
 return id;
+}
+function guiCreateTaskbar(title,h){
+if(Object.keys(guiWins).length>=MAX_GUI_WINDOWS&&!isAdmin){cubeWarn('gui: window limit reached ('+MAX_GUI_WINDOWS+'). use admin to bypass.');return null}
+var id='tb_'+Date.now()+'_'+Math.floor(Math.random()*999);
+var win=document.createElement('div');win.className='gui-window';win.id=id;
+win.style.cssText='position:fixed;left:0;bottom:0;top:auto;width:100vw;height:'+(parseInt(h)+30)+'px;display:flex;flex-direction:column;border-radius:8px 8px 0 0;z-index:70';
+var tb=document.createElement('div');tb.className='gui-title';
+var tl=document.createElement('span');tl.textContent=formatGuiText(title);
+var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
+cb.onclick=function(){win.remove();delete guiWins[id];if(activeWin===id)activeWin=null};
+tb.appendChild(tl);tb.appendChild(cb);
+var ct=document.createElement('div');ct.className='gui-content';ct.style.height=h+'px';
+win.appendChild(tb);win.appendChild(ct);document.body.appendChild(win);
+guiWins[id]={el:win,content:ct,title:tb};activeWin=id;return id;
 }
 function guiGetActive(){if(typeof studioOpen!=='undefined'&&studioOpen&&!studioPreviewEnabled)return null;if(!activeWin||!guiWins[activeWin]){cubeError('no active gui window — create one with: gui window "title" 400 300');return null}return guiWins[activeWin]}
 function guiClearAll(){
@@ -915,8 +951,8 @@ return val!==undefined&&val!==''&&val!=='0'&&val!=='false'&&val!=='undefined';
 }
 function step(){
 operationCount++;
-if(operationCount>MAX_SCRIPT_OPERATIONS){
-cubeError(rp+': operation limit reached ('+MAX_SCRIPT_OPERATIONS+').');
+if(operationCount>MAX_SCRIPT_OPERATIONS&&!isAdmin){
+cubeError(rp+': operation limit reached ('+MAX_SCRIPT_OPERATIONS+'). use admin to bypass.');
 if(doneCallback)doneCallback();
 return;
 }
@@ -935,8 +971,8 @@ if(ln==='end'||ln==='halt'||op==='return'){cubeOk(rp+': halted.');if(doneCallbac
 if(op==='loop'){
 var count=parseInt(args[0],10)||0;
 if(count<1){cubeError('loop: count must be > 0');i++;setTimeout(step,50);return}
-if(count>MAX_LOOP_ITERATIONS){
-cubeWarn('loop: capped at '+MAX_LOOP_ITERATIONS+' iterations for safety (requested '+count+')');
+if(count>MAX_LOOP_ITERATIONS&&!isAdmin){
+cubeWarn('loop: capped at '+MAX_LOOP_ITERATIONS+' iterations for safety (requested '+count+'). use admin to bypass.');
 count=MAX_LOOP_ITERATIONS;
 }
 loopStack.push({count:count,startLine:i+1});
@@ -1144,6 +1180,7 @@ cubePrint('  vars           — list all variables');
 cubePrint('');
 cubePrint('  --- gui ---');
 cubePrint('  gui window "t" <w> <h> [random] — create a window');
+cubePrint('  gui taskbar "t" [h]        — create a full-width bottom taskbar');
 cubePrint('  gui label "txt" <x> <y> — add label');
 cubePrint('  gui button "txt" <x> <y> "cmd" — add button');
 cubePrint('  gui input "ph" <x> <y> — add text input');
@@ -1909,6 +1946,13 @@ if(isNaN(w)||isNaN(h)){cubeError('gui window: width and height must be numbers')
 var wid=guiCreateWin(t,w,h,rndPos==='true'||rndPos==='random');
 cubeOk('window "'+t+'" opened ('+w+'x'+h+') id:'+wid);
 return}
+if(gs==='taskbar'){
+if(parts.length<3){cubeError('usage: gui taskbar "title" [height]');return}
+var taskbarTitle=parts[2].replace(/"/g,'');
+var taskbarHeight=parseInt(parts[3],10)||52;
+var taskbarId=guiCreateTaskbar(taskbarTitle,taskbarHeight);
+cubeOk('taskbar "'+taskbarTitle+'" opened id:'+taskbarId);
+return}
 if(gs==='close'){
 if(!activeWin){cubeError('no active window to close');return}
 guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null;
@@ -1963,6 +2007,11 @@ if(!loopCmd){cubeError('loop: no command to repeat');return}
 cubePrint('looping '+loopCmd+' x'+count+'...');
 for(var li=0;li<count;li++){cubeEval(loopCmd)}
 return}
+
+if(voidScriptLang[cmd]){
+runVoidScript(raw,'interactive command');
+return;
+}
 
 cubeError('unknown command: '+cmd);
 cubePrint('type "help" for commands');
@@ -2139,7 +2188,7 @@ function mkS(ctx,type,src){var s=ctx.createShader(type);ctx.shaderSource(s,src);
 function mkP(ctx,vs,fs){var p=ctx.createProgram();ctx.attachShader(p,mkS(ctx,ctx.VERTEX_SHADER,vs));ctx.attachShader(p,mkS(ctx,ctx.FRAGMENT_SHADER,fs));ctx.linkProgram(p);return p}
 
 var VS='attribute vec3 aPos,aNorm,aCol;uniform mat4 uMVP,uMod;uniform mat3 uNM;varying vec3 vC,vN,vW;void main(){vec4 w=uMod*vec4(aPos,1.0);vW=w.xyz;vN=normalize(uNM*aNorm);vC=aCol;gl_Position=uMVP*vec4(aPos,1.0);}';
-var FS='precision highp float;varying vec3 vC,vN,vW;uniform vec3 uCam;uniform float uEm,uAl,uInv;vec3 cL(vec3 lp,vec3 lc,float li,vec3 n,vec3 vd,vec3 al){vec3 ld=normalize(lp-vW);float d=max(dot(n,ld),0.0);vec3 df=d*lc*li;vec3 rd=reflect(-ld,n);float sp=pow(max(dot(vd,rd),0.0),128.0);vec3 spc=sp*lc*li*1.2;float ds=length(lp-vW);return(df+spc)/(1.0+0.003*ds*ds);}void main(){vec3 n=normalize(vN),vd=normalize(uCam-vW),al=vC;vec3 l=al*0.06;l+=cL(vec3(6,8,6),vec3(1,.95,.9),2.5,n,vd,al);l+=cL(vec3(-5,4,-3),vec3(.2,.5,1),1.8,n,vd,al);l+=cL(vec3(0,-4,5),vec3(1,.2,.5),1.2,n,vd,al);l+=cL(vec3(4,0,-6),vec3(.1,1,.4),0.9,n,vd,al);float fr=pow(1.0-max(dot(vd,n),0.0),4.0);vec3 fc=(l+fr*vec3(.3,.6,.9)*0.4+al*uEm);fc=pow(fc/(fc+vec3(1.0)),vec3(1.0/2.2));fc=mix(fc,1.0-fc,uInv);gl_FragColor=vec4(fc,uAl);}';
+var FS='precision highp float;varying vec3 vC,vN,vW;uniform vec3 uCam;uniform float uEm,uAl,uInv;float cL(vec3 lp,float li,vec3 n){vec3 ld=normalize(lp-vW);float d=max(dot(n,ld),0.0);float ds=length(lp-vW);return d*li/(1.0+0.003*ds*ds);}void main(){vec3 n=normalize(vN),vd=normalize(uCam-vW),al=vC;float light=.35+cL(vec3(6,8,6),1.0,n)+cL(vec3(-5,4,-3),.7,n)+cL(vec3(0,-4,5),.5,n);vec3 l=al*(light+uEm);float fr=pow(1.0-max(dot(vd,n),0.0),4.0);vec3 fc=l+al*uEm+fr*al*.12;fc=pow(fc/(fc+vec3(1.0)),vec3(1.0/2.2));fc=mix(fc,1.0-fc,uInv);gl_FragColor=vec4(fc,uAl);}';
 var PVS='attribute vec3 aP;attribute float aS,aA;attribute vec3 aC;uniform mat4 uPr,uVw;varying vec3 vC;varying float vA;void main(){vec4 vp=uVw*vec4(aP,1.0);gl_Position=uPr*vp;gl_PointSize=max(aS*1500.0/-vp.z,6.0);vC=aC;vA=aA;}';
 var PFS='precision highp float;varying vec3 vC;varying float vA;void main(){vec2 c=gl_PointCoord-0.5;float d=length(c);if(d>0.5)discard;gl_FragColor=vec4(vC,vA);}';
 
@@ -2925,6 +2974,7 @@ cubeError=function(txt){studioPrintColor('error: '+txt,'rgba(255,80,80,0.8)');st
 cubeWarn=function(txt){studioPrintColor(txt,'rgba(255,200,50,0.6)');studioTerminalPrint(txt,'warn')};
 cubeOk=function(txt){studioPrintColor(txt,'rgba(100,255,100,0.6)');studioTerminalPrint(txt,'ok')};
 var origGuiCreateWin=guiCreateWin;
+var origGuiCreateTaskbar=guiCreateTaskbar;
 var origGuiAddLabel=guiAddLabel;
 var origGuiAddButton=guiAddButton;
 var origGuiAddInput=guiAddInput;
@@ -2957,6 +3007,20 @@ guiWins[id]={el:win,content:ct,title:tb};
 activeWin=id;
 return id;
 };
+guiCreateTaskbar=function(title,h){
+if(!studioPreviewEnabled)return null;
+var id='tb_'+Date.now()+'_'+Math.floor(Math.random()*999);
+var win=document.createElement('div');win.className='gui-window';win.id=id;
+win.style.cssText='position:absolute;left:0;bottom:0;width:100%;height:'+(parseInt(h)+30)+'px;display:flex;flex-direction:column;border-radius:8px 8px 0 0;z-index:70';
+var tb=document.createElement('div');tb.className='gui-title';
+var tl=document.createElement('span');tl.textContent=formatGuiText(title);
+var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
+cb.onclick=function(){win.remove();delete guiWins[id];if(activeWin===id)activeWin=null};
+tb.appendChild(tl);tb.appendChild(cb);
+var ct=document.createElement('div');ct.className='gui-content';ct.style.height=h+'px';
+win.appendChild(tb);win.appendChild(ct);previewArea.appendChild(win);
+guiWins[id]={el:win,content:ct,title:tb};activeWin=id;return id;
+};
 guiAddLabel=function(text,x,y){var w=guiGetActive();if(!w)return;var lbl=document.createElement('div');lbl.className='gui-label';lbl.textContent=formatGuiText(text);lbl.style.left=x+'px';lbl.style.top=y+'px';w.content.appendChild(lbl)};
 guiAddButton=function(text,x,y,action){var w=guiGetActive();if(!w)return;var btn=document.createElement('button');btn.className='gui-button';btn.textContent=formatGuiText(text);btn.style.left=x+'px';btn.style.top=y+'px';btn.onclick=function(){var cleaned=normalizeVoidScriptAction(action);var vsFn=voidScriptLang[cleaned.split(/\s+/)[0].toLowerCase()];if(vsFn){runVoidScript(cleaned,'button action')}else{cubeEval(cleaned)}};w.content.appendChild(btn)};
 guiAddInput=function(placeholder,x,y){var w=guiGetActive();if(!w)return;var inp=document.createElement('input');inp.className='gui-input';inp.placeholder=formatGuiText(placeholder);inp.style.left=x+'px';inp.style.top=y+'px';w.content.appendChild(inp)};
@@ -2971,6 +3035,7 @@ cubeError=studioOrigError;
 cubeWarn=studioOrigWarn;
 cubeOk=studioOrigOk;
 guiCreateWin=origGuiCreateWin;
+guiCreateTaskbar=origGuiCreateTaskbar;
 guiAddLabel=origGuiAddLabel;
 guiAddButton=origGuiAddButton;
 guiAddInput=origGuiAddInput;
@@ -2995,7 +3060,7 @@ var sp=ln.split(/\s+/);
 var op=sp[0]?sp[0].toLowerCase():'';
 if(op==='loop'){
 var count=parseInt(sp[1],10)||1;
-count=Math.min(count,MAX_LOOP_ITERATIONS);
+count=Math.min(count,isAdmin?999999:MAX_LOOP_ITERATIONS);
 loopStack.push({count:count,startLine:expanded.length});
 expanded.push({type:'loop',count:count});
 continue;
@@ -3104,9 +3169,15 @@ document.getElementById('studioExit').onclick=closeStudio;
 document.getElementById('studioHelp').onclick=function(){var p=document.getElementById('studioHelpPanel');p.classList.toggle('active')};
 document.getElementById('studioHelpClose').onclick=function(){document.getElementById('studioHelpPanel').classList.remove('active')};
 document.getElementById('studioOpen').onclick=function(){
-var inp=document.createElement('input');inp.type='file';inp.accept='.vsc,.txt';
+var inp=document.createElement('input');inp.type='file';inp.accept='.vsc';
 inp.onchange=function(e){
 var file=e.target.files[0];if(!file)return;
+var name=file.name||'';
+if(!/\.vsc$/i.test(name)){
+studioPrintColor('rejected: VoidStudio only opens .vsc files.','rgba(255,80,80,0.8)');
+inp.value='';
+return;
+}
 var reader=new FileReader();
 reader.onload=function(ev){
 code.value=ev.target.result;
