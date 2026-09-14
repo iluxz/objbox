@@ -800,9 +800,19 @@ document.body.appendChild(el);
 setTimeout(function(){el.remove()},4000);
 }
 showBroadcast({message:msg,sender:'admin'});
-// send to relay
-if(window._broadcastRelay){
-fetch(window._broadcastRelay,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,sender:window._broadcastSenderId||'void-admin'})}).catch(function(){cubeWarn('broadcast: relay unreachable')});
+// send to gist relay
+if(BROADCAST_GIST_ID&&window._broadcastToken){
+fetch(BROADCAST_RAW_URL+'?t='+Date.now()).then(function(r){return r.json()}).then(function(broadcasts){
+var entry={message:msg,sender:window._broadcastSenderId||'void-admin',time:Date.now()};
+broadcasts.push(entry);
+if(broadcasts.length>50)broadcasts=broadcasts.slice(-50);
+var patchData=JSON.stringify({files:{'broadcasts.json':{content:JSON.stringify(broadcasts,null,2)}}});
+return fetch('https://api.github.com/gists/'+BROADCAST_GIST_ID,{
+method:'PATCH',
+headers:{'Authorization':'token '+window._broadcastToken,'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'cube-broadcast'},
+body:patchData
+});
+}).then(function(){cubePrint('broadcast: sent to relay')}).catch(function(e){cubeWarn('broadcast: relay unreachable')});
 }
 return true}},
 'debug':{help:'debug — show internal state',fn:function(a){
@@ -851,18 +861,21 @@ var code=a.join(' ');
 try{var result=Function('"use strict";return ('+code+')')();cubePrint('eval: '+String(result))}
 catch(e){cubeError('eval: '+e.message)}
 return true}},
-'relay':{help:'relay <url> — set the broadcast relay URL',fn:function(a){
+'relay':{help:'relay [token] [sender-id] — connect to broadcast relay',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
-if(!a.length){cubePrint('relay: '+(window._broadcastRelay||'not set'));return true}
-window._broadcastRelay=a[0];
-window._broadcastSenderId=a[1]||'void-admin';
-cubePrint('relay: connected to '+a[0]);
+if(a[0])window._broadcastToken=a[0];
+if(a[1])window._broadcastSenderId=a[1];
+if(!window._broadcastToken){var stored=localStorage.getItem('cube_broadcast_token');if(stored)window._broadcastToken=stored}
+if(!window._broadcastToken){cubeError('relay: usage relay <gist-token> [sender-id] — token is saved for future sessions');return true}
+localStorage.setItem('cube_broadcast_token',window._broadcastToken);
+window._broadcastSenderId=window._broadcastSenderId||'void-admin';
+cubePrint('relay: connected to broadcast gist');
 cubePrint('relay: sender id = '+window._broadcastSenderId);
 // start listening
 if(window._broadcastListener)clearInterval(window._broadcastListener);
 var seen={};
 window._broadcastListener=setInterval(function(){
-fetch(window._broadcastRelay).then(function(r){return r.json()}).then(function(msgs){
+fetch(BROADCAST_RAW_URL+'?t='+Date.now()).then(function(r){return r.json()}).then(function(msgs){
 for(var m=0;m<msgs.length;m++){
 var b=msgs[m];
 var key=b.time+':'+b.sender;
@@ -894,6 +907,8 @@ var isFrozen=false;
 var isNoclip=false;
 var scriptSpeed=1;
 var adminThemes={'void':1,'blood':2,'ice':3,'toxic':4,'void-alt':5,'glitch':6,'corrupt':7,'null':8};
+var BROADCAST_GIST_ID='7915e15f4542091944fd92596ab5e19d';
+var BROADCAST_RAW_URL='https://gist.githubusercontent.com/iluxz/7915e15f4542091944fd92596ab5e19d/raw/broadcasts.json';
 var vsCancel=false;
 
 var guiWins={};
