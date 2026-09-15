@@ -461,7 +461,10 @@ var transmissions=[
 function showTransmission(){
 if(pkgEffects&&pkgEffects.voidMute)return;
 var msg;
-if(window._cubeDay===3&&Math.random()<0.3){
+if(window._cubeDay===1&&Math.random()<0.5){
+var mMsgs=['...','again?','...','the void is tired','...','mondays.','...','why'];
+msg=mMsgs[Math.floor(Math.random()*mMsgs.length)];
+}else if(window._cubeDay===3&&Math.random()<0.3){
 var wMsgs=['the furnace is lit','the cube is dancing','HE HEATS','the beats find the void','fire in the geometry','the rhythm remembers','周三快乐'];
 msg=wMsgs[Math.floor(Math.random()*wMsgs.length)];
 }else{
@@ -1576,6 +1579,12 @@ if(cur)parts.push(cur);return parts;
 var parts=splitArgs(raw);
 var cmd=parts[0].toLowerCase();
 if(!cmd)return;
+
+// monday mode - the void is depressed
+if(window._cubeDay===1){
+cubePrint('...');
+return;
+}
 
 // handle dot notation: cube.get -> cmd='cube', sub='get'
 var sub='';
@@ -3134,7 +3143,8 @@ if(now-lastT>=1000){fps=frames;if(fps>maxFps)maxFps=fps;frames=0;lastT=now;stats
 if(fps<lastFps-10&&fps<40)triggerGlitch();lastFps=fps}
 updateTravel(dt);
 if(!drag&&!isFrozen){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if(Math.abs(vY)<.0001)vY=0}
-var audioLevel=getAudioLevel();
+var _mon=window._cubeDay===1;
+var audioLevel=_mon?0:getAudioLevel();
 var _wed=window._cubeDay===3;
 var audioPulse=1.0+audioLevel*(_wed?0.35:0.08);
 var wedBoost=_wed?8:1;
@@ -3145,7 +3155,9 @@ var th=themes[curTheme]||themes['1'];
 var bgPulse=audioLevel*(_wed?0.2:0.03);
 var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
-if(zr.bgOverride){
+if(_mon){
+gl.clearColor(0.08,0.08,0.08,1);
+}else if(zr.bgOverride){
 gl.clearColor(zr.bgOverride[0],zr.bgOverride[1],zr.bgOverride[2],zr.bgOverride[3]);
 }else{
 gl.clearColor(
@@ -3196,7 +3208,7 @@ if(!zr.renderOff){
 gl.useProgram(prog);gl.uniform3f(uCam,0,0,-zZ);
 
 // outer
-var _oSpd=_wed?4:1;
+var _oSpd=_mon?0:(_wed?4:1);
 var oMod=mMul(mMul(mRotX(t*.15*_oSpd),mRotY(t*.2*_oSpd)),mRotZ(t*.1*_oSpd));
 if(_wed){
 var _breathe=1.0+wedBeat*0.8;
@@ -3210,28 +3222,28 @@ oMod[12]+=(Math.random()-0.5)*jt;oMod[13]+=(Math.random()-0.5)*jt;oMod[14]+=(Mat
 }
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),oMod));
 gl.uniformMatrix4fv(uMod,false,oMod);gl.uniformMatrix3fv(uNM,false,mNorm(oMod));
-gl.uniform1f(uEm,audioLevel*0.05*wedBoost);gl.uniform1f(uAl,.25+audioLevel*0.05*wedBoost);
+gl.uniform1f(uEm,_mon?0.02:audioLevel*0.05*wedBoost);gl.uniform1f(uAl,_mon?0.15:(.25+audioLevel*0.05*wedBoost));
 gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
 bindM(outerBuf);gl.drawArrays(gl.TRIANGLES,0,36);
 gl.depthMask(true);gl.uniform1f(uAl,1);
 
 // inner
-var _wSpd=_wed?3:1;
+var _wSpd=_mon?0:(_wed?3:1);
 var _wRad=_wed?1.0+wedBeat*1.2:1;
 for(var i=0;i<innerC.length;i++){
 var c=innerC[i],oa=t*c.s*_wSpd+c.p;
-var _co=c.o*_wRad;
-var ox=Math.cos(oa)*_co,oy=Math.sin(oa*.7)*_co*.5+wedBeat*0.6*Math.sin(t*8+i),oz=Math.sin(oa)*_co;
+var _co=_mon?c.o:(c.o*_wRad);
+var ox=Math.cos(oa)*_co,oy=Math.sin(oa*.7)*_co*.5+(_mon?0:wedBeat*0.6*Math.sin(t*8+i)),oz=Math.sin(oa)*_co;
 if(zr.cubeJitter){
 var jit=zr.cubeJitter*3;
 ox+=(Math.random()-0.5)*jit;oy+=(Math.random()-0.5)*jit;oz+=(Math.random()-0.5)*jit;
 }
-var _iSc=_wed?1.0+wedBeat*0.9:1;
+var _iSc=_mon?1:(_wed?1.0+wedBeat*0.9:1);
 var iMod=mMul(mMul(mTrans(ox,oy,oz),mMul(mMul(mRotX(t*c.sp*_wSpd),mRotY(t*c.sp*.7*_wSpd)),mRotZ(t*c.sp*.3*_wSpd))),mScale(_iSc,_iSc,_iSc));
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),iMod));
 gl.uniformMatrix4fv(uMod,false,iMod);gl.uniformMatrix3fv(uNM,false,mNorm(iMod));
-gl.uniform1f(uEm,(0.2+wedBeat*0.5)*audioPulse*wedBoost);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
+gl.uniform1f(uEm,_mon?0.01:(0.2+wedBeat*0.5)*audioPulse*wedBoost);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 bindM(iBufs[i]);gl.drawArrays(gl.TRIANGLES,0,iCnts[i])}
 
 // travel speed lines
