@@ -261,7 +261,7 @@ END LOG
 <div class="help-cmd"><span class="hl">theme</span> &lt;1-5&gt; — switch color theme</div>
 <div class="help-cmd"><span class="hl">glitch</span> — trigger glitch effect</div>
 <div class="help-cmd"><span class="hl">shape</span> &lt;name&gt; — change shape (cube/sphere/tetra/cyl)</div>
-<div class="help-cmd"><span class="hl">bgm</span> — toggle background music</div>
+<div class="help-cmd"><span class="hl">bgm</span> — toggle background music (wednesdays: the furnace)</div>
 <div class="help-cmd"><span class="hl">clear</span> — clear the output log</div>
 <div class="help-cmd"><span class="hl">travel</span> &lt;zone&gt; — travel through the void</div>
 </div>
@@ -346,6 +346,7 @@ END LOG
 <div class="help-cmd"><span class="hl">freeze</span> &lt;on|off&gt; — freeze the cube in place</div>
 <div class="help-cmd"><span class="hl">noclip</span> &lt;on|off&gt; — drag windows anywhere, even offscreen</div>
 <div class="help-cmd"><span class="hl">override</span> theme &lt;1-8&gt; — access hidden themes</div>
+<div class="help-cmd"><span class="hl">setday</span> &lt;0-6|mon-sun|reset&gt; — override the day (test wednesday music, etc)</div>
 <div class="help-cmd"><span class="hl">eval</span> &lt;code&gt; — run raw javascript (dangerous)</div>
 <div class="help-cmd"><span class="hl">relay</span> &lt;url&gt; [sender-id] — connect to broadcast relay</div>
 <div class="help-cmd"><span class="hl">unlisten</span> — stop receiving broadcasts</div>
@@ -366,10 +367,13 @@ END LOG
 </div>
 </div>
 </div>
-<audio id="bgm" loop preload="auto"><source src="drone2lp.wav" type="audio/wav"></audio>
+<audio id="bgm" loop preload="auto"></audio>
 <script>
 // audio
 var bgm=document.getElementById('bgm');bgm.volume=0.3;
+window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
+function loadDayBgm(){bgm.src=window._cubeDay===3?'the_furnace.mp3':'drone2lp.wav'}
+loadDayBgm();
 document.addEventListener('click',function(){if(bgm.paused)bgm.play()},{once:true});
 bgm.play().catch(function(){});
 
@@ -746,7 +750,7 @@ travelTo(resolved);
 return true}},
 'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
-'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();return true}},
+'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();var t=bgm.src.includes('furnace')?'the furnace':'void drone';cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
 'shape':{help:'shape <name> — change shape (cube/sphere/tetra/cyl)',fn:function(a){if(a[0]){curShape=a[0];rebuild(a[0])}return true}},
 'warn':{help:'warn <text> — print a warning',fn:function(a){cubeWarn(a.join(' '));return true}},
 'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}},
@@ -828,6 +832,8 @@ cubePrint('frozen: '+isFrozen);
 cubePrint('noclip: '+isNoclip);
 cubePrint('speed: '+scriptSpeed+'x');
 cubePrint('godmode: '+(window._godmode||false));
+var _dn=['sun','mon','tue','wed','thu','fri','sat'];
+cubePrint('day: '+_dn[window._cubeDay]+(window._cubeDayOverride?' (overridden)':' (real)'));
 cubePrint('current zone: '+zones[currentZone].name);
 cubePrint('active windows: '+Object.keys(guiWins).length+'/'+MAX_GUI_WINDOWS);
 cubePrint('cube vars: '+Object.keys(cubeVars).length);
@@ -859,6 +865,19 @@ if(isNaN(t)||t<1||t>8){cubeError('override: theme must be 1-8');return true}
 applyTheme(String(t));
 cubePrint('override theme: '+t);
 return true}},
+'setday':{help:'setday <0-6|mon-sun|reset> — override the day for testing',fn:function(a){
+if(!isAdmin){cubeError('admin access required');return true}
+var days={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6,0:0,1:1,2:2,3:3,4:4,5:5,6:6};
+var names=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+if(!a.length||a[0].toLowerCase()==='reset'){
+window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
+loadDayBgm();cubeOk('day reset to '+names[window._cubeDay]+' (real time)');return true}
+var input=a[0].toLowerCase();
+if(days[input]===undefined){cubeError('setday: use 0-6, mon-sun, or reset');return true}
+window._cubeDay=days[input];window._cubeDayOverride=true;
+loadDayBgm();
+var t=window._cubeDay===3?'[the furnace]':'[void drone]';
+cubeOk('day set to '+names[window._cubeDay]+' — bgm: '+t);return true}},
 'eval':{help:'eval <code> — run raw javascript (dangerous)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
 if(!a.length){cubeError('eval: usage eval <code>');return true}
@@ -1579,7 +1598,7 @@ cubePrint('  cube.get       — show inner cube count');
 cubePrint('  cube.morph <n> — change shape');
 cubePrint('  cube.theme <n> — switch color theme (1-5)');
 cubePrint('  cube.glitch    — trigger glitch effect');
-cubePrint('  cube.bgm       — toggle music');
+cubePrint('  cube.bgm       — toggle music (wed: the furnace)');
 cubePrint('  cube.fps       — show current fps');
 cubePrint('  cube.particles — show particle count');
 cubePrint('  cube.time      — show void time');
@@ -1704,7 +1723,7 @@ cubePrint('  sleep <ms>     — wait alias');
 cubePrint('  random <n> <min> <max> — random integer variable');
 cubePrint('  assert <n> <v> — stop when a variable differs');
 cubePrint('  time           — void clock');
-cubePrint('  bgm            — toggle music');
+cubePrint('  bgm            — toggle music (wed: the furnace)');
 cubePrint('  clear          — clear output');
 cubePrint('  travel <zone>  — travel through the void');
 cubePrint('  void           — the void acknowledges');
@@ -1761,6 +1780,8 @@ applyTheme(idx);cubeOk('theme: '+themes[idx].name);return}
 if(sub==='glitch'){triggerGlitch();cubeOk('glitch triggered');return}
 if(sub==='bgm'){
 if(bgm.paused){bgm.play();cubeOk('music: on')}else{bgm.pause();cubeOk('music: off')}
+var t=bgm.src.includes('furnace')?'the furnace':'void drone';
+cubePrint('  track: '+t);
 return}
 if(sub==='fps'){cubePrint('fps: '+fps+' | max: '+maxFps);return}
 if(sub==='particles'){cubePrint('particles: '+NP);return}
