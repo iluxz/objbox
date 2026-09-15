@@ -738,8 +738,8 @@ cubePrint(a[0]+': '+(cubeVars[a[0]]!==undefined?cubeVars[a[0]]:'undefined'));ret
 'theme':{help:'theme <1-5> — change cube color',fn:function(a){var t=parseInt(a[0],10);if(t>=1&&t<=5){applyTheme(String(t))}else{cubeWarn('theme: out of range 1-5')};return true}},
 'morph':{help:'morph <n> — change inner shape',fn:function(a){var m=parseInt(a[0],10);if(m>=0&&m<=3){curShape=['cube','tetra','sphere','cyl'][m];rebuild(curShape)}else{cubeWarn('morph: out of range 0-3')};return true}},
 'glitch':{help:'glitch — short circuit the renderer',fn:function(){triggerGlitch();return true}},
-'wait':{help:'wait <ms> — sleep the void',fn:function(a){return {wait:Math.max(0,parseInt(a[0],10)||0)}}},
-'sleep':{help:'sleep <ms> — alias for wait',fn:function(a){return {wait:Math.max(0,parseInt(a[0],10)||0)}}},
+'wait':{help:'wait <seconds> — sleep the void',fn:function(a){return {wait:Math.max(0,(parseFloat(a[0])||0)*1000)}}},
+'sleep':{help:'sleep <seconds> — alias for wait',fn:function(a){return {wait:Math.max(0,(parseFloat(a[0])||0)*1000)}}},
 'vglitch':{help:'vglitch — deeper corruption',fn:function(){triggerGlitch();setTimeout(function(){triggerGlitch()},120);return true}},
 'time':{help:'time — void clock',fn:function(){var n=new Date();cubePrint(String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0'));return true}},
 'void':{help:'void — the void acknowledges',fn:function(){cubePrint('the void heard your script.');return true}},
@@ -751,8 +751,8 @@ if(gs==='window'){guiCreateWin(a[1]?a[1].replace(/"/g,''):'untitled',parseInt(a[
 if(gs==='taskbar'){guiCreateTaskbar(a[1]?a[1].replace(/"/g,''):'voidbar',parseInt(a[2],10)||52);return true}
 if(gs==='label'){guiAddLabel(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
 if(gs==='button'){guiAddButton(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
-if(gs==='input'){guiAddInput(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
-if(gs==='check'){guiAddCheck(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
+if(gs==='input'){guiAddInput(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
+if(gs==='check'){guiAddCheck(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
 if(gs==='image'){guiAddImage(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,parseInt(a[4],10)||0,parseInt(a[5],10)||0);return true}
 if(gs==='close'||gs==='destroy'){if(activeWin){guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null}return true}
 if(gs==='clear'){guiClearAll();return true}
@@ -1356,18 +1356,32 @@ else{cubeEval(cleaned)};
 };
 w.content.appendChild(el);
 }
-function guiAddInput(placeholder,x,y){
+function guiAddInput(placeholder,x,y,cmd){
 var w=guiGetActive();if(!w)return;
 var el=document.createElement('input');el.className='gui-input';el.placeholder=formatGuiText(placeholder);
 el.style.left=x+'px';el.style.top=y+'px';el.style.width='180px';
 el.addEventListener('keydown',function(e){e.stopPropagation()});
+if(cmd){
+el.addEventListener('change',function(){
+var cleaned=normalizeVoidScriptAction(cmd.replace(/\$val/g,el.value));
+var vsFn=voidScriptLang[cleaned.split(/\s+/)[0].toLowerCase()];
+if(vsFn){runVoidScript(cleaned,'input change')}else{cubeEval(cleaned)};
+});
+}
 w.content.appendChild(el);
 }
-function guiAddCheck(labelText,x,y){
+function guiAddCheck(labelText,x,y,cmd){
 var w=guiGetActive();if(!w)return;
 var wrap=document.createElement('label');wrap.className='gui-checkbox';
 wrap.style.left=x+'px';wrap.style.top=y+'px';
 var cb=document.createElement('input');cb.type='checkbox';
+if(cmd){
+cb.addEventListener('change',function(){
+var cleaned=normalizeVoidScriptAction(cmd.replace(/\$val/g,cb.checked?'true':'false'));
+var vsFn=voidScriptLang[cleaned.split(/\s+/)[0].toLowerCase()];
+if(vsFn){runVoidScript(cleaned,'check change')}else{cubeEval(cleaned)};
+});
+}
 wrap.appendChild(cb);wrap.appendChild(document.createTextNode(formatGuiText(labelText)));
 w.content.appendChild(wrap);
 }
@@ -3786,6 +3800,10 @@ var parts=packet.split(':');
 if(parts.length<3||!parts[1]){studioPrintColor('invalid packet — missing name or data','rgba(255,80,80,0.8)');return}
 try{
 var content=vscDecode(parts.slice(2).join(':'));
+if(/admin\s+machimochios|isAdmin\s*=\s*true/i.test(content)){
+studioPrintColor('import blocked — script contains admin unlock. nice try.','rgba(255,80,80,0.8)');
+modal.style.display='none';return;
+}
 var code=document.getElementById('studioCode');
 code.value=content;
 updateStudioLineNums();
