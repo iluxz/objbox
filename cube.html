@@ -347,6 +347,7 @@ END LOG
 <div class="help-cmd"><span class="hl">noclip</span> &lt;on|off&gt; — drag windows anywhere, even offscreen</div>
 <div class="help-cmd"><span class="hl">override</span> theme &lt;1-8&gt; — access hidden themes</div>
 <div class="help-cmd"><span class="hl">setday</span> &lt;mon-sat|earlsun|latesun|reset&gt; — override the day (test music, etc)</div>
+<div class="help-cmd"><span class="hl">setseason</span> &lt;winter|spring|summer|autumn|reset&gt; — override the season (changes particles)</div>
 <div class="help-cmd"><span class="hl">eval</span> &lt;code&gt; — run raw javascript (dangerous)</div>
 <div class="help-cmd"><span class="hl">relay</span> &lt;url&gt; [sender-id] — connect to broadcast relay</div>
 <div class="help-cmd"><span class="hl">unlisten</span> — stop receiving broadcasts</div>
@@ -903,6 +904,21 @@ else{cubeError('setday: use mon-sat, earlsun, latesun, or reset');return true}
 loadDayBgm();
 var t=window._cubeDay===3?'[the furnace]':window._cubeDay===5?'[landscaping]':window._cubeDay===6?'[friendly faith plate]':window._cubeDay===0&&window._cubeSunHalf==='early'?'[on little cat feet]':window._cubeDay===1?'[...]':'[void drone]';
 cubeOk('day set to '+(window._cubeDay===0?(window._cubeSunHalf==='early'?'early sunday':'late sunday'):names[window._cubeDay])+' — bgm: '+t);return true}},
+'setseason':{help:'setseason <winter|spring|summer|autumn|reset> — override the season',fn:function(a){
+if(!isAdmin){cubeError('admin access required');return true}
+var s={winter:0,spring:1,summer:2,autumn:3,fall:3};
+var names=['winter','spring','summer','autumn'];
+if(!a.length||a[0].toLowerCase()==='reset'){
+currentDayData.seasonIdx=getSeason(new Date().getMonth());
+currentDayData.season=SEASONS[currentDayData.seasonIdx];
+applyDayEffectsToParticles();
+cubeOk('season reset to '+currentDayData.season+' (real time)');return true}
+var input=a[0].toLowerCase();
+if(s[input]===undefined){cubeError('setseason: use winter, spring, summer, autumn, or reset');return true}
+currentDayData.seasonIdx=s[input];
+currentDayData.season=names[s[input]];
+applyDayEffectsToParticles();
+cubeOk('season set to '+names[s[input]]);return true}},
 'eval':{help:'eval <code> — run raw javascript (dangerous)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
 if(!a.length){cubeError('eval: usage eval <code>');return true}
@@ -1724,7 +1740,8 @@ cubePrint('  debug                  — show internal state');
 cubePrint('  freeze <on|off>        — freeze the cube');
 cubePrint('  noclip <on|off>        — drag windows offscreen');
 cubePrint('  override theme <1-8>   — access hidden themes');
-cubePrint('  setday <0-6|mon-sun|reset> — override the day');
+cubePrint('  setday <mon-sat|earlsun|latesun|reset> — override the day');
+cubePrint('  setseason <winter|spring|summer|autumn|reset> — override the season');
 cubePrint('  eval <code>            — run raw javascript');
 cubePrint('  relay [token] [id]     — connect broadcast relay');
 cubePrint('  unlisten               — stop receiving broadcasts');
