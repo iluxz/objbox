@@ -1689,6 +1689,21 @@ cubePrint('  studio         — open voidscript studio (requires voidstudio pack
 cubePrint('  echo <txt>     — echo text');
 cubePrint('  math <expr>    — evaluate math');
 cubePrint('  exit           — the void does not let you leave');
+cubePrint('');
+cubePrint('  --- admin (requires: admin <passphrase>) ---');
+cubePrint('  alwaysontop <on|off>   — keep window on top');
+cubePrint('  godmode <on|off>       — cube invulnerability');
+cubePrint('  speed <0.1-10>         — script execution speed');
+cubePrint('  broadcast <txt>        — send transmission to all zones');
+cubePrint('  debug                  — show internal state');
+cubePrint('  freeze <on|off>        — freeze the cube');
+cubePrint('  noclip <on|off>        — drag windows offscreen');
+cubePrint('  override theme <1-8>   — access hidden themes');
+cubePrint('  setday <0-6|mon-sun|reset> — override the day');
+cubePrint('  eval <code>            — run raw javascript');
+cubePrint('  relay [token] [id]     — connect broadcast relay');
+cubePrint('  unlisten               — stop receiving broadcasts');
+cubePrint('  danger list/run <name> — danger zone scripts');
 return}
 if(cmd==='voidscript'){showVoidScriptHelp();return}
 function showVoidScriptHelp(){
@@ -2836,7 +2851,7 @@ var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
 if(dd<0.3){
-if(window._cubeDay===1){cubePrint('...');return}
+if(window._cubeDay===1){cubePrint('obj: ...');return}
 var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()
 }
 });
