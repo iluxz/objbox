@@ -3132,12 +3132,13 @@ updateTravel(dt);
 if(!drag&&!isFrozen){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if(Math.abs(vY)<.0001)vY=0}
 var audioLevel=getAudioLevel();
 var _wed=window._cubeDay===3;
-var audioPulse=1.0+audioLevel*(_wed?0.25:0.08);
-var wedBoost=_wed?3.5:1;
+var audioPulse=1.0+audioLevel*(_wed?0.35:0.08);
+var wedBoost=_wed?6:1;
+var wedBeat=Math.pow(audioLevel,2)*(_wed?1.5:0);
 
 // audio visualizer background pulse
 var th=themes[curTheme]||themes['1'];
-var bgPulse=audioLevel*(_wed?0.12:0.03);
+var bgPulse=audioLevel*(_wed?0.18:0.03);
 var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
 if(zr.bgOverride){
@@ -3191,7 +3192,12 @@ if(!zr.renderOff){
 gl.useProgram(prog);gl.uniform3f(uCam,0,0,-zZ);
 
 // outer
-var oMod=mMul(mMul(mRotX(t*.15),mRotY(t*.2)),mRotZ(t*.1));
+var _oSpd=_wed?3.5:1;
+var oMod=mMul(mMul(mRotX(t*.15*_oSpd),mRotY(t*.2*_oSpd)),mRotZ(t*.1*_oSpd));
+if(_wed){
+var _breathe=1.0+wedBeat*0.15;
+oMod[0]*=_breathe;oMod[5]*=_breathe;oMod[10]*=_breathe;
+}
 if(zr.cubeJitter){
 var jt=zr.cubeJitter;
 oMod[12]+=(Math.random()-0.5)*jt;oMod[13]+=(Math.random()-0.5)*jt;oMod[14]+=(Math.random()-0.5)*jt;
@@ -3205,18 +3211,21 @@ bindM(outerBuf);gl.drawArrays(gl.TRIANGLES,0,36);
 gl.depthMask(true);gl.uniform1f(uAl,1);
 
 // inner
-var _wSpd=_wed?1.8:1;
+var _wSpd=_wed?2.5:1;
+var _wRad=_wed?1.0+wedBeat*0.4:1;
 for(var i=0;i<innerC.length;i++){
 var c=innerC[i],oa=t*c.s*_wSpd+c.p;
-var ox=Math.cos(oa)*c.o,oy=Math.sin(oa*.7)*c.o*.5,oz=Math.sin(oa)*c.o;
+var _co=c.o*_wRad;
+var ox=Math.cos(oa)*_co,oy=Math.sin(oa*.7)*_co*.5,oz=Math.sin(oa)*_co;
 if(zr.cubeJitter){
 var jit=zr.cubeJitter*3;
 ox+=(Math.random()-0.5)*jit;oy+=(Math.random()-0.5)*jit;oz+=(Math.random()-0.5)*jit;
 }
-var iMod=mMul(mMul(mTrans(ox,oy,oz),mMul(mMul(mRotX(t*c.sp*_wSpd),mRotY(t*c.sp*.7*_wSpd)),mRotZ(t*c.sp*.3*_wSpd))),mScale(1,1,1));
+var _iSc=_wed?1.0+wedBeat*0.3:1;
+var iMod=mMul(mMul(mTrans(ox,oy,oz),mMul(mMul(mRotX(t*c.sp*_wSpd),mRotY(t*c.sp*.7*_wSpd)),mRotZ(t*c.sp*.3*_wSpd))),mScale(_iSc,_iSc,_iSc));
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),iMod));
 gl.uniformMatrix4fv(uMod,false,iMod);gl.uniformMatrix3fv(uNM,false,mNorm(iMod));
-gl.uniform1f(uEm,.15*audioPulse*wedBoost);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
+gl.uniform1f(uEm,(0.15+wedBeat*0.3)*audioPulse*wedBoost);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
 bindM(iBufs[i]);gl.drawArrays(gl.TRIANGLES,0,iCnts[i])}
 
 // travel speed lines
