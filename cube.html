@@ -261,7 +261,7 @@ END LOG
 <div class="help-cmd"><span class="hl">theme</span> &lt;1-5&gt; — switch color theme</div>
 <div class="help-cmd"><span class="hl">glitch</span> — trigger glitch effect</div>
 <div class="help-cmd"><span class="hl">shape</span> &lt;name&gt; — change shape (cube/sphere/tetra/cyl)</div>
-<div class="help-cmd"><span class="hl">bgm</span> — toggle background music (wednesdays: the furnace)</div>
+<div class="help-cmd"><span class="hl">bgm</span> — toggle background music (wed: furnace, fri: landscaping)</div>
 <div class="help-cmd"><span class="hl">clear</span> — clear the output log</div>
 <div class="help-cmd"><span class="hl">travel</span> &lt;zone&gt; — travel through the void</div>
 </div>
@@ -374,7 +374,9 @@ var bgm=document.getElementById('bgm');bgm.volume=0.3;
 window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
 function loadDayBgm(){
 var wasPlaying=!bgm.paused;
-bgm.src=window._cubeDay===3?'the_furnace.mp3':'drone2lp.wav';
+if(window._cubeDay===3)bgm.src='the_furnace.mp3';
+else if(window._cubeDay===5)bgm.src='friday.mp3';
+else bgm.src='drone2lp.wav';
 if(wasPlaying)bgm.addEventListener('canplay',function(){bgm.play()},{once:true});
 }
 loadDayBgm();
@@ -461,9 +463,8 @@ var transmissions=[
 function showTransmission(){
 if(pkgEffects&&pkgEffects.voidMute)return;
 var msg;
-if(window._cubeDay===1&&Math.random()<0.5){
-var mMsgs=['...','again?','...','the void is tired','...','mondays.','...','why'];
-msg=mMsgs[Math.floor(Math.random()*mMsgs.length)];
+if(window._cubeDay===1){
+msg='...';
 }else if(window._cubeDay===3&&Math.random()<0.3){
 var wMsgs=['the furnace is lit','the cube is dancing','HE HEATS','the beats find the void','fire in the geometry','the rhythm remembers','周三快乐'];
 msg=wMsgs[Math.floor(Math.random()*wMsgs.length)];
@@ -763,7 +764,7 @@ travelTo(resolved);
 return true}},
 'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
-'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();var t=bgm.src.includes('furnace')?'the furnace':'void drone';cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
+'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':'void drone';cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
 'shape':{help:'shape <name> — change shape (cube/sphere/tetra/cyl)',fn:function(a){if(a[0]){curShape=a[0];rebuild(a[0])}return true}},
 'warn':{help:'warn <text> — print a warning',fn:function(a){cubeWarn(a.join(' '));return true}},
 'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}},
@@ -889,7 +890,7 @@ var input=a[0].toLowerCase();
 if(days[input]===undefined){cubeError('setday: use 0-6, mon-sun, or reset');return true}
 window._cubeDay=days[input];window._cubeDayOverride=true;
 loadDayBgm();
-var t=window._cubeDay===3?'[the furnace]':'[void drone]';
+var t=window._cubeDay===3?'[the furnace]':window._cubeDay===5?'[landscaping]':window._cubeDay===1?'[...]':'[void drone]';
 cubeOk('day set to '+names[window._cubeDay]+' — bgm: '+t);return true}},
 'eval':{help:'eval <code> — run raw javascript (dangerous)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
@@ -1580,12 +1581,6 @@ var parts=splitArgs(raw);
 var cmd=parts[0].toLowerCase();
 if(!cmd)return;
 
-// monday mode - the void is depressed
-if(window._cubeDay===1){
-cubePrint('...');
-return;
-}
-
 // handle dot notation: cube.get -> cmd='cube', sub='get'
 var sub='';
 if(cmd.indexOf('.')!==-1){
@@ -1799,7 +1794,7 @@ applyTheme(idx);cubeOk('theme: '+themes[idx].name);return}
 if(sub==='glitch'){triggerGlitch();cubeOk('glitch triggered');return}
 if(sub==='bgm'){
 if(bgm.paused){bgm.play();cubeOk('music: on')}else{bgm.pause();cubeOk('music: off')}
-var t=bgm.src.includes('furnace')?'the furnace':'void drone';
+var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':'void drone';
 cubePrint('  track: '+t);
 return}
 if(sub==='fps'){cubePrint('fps: '+fps+' | max: '+maxFps);return}
@@ -2840,7 +2835,10 @@ if(wasDrag)return;
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
-if(dd<0.3){var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()}
+if(dd<0.3){
+if(window._cubeDay===1){cubePrint('...');return}
+var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()
+}
 });
 
 // === HOVER INNER CUBES ===
@@ -3146,13 +3144,15 @@ if(!drag&&!isFrozen){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if
 var _mon=window._cubeDay===1;
 var audioLevel=_mon?0:getAudioLevel();
 var _wed=window._cubeDay===3;
-var audioPulse=1.0+audioLevel*(_wed?0.35:0.08);
-var wedBoost=_wed?8:1;
-var wedBeat=_wed?audioLevel:0;
+var _fri=window._cubeDay===5;
+var _party=_wed||_fri;
+var audioPulse=1.0+audioLevel*(_party?0.35:0.08);
+var wedBoost=_party?8:1;
+var wedBeat=_party?audioLevel:0;
 
 // audio visualizer background pulse
 var th=themes[curTheme]||themes['1'];
-var bgPulse=audioLevel*(_wed?0.2:0.03);
+var bgPulse=audioLevel*(_party?0.2:0.03);
 var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
 if(_mon){
@@ -3208,7 +3208,7 @@ if(!zr.renderOff){
 gl.useProgram(prog);gl.uniform3f(uCam,0,0,-zZ);
 
 // outer
-var _oSpd=_mon?0:(_wed?4:1);
+var _oSpd=_mon?0:(_party?4:1);
 var oMod=mMul(mMul(mRotX(t*.15*_oSpd),mRotY(t*.2*_oSpd)),mRotZ(t*.1*_oSpd));
 if(_wed){
 var _breathe=1.0+wedBeat*0.8;
@@ -3229,8 +3229,8 @@ bindM(outerBuf);gl.drawArrays(gl.TRIANGLES,0,36);
 gl.depthMask(true);gl.uniform1f(uAl,1);
 
 // inner
-var _wSpd=_mon?0:(_wed?3:1);
-var _wRad=_wed?1.0+wedBeat*1.2:1;
+var _wSpd=_mon?0:(_party?3:1);
+var _wRad=_party?1.0+wedBeat*1.2:1;
 for(var i=0;i<innerC.length;i++){
 var c=innerC[i],oa=t*c.s*_wSpd+c.p;
 var _co=_mon?c.o:(c.o*_wRad);
@@ -3239,7 +3239,7 @@ if(zr.cubeJitter){
 var jit=zr.cubeJitter*3;
 ox+=(Math.random()-0.5)*jit;oy+=(Math.random()-0.5)*jit;oz+=(Math.random()-0.5)*jit;
 }
-var _iSc=_mon?1:(_wed?1.0+wedBeat*0.9:1);
+var _iSc=_mon?1:(_party?1.0+wedBeat*0.9:1);
 var iMod=mMul(mMul(mTrans(ox,oy,oz),mMul(mMul(mRotX(t*c.sp*_wSpd),mRotY(t*c.sp*.7*_wSpd)),mRotZ(t*c.sp*.3*_wSpd))),mScale(_iSc,_iSc,_iSc));
 gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),iMod));
 gl.uniformMatrix4fv(uMod,false,iMod);gl.uniformMatrix3fv(uNM,false,mNorm(iMod));
