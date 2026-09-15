@@ -346,7 +346,7 @@ END LOG
 <div class="help-cmd"><span class="hl">freeze</span> &lt;on|off&gt; — freeze the cube in place</div>
 <div class="help-cmd"><span class="hl">noclip</span> &lt;on|off&gt; — drag windows anywhere, even offscreen</div>
 <div class="help-cmd"><span class="hl">override</span> theme &lt;1-8&gt; — access hidden themes</div>
-<div class="help-cmd"><span class="hl">setday</span> &lt;0-6|mon-sun|reset&gt; — override the day (test wednesday music, etc)</div>
+<div class="help-cmd"><span class="hl">setday</span> &lt;mon-sat|earlsun|latesun|reset&gt; — override the day (test music, etc)</div>
 <div class="help-cmd"><span class="hl">eval</span> &lt;code&gt; — run raw javascript (dangerous)</div>
 <div class="help-cmd"><span class="hl">relay</span> &lt;url&gt; [sender-id] — connect to broadcast relay</div>
 <div class="help-cmd"><span class="hl">unlisten</span> — stop receiving broadcasts</div>
@@ -374,7 +374,7 @@ var bgm=document.getElementById('bgm');bgm.volume=0.3;
 window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
 function loadDayBgm(){
 var wasPlaying=!bgm.paused;
-var h=new Date().getHours();
+var h=window._cubeSunHalf==='early'?0:(window._cubeSunHalf==='late'?13:new Date().getHours());
 if(window._cubeDay===3)bgm.src='the_furnace.mp3';
 else if(window._cubeDay===5)bgm.src='friday.mp3';
 else if(window._cubeDay===6)bgm.src='friendly_faith_plate.mp3';
@@ -468,7 +468,7 @@ if(pkgEffects&&pkgEffects.voidMute)return;
 var msg;
 if(window._cubeDay===1){
 msg='...';
-}else if(window._cubeDay===0&&new Date().getHours()<12&&Math.random()<0.3){
+}else if(window._cubeDay===0&&(window._cubeSunHalf==='early'||(!window._cubeDayOverride&&new Date().getHours()<12))&&Math.random()<0.3){
 var eMsgs=['pretty nice day, huh','the cube is at peace','niko says hi','the sun is warm','enjoy this while it lasts','the world is still'];
 msg=eMsgs[Math.floor(Math.random()*eMsgs.length)];
 }else if(window._cubeDay===3&&Math.random()<0.3){
@@ -888,19 +888,21 @@ if(isNaN(t)||t<1||t>8){cubeError('override: theme must be 1-8');return true}
 applyTheme(String(t));
 cubePrint('override theme: '+t);
 return true}},
-'setday':{help:'setday <0-6|mon-sun|reset> — override the day for testing',fn:function(a){
+'setday':{help:'setday <mon-sat|earlsun|latesun|reset> — override the day for testing',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
-var days={sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6,0:0,1:1,2:2,3:3,4:4,5:5,6:6};
-var names=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+var days={mon:1,tue:2,wed:3,thu:4,fri:5,sat:6,earlsun:0,latesun:0,0:0,1:1,2:2,3:3,4:4,5:5,6:6};
+var names={0:'sunday',1:'monday',2:'tuesday',3:'wednesday',4:'thursday',5:'friday',6:'saturday'};
 if(!a.length||a[0].toLowerCase()==='reset'){
-window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
+window._cubeDay=new Date().getDay();window._cubeDayOverride=false;window._cubeSunHalf='';
 loadDayBgm();cubeOk('day reset to '+names[window._cubeDay]+' (real time)');return true}
 var input=a[0].toLowerCase();
-if(days[input]===undefined){cubeError('setday: use 0-6, mon-sun, or reset');return true}
-window._cubeDay=days[input];window._cubeDayOverride=true;
+if(input==='earlsun'){window._cubeDay=0;window._cubeDayOverride=true;window._cubeSunHalf='early'}
+else if(input==='latesun'){window._cubeDay=0;window._cubeDayOverride=true;window._cubeSunHalf='late'}
+else if(days[input]!==undefined){window._cubeDay=days[input];window._cubeDayOverride=true;window._cubeSunHalf=''}
+else{cubeError('setday: use mon-sat, earlsun, latesun, or reset');return true}
 loadDayBgm();
-var t=window._cubeDay===3?'[the furnace]':window._cubeDay===5?'[landscaping]':window._cubeDay===6?'[friendly faith plate]':window._cubeDay===0&&(new Date().getHours()<12)?'[on little cat feet]':window._cubeDay===1?'[...]':'[void drone]';
-cubeOk('day set to '+names[window._cubeDay]+' — bgm: '+t);return true}},
+var t=window._cubeDay===3?'[the furnace]':window._cubeDay===5?'[landscaping]':window._cubeDay===6?'[friendly faith plate]':window._cubeDay===0&&window._cubeSunHalf==='early'?'[on little cat feet]':window._cubeDay===1?'[...]':'[void drone]';
+cubeOk('day set to '+(window._cubeDay===0?(window._cubeSunHalf==='early'?'early sunday':'late sunday'):names[window._cubeDay])+' — bgm: '+t);return true}},
 'eval':{help:'eval <code> — run raw javascript (dangerous)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
 if(!a.length){cubeError('eval: usage eval <code>');return true}
@@ -3184,7 +3186,7 @@ var audioLevel=_mon?0:getAudioLevel();
 var _wed=window._cubeDay===3;
 var _fri=window._cubeDay===5;
 var _sat=window._cubeDay===6;
-var _sunEarly=window._cubeDay===0&&new Date().getHours()<12;
+var _sunEarly=window._cubeDay===0&&(window._cubeSunHalf==='early'||(!window._cubeDayOverride&&new Date().getHours()<12));
 var _party=_wed||_fri||_sat;
 var _fire=_sat;
 var _peaceful=_sunEarly;
