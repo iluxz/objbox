@@ -372,7 +372,11 @@ END LOG
 // audio
 var bgm=document.getElementById('bgm');bgm.volume=0.3;
 window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
-function loadDayBgm(){bgm.src=window._cubeDay===3?'the_furnace.mp3':'drone2lp.wav'}
+function loadDayBgm(){
+var wasPlaying=!bgm.paused;
+bgm.src=window._cubeDay===3?'the_furnace.mp3':'drone2lp.wav';
+if(wasPlaying)bgm.addEventListener('canplay',function(){bgm.play()},{once:true});
+}
 loadDayBgm();
 document.addEventListener('click',function(){if(bgm.paused)bgm.play()},{once:true});
 bgm.play().catch(function(){});
