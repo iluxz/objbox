@@ -261,7 +261,7 @@ END LOG
 <div class="help-cmd"><span class="hl">theme</span> &lt;1-5&gt; — switch color theme</div>
 <div class="help-cmd"><span class="hl">glitch</span> — trigger glitch effect</div>
 <div class="help-cmd"><span class="hl">shape</span> &lt;name&gt; — change shape (cube/sphere/tetra/cyl)</div>
-<div class="help-cmd"><span class="hl">bgm</span> — toggle background music (wed: furnace, fri: landscaping, sat: faith plate)</div>
+<div class="help-cmd"><span class="hl">bgm</span> — toggle background music (wed: furnace, fri: landscaping, sat: faith plate, sun am: cat feet)</div>
 <div class="help-cmd"><span class="hl">clear</span> — clear the output log</div>
 <div class="help-cmd"><span class="hl">travel</span> &lt;zone&gt; — travel through the void</div>
 </div>
@@ -374,9 +374,11 @@ var bgm=document.getElementById('bgm');bgm.volume=0.3;
 window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
 function loadDayBgm(){
 var wasPlaying=!bgm.paused;
+var h=new Date().getHours();
 if(window._cubeDay===3)bgm.src='the_furnace.mp3';
 else if(window._cubeDay===5)bgm.src='friday.mp3';
 else if(window._cubeDay===6)bgm.src='friendly_faith_plate.mp3';
+else if(window._cubeDay===0&&h<12)bgm.src='little_cat_feet.mp3';
 else bgm.src='drone2lp.wav';
 if(wasPlaying)bgm.addEventListener('canplay',function(){bgm.play()},{once:true});
 }
@@ -466,6 +468,9 @@ if(pkgEffects&&pkgEffects.voidMute)return;
 var msg;
 if(window._cubeDay===1){
 msg='...';
+}else if(window._cubeDay===0&&new Date().getHours()<12&&Math.random()<0.3){
+var eMsgs=['pretty nice day, huh','the cube is at peace','niko says hi','the sun is warm','enjoy this while it lasts','the world is still'];
+msg=eMsgs[Math.floor(Math.random()*eMsgs.length)];
 }else if(window._cubeDay===3&&Math.random()<0.3){
 var wMsgs=['the furnace is lit','the cube is dancing','HE HEATS','the beats find the void','fire in the geometry','the rhythm remembers','周三快乐'];
 msg=wMsgs[Math.floor(Math.random()*wMsgs.length)];
@@ -768,7 +773,7 @@ travelTo(resolved);
 return true}},
 'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
-'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':'void drone';cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
+'bgm':{help:'bgm — toggle background music',fn:function(){if(bgm.paused)bgm.play();else bgm.pause();var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':bgm.src.includes('cat')?'on little cat feet':'void drone';cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
 'shape':{help:'shape <name> — change shape (cube/sphere/tetra/cyl)',fn:function(a){if(a[0]){curShape=a[0];rebuild(a[0])}return true}},
 'warn':{help:'warn <text> — print a warning',fn:function(a){cubeWarn(a.join(' '));return true}},
 'error':{help:'error <text> — print an error',fn:function(a){cubeError(a.join(' '));return true}},
@@ -894,7 +899,7 @@ var input=a[0].toLowerCase();
 if(days[input]===undefined){cubeError('setday: use 0-6, mon-sun, or reset');return true}
 window._cubeDay=days[input];window._cubeDayOverride=true;
 loadDayBgm();
-var t=window._cubeDay===3?'[the furnace]':window._cubeDay===5?'[landscaping]':window._cubeDay===6?'[friendly faith plate]':window._cubeDay===1?'[...]':'[void drone]';
+var t=window._cubeDay===3?'[the furnace]':window._cubeDay===5?'[landscaping]':window._cubeDay===6?'[friendly faith plate]':window._cubeDay===0&&(new Date().getHours()<12)?'[on little cat feet]':window._cubeDay===1?'[...]':'[void drone]';
 cubeOk('day set to '+names[window._cubeDay]+' — bgm: '+t);return true}},
 'eval':{help:'eval <code> — run raw javascript (dangerous)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
@@ -1827,7 +1832,7 @@ applyTheme(idx);cubeOk('theme: '+themes[idx].name);return}
 if(sub==='glitch'){triggerGlitch();cubeOk('glitch triggered');return}
 if(sub==='bgm'){
 if(bgm.paused){bgm.play();cubeOk('music: on')}else{bgm.pause();cubeOk('music: off')}
-var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':'void drone';
+var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':bgm.src.includes('cat')?'on little cat feet':'void drone';
 cubePrint('  track: '+t);
 return}
 if(sub==='fps'){cubePrint('fps: '+fps+' | max: '+maxFps);return}
@@ -3179,11 +3184,13 @@ var audioLevel=_mon?0:getAudioLevel();
 var _wed=window._cubeDay===3;
 var _fri=window._cubeDay===5;
 var _sat=window._cubeDay===6;
+var _sunEarly=window._cubeDay===0&&new Date().getHours()<12;
 var _party=_wed||_fri||_sat;
 var _fire=_sat;
-var audioPulse=1.0+audioLevel*(_party?0.35:0.08);
-var wedBoost=_party?8:1;
-var wedBeat=_party?audioLevel:0;
+var _peaceful=_sunEarly;
+var audioPulse=1.0+audioLevel*(_party?0.35:(_peaceful?0.15:0.08));
+var wedBoost=_party?8:(_peaceful?2:1);
+var wedBeat=_party?audioLevel:(_peaceful?audioLevel*0.5:0);
 
 // audio visualizer background pulse
 var th=themes[curTheme]||themes['1'];
@@ -3192,6 +3199,9 @@ var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
 if(_mon){
 gl.clearColor(0.08,0.08,0.08,1);
+}else if(_peaceful){
+var _softPulse=0.5+audioLevel*0.15;
+gl.clearColor(0.05+_softPulse*0.03,0.06+_softPulse*0.04,0.12+_softPulse*0.06,1);
 }else if(zr.bgOverride){
 gl.clearColor(zr.bgOverride[0],zr.bgOverride[1],zr.bgOverride[2],zr.bgOverride[3]);
 }else{
