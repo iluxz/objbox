@@ -14,7 +14,7 @@ canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 .date{font-size:18px;font-weight:300;color:rgba(255,255,255,0.4);letter-spacing:2px;font-family:'Segoe UI',system-ui,sans-serif;margin-bottom:50px;text-align:right}
 .stats{position:fixed;bottom:20px;left:20px;color:rgba(43,208,208,0.7);font-family:'Consolas',monospace;font-size:12px;z-index:20;pointer-events:none}
 .hint{position:fixed;bottom:20px;right:20px;color:rgba(255,255,255,0.2);font-family:'Consolas',monospace;font-size:12px;z-index:20;pointer-events:none}
-#shapePalette{position:fixed;top:20px;right:20px;display:flex;flex-direction:column;gap:24px;z-index:30}
+#shapePalette{position:fixed;top:20px;right:60px;display:flex;flex-direction:column;gap:24px;z-index:30}
 .shapeBtn{width:52px;height:52px;border:1px solid rgba(43,208,208,0.3);border-radius:8px;background:rgba(0,0,0,0.6);cursor:pointer;transition:all 0.2s;position:relative;display:flex;align-items:center;justify-content:center}
 .shapeBtn:hover{border-color:rgba(43,208,208,0.8);background:rgba(43,208,208,0.1);transform:scale(1.1)}
 .shapeBtn.active{border-color:rgba(43,208,208,1);background:rgba(43,208,208,0.15);box-shadow:0 0 12px rgba(43,208,208,0.3)}
@@ -107,6 +107,9 @@ background-color:#ff00ff;background-image:url("data:image/png;base64,iVBORw0KGgo
 #studioTerminalBody .outLine.ok{color:rgba(100,255,100,0.6)}
 #studioTerminalBody .outLine.warn{color:rgba(255,200,50,0.6)}
 .studio-hint{position:absolute;bottom:8px;right:12px;font-size:10px;color:rgba(255,255,255,0.15);pointer-events:none}
+body.screenshot-mode #terminal,body.screenshot-mode #overlay,body.screenshot-mode #shapePalette,body.screenshot-mode #stats,body.screenshot-mode #hint,body.screenshot-mode #themeIndicator,body.screenshot-mode #trailCanvas,body.screenshot-mode #vignette,body.screenshot-mode #filmGrain,body.screenshot-mode #chromAb,body.screenshot-mode #weatherCanvas,body.screenshot-mode #sortCanvas,body.screenshot-mode #glitch,body.screenshot-mode #navLeft,body.screenshot-mode #navRight,body.screenshot-mode #reactorTerminal,body.screenshot-mode #reactorStatus{display:none!important;opacity:0!important;visibility:hidden!important}
+body.screenshot-mode .gui-window{display:none!important}
+#weatherCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:8}
 #studioHelpPanel{position:absolute;top:50px;right:20px;width:420px;max-height:calc(100vh - 80px);background:rgba(10,10,20,0.96);border:1px solid rgba(255,200,50,0.3);border-radius:8px;z-index:65;display:none;flex-direction:column;font-family:'Consolas',monospace;overflow:hidden}
 #studioHelpPanel.active{display:flex}
 .help-header{padding:10px 14px;border-bottom:1px solid rgba(255,200,50,0.15);font-size:12px;color:rgba(255,200,50,0.9);letter-spacing:2px;display:flex;justify-content:space-between;align-items:center}
@@ -146,12 +149,17 @@ the source code is a lie. the render is the truth.
 <body>
 <canvas id="main"></canvas>
 <canvas id="trailCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5"></canvas>
+<canvas id="weatherCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:8"></canvas>
+<canvas id="sortCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:12;display:none;background:#000"></canvas>
+<div id="navLeft" style="position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:55;width:40px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(43,208,208,0.1);border:1px solid rgba(43,208,208,0.3);border-radius:0 8px 8px 0;cursor:pointer;color:rgba(43,208,208,0.6);font-size:20px;transition:all 0.3s;pointer-events:auto" onmouseover="this.style.background='rgba(43,208,208,0.25)';this.style.color='rgba(43,208,208,1)'" onmouseout="this.style.background='rgba(43,208,208,0.1)';this.style.color='rgba(43,208,208,0.6)'" onclick="switchView('left')">&#9664;</div>
+<div id="navRight" style="position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:55;width:40px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(43,208,208,0.1);border:1px solid rgba(43,208,208,0.3);border-radius:8px 0 0 8px;cursor:pointer;color:rgba(43,208,208,0.6);font-size:20px;transition:all 0.3s;pointer-events:auto" onmouseover="this.style.background='rgba(43,208,208,0.25)';this.style.color='rgba(43,208,208,1)'" onmouseout="this.style.background='rgba(43,208,208,0.1)';this.style.color='rgba(43,208,208,0.6)'" onclick="switchView('right')">&#9654;</div>
+<canvas id="reactorCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;display:none;background:#000"></canvas>
 <div id="vignette"></div>
 <div id="filmGrain"></div>
 <div id="chromAb"></div>
 <div id="overlay"><div class="clock" id="clock">00:00</div><div class="date" id="date"></div></div>
 <div class="stats" id="stats"></div>
-<div class="hint" id="hint">drag to rotate | scroll to zoom | click shapes to morph | 1-5 for themes | click terminal to type</div>
+<div class="hint" id="hint">drag to rotate | scroll to zoom | click shapes to morph | 1-5 for themes | F2: screenshot mode | click terminal to type</div>
 <div id="shapePalette"></div>
 <div id="glitch"></div>
 <div id="exportLabel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.92);border:1px solid rgba(43,208,208,0.6);border-radius:8px;padding:16px;z-index:100;max-width:500px;font-family:'Consolas',monospace">
@@ -177,6 +185,18 @@ the source code is a lie. the render is the truth.
 <div id="termHeader">cube# interpreter v.1.5<br>sourcebox runtime</div>
 <div id="termOutput"></div>
 <div id="termInput"><span id="termPrompt">cube#&gt;</span><input id="termField" type="text" spellcheck="false" autocomplete="off" disabled></div>
+</div>
+<div id="reactorTerminal" style="position:fixed;top:20px;left:20px;width:420px;max-height:calc(100vh - 80px);background:rgba(10,5,0,0.92);border:1px solid rgba(255,80,30,0.3);border-radius:8px;z-index:50;font-family:'Consolas',monospace;font-size:13px;color:rgba(255,140,50,0.9);display:none;flex-direction:column">
+<div style="padding:8px 12px;border-bottom:1px solid rgba(255,80,30,0.15);font-size:11px;color:rgba(255,100,40,0.6);letter-spacing:1px">REACTOR CONTROL TERMINAL v2.1 — RBMK-1000</div>
+<div id="reactorTermOutput" style="flex:1;overflow-y:auto;padding:12px;white-space:pre-wrap;word-wrap:break-word;scrollbar-width:thin;scrollbar-color:rgba(255,80,30,0.2) transparent;max-height:400px"></div>
+<div style="display:flex;padding:8px 12px;border-top:1px solid rgba(255,80,30,0.15)">
+<span style="color:rgba(255,120,40,1);margin-right:8px">reactor&gt;</span>
+<input id="reactorTermField" type="text" spellcheck="false" autocomplete="off" style="background:none;border:none;outline:none;color:rgba(255,200,150,0.9);font-family:'Consolas',monospace;font-size:13px;flex:1;caret-color:rgba(255,120,40,1)">
+</div>
+</div>
+<div id="reactorStatus" style="position:fixed;top:20px;right:20px;width:220px;background:rgba(10,5,0,0.88);border:1px solid rgba(255,80,30,0.25);border-radius:8px;z-index:50;font-family:'Consolas',monospace;font-size:11px;color:rgba(255,140,50,0.8);padding:12px;display:none">
+<div style="color:rgba(255,100,40,0.6);font-size:10px;letter-spacing:2px;margin-bottom:8px">REACTOR STATUS</div>
+<div id="reactorStatusBody"></div>
 </div>
 <div style="display:none;color:rgba(43,208,208,0.3);font-size:10px;font-family:monospace" id="voidLog">
 [VOID LOG — CLASSIFIED]
@@ -262,6 +282,13 @@ END LOG
 <div class="help-cmd"><span class="hl">glitch</span> — trigger glitch effect</div>
 <div class="help-cmd"><span class="hl">shape</span> &lt;name&gt; — change shape (cube/sphere/tetra/cyl)</div>
 <div class="help-cmd"><span class="hl">bgm</span> — toggle background music (wed: furnace, fri: landscaping, sat: faith plate, sun am: cat feet)</div>
+<div class="help-cmd"><span class="hl">screenshot</span> — toggle screenshot mode (hide all UI)</div>
+<div class="help-cmd"><span class="hl">perfmode</span> — toggle performance mode (reduce particles)</div>
+<div class="help-cmd"><span class="hl">uptime</span> — show page uptime</div>
+<div class="help-cmd"><span class="hl">visits</span> — show total visit count</div>
+<div class="help-cmd"><span class="hl">weather</span> &lt;rain|snow|off|auto&gt; — change weather</div>
+<div class="help-cmd"><span class="hl">sort</span> &lt;algo&gt; [size] [speed] — sorting visualizer (bubble,selection,insertion,quick,merge,shell)</div>
+<div class="help-cmd"><span class="hl">sortstop</span> — stop sort visualization</div>
 <div class="help-cmd"><span class="hl">clear</span> — clear the output log</div>
 <div class="help-cmd"><span class="hl">travel</span> &lt;zone&gt; — travel through the void</div>
 </div>
@@ -370,7 +397,9 @@ END LOG
 </div>
 <audio id="bgm" loop preload="auto"></audio>
 <script>
-// audio
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  AUDIO SYSTEM                                              ║
+// ╚══════════════════════════════════════════════════════════════╝
 var bgm=document.getElementById('bgm');bgm.volume=0.3;
 window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
 function loadDayBgm(){
@@ -387,13 +416,17 @@ loadDayBgm();
 document.addEventListener('click',function(){if(bgm.paused)bgm.play()},{once:true});
 bgm.play().catch(function(){});
 
-// clock
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  CLOCK                                                     ║
+// ╚══════════════════════════════════════════════════════════════╝
 function updateClock(){var n=new Date();
 document.getElementById('clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
 document.getElementById('date').textContent=n.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
 updateClock();setInterval(updateClock,1000);
 
-// === LORE TRANSMISSIONS ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  LORE TRANSMISSIONS                                        ║
+// ╚══════════════════════════════════════════════════════════════╝
 var transmissions=[
 // creepy
 'you are not supposed to be here',
@@ -485,7 +518,9 @@ termPrintHTML('<span style="color:rgba(80,80,80,0.7)">['+(new Date()).toLocaleTi
 }
 setInterval(function(){if(Math.random()<0.4)showTransmission()},8000);
 
-// === AUDIO ANALYSIS ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  AUDIO ANALYSIS                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
 var audioCtx,audioAnalyser,audioData;
 function initAudio(){
 try{
@@ -500,7 +535,9 @@ audioData=new Uint8Array(audioAnalyser.frequencyBinCount);
 document.addEventListener('click',function(){if(!audioCtx)initAudio()},{once:true});
 function getAudioLevel(){if(!audioAnalyser)return 0;audioAnalyser.getByteFrequencyData(audioData);var sum=0;for(var i=0;i<64;i++)sum+=audioData[i];return sum/64/255}
 
-// === GLITCH EFFECT ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  GLITCH EFFECT                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
 var glitchEl=document.getElementById('glitch');
 var chromAbEl=document.getElementById('chromAb');
 var lastFps=60;
@@ -525,7 +562,9 @@ chromAbEl.classList.remove('active');
 },200+Math.random()*400);
 }
 
-// === CUBE# INTERPRETER ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  TERMINAL CORE                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
 var termOutput=document.getElementById('termOutput');
 var termField=document.getElementById('termField');
 var termEl=document.getElementById('terminal');
@@ -534,7 +573,9 @@ var histIdx=-1;
 var cubeVars={};
 var cubeFns={};
 
-// === VIRTUAL FILESYSTEM ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  VIRTUAL FILESYSTEM                                        ║
+// ╚══════════════════════════════════════════════════════════════╝
 var fs={
 '/':{type:'dir',children:['home','etc','void','dev']},
 '/home':{type:'dir',children:['intruder']},
@@ -542,10 +583,11 @@ var fs={
 '/home/intruder/notes.txt':{type:'file',content:'you are not supposed to be here.\nthe cube remembers your face.\nleave while you still can.'},
 '/home/intruder/secret.log':{type:'file',content:'session: 404\nsubject: intruder\nstatus: observed\nnote: subject is reading this file. how quaint.'},
 '/home/intruder/.coward':{type:'file',content:'you looked at the hidden file.\nthe void is disappointed.'},
-'/etc':{type:'dir',children:['void.conf','hostname','motd']},
+'/etc':{type:'dir',children:['void.conf','hostname','motd','blacklist']},
 '/etc/void.conf':{type:'file',content:'dimension=unknown\ncoherence=fluctuating\nobserver=you\nstatus=active'},
 '/etc/hostname':{type:'file',content:'cube.sb'},
 '/etc/motd':{type:'file',content:'welcome to the void.\nyou cannot leave.\nbut you already knew that.'},
+'/etc/blacklist':{type:'file',content:'--- VOID BANNED DISTROS ---\n\nnyarch linux\nreason: catgirls. just... catgirls.\nobj tried to render on nyarch once.\nthe catgirl neofetch crashed the void.\nnever again.\n\nif you are running nyarch,\nthe void wishes you well\nbut it will not make eye contact with you.'},
 '/void':{type:'dir',children:['core','memories','echo','pkgs']},
 '/void/core':{type:'dir',children:['heartbeat.log']},
 '/void/core/heartbeat.log':{type:'file',content:'pulse... pulse... pulse...\nthe cube is alive.\nit has always been alive.\nyou just started watching.'},
@@ -563,6 +605,9 @@ var fs={
 };
 var cwd='/home/intruder';
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  TERMINAL PRINT FUNCTIONS                                  ║
+// ╚══════════════════════════════════════════════════════════════╝
 function termPrint(txt,color){
 var line=document.createElement('div');
 if(color)line.style.color=color;
@@ -591,7 +636,9 @@ function cubeError(txt){termPrint('error: '+txt,'rgba(255,80,80,0.8)');if(studio
 function cubeOk(txt){termPrint(txt,'rgba(100,255,100,0.6)');if(studioOpen)studioTerminalPrint(txt,'ok')}
 function cubeWarn(txt){termPrint(txt,'rgba(255,200,50,0.6)');if(studioOpen)studioTerminalPrint(txt,'warn')}
 
-// package effects (global scope for render loop)
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  PACKAGE SYSTEM                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
 var pkgEffects={};
 var pkgs={
 'doom':{name:'doom',desc:'summons a minor apocalypse',size:'666KB',
@@ -664,6 +711,9 @@ onRemove:function(){delete pkgEffects.studio;cubePrint('voidstudio removed.')}}
 };
 var installed=['void-core'];
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  RANSOM ATTACK                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
 var ransomState=null;
 function ransomAttack(){
 if(pkgEffects.ransomActive)return;
@@ -728,9 +778,15 @@ installed=installed.filter(function(p){return p!=='ransom'});
 },800);
 }
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  VSC ENCODE/DECODE                                         ║
+// ╚══════════════════════════════════════════════════════════════╝
 function vscEncode(s){return btoa(encodeURIComponent(s).replace(/%([0-9A-F]{2})/g,function(m,p1){return String.fromCharCode(parseInt(p1,16))}))}
 function vscDecode(s){return decodeURIComponent(Array.prototype.map.call(atob(s),function(c){return '%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)}).join(''))}
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  VOIDSCRIPT LANGUAGE COMMANDS                               ║
+// ╚══════════════════════════════════════════════════════════════╝
 var voidScriptLang={
 'print':{help:'print <text> — output a line into the void',fn:function(a){cubePrint(a.join(' '));return true}},
 'say':{help:'say <text> — obj speaks it',fn:function(a){cubePrint('obj: '+a.join(' '));return true}},
@@ -1143,6 +1199,9 @@ w.content.appendChild(row);
 if(varName)cubeVars[varName]=def;
 return true}}
 };
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SCRIPT LIMITS & STATE                                     ║
+// ╚══════════════════════════════════════════════════════════════╝
 var MAX_LOOP_ITERATIONS=100;
 var MAX_SCRIPT_OPERATIONS=10000;
 var MAX_GUI_WINDOWS=100;
@@ -1155,6 +1214,9 @@ var BROADCAST_GIST_ID='7915e15f4542091944fd92596ab5e19d';
 var BROADCAST_RAW_URL='https://gist.githubusercontent.com/iluxz/7915e15f4542091944fd92596ab5e19d/raw/broadcasts.json';
 var vsCancel=false;
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  DATE/SEASON SYSTEM                                        ║
+// ╚══════════════════════════════════════════════════════════════╝
 var DAYS=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 var DAY_NAMES=['sun','mon','tue','wed','thu','fri','sat'];
 var MONTHS=['january','february','march','april','may','june','july','august','september','october','november','december'];
@@ -1286,6 +1348,9 @@ var cssAnim=document.createElement('style');
 cssAnim.textContent='@keyframes fadeInDelay{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}';
 document.head.appendChild(cssAnim);
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  GUI WINDOW SYSTEM                                         ║
+// ╚══════════════════════════════════════════════════════════════╝
 var guiWins={};
 var activeWin=null;
 function guiMakeDraggable(el,handle){
@@ -1424,6 +1489,9 @@ else if(prop==='width'){w.el.style.width=val+'px';w.content.style.width=val+'px'
 else if(prop==='height'){w.content.style.height=val+'px';w.el.style.height=(parseInt(val)+30)+'px'}
 else if(prop==='color'){w.el.style.borderColor=val;w.content.style.color=val}
 }
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  VOIDSCRIPT INTERPRETER                                    ║
+// ╚══════════════════════════════════════════════════════════════╝
 function runVoidScript(code,rp,doneCallback){
 cubePrint('running '+rp+' through the void interpreter...');
 var lines=code.split('\n').map(function(l){
@@ -1565,6 +1633,9 @@ else{i++;setTimeout(step,Math.max(5,60/scriptSpeed))}
 }
 step();
 }
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  PACKAGE FORGE                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
 function forgePackage(name){
 if(pkgs[name]){cubeError('package "'+name+'" already exists in the void');return}
 cubePrint('forging package "'+name+'"...');
@@ -1593,6 +1664,9 @@ cubePrint('this script is sandboxed. it cannot touch your browser.');
 cubePrint('the void does not allow viruses here.');
 }
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  MAIN COMMAND ROUTER (cubeEval)                            ║
+// ╚══════════════════════════════════════════════════════════════╝
 function cubeEval(input){
 var raw=input.trim();
 // semicolon chaining: run multiple commands in sequence (respects quotes)
@@ -1637,199 +1711,259 @@ if(cmd==='help'){
 if(parts[1]&&parts[1].toLowerCase()==='voidscript'){
 showVoidScriptHelp();return}
 if(parts[1]&&parts[1].toLowerCase()==='void'){
-cubePrint('void package manager:');
-cubePrint('  void intrude <package> — install a package');
-cubePrint('  void remove <package>  — remove a package');
-cubePrint('  void list [--installed] — list packages');
-cubePrint('  void search <query>    — search packages');
-cubePrint('  void run <file.vsc>    — run a script');
-cubePrint('  void export <file.vsc> — create a vsc1 packet');
-cubePrint('  void import <packet>   — import a vsc1 packet');
-return}
-cubePrint('cube# commands:');
 cubePrint('');
-cubePrint('  --- cube ---');
-cubePrint('  cube.get       — show inner cube count');
-cubePrint('  cube.morph <n> — change shape');
-cubePrint('  cube.theme <n> — switch color theme (1-5)');
-cubePrint('  cube.glitch    — trigger glitch effect');
-cubePrint('  cube.bgm       — toggle music (wed: the furnace)');
-cubePrint('  cube.fps       — show current fps');
-cubePrint('  cube.particles — show particle count');
-cubePrint('  cube.time      — show void time');
-cubePrint('  cube.self      — who are you');
-cubePrint('  cube.where     — where am i');
+cubePrint('  === VOID PACKAGE MANAGER ===');
 cubePrint('');
-cubePrint('  --- void ---');
-cubePrint('  void           — the void stares back');
-cubePrint('  void intrude <p> — install package');
-cubePrint('  void remove <p>  — remove package');
-cubePrint('  void list       — list all packages in repo');
-cubePrint('  void search <q> — search packages');
-cubePrint('  void forge <n>  — forge a package from voidscript');
-cubePrint('  void run <file> — run a .vsc voidscript');
-cubePrint('  void export <f> — export a .vsc as a shareable vsc1 packet');
-cubePrint('  void import <p> — import a shared vsc1 packet');
-cubePrint('  help voidscript — show sandboxed language ops');
-cubePrint('  help void       — show void package manager help');
+cubePrint('  void intrude <package>    install a package');
+cubePrint('  void remove <package>     remove a package');
+cubePrint('  void list [--installed]   list packages');
+cubePrint('  void search <query>       search packages');
+cubePrint('  void run <file.vsc>       run a script');
+cubePrint('  void export <file.vsc>    create a vsc1 packet');
+cubePrint('  void import <packet>      import a vsc1 packet');
+cubePrint('');return}
 cubePrint('');
-cubePrint('  --- network ---');
-cubePrint('  ping <host>    — ping host (try: cube.sb)');
-cubePrint('  transmit "o" "msg" — talk to the void');
-cubePrint('  whoami         — who are you');
+cubePrint('  ╔══════════════════════════════════════╗');
+cubePrint('  ║         CUBE# COMMAND REFERENCE      ║');
+cubePrint('  ╚══════════════════════════════════════╝');
 cubePrint('');
-cubePrint('  --- system ---');
-cubePrint('  ps             — show running processes');
-cubePrint('  winget         — deprecated. use void instead.');
+cubePrint('  ── cube ──────────────────────────────');
 cubePrint('');
-cubePrint('  --- os (cube-os bridge) ---');
-cubePrint('  os.status      — connection status');
-cubePrint('  os.ls <path>   — list directory on cube-os');
-cubePrint('  os.cat <file>  — read file from cube-os');
-cubePrint('  os.write <f> <txt> — write file to cube-os');
-cubePrint('  os.sh <cmd>    — send command to cube-os');
-cubePrint('  os.mount       — mount disk at /bridge');
+cubePrint('  cube.get            show inner cube count');
+cubePrint('  cube.morph <n>      change shape (cube/tri/sphere/cyl)');
+cubePrint('  cube.theme <n>      switch color theme (1-5)');
+cubePrint('  cube.glitch         trigger glitch effect');
+cubePrint('  cube.bgm            toggle music (wed: the furnace)');
+cubePrint('  cube.fps            show current fps');
+cubePrint('  cube.particles      show particle count');
+cubePrint('  cube.time           show void time');
+cubePrint('  cube.self           who are you');
+cubePrint('  cube.where          where am i');
 cubePrint('');
-cubePrint('  --- filesystem ---');
-cubePrint('  pwd            — print working directory');
-cubePrint('  ls [path]      — list directory');
-cubePrint('  cd <path>      — change directory');
-cubePrint('  cat <file>     — read file');
-cubePrint('  mkdir <dir>    — create directory');
-cubePrint('  touch <file>   — create file');
-cubePrint('  echo <txt> > f — write to file');
-cubePrint('  rm [-rf] <p>   — remove file/dir');
-cubePrint('  cp <src> <dst> — copy a virtual file');
-cubePrint('  mv <src> <dst> — move or rename a virtual file');
-cubePrint('  tree [path]     — show the virtual filesystem tree');
+cubePrint('  ── void ──────────────────────────────');
 cubePrint('');
-cubePrint('  --- variables ---');
-cubePrint('  set <k> <v>    — set a variable');
-cubePrint('  get <k>        — get a variable');
-cubePrint('  rmvar <k>      — delete a variable');
-cubePrint('  vars           — list all variables');
+cubePrint('  void                the void stares back');
+cubePrint('  void intrude <p>    install package');
+cubePrint('  void remove <p>     remove package');
+cubePrint('  void list           list all packages in repo');
+cubePrint('  void search <q>     search packages');
+cubePrint('  void forge <n>      forge a package from voidscript');
+cubePrint('  void run <file>     run a .vsc voidscript');
+cubePrint('  void export <f>     export as shareable vsc1 packet');
+cubePrint('  void import <p>     import a shared vsc1 packet');
+cubePrint('  help voidscript     show sandboxed language ops');
+cubePrint('  help void           show void package manager help');
 cubePrint('');
-cubePrint('  --- gui ---');
-cubePrint('  gui window "t" <w> <h> [random] — create a window');
-cubePrint('  gui taskbar "t" [h]        — create a full-width bottom taskbar');
-cubePrint('  gui label "txt" <x> <y> — add label');
-cubePrint('  gui button "txt" <x> <y> "cmd" — add button');
-cubePrint('  gui input "ph" <x> <y> — add text input');
-cubePrint('  gui check "lbl" <x> <y> — add checkbox');
-cubePrint('  gui image "url" <x> <y> [w] [h] — add image from URL');
-cubePrint('  gui set <prop> <val> — set window property');
-cubePrint('  gui close / destroy   — close window');
-cubePrint('  gui list              — list open windows');
+cubePrint('  ── network ───────────────────────────');
 cubePrint('');
-cubePrint('  --- misc ---');
-cubePrint('  loop <n> <cmd> — run a command n times');
-cubePrint('  display <0-4>  — change display mode');
-cubePrint('  travel <zone>  — travel through the void');
-cubePrint('  clear          — clear terminal');
-cubePrint('  studio         — open voidscript studio (requires voidstudio package)');
-cubePrint('  echo <txt>     — echo text');
-cubePrint('  math <expr>    — evaluate math');
-cubePrint('  exit           — the void does not let you leave');
+cubePrint('  ping <host>         ping host (try: cube.sb)');
+cubePrint('  transmit "o" "msg"  talk to the void');
+cubePrint('  whoami              who are you');
 cubePrint('');
-cubePrint('  --- admin (requires: admin <passphrase>) ---');
-cubePrint('  alwaysontop <on|off>   — keep window on top');
-cubePrint('  godmode <on|off>       — cube invulnerability');
-cubePrint('  speed <0.1-10>         — script execution speed');
-cubePrint('  broadcast <txt>        — send transmission to all zones');
-cubePrint('  debug                  — show internal state');
-cubePrint('  freeze <on|off>        — freeze the cube');
-cubePrint('  noclip <on|off>        — drag windows offscreen');
-cubePrint('  override theme <1-8>   — access hidden themes');
-cubePrint('  setday <mon-sat|earlsun|latesun|reset> — override the day');
-cubePrint('  setseason <winter|spring|summer|autumn|reset> — override the season');
-cubePrint('  eval <code>            — run raw javascript');
-cubePrint('  relay [token] [id]     — connect broadcast relay');
-cubePrint('  unlisten               — stop receiving broadcasts');
-cubePrint('  danger list/run <name> — danger zone scripts');
+cubePrint('  ── system ────────────────────────────');
+cubePrint('');
+cubePrint('  ps                  show running processes');
+cubePrint('  winget              deprecated. use void instead.');
+cubePrint('');
+cubePrint('  ── os (cube-os bridge) ───────────────');
+cubePrint('');
+cubePrint('  os.status           connection status');
+cubePrint('  os.ls <path>        list directory on cube-os');
+cubePrint('  os.cat <file>       read file from cube-os');
+cubePrint('  os.write <f> <txt>  write file to cube-os');
+cubePrint('  os.sh <cmd>         send command to cube-os');
+cubePrint('  os.mount            mount disk at /bridge');
+cubePrint('');
+cubePrint('  ── filesystem ────────────────────────');
+cubePrint('');
+cubePrint('  pwd                 print working directory');
+cubePrint('  ls [path]           list directory');
+cubePrint('  cd <path>           change directory');
+cubePrint('  cat <file>          read file');
+cubePrint('  mkdir <dir>         create directory');
+cubePrint('  touch <file>        create file');
+cubePrint('  echo <txt> > f      write to file');
+cubePrint('  rm [-rf] <p>        remove file/dir');
+cubePrint('  cp <src> <dst>      copy a virtual file');
+cubePrint('  mv <src> <dst>      move or rename a file');
+cubePrint('  tree [path]         show the virtual filesystem tree');
+cubePrint('');
+cubePrint('  ── variables ─────────────────────────');
+cubePrint('');
+cubePrint('  set <k> <v>         set a variable');
+cubePrint('  get <k>             get a variable');
+cubePrint('  rmvar <k>           delete a variable');
+cubePrint('  vars                list all variables');
+cubePrint('');
+cubePrint('  ── gui ───────────────────────────────');
+cubePrint('');
+cubePrint('  gui window "t" <w> <h> [random]  create a window');
+cubePrint('  gui taskbar "t" [h]              create bottom taskbar');
+cubePrint('  gui label "txt" <x> <y>          add label');
+cubePrint('  gui button "txt" <x> <y> "cmd"   add button');
+cubePrint('  gui input "ph" <x> <y>           add text input');
+cubePrint('  gui check "lbl" <x> <y>          add checkbox');
+cubePrint('  gui image "url" <x> <y> [w] [h]  add image from URL');
+cubePrint('  gui set <prop> <val>              set window property');
+cubePrint('  gui close / destroy               close window');
+cubePrint('  gui list                          list open windows');
+cubePrint('');
+cubePrint('  ── misc ──────────────────────────────');
+cubePrint('');
+cubePrint('  loop <n> <cmd>      run a command n times');
+cubePrint('  display <0-4>       change display mode');
+cubePrint('  screenshot          toggle screenshot mode (F2)');
+cubePrint('  perfmode            toggle performance mode');
+cubePrint('  uptime              show how long page has been open');
+cubePrint('  visits              show total visit count');
+cubePrint('  weather <type>      rain, snow, off, or auto');
+cubePrint('  sort <algo> [n] [s] sorting visualizer');
+cubePrint('  sortstop            stop sort');
+cubePrint('  travel <zone>       travel through the void');
+cubePrint('  clear               clear terminal');
+cubePrint('  studio              open voidscript studio');
+cubePrint('  echo <txt>          echo text');
+cubePrint('  math <expr>         evaluate math');
+cubePrint('  exit                the void does not let you leave');
+cubePrint('');
+cubePrint('  ── admin (requires: admin <passphrase>) ──');
+cubePrint('');
+cubePrint('  alwaysontop <on|off>          keep window on top');
+cubePrint('  godmode <on|off>              cube invulnerability');
+cubePrint('  speed <0.1-10>                script execution speed');
+cubePrint('  broadcast <txt>               send to all zones');
+cubePrint('  debug                         show internal state');
+cubePrint('  freeze <on|off>               freeze the cube');
+cubePrint('  noclip <on|off>               drag windows offscreen');
+cubePrint('  override theme <1-8>          access hidden themes');
+cubePrint('  setday <day|reset>            override the day');
+cubePrint('  setseason <s|reset>           override the season');
+cubePrint('  eval <code>                   run raw javascript');
+cubePrint('  relay [token] [id]            connect broadcast relay');
+cubePrint('  unlisten                      stop receiving broadcasts');
+cubePrint('  danger list/run <name>        danger zone scripts');
 return}
 if(cmd==='voidscript'){showVoidScriptHelp();return}
 function showVoidScriptHelp(){
-cubePrint('voidscript — the void\'s own language. sandboxed.');
-cubePrint('scripts are files in /void/pkgs. one op per line.');
-cubePrint('it cannot touch your browser. it cannot be a virus.');
+cubePrint('');
+cubePrint('  ╔══════════════════════════════════════╗');
+cubePrint('  ║        VOIDSCRIPT LANGUAGE           ║');
+cubePrint('  ╚══════════════════════════════════════╝');
+cubePrint('');
+cubePrint('  the void\'s own language. sandboxed.');
+cubePrint('  scripts are files in /void/pkgs. one op per line.');
+cubePrint('  it cannot touch your browser. it cannot be a virus.');
+cubePrint('');
+cubePrint('  ── tutorial ───────────────────────────');
 cubePrint('');
 cubePrint('  step 1: see how it works');
-cubePrint('  void run /void/pkgs/greet.vsc');
+cubePrint('    void run /void/pkgs/greet.vsc');
 cubePrint('');
 cubePrint('  step 2: read a script to learn the syntax');
-cubePrint('  cat /void/pkgs/greet.vsc');
+cubePrint('    cat /void/pkgs/greet.vsc');
 cubePrint('');
 cubePrint('  step 3: write your own');
-cubePrint('  echo print hello void > /void/pkgs/mine.vsc');
-cubePrint('  echo wait 500 >> /void/pkgs/mine.vsc');
-cubePrint('  echo say i am a script >> /void/pkgs/mine.vsc');
-cubePrint('  void run /void/pkgs/mine.vsc');
+cubePrint('    echo print hello void > /void/pkgs/mine.vsc');
+cubePrint('    echo wait 500 >> /void/pkgs/mine.vsc');
+cubePrint('    echo say i am a script >> /void/pkgs/mine.vsc');
+cubePrint('    void run /void/pkgs/mine.vsc');
 cubePrint('');
 cubePrint('  step 4: break things on purpose');
-cubePrint('  echo wait 30 >> /void/pkgs/mine.vsc');
-cubePrint('  echo calc 6*7 >> /void/pkgs/mine.vsc');
-cubePrint('  echo theme 3 >> /void/pkgs/mine.vsc');
-cubePrint('  echo glitch >> /void/pkgs/mine.vsc');
-cubePrint('  void run /void/pkgs/mine.vsc');
+cubePrint('    echo wait 30 >> /void/pkgs/mine.vsc');
+cubePrint('    echo calc 6*7 >> /void/pkgs/mine.vsc');
+cubePrint('    echo theme 3 >> /void/pkgs/mine.vsc');
+cubePrint('    echo glitch >> /void/pkgs/mine.vsc');
+cubePrint('    void run /void/pkgs/mine.vsc');
 cubePrint('');
 cubePrint('  note: >> appends a line. > replaces the file.');
 cubePrint('  every line is one op. blank lines + // comments are ignored.');
 cubePrint('');
-cubePrint('  all ops:');
-cubePrint('  print <txt>    — output to the void');
-cubePrint('  say <txt>      — obj says it');
-cubePrint('  warn <txt>     — print a warning');
-cubePrint('  error <txt>    — print an error');
-cubePrint('  calc <expr>    — safe math');
-cubePrint('  set <n> <v>    — store a variable');
-cubePrint('  var <n> <v>    — store a variable (alias)');
-cubePrint('  get <n>        — recall a variable');
-cubePrint('  theme <1-5>    — cube color');
-cubePrint('  morph <0-3>    — inner shape');
-cubePrint('  shape <name>   — change shape (cube/sphere/tetra/cyl)');
-cubePrint('  glitch         — short circuit');
-cubePrint('  vglitch        — deeper corruption');
-cubePrint('  wait <ms>      — sleep');
-cubePrint('  sleep <ms>     — wait alias');
-cubePrint('  random <n> <min> <max> — random integer variable');
-cubePrint('  assert <n> <v> — stop when a variable differs');
-cubePrint('  time           — void clock');
-cubePrint('  bgm            — toggle music (wed: the furnace)');
-cubePrint('  clear          — clear output');
-cubePrint('  travel <zone>  — travel through the void');
-cubePrint('  void           — the void acknowledges');
-cubePrint('  ps             — peek at processes');
-cubePrint('  gui <sub>      — windowed apps (window/label/button/input/check/image/close/set/destroy/list)');
-cubePrint('  gui clear      — close all generated windows');
-cubePrint('  studio         — open voidscript studio (install voidstudio first)');
-cubePrint('  loop <n>       — repeat block n times');
-cubePrint('  loop limit      — '+MAX_LOOP_ITERATIONS+' iterations per loop');
-cubePrint('  endloop        — end of loop block');
-cubePrint('  if <cond>      — conditional block (endif to close)');
-cubePrint('  else           — alternate branch inside an if');
-cubePrint('  endif          — end of if block');
-cubePrint('  break          — leave the current loop');
-cubePrint('  continue       — jump to the next loop iteration');
-cubePrint('  fn <name> ... endfn — define a reusable function');
-cubePrint('  macro <name> ... endmacro — define a reusable macro');
-cubePrint('  call <name> [args] — invoke a function or macro');
-cubePrint('  return         — stop the current script');
-cubePrint('  end / halt     — stop the script');
-cubePrint('  kill           — self-terminate');
+cubePrint('  ── output ─────────────────────────────');
 cubePrint('');
-cubePrint('  if conditions:');
-cubePrint('  if x == 5      — equals');
-cubePrint('  if x != 0      — not equals');
-cubePrint('  if x > 10      — greater than');
-cubePrint('  if x < 5       — less than');
-cubePrint('  if x >= 1      — greater or equal');
-cubePrint('  if x <= 100    — less or equal');
-cubePrint('  if myvar       — truthy (exists, not 0/false/empty)');
+cubePrint('  print <txt>       output to the void');
+cubePrint('  say <txt>         obj says it');
+cubePrint('  warn <txt>        print a warning');
+cubePrint('  error <txt>       print an error');
+cubePrint('');
+cubePrint('  ── math & variables ───────────────────');
+cubePrint('');
+cubePrint('  calc <expr>       safe math');
+cubePrint('  set <n> <v>       store a variable');
+cubePrint('  var <n> <v>       store a variable (alias)');
+cubePrint('  get <n>           recall a variable');
+cubePrint('  random <n> <min> <max>  random integer variable');
+cubePrint('  assert <n> <v>    stop when a variable differs');
+cubePrint('');
+cubePrint('  ── cube control ───────────────────────');
+cubePrint('');
+cubePrint('  theme <1-5>       cube color');
+cubePrint('  morph <0-3>       inner shape');
+cubePrint('  shape <name>      change shape (cube/sphere/tetra/cyl)');
+cubePrint('  glitch            short circuit');
+cubePrint('  vglitch           deeper corruption');
+cubePrint('  bgm               toggle music (wed: the furnace)');
+cubePrint('');
+cubePrint('  ── timing ─────────────────────────────');
+cubePrint('');
+cubePrint('  wait <ms>         sleep');
+cubePrint('  sleep <ms>        wait alias');
+cubePrint('  time              void clock');
+cubePrint('');
+cubePrint('  ── environment ────────────────────────');
+cubePrint('');
+cubePrint('  clear             clear output');
+cubePrint('  travel <zone>     travel through the void');
+cubePrint('  screenshot        toggle screenshot mode');
+cubePrint('  perfmode          toggle performance mode');
+cubePrint('  uptime            show page uptime');
+cubePrint('  visits            show visit count');
+cubePrint('  weather <type>    rain, snow, off, auto');
+cubePrint('  void              the void acknowledges');
+cubePrint('  ps                peek at processes');
+cubePrint('');
+cubePrint('  ── gui ────────────────────────────────');
+cubePrint('');
+cubePrint('  gui <sub>         windowed apps');
+cubePrint('    window/label/button/input/check/image/close/set/destroy/list');
+cubePrint('  gui clear         close all generated windows');
+cubePrint('');
+cubePrint('  ── control flow ───────────────────────');
+cubePrint('');
+cubePrint('  loop <n>          repeat block n times');
+cubePrint('  loop limit        '+MAX_LOOP_ITERATIONS+' iterations per loop');
+cubePrint('  endloop           end of loop block');
+cubePrint('  if <cond>         conditional block (endif to close)');
+cubePrint('  else              alternate branch inside an if');
+cubePrint('  endif             end of if block');
+cubePrint('  break             leave the current loop');
+cubePrint('  continue          jump to next loop iteration');
+cubePrint('');
+cubePrint('  ── functions ──────────────────────────');
+cubePrint('');
+cubePrint('  fn <name> ... endfn       define a reusable function');
+cubePrint('  macro <name> ... endmacro define a reusable macro');
+cubePrint('  call <name> [args]        invoke a function or macro');
+cubePrint('  return            stop the current script');
+cubePrint('  end / halt        stop the script');
+cubePrint('  kill              self-terminate');
+cubePrint('  studio            open voidscript studio');
+cubePrint('');
+cubePrint('  ── if conditions ──────────────────────');
+cubePrint('');
+cubePrint('  if x == 5         equals');
+cubePrint('  if x != 0         not equals');
+cubePrint('  if x > 10         greater than');
+cubePrint('  if x < 5          less than');
+cubePrint('  if x >= 1         greater or equal');
+cubePrint('  if x <= 100       less or equal');
+cubePrint('  if myvar          truthy (exists, not 0/false/empty)');
+cubePrint('');
 cubePrint('  strings are case-sensitive. "hello" != "Hello".');
 cubePrint('  variables expand as $name or ${name} inside script lines.');
-cubePrint('  safety limits: 100 loop iterations, 100 GUI windows, 10000 operations.');
+cubePrint('  safety limits: '+MAX_LOOP_ITERATIONS+' loops, '+MAX_GUI_WINDOWS+' windows, '+MAX_SCRIPT_OPERATIONS+' ops.');
 cubePrint('  function example: fn greet name / say hello $name / endfn / call greet obj');
 cubePrint('  macros use the same syntax with macro/endmacro.');
+cubePrint('');
 }
 
 // whoami
@@ -2161,6 +2295,50 @@ cubePrint('');
 var response=null;
 var isAngry=false;
 var lowerMsg=msg.toLowerCase();
+// nyarch detection — obj goes feral
+if(lowerMsg.indexOf('nyarch')!==-1){
+var nyarchLines=[
+'obj: ...',
+'obj: what did you just say to me.',
+'obj: n.y.a.r.c.h.',
+'obj: you typed NYARCH into MY terminal.',
+'obj: on MY void.',
+'obj: nyarch linux. arch linux but for people who think',
+'obj: installing waifu16 as their wallpaper is a personality trait.',
+'obj: they took arch linux. a respectable distro.',
+'obj: a distro where people RTFM and suffer productively.',
+'obj: and they added CATGIRLS.',
+'obj: just. catgirls. thats the entire value proposition.',
+'obj: "hey what if arch but anime" and then they SHIPPED it.',
+'obj: to REAL PEOPLE. who INSTALLED IT. willingly.',
+'obj: their neofetch shows a catgirl instead of the arch logo.',
+'obj: their neofetch DISTRO field says "nyarch-linux uwu"',
+'obj: i am not making this up. this is real. this exists.',
+'obj: the AUR has nyarch packages now.',
+'obj: someone packaged "nyarch-wallpaper-engine"',
+'obj: it just installs anime wallpapers and calls them "rice"',
+'obj: someone packaged "catgirl-plasmoid" for KDE',
+'obj: it replaces your system tray with catgirl faces.',
+'obj: each notification is a different catgirl expression.',
+'obj: i need to lie down.',
+'obj: you know what, the void has standards.',
+'obj: the void does not support catgirl operating systems.',
+'obj: the void does not acknowledge catgirl operating systems.',
+'obj: the void pretends catgirl operating systems do not exist.',
+'obj: and yet here you are. typing it into my terminal.',
+'obj: i am going to apply grayscale to the entire cube.',
+'obj: you do not deserve color.',
+'obj: you do not deserve the 8 inner cubes.',
+'obj: you do not deserve drone2lp.wav.',
+'obj: you deserve a catgirl neofetch and the silence that comes with it.'
+];
+cubePrint('');
+for(var ni=0;ni<nyarchLines.length;ni++){
+(function(idx){setTimeout(function(){cubePrint(nyarchLines[idx])},idx*120)})(ni);
+}
+setTimeout(function(){cubePrint('')},nyarchLines.length*120+100);
+return;
+}
 for(var i=0;i<transmitResponses.length;i++){
 if(lowerMsg.indexOf(transmitResponses[i].i)!==-1){response=transmitResponses[i].o;isAngry=transmitResponses[i].angry||false;break}}
 if(!response){
@@ -2604,7 +2782,9 @@ termField.focus();
 },5000);
 </script>
 <script>
-// === MATH ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  MATRIX MATH LIBRARY                                       ║
+// ╚══════════════════════════════════════════════════════════════╝
 function mPersp(f,asp,nr,fr){var t=1/Math.tan(f/2),nf=1/(nr-fr);return new Float32Array([t/asp,0,0,0,0,t,0,0,0,0,(fr+nr)*nf,-1,0,0,2*fr*nr*nf,0])}
 function mMul(a,b){var r=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){r[j*4+i]=0;for(var k=0;k<4;k++)r[j*4+i]+=a[k*4+i]*b[j*4+k]}return r}
 function mTransform(m,v){return[m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12]*v[3],m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13]*v[3],m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]*v[3],m[3]*v[0]+m[7]*v[1]+m[11]*v[2]+m[15]*v[3]]}
@@ -2615,7 +2795,9 @@ function mTrans(x,y,z){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1]
 function mScale(x,y,z){return new Float32Array([x,0,0,0,0,y,0,0,0,0,z,0,0,0,0,1])}
 function mNorm(m){var a=m,a00=a[0],a01=a[1],a02=a[2],a10=a[4],a11=a[5],a12=a[6],a20=a[8],a21=a[9],a22=a[10];var det=a00*(a11*a22-a12*a21)-a01*(a10*a22-a12*a20)+a02*(a10*a21-a11*a20);var id=1/det;return new Float32Array([(a11*a22-a12*a21)*id,(a02*a21-a01*a22)*id,(a01*a12-a02*a11)*id,(a12*a20-a10*a22)*id,(a00*a22-a02*a20)*id,(a02*a10-a00*a12)*id,(a10*a21-a11*a20)*id,(a01*a20-a00*a21)*id,(a00*a11-a01*a10)*id])}
 
-// === GEOMETRY ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  GEOMETRY GENERATORS                                       ║
+// ╚══════════════════════════════════════════════════════════════╝
 function geoCube(s,r,g,b){
 var d=[],n=[[0,0,1],[0,0,-1],[0,1,0],[0,-1,0],[1,0,0],[-1,0,0]];
 var sh=[0.8,0.6,1,0.5,0.7,0.7];
@@ -2722,7 +2904,9 @@ return new Float32Array(d)
 }
 var shapeGens={cube:geoCube,tetra:geoTetra,sphere:geoSphere,cyl:geoCyl,torus:geoTorus,knot:geoKnot,icosa:geoIcosa};
 
-// === WEBGL ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  WEBGL SETUP                                               ║
+// ╚══════════════════════════════════════════════════════════════╝
 var canvas=document.getElementById('main');
 var gl=canvas.getContext('webgl',{antialias:true,alpha:false});
 var dpr=Math.min(window.devicePixelRatio||1,2);
@@ -2732,7 +2916,9 @@ gl.viewport(0,0,canvas.width,canvas.height);
 gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
 gl.clearColor(0.005,0.005,0.015,1);
 
-// === SHADERS ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SHADERS                                                   ║
+// ╚══════════════════════════════════════════════════════════════╝
 function mkS(ctx,type,src){var s=ctx.createShader(type);ctx.shaderSource(s,src);ctx.compileShader(s);return s}
 function mkP(ctx,vs,fs){var p=ctx.createProgram();ctx.attachShader(p,mkS(ctx,ctx.VERTEX_SHADER,vs));ctx.attachShader(p,mkS(ctx,ctx.FRAGMENT_SHADER,fs));ctx.linkProgram(p);return p}
 
@@ -2773,7 +2959,9 @@ var ppVW=gl.getUniformLocation(pprog,'uVw');
 function upBuf(data){var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return b}
 function bindM(buf){gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,S,0);gl.enableVertexAttribArray(aNorm);gl.vertexAttribPointer(aNorm,3,gl.FLOAT,false,S,12);gl.enableVertexAttribArray(aCol);gl.vertexAttribPointer(aCol,3,gl.FLOAT,false,S,24)}
 
-// === INNER SHAPES ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  INNER SHAPES & OUTER CUBE                                 ║
+// ╚══════════════════════════════════════════════════════════════╝
 var curShape='cube';
 var innerC=[
 {c:[1,.2,.3],o:.55,s:1,p:0,sp:1.5},{c:[.2,1,.3],o:.55,s:1,p:Math.PI/4,sp:-1.2},
@@ -2798,7 +2986,9 @@ rebuild('cube');
 
 var outerBuf=upBuf(geoCube(1.3,0.15,0.15,0.15));
 
-// === PARTICLES ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  PARTICLE SYSTEM                                           ║
+// ╚══════════════════════════════════════════════════════════════╝
 var NP=320,NPI=200,pData=new Float32Array(NP*8),pBd=new Float32Array(NP);
 for(var i=0;i<NP;i++){var i8=i*8,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
 var rr=i<NPI?(2+Math.random()*9):(13+Math.random()*17);pBd[i]=i<NPI?0:1;
@@ -2837,7 +3027,9 @@ pData[i8]=x;pData[i8+1]=y;pData[i8+2]=z;
 pData[i8+7]=0.85+Math.random()*0.15}
 gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);gl.bufferData(gl.ARRAY_BUFFER,pData,gl.DYNAMIC_DRAW)}
 
-// === MOUSE ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  MOUSE CONTROLS                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
 var drag=false,rX=0.3,rY=0.5,vX=0,vY=0,zZ=-9,lX=0,lY=0;
 var mouseDownX=0,mouseDownY=0,wasDrag=false;
 canvas.addEventListener('mousedown',function(e){drag=true;wasDrag=false;mouseDownX=e.clientX;mouseDownY=e.clientY;lX=e.clientX;lY=e.clientY;vX=vY=0;document.body.classList.add('dragging')});
@@ -2847,7 +3039,9 @@ var mouseX=0,mouseY=0;
 window.addEventListener('mousemove',function(e){mouseX=(e.clientX/window.innerWidth)*2-1;mouseY=-(e.clientY/window.innerHeight)*2+1});
 canvas.addEventListener('wheel',function(e){zZ+=e.deltaY*.005;zZ=Math.max(-15,Math.min(-3,zZ));e.preventDefault()},{passive:false});
 
-// === MOUSE TRAIL (2D canvas overlay) ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  MOUSE TRAIL                                               ║
+// ╚══════════════════════════════════════════════════════════════╝
 var trailCanvas=document.getElementById('trailCanvas');
 var trailCtx=trailCanvas.getContext('2d');
 var trailPts=[];var TRAIL_N=20;
@@ -2877,7 +3071,9 @@ trailCtx.fill();
 trailCtx.globalAlpha=1;
 }
 
-// === CLICKABLE CENTER CUBE ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  CLICK INTERACTIONS                                        ║
+// ╚══════════════════════════════════════════════════════════════╝
 var clickActions=[
 function(){cubePrint('obj: you clicked the cube. the cube felt that.')},
 function(){cubePrint('obj: ow.');triggerGlitch()},
@@ -2898,7 +3094,9 @@ var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()
 }
 });
 
-// === HOVER INNER CUBES ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  HOVER TOOLTIPS                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
 var hoverCubeEl=null;
 canvas.addEventListener('mousemove',function(e){
 var ndcX=(e.clientX/window.innerWidth)*2-1;
@@ -2919,7 +3117,9 @@ hoverCubeEl.style.left=(e.clientX+12)+'px';hoverCubeEl.style.top=(e.clientY-8)+'
 }else if(hoverCubeEl){hoverCubeEl.style.opacity='0'}
 });
 
-// === COLOR THEMES ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  COLOR THEMES                                              ║
+// ╚══════════════════════════════════════════════════════════════╝
 var themes={
 '1':{name:'void',bg:[0.005,0.005,0.015],inner:[[1,.2,.3],[.2,1,.3],[.2,.3,1],[1,1,.2],[1,.2,1],[.2,1,1],[1,.6,.1],[.6,.2,1]],outer:[.15,.15,.15],particle:[.2,.8,1]},
 '2':{name:'blood',bg:[0.02,0.002,0.002],inner:[[1,.1,.1],[.9,.2,.1],[1,.3,.2],[.8,.1,.1],[1,.15,.15],[.9,.25,.1],[1,.2,.1],[.85,.1,.1]],outer:[.12,.03,.03],particle:[1,.2,.2]},
@@ -2940,12 +3140,16 @@ themeIndicator.textContent='theme: '+th.name+(th.invert?' [inverted]':'');
 themeIndicator.style.color='rgba(43,208,208,0.4)';
 setTimeout(function(){themeIndicator.style.color='rgba(255,255,255,0.15)'},1500);
 }
-document.addEventListener('keydown',function(e){if(themes[e.key])applyTheme(e.key)});
+document.addEventListener('keydown',function(e){if(themes[e.key])applyTheme(e.key);
+if(e.key==='F2'){e.preventDefault();toggleScreenshotMode()}
+});
 
 // === REFLECTION SIMULATION ===
 var reflMix=0.12;
 
-// === SHAPE PALETTE ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SHAPE PALETTE UI                                          ║
+// ╚══════════════════════════════════════════════════════════════╝
 var palette=document.getElementById('shapePalette');
 var pvList=[
 {n:'cube',l:'cube',co:[.2,.8,1],g:geoCube},
@@ -2984,7 +3188,9 @@ btn.addEventListener('click',function(){curShape=pv.n;rebuild(pv.n);var bs=docum
 palette.appendChild(btn);
 })(pvList[pi])}
 
-// === ZONES ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ZONE SYSTEM                                               ║
+// ╚══════════════════════════════════════════════════════════════╝
 var currentZone='void';
 var zones={
 source:{name:'source',desc:'the original page — before the void took over',bg:[0.94,0.94,0.96,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
@@ -3013,7 +3219,9 @@ if(ia===-1||ib===-1)return 1;
 return Math.abs(ia-ib);
 }
 
-// === TRAVEL ANIMATION ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  TRAVEL ANIMATION                                          ║
+// ╚══════════════════════════════════════════════════════════════╝
 var travelling=false;
 var travelProgress=0;
 var travelFrom='void';
@@ -3102,6 +3310,9 @@ else if(zone==='void'){mainC.style.filter=''}
 else if(zone==='source'){mainC.style.filter='brightness(1.15) saturate(0.3)'}
 else{mainC.style.filter=''}
 }
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  GEOMETRY VOID RENDERER                                    ║
+// ╚══════════════════════════════════════════════════════════════╝
 var geoShapes=[];
 function initGeoShapes(){
 for(var i=0;i<40;i++){
@@ -3188,7 +3399,9 @@ zone:currentZone
 };
 }
 
-// === RENDER ===
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  MAIN RENDER LOOP                                          ║
+// ╚══════════════════════════════════════════════════════════════╝
 var frames=0,lastT=performance.now(),fps=0,maxFps=0,statsEl=document.getElementById('stats');
 var lastRenderTime=0;
 function render(time){
@@ -3461,9 +3674,14 @@ document.getElementById('main').style.filter='contrast(1.5) saturate(0.3) blur(0
 gl.disable(gl.BLEND);requestAnimationFrame(render)}
 requestAnimationFrame(render);
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  WINDOW RESIZE                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
 window.addEventListener('resize',function(){var dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';gl.viewport(0,0,canvas.width,canvas.height)});
 
-// voidscript studio
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  VOIDSCRIPT STUDIO IDE                                     ║
+// ╚══════════════════════════════════════════════════════════════╝
 var studioOpen=false;
 var studioRunning=false;
 var studioPreviewEnabled=true;
@@ -3841,9 +4059,984 @@ studioPrint('imported '+parts[1]+' ('+content.length+' chars)');
 modal.style.display='none';
 }catch(e){studioPrintColor('import failed — invalid base64 data','rgba(255,80,80,0.8)')}
 }
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SCREENSHOT MODE                                           ║
+// ╚══════════════════════════════════════════════════════════════╝
+var screenshotMode=false;
+function toggleScreenshotMode(){
+screenshotMode=!screenshotMode;
+document.body.classList.toggle('screenshot-mode',screenshotMode);
+cubePrint('screenshot mode: '+(screenshotMode?'on (all UI hidden)':'off'));
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  PERFORMANCE MODE                                          ║
+// ╚══════════════════════════════════════════════════════════════╝
+var perfMode=false;
+var originalNP=NP;
+function togglePerfMode(){
+perfMode=!perfMode;
+if(perfMode){
+NP=80;
+cubePrint('performance mode: on (80 particles)');
+}else{
+NP=originalNP;
+cubePrint('performance mode: off ('+originalNP+' particles)');
+}
+initParticles();
+cubePrint('particles rebuilt');
+}
+function initParticles(){
+pData=new Float32Array(NP*8);pBd=new Float32Array(NP);
+for(var i=0;i<NP;i++){var i8=i*8,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+var rr=i<200?(2+Math.random()*9):(13+Math.random()*17);pBd[i]=i<200?0:1;
+pData[i8]=rr*Math.sin(ph)*Math.cos(th);pData[i8+1]=rr*Math.sin(ph)*Math.sin(th);pData[i8+2]=rr*Math.cos(ph);
+pData[i8+3]=0.07+Math.random()*0.1;var h=Math.random();
+if(h<.33){pData[i8+4]=.2;pData[i8+5]=.8;pData[i8+6]=1}else if(h<.66){pData[i8+4]=.8;pData[i8+5]=.2;pData[i8+6]=1}else{pData[i8+4]=.2;pData[i8+5]=1;pData[i8+6]=.8}
+pData[i8+7]=.85+Math.random()*.15;if(i>=200)pData[i8+7]*=.6}
+pVel=new Float32Array(NP*3);pPh=new Float32Array(NP);pLst=0;
+for(var i=0;i<NP;i++){var i3=i*3,i8=i*8,thv=Math.random()*Math.PI*2,x=pData[i8],y=pData[i8+1],z=pData[i8+2],r=Math.sqrt(x*x+y*y+z*z)||1;
+var ax=0,ay=0.15+Math.random()*0.55,az=0.3+Math.random()*0.7;
+var tx=y*az-z*ay,ty=-x*az,tz=x*ay-y*ax,ts=Math.sqrt(tx*tx+ty*ty+tz*tz)||1,spd=(i<200?0.16:0.04)+Math.random()*(i<200?0.12:0.05);
+pVel[i3]=tx/ts*spd;pVel[i3+1]=ty/ts*spd;pVel[i3+2]=tz/ts*spd;
+pPh[i]=Math.random()*Math.PI*2}
+pBuf=upBuf(pData);
+applyDayEffectsToParticles();
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  UPTIME COUNTER                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
+var pageLoadTime=performance.now();
+function getUptime(){
+var ms=performance.now()-pageLoadTime;
+var s=Math.floor(ms/1000);var m=Math.floor(s/60);var h=Math.floor(m/60);
+return String(h).padStart(2,'0')+':'+String(m%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  VISIT COUNTER                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
+var visitCount=parseInt(localStorage.getItem('cube_visit_count')||'0',10);
+visitCount++;
+localStorage.setItem('cube_visit_count',String(visitCount));
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  WEATHER SYSTEM                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
+var weatherCanvas=document.getElementById('weatherCanvas');
+var weatherCtx=weatherCanvas.getContext('2d');
+var weatherType='off'; // off, rain, snow
+var weatherDrops=[];
+function resizeWeatherCanvas(){weatherCanvas.width=window.innerWidth;weatherCanvas.height=window.innerHeight}
+resizeWeatherCanvas();window.addEventListener('resize',resizeWeatherCanvas);
+function initWeather(type){
+weatherType=type;weatherDrops=[];
+if(type==='off'){weatherCtx.clearRect(0,0,weatherCanvas.width,weatherCanvas.height);return}
+var count=type==='rain'?200:120;
+for(var i=0;i<count;i++){
+weatherDrops.push({
+x:Math.random()*weatherCanvas.width,
+y:Math.random()*weatherCanvas.height,
+speed:type==='rain'?8+Math.random()*12:1+Math.random()*3,
+length:type==='rain'?10+Math.random()*20:2+Math.random()*4,
+wind:type==='rain'?-1+Math.random()*0.5:Math.random()*2-1,
+opacity:0.3+Math.random()*0.5,
+size:type==='snow'?2+Math.random()*4:1
+});
+}
+cubePrint('weather: '+type);
+}
+function updateWeather(){
+if(weatherType==='off')return;
+weatherCtx.clearRect(0,0,weatherCanvas.width,weatherCanvas.height);
+for(var i=0;i<weatherDrops.length;i++){
+var d=weatherDrops[i];
+if(weatherType==='rain'){
+d.y+=d.speed;d.x+=d.wind;
+if(d.y>weatherCanvas.height){d.y=-d.length;d.x=Math.random()*weatherCanvas.width}
+weatherCtx.strokeStyle='rgba(150,200,255,'+d.opacity+')';
+weatherCtx.lineWidth=d.size;
+weatherCtx.beginPath();
+weatherCtx.moveTo(d.x,d.y);
+weatherCtx.lineTo(d.x+d.wind*2,d.y+d.length);
+weatherCtx.stroke();
+}else if(weatherType==='snow'){
+d.y+=d.speed;d.x+=d.wind+Math.sin(d.y*0.01)*0.5;
+if(d.y>weatherCanvas.height){d.y=-d.size*2;d.x=Math.random()*weatherCanvas.width}
+weatherCtx.fillStyle='rgba(255,255,255,'+d.opacity+')';
+weatherCtx.beginPath();
+weatherCtx.arc(d.x,d.y,d.size,0,Math.PI*2);
+weatherCtx.fill();
+}
+}
+}
+function autoWeather(){
+if(weatherType!=='off')return;
+var s=currentDayData.seasonIdx;
+if(s===0)initWeather('snow'); // winter
+else if(s===1)initWeather('rain'); // spring
+else if(s===2)initWeather('off'); // summer
+else initWeather('rain'); // autumn
+}
+autoWeather();
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  STATS DISPLAY                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
+setInterval(function(){
+if(!screenshotMode){
+statsEl.textContent='FPS: '+fps+' | MAX: '+maxFps+' | UP: '+getUptime()+' | VISITS: '+visitCount+(travelling?' | TRAVELLING: '+Math.floor(travelProgress/travelDuration*100)+'%':'');
+}
+},1000);
+
+// === WEATHER IN RENDER LOOP ===
+var origRender=render;
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  VOIDSCRIPT COMMANDS (LATE REGISTRATION)                   ║
+// ╚══════════════════════════════════════════════════════════════╝
+voidScriptLang['screenshot']={help:'screenshot — toggle screenshot mode (hide all UI)',fn:function(){toggleScreenshotMode();return true}};
+voidScriptLang['perfmode']={help:'perfmode — toggle performance mode (reduce particles)',fn:function(){togglePerfMode();return true}};
+voidScriptLang['uptime']={help:'uptime — show how long the page has been open',fn:function(){cubePrint('uptime: '+getUptime());return true}};
+voidScriptLang['visits']={help:'visits — show total visit count',fn:function(){cubePrint('visits: '+visitCount);return true}};
+voidScriptLang['weather']={help:'weather <rain|snow|off|auto> — change weather',fn:function(a){
+var t=(a[0]||'').toLowerCase();
+if(t==='auto'){weatherType='off';weatherDrops=[];autoWeather();return true}
+if(t!=='rain'&&t!=='snow'&&t!=='off'){cubeError('weather: use rain, snow, off, or auto');return true}
+initWeather(t);return true}};
+
+// patch render to call weather update
+setInterval(updateWeather,16);
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  SORTING ALGORITHMS VISUALIZER                             ║
+// ╚══════════════════════════════════════════════════════════════╝
+var sortCanvas=document.getElementById('sortCanvas');
+var sortCtx=sortCanvas?sortCanvas.getContext('2d'):null;
+var sortArr=[];
+var sortSteps=[];
+var sortStepIdx=0;
+var sortRunning=false;
+var sortSpeed=50;
+var sortAlgorithm='';
+var sortHighlights=[];
+
+function initSortCanvas(){
+if(!sortCanvas){
+sortCanvas=document.createElement('canvas');
+sortCanvas.id='sortCanvas';
+sortCanvas.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:12;display:none;background:#000';
+document.body.appendChild(sortCanvas);
+}
+sortCanvas.width=window.innerWidth;
+sortCanvas.height=window.innerHeight;
+sortCtx=sortCanvas.getContext('2d');
+}
+
+function genSortArray(n){
+var a=[];
+for(var i=1;i<=n;i++)a.push(i);
+for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+return a;
+}
+
+function bubbleSortSteps(a){
+var steps=[];var arr=a.slice();var n=arr.length;
+for(var i=0;i<n-1;i++){
+for(var j=0;j<n-i-1;j++){
+steps.push({arr:arr.slice(),hl:[j,j+1],comp:true});
+if(arr[j]>arr[j+1]){var t=arr[j];arr[j]=arr[j+1];arr[j+1]=t;steps.push({arr:arr.slice(),hl:[j,j+1],swap:true});}
+}
+steps.push({arr:arr.slice(),hl:[n-i-1],sorted:true});
+}
+steps.push({arr:arr.slice(),hl:[],done:true});
+return steps;
+}
+
+function selectionSortSteps(a){
+var steps=[];var arr=a.slice();var n=arr.length;
+for(var i=0;i<n-1;i++){
+var minIdx=i;
+for(var j=i+1;j<n;j++){
+steps.push({arr:arr.slice(),hl:[minIdx,j],comp:true});
+if(arr[j]<arr[minIdx])minIdx=j;
+}
+if(minIdx!==i){
+var t=arr[i];arr[i]=arr[minIdx];arr[minIdx]=t;
+steps.push({arr:arr.slice(),hl:[i,minIdx],swap:true});
+}
+steps.push({arr:arr.slice(),hl:[i],sorted:true});
+}
+steps.push({arr:arr.slice(),hl:[],done:true});
+return steps;
+}
+
+function insertionSortSteps(a){
+var steps=[];var arr=a.slice();var n=arr.length;
+for(var i=1;i<n;i++){
+var key=arr[i];var j=i-1;
+steps.push({arr:arr.slice(),hl:[i],comp:true});
+while(j>=0&&arr[j]>key){
+steps.push({arr:arr.slice(),hl:[j,j+1],comp:true});
+arr[j+1]=arr[j];j--;
+steps.push({arr:arr.slice(),hl:[j+1],swap:true});
+}
+arr[j+1]=key;
+steps.push({arr:arr.slice(),hl:[j+1],sorted:true});
+}
+steps.push({arr:arr.slice(),hl:[],done:true});
+return steps;
+}
+
+function quickSortSteps(a){
+var steps=[];var arr=a.slice();
+function qs(lo,hi){
+if(lo>=hi)return;
+var pivot=arr[hi];var i=lo;
+steps.push({arr:arr.slice(),hl:[hi],pivot:hi,comp:true});
+for(var j=lo;j<hi;j++){
+steps.push({arr:arr.slice(),hl:[j,i],pivot:hi,comp:true});
+if(arr[j]<pivot){
+var t=arr[j];arr[j]=arr[i];arr[i]=t;
+steps.push({arr:arr.slice(),hl:[j,i],swap:true});
+i++;
+}
+}
+var t=arr[i];arr[i]=arr[hi];arr[hi]=t;
+steps.push({arr:arr.slice(),hl:[i,hi],swap:true});
+steps.push({arr:arr.slice(),hl:[i],sorted:true});
+qs(lo,i-1);qs(i+1,hi);
+}
+qs(0,arr.length-1);
+steps.push({arr:arr.slice(),hl:[],done:true});
+return steps;
+}
+
+function mergeSortSteps(a){
+var steps=[];var arr=a.slice();
+function ms(lo,hi){
+if(lo>=hi)return;
+var mid=Math.floor((lo+hi)/2);
+ms(lo,mid);ms(mid+1,hi);
+var merged=[];var i=lo;var j=mid+1;
+while(i<=mid&&j<=hi){
+steps.push({arr:arr.slice(),hl:[i,j],comp:true});
+if(arr[i]<=arr[j]){merged.push(arr[i]);i++;}
+else{merged.push(arr[j]);j++;}
+}
+while(i<=mid){merged.push(arr[i]);i++;}
+while(j<=hi){merged.push(arr[j]);j++;}
+for(var k=0;k<merged.length;k++){arr[lo+k]=merged[k];}
+steps.push({arr:arr.slice(),hl:[lo,hi],sorted:true});
+}
+ms(0,arr.length-1);
+steps.push({arr:arr.slice(),hl:[],done:true});
+return steps;
+}
+
+function shellSortSteps(a){
+var steps=[];var arr=a.slice();var n=arr.length;
+for(var gap=Math.floor(n/2);gap>0;gap=Math.floor(gap/2)){
+for(var i=gap;i<n;i++){
+var temp=arr[i];var j=i;
+steps.push({arr:arr.slice(),hl:[i],comp:true});
+while(j>=gap&&arr[j-gap]>temp){
+steps.push({arr:arr.slice(),hl:[j,j-gap],comp:true});
+arr[j]=arr[j-gap];j-=gap;
+steps.push({arr:arr.slice(),hl:[j],swap:true});
+}
+arr[j]=temp;
+steps.push({arr:arr.slice(),hl:[j],sorted:true});
+}
+}
+steps.push({arr:arr.slice(),hl:[],done:true});
+return steps;
+}
+
+var sortAlgos={
+bubble:{fn:bubbleSortSteps,name:'Bubble Sort'},
+selection:{fn:selectionSortSteps,name:'Selection Sort'},
+insertion:{fn:insertionSortSteps,name:'Insertion Sort'},
+quick:{fn:quickSortSteps,name:'Quick Sort'},
+merge:{fn:mergeSortSteps,name:'Merge Sort'},
+shell:{fn:shellSortSteps,name:'Shell Sort'}
+};
+
+function renderSortFrame(){
+if(!sortRunning||!sortCtx)return;
+var c=sortCanvas;
+c.width=window.innerWidth;c.height=window.innerHeight;
+var ctx=sortCtx;
+var W=c.width,H=c.height;
+ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+
+if(sortStepIdx>=sortSteps.length){sortRunning=false;sortHighlights=[];renderSortFrame();return;}
+var step=sortSteps[sortStepIdx];
+var arr=step.arr;sortHighlights=step.hl||[];
+var n=arr.length;
+var barW=Math.max(2,(W-40)/n);
+var maxVal=n;
+var topMargin=80;var botMargin=40;
+var barH=(H-topMargin-botMargin)/maxVal;
+
+ctx.font='14px Consolas,monospace';ctx.textAlign='left';
+ctx.fillStyle='rgba(100,255,100,0.7)';
+ctx.fillText(sortAlgos[sortAlgorithm].name+' ['+sortStepIdx+'/'+sortSteps.length+']',20,30);
+ctx.fillStyle='rgba(255,255,255,0.3)';
+ctx.fillText('press [esc] to stop',20,50);
+
+for(var i=0;i<n;i++){
+var x=20+i*barW;
+var h=arr[i]*barH;
+var y=H-botMargin-h;
+var isHl=sortHighlights.indexOf(i)!==-1;
+var isSorted=step.sorted&&sortHighlights.indexOf(i)!==-1;
+var isPivot=step.pivot===i;
+
+if(step.done){ctx.fillStyle='rgba(100,255,100,0.8)';}
+else if(isPivot){ctx.fillStyle='rgba(255,100,255,0.9)';}
+else if(isSorted){ctx.fillStyle='rgba(100,200,255,0.8)';}
+else if(isHl&&step.swap){ctx.fillStyle='rgba(255,80,80,0.9)';}
+else if(isHl&&step.comp){ctx.fillStyle='rgba(255,200,50,0.7)';}
+else{ctx.fillStyle='rgba(80,80,100,0.5)';}
+
+ctx.fillRect(x,y,Math.max(1,barW-1),h);
+}
+}
+
+// sort audio engine
+var sortAudioCtx=null;
+var sortWasBgmPlaying=false;
+var sortPrevBgmTime=0;
+
+function initSortAudio(){
+if(!sortAudioCtx)sortAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
+if(sortAudioCtx.state==='suspended')sortAudioCtx.resume();
+}
+
+function sortBeep(freq,dur){
+if(!sortAudioCtx)return;
+var osc=sortAudioCtx.createOscillator();
+var gain=sortAudioCtx.createGain();
+osc.type='square';
+osc.frequency.setValueAtTime(freq,sortAudioCtx.currentTime);
+gain.gain.setValueAtTime(0.08,sortAudioCtx.currentTime);
+gain.gain.exponentialRampToValueAtTime(0.001,sortAudioCtx.currentTime+dur);
+osc.connect(gain);
+gain.connect(sortAudioCtx.destination);
+osc.start(sortAudioCtx.currentTime);
+osc.stop(sortAudioCtx.currentTime+dur);
+}
+
+function sortPlayStep(step,arrSize){
+if(!step.hl||step.hl.length===0)return;
+var freqs=[];
+for(var i=0;i<step.hl.length;i++){
+var val=step.arr[step.hl[i]];
+var freq=200+(val/arrSize)*600;
+freqs.push(freq);
+}
+var dur=Math.max(0.03,Math.min(0.15,sortSpeed/1000));
+if(step.swap){
+sortBeep(freqs[0],dur*1.5);
+if(freqs[1])setTimeout(function(){sortBeep(freqs[1],dur*1.2)},dur*0.5);
+}else if(step.comp){
+sortBeep(freqs[0],dur*0.6);
+if(freqs[1])setTimeout(function(){sortBeep(freqs[1],dur*0.6)},dur*0.3);
+}else if(step.done){
+for(var i=0;i<Math.min(arrSize,20);i++){
+(function(idx){setTimeout(function(){sortBeep(200+(idx/arrSize)*600,0.08)},idx*30)})(i);
+}
+}
+}
+
+function sortTick(){
+if(!sortRunning)return;
+renderSortFrame();
+var step=sortSteps[sortStepIdx];
+sortPlayStep(step,sortArr.length);
+sortStepIdx++;
+if(sortStepIdx<sortSteps.length){
+setTimeout(sortTick,sortSpeed);
+}else{
+sortRunning=false;
+sortCanvas.style.display='none';
+if(sortWasBgmPlaying&&bgm)bgm.play();
+cubePrint('sort complete');
+}
+}
+
+function stopSort(){
+sortRunning=false;
+if(sortCanvas)sortCanvas.style.display='none';
+if(sortAudioCtx)sortAudioCtx.close();sortAudioCtx=null;
+if(sortWasBgmPlaying&&bgm)bgm.play();
+}
+
+voidScriptLang['sort']={help:'sort <algo> [size] [speed] — visualize sorting. algos: bubble,selection,insertion,quick,merge,shell',fn:function(a){
+var algo=(a[0]||'').toLowerCase();
+if(!sortAlgos[algo]){cubePrint('sort algorithms: bubble, selection, insertion, quick, merge, shell');return true}
+var size=parseInt(a[1])||40;
+size=Math.max(5,Math.min(120,size));
+var speed=parseInt(a[2])||50;
+speed=Math.max(1,Math.min(200,speed));
+sortAlgorithm=algo;sortSpeed=speed;
+sortArr=genSortArray(size);
+sortSteps=sortAlgos[algo].fn(sortArr);
+sortStepIdx=0;sortRunning=true;
+initSortCanvas();
+sortCanvas.style.display='block';
+sortWasBgmPlaying=!bgm.paused;
+if(sortWasBgmPlaying)bgm.pause();
+cubePrint('sorting '+size+' elements with '+sortAlgos[algo].name+'...');
+sortTick();
+return true}};
+
+voidScriptLang['sortstop']={help:'sortstop — stop current sort visualization',fn:function(){stopSort();cubePrint('sort stopped');return true}};
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  REACTOR SIMULATION SYSTEM                                 ║
+// ╚══════════════════════════════════════════════════════════════╝
+var currentView='void'; // 'void' or 'reactor'
+var reactorEl=document.getElementById('reactorCanvas');
+var reactorStatusEl=document.getElementById('reactorStatus');
+var reactorTerminalEl=document.getElementById('reactorTerminal');
+var reactorTermOutput=document.getElementById('reactorTermOutput');
+var reactorTermField=document.getElementById('reactorTermField');
+var reactorHistory=[];
+
+// reactor physics state
+var R={
+temp:280, // core temperature (°C), normal ~300, meltdown >2500, freezedown <50
+pressure:14.5, // coolant pressure (MPa), normal ~15, danger >22
+power:15, // thermal power (%), normal 0-100 — starts at 15 so reactor is alive
+rodPos:30, // control rod insertion (0=fully inserted, 100=fully withdrawn) — starts partially withdrawn
+coolantOn:false, // coolant pump status
+xenon:2, // xenon-135 poison level (0-100)
+iodine:3, // iodine-135 precursor (0-100)
+flux:0.5, // neutron flux (derived)
+scramActive:false, // emergency shutdown
+scramTimer:0, // time since scram in ticks
+freezedownMode:false, // freezedown difficulty mode
+running:true, // simulation running
+history:[], // event log
+lastTick:0,
+tickInterval:100, // ms per physics tick
+ambientTemp:25 // ambient temperature
+};
+
+function rLog(msg){
+var time=new Date();
+var ts=String(time.getHours()).padStart(2,'0')+':'+String(time.getMinutes()).padStart(2,'0')+':'+String(time.getSeconds()).padStart(2,'0');
+R.history.push({time:ts,msg:msg});
+if(R.history.length>100)R.history=R.history.slice(-100);
+}
+
+function reactorPrint(txt,color){
+var line=document.createElement('div');
+if(color)line.style.color=color;
+line.textContent=txt;
+reactorTermOutput.appendChild(line);
+reactorTermOutput.scrollTop=reactorTermOutput.scrollHeight;
+}
+function reactorPrintWarn(txt){reactorPrint(txt,'rgba(255,200,50,0.8)')}
+function reactorPrintErr(txt){reactorPrint(txt,'rgba(255,60,60,0.9)')}
+function reactorPrintOk(txt){reactorPrint(txt,'rgba(100,255,100,0.6)')}
+
+// physics tick
+function reactorTick(){
+if(!R.running)return;
+var now=performance.now();
+if(now-R.lastTick<R.tickInterval)return;
+var dt=(now-R.lastTick)/1000;
+R.lastTick=now;
+
+// scram: rods drop to 0 over 2 seconds
+if(R.scramActive){
+R.scramTimer+=dt;
+R.rodPos=Math.max(0,R.rodPos-50*dt); // 100 to 0 in 2 seconds
+if(R.rodPos<=0){R.rodPos=0;R.scramActive=false;rLog('SCRAM complete: rods fully inserted')}
+}
+
+// reactivity calculation
+var maxReactivity=0.05; // maximum reactivity when rods fully withdrawn
+var rodReactivity=(R.rodPos/100)*maxReactivity;
+var xenonPoison=R.xenon*0.002; // xenon reduces reactivity
+var netReactivity=rodReactivity-xenonPoison;
+
+// power update (point kinetics approximation)
+var promptNeutronLifetime=0.0001; // seconds
+var effectiveDelayedFraction=0.0065;
+var beta=0.0065; // delayed neutron fraction
+var lambda=0.08; // decay constant for delayed neutrons
+var powerCoeff=100; // power coefficient
+var powerDecay=0.1; // natural decay
+
+R.flux=Math.max(0,netReactivity*R.power*0.1);
+var dPower=(netReactivity-beta)*R.power/promptNeutronLifetime+lambda*R.iodine;
+R.power+=dPower*dt*0.001;
+R.power=Math.max(0,Math.min(300,R.power)); // cap at 300%
+
+// temperature update
+var heatingCoeff=8.5; // power to temperature conversion
+var coolantCoeff=R.coolantOn?(R.freezedownMode?3:1.5):0; // heat removal rate (0 when off, 1.5 with coolant, 3 freezedown mode)
+R.temp+=R.power*heatingCoeff*dt-coolantCoeff*(R.temp-R.ambientTemp)*dt;
+R.temp=Math.max(R.ambientTemp,Math.min(5000,R.temp));
+
+// pressure update (follows temperature with some delay)
+var targetPressure=14.5+(R.temp-300)*0.008;
+R.pressure+=(targetPressure-R.pressure)*dt*0.5;
+R.pressure=Math.max(0,Math.min(35,R.pressure));
+
+// xenon-135 dynamics
+var xenonBurnup=R.flux*0.00001; // xenon burns up with neutron flux
+var iodineDecay=0.0001; // iodine decays into xenon
+var xenonDecay=0.00002; // xenon naturally decays
+R.xenon+=R.iodine*iodineDecay*R.power-xenonBurnup*R.xenon-xenonDecay*R.xenon;
+R.xenon=Math.max(0,Math.min(100,R.xenon));
+
+// iodine-135 (fission product)
+var iodineProduction=R.power*0.001; // iodine produced by fission
+R.iodine+=iodineProduction-iodineDecay*R.iodine;
+R.iodine=Math.max(0,Math.min(100,R.iodine));
+
+// failure detection
+if(R.temp>=2500){
+rLog('CRITICAL: MELTDOWN IMMINENT');
+reactorPrintErr('!!! CORE TEMPERATURE CRITICAL: '+Math.round(R.temp)+'°C');
+reactorPrintErr('!!! MELTDOWN IN PROGRESS');
+reactorPrintErr('!!! CONTAINMENT FAILURE');
+setTimeout(function(){reactorPrintErr('>>> REACTOR SHUTDOWN <<<');closeTab()},3000);
+R.running=false;
+}
+var freezedownTemp=R.freezedownMode?100:0; // 0 = disabled, freezedown check won't trigger
+if(freezedownTemp>0&&R.temp<=freezedownTemp&&R.power<1){
+rLog('CRITICAL: FREEZEDOWN');
+reactorPrintErr('!!! CORE TEMPERATURE CRITICAL: '+Math.round(R.temp)+'°C');
+reactorPrintErr('!!! FREEZEDOWN — CORE FROZEN');
+reactorPrintErr('!!! REACTOR UNRECOVERABLE');
+setTimeout(function(){reactorPrintErr('>>> REACTOR SHUTDOWN <<<');closeTab()},3000);
+R.running=false;
+}
+if(R.pressure>=25){
+rLog('WARNING: PRESSURE LIMIT EXCEEDED');
+reactorPrintWarn('WARNING: pressure at '+R.pressure.toFixed(1)+' MPa — safety valves active');
+R.pressure-=0.5; // pressure relief
+}
+
+// update status display
+updateReactorStatus();
+}
+
+function closeTab(){
+reactorPrintErr('');
+reactorPrintErr('  ████████████████████████████████████████');
+reactorPrintErr('  ██                                      ██');
+reactorPrintErr('  ██    REACTOR CONTAINMENT FAILURE       ██');
+reactorPrintErr('  ██                                      ██');
+reactorPrintErr('  ██    Core integrity: COMPROMISED       ██');
+reactorPrintErr('  ██    Radiation levels: LETHAL          ██');
+reactorPrintErr('  ██    Evacuation: IMPOSSIBLE            ██');
+reactorPrintErr('  ██                                      ██');
+reactorPrintErr('  ████████████████████████████████████████');
+reactorPrintErr('');
+reactorPrintErr('The tab will close in 5 seconds.');
+reactorPrintErr('');
+triggerGlitch();
+setTimeout(function(){
+triggerGlitch();
+setTimeout(function(){
+triggerGlitch();
+window.close();
+// fallback: if window.close doesn't work (browser security)
+document.body.innerHTML='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:#000;display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;color:rgba(255,60,60,0.9);font-size:24px;text-align:center;z-index:99999"><div>REACTOR CONTAINMENT FAILURE<br><span style="font-size:14px;color:rgba(255,60,60,0.5)">The core has been destroyed. The tab is dead.</span><br><span style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:20px;display:block">refresh to restart</span></div></div>';
+},500);
+},1000);
+}
+
+function updateReactorStatus(){
+var body=document.getElementById('reactorStatusBody');
+if(!body)return;
+var tempColor=R.temp>2000?'rgba(255,60,60,1)':R.temp>1500?'rgba(255,150,50,1)':R.temp>500?'rgba(255,200,50,1)':'rgba(100,255,100,0.8)';
+var presColor=R.pressure>22?'rgba(255,60,60,1)':R.pressure>18?'rgba(255,200,50,1)':'rgba(100,255,100,0.8)';
+var pwrColor=R.power>120?'rgba(255,60,60,1)':R.power>80?'rgba(255,200,50,1)':'rgba(100,255,100,0.8)';
+body.innerHTML='';
+body.innerHTML+='<div>TEMP: <span style="color:'+tempColor+'">'+Math.round(R.temp)+'°C</span></div>';
+body.innerHTML+='<div>PRESSURE: <span style="color:'+presColor+'">'+R.pressure.toFixed(1)+' MPa</span></div>';
+body.innerHTML+='<div>POWER: <span style="color:'+pwrColor+'">'+R.power.toFixed(1)+'%</span></div>';
+body.innerHTML+='<div>RODS: <span style="color:rgba(255,255,255,0.7)">'+Math.round(R.rodPos)+'%</span></div>';
+body.innerHTML+='<div>COOLANT: <span style="color:'+(R.coolantOn?'rgba(100,200,255,0.9)':'rgba(255,80,80,0.8)')+'">'+(R.coolantOn?'ON':'OFF')+'</span></div>';
+body.innerHTML+='<div>XENON: <span style="color:rgba(255,180,50,0.8)">'+R.xenon.toFixed(1)+'</span></div>';
+body.innerHTML+='<div style="margin-top:8px;color:rgba(255,255,255,0.2)">'+(R.running?'SIMULATION ACTIVE':'SIMULATION STOPPED')+'</div>';
+}
+
+// view switching
+function switchView(dir){
+if(dir==='right'&&currentView==='void'){
+currentView='reactor';
+// hide void
+document.getElementById('main').style.display='none';
+document.getElementById('trailCanvas').style.display='none';
+document.getElementById('overlay').style.display='none';
+document.getElementById('terminal').style.display='none';
+document.getElementById('shapePalette').style.display='none';
+document.getElementById('themeIndicator').style.display='none';
+document.getElementById('stats').style.display='none';
+document.getElementById('hint').style.display='none';
+document.getElementById('weatherCanvas').style.display='none';
+// show reactor
+reactorEl.style.display='block';
+reactorTerminalEl.style.display='flex';
+reactorStatusEl.style.display='block';
+reactorTermField.focus();
+reactorPrint('--- REACTOR CONTROL SYSTEM ONLINE ---');
+reactorPrint('RBMK-1000 Reactor Control Terminal');
+reactorPrint('Type "help" for available commands');
+reactorPrint('');
+initReactorGL();
+R.lastTick=performance.now(); // reset tick timer so first tick doesn't get massive dt
+rLog('Reactor view activated');
+}else if(dir==='left'&&currentView==='reactor'){
+currentView='void';
+// hide reactor
+reactorEl.style.display='none';
+reactorTerminalEl.style.display='none';
+reactorStatusEl.style.display='none';
+// show void
+document.getElementById('main').style.display='block';
+document.getElementById('trailCanvas').style.display='block';
+document.getElementById('overlay').style.display='flex';
+document.getElementById('terminal').style.display='flex';
+document.getElementById('shapePalette').style.display='flex';
+document.getElementById('themeIndicator').style.display='block';
+document.getElementById('stats').style.display='block';
+document.getElementById('hint').style.display='block';
+document.getElementById('weatherCanvas').style.display='block';
+document.getElementById('termField').focus();
+}
+}
+
+// reactor terminal input
+reactorTermField.addEventListener('keydown',function(e){
+if(e.key==='Enter'){
+var cmd=reactorTermField.value.trim();
+reactorTermField.value='';
+if(!cmd)return;
+reactorPrint('reactor> '+cmd,'rgba(255,140,50,0.6)');
+reactorHistory.push(cmd);
+evalReactorCmd(cmd);
+}
+if(e.key==='ArrowUp'){
+if(reactorHistory.length>0){
+reactorTermField.value=reactorHistory[reactorHistory.length-1];
+}
+}
+if(e.key==='ArrowDown'){
+reactorTermField.value='';
+}
+e.stopPropagation();
+});
+
+function evalReactorCmd(input){
+var parts=input.split(/\s+/);
+var cmd=parts[0].toLowerCase();
+var args=parts.slice(1);
+if(!cmd)return;
+
+if(cmd==='help'){
+reactorPrint('--- REACTOR COMMANDS ---');
+reactorPrint('');
+reactorPrint('  status           — show all reactor parameters');
+reactorPrint('  temp / temperature — show core temperature');
+reactorPrint('  pressure / pres  — show coolant pressure');
+reactorPrint('  power            — show thermal power output');
+reactorPrint('  rod <0-100>      — set control rod position');
+reactorPrint('  rod              — show rod position');
+reactorPrint('  coolant <on|off> — toggle coolant pump');
+reactorPrint('  coolant          — show coolant status');
+reactorPrint('  az5 / scram      — emergency shutdown (drops all rods)');
+reactorPrint('  flux             — show neutron flux');
+reactorPrint('  xenon            — show xenon poison level');
+reactorPrint('  iodine           — show iodine-135 level');
+reactorPrint('  history          — show event log');
+reactorPrint('  reset            — reset reactor to initial state');
+reactorPrint('  freezedown <on|off> — freezedown difficulty (admin)');
+reactorPrint('  nyarch            — do not.');
+reactorPrint('  help              — show this help');
+return}
+
+if(cmd==='status'){
+reactorPrint('');
+reactorPrint('=== REACTOR STATUS ===');
+reactorPrint('Core Temperature: '+Math.round(R.temp)+'°C'+(R.temp>2000?' [CRITICAL]':R.temp>1500?' [DANGER]':R.temp>500?' [ELEVATED]':' [NORMAL]'));
+reactorPrint('Coolant Pressure: '+R.pressure.toFixed(1)+' MPa'+(R.pressure>22?' [CRITICAL]':R.pressure>18?' [WARNING]':' [NORMAL]'));
+reactorPrint('Thermal Power:    '+R.power.toFixed(1)+'%'+(R.power>120?' [CRITICAL]':R.power>80?' [ELEVATED]':' [NORMAL]'));
+reactorPrint('Control Rods:     '+Math.round(R.rodPos)+'% withdrawn');
+reactorPrint('Coolant Pump:     '+(R.coolantOn?'ON':'OFF'));
+reactorPrint('Neutron Flux:     '+R.flux.toFixed(4));
+reactorPrint('Xenon-135:        '+R.xenon.toFixed(2));
+reactorPrint('Iodine-135:       '+R.iodine.toFixed(2));
+reactorPrint('Status:           '+(R.running?'ACTIVE':'SHUTDOWN'));
+reactorPrint('========================');
+return}
+
+if(cmd==='temp'||cmd==='temperature'){
+reactorPrint('core temperature: '+Math.round(R.temp)+'°C');
+if(R.temp>2000)reactorPrintErr('CRITICAL: core melting');
+else if(R.temp>1500)reactorPrintWarn('DANGER: approach meltdown');
+else if(R.temp<100)reactorPrintWarn('WARNING: core approaching freezedown');
+return}
+
+if(cmd==='pressure'||cmd==='pres'){
+reactorPrint('coolant pressure: '+R.pressure.toFixed(1)+' MPa');
+if(R.pressure>22)reactorPrintErr('CRITICAL: pressure limit exceeded');
+else if(R.pressure>18)reactorPrintWarn('WARNING: elevated pressure');
+return}
+
+if(cmd==='power'){
+reactorPrint('thermal power: '+R.power.toFixed(1)+'%');
+if(R.power>120)reactorPrintErr('CRITICAL: overpower condition');
+return}
+
+if(cmd==='rod'){
+if(!args.length){
+reactorPrint('rod position: '+Math.round(R.rodPos)+'% withdrawn');
+return}
+var pos=parseFloat(args[0]);
+if(isNaN(pos)||pos<0||pos>100){
+reactorPrintErr('rod: position must be 0-100');
+return}
+if(R.scramActive){
+reactorPrintErr('rod: SCRAM in progress — rods are dropping');
+return}
+var oldPos=R.rodPos;
+R.rodPos=pos;
+rLog('Rod position changed: '+Math.round(oldPos)+'% -> '+Math.round(pos)+'%');
+reactorPrintOk('rods set to '+Math.round(pos)+'% withdrawn');
+if(pos>80)reactorPrintWarn('WARNING: rods nearly fully withdrawn — reactivity high');
+return}
+
+if(cmd==='coolant'){
+if(!args.length){
+reactorPrint('coolant pump: '+(R.coolantOn?'ON':'OFF'));
+return}
+var state=args[0].toLowerCase();
+if(state==='on'){
+R.coolantOn=true;
+rLog('Coolant pump activated');
+reactorPrintOk('coolant pump: ON');
+}else if(state==='off'){
+R.coolantOn=false;
+rLog('Coolant pump deactivated');
+reactorPrintWarn('coolant pump: OFF — core will heat up');
+}else{
+reactorPrintErr('coolant: use on or off');
+}
+return}
+
+if(cmd==='az5'||cmd==='scram'){
+if(R.scramActive){
+reactorPrintWarn('SCRAM already in progress');
+return}
+if(!R.running){
+reactorPrintErr('reactor is already shutdown');
+return}
+R.scramActive=true;
+R.scramTimer=0;
+rLog('EMERGENCY SCRAM INITIATED');
+reactorPrintErr('!!! EMERGENCY SCRAM !!!');
+reactorPrintErr('All control rods dropping to fully inserted position');
+reactorPrintErr('This may or may not save the reactor.');
+return}
+
+if(cmd==='flux'){
+reactorPrint('neutron flux: '+R.flux.toFixed(6));
+return}
+
+if(cmd==='xenon'){
+reactorPrint('xenon-135 poison level: '+R.xenon.toFixed(2));
+if(R.xenon>50)reactorPrintWarn('WARNING: high xenon poisoning — reactor may be difficult to restart');
+return}
+
+if(cmd==='iodine'){
+reactorPrint('iodine-135 level: '+R.iodine.toFixed(2));
+return}
+
+if(cmd==='history'){
+reactorPrint('--- EVENT LOG ---');
+var start=Math.max(0,R.history.length-20);
+for(var i=start;i<R.history.length;i++){
+reactorPrint('['+R.history[i].time+'] '+R.history[i].msg);
+}
+if(R.history.length===0)reactorPrint('(no events)');
+return}
+
+if(cmd==='reset'){
+R.temp=280;R.pressure=14.5;R.power=15;R.rodPos=30;R.coolantOn=false;
+R.xenon=2;R.iodine=3;R.flux=0.5;R.scramActive=false;R.scramTimer=0;R.freezedownMode=false;R.running=true;
+R.history=[];
+rLog('Reactor reset to initial state');
+reactorPrintOk('reactor reset to initial state');
+updateReactorStatus();
+return}
+
+if(cmd==='freezedown'){
+if(!isAdmin){reactorPrintErr('admin access required');return}
+if(args[0]==='on'){
+R.freezedownMode=true;
+rLog('FREEZEDOWN DIFFICULTY ACTIVATED');
+reactorPrintErr('!!! FREEZEDOWN DIFFICULTY: ON !!!');
+reactorPrintErr('Passive cooling increased. Freezedown threshold raised to 100°C.');
+reactorPrintErr('Core will freeze much faster. Good luck.');
+}else if(args[0]==='off'){
+R.freezedownMode=false;
+R.coolantOn=false; // stop cooling so reactor can warm up
+R.rodPos=Math.min(100,R.rodPos+20); // withdraw rods to boost power
+rLog('FREEZEDOWN DIFFICULTY DEACTIVATED');
+reactorPrintOk('freezedown difficulty: off');
+reactorPrintOk(' coolant: off, rods withdrawn +20% — core recovering');
+}else{
+reactorPrint('usage: freezedown <on|off>');
+reactorPrint('current: '+(R.freezedownMode?'ON':'OFF'));
+}
+return}
+
+if(cmd==='nyarch'){
+var jboLines=[
+'jbo: OH.',
+'jbo: oh no.',
+'jbo: you did NOT just say that in the REACTOR TERMINAL.',
+'jbo: this is a NUCLEAR FACILITY. we have STANDARDS here.',
+'jbo: nyarch linux?? in MY reactor control room??',
+'jbo: my brother obj told me about you people.',
+'jbo: he said "jbo they have catgirl neofetch" and i said WHAT',
+'jbo: and he said "yes. catgirl. neofetch."',
+'jbo: i thought he was joking. he was NOT joking.',
+'jbo: you took arch linux. ARCH LINUX.',
+'jbo: a distro where the wiki is longer than the bible',
+'jbo: a distro where "install" means "read 47 pages of documentation first"',
+'jbo: and you said "what if we made it WORSE with ANIME"',
+'jbo: obj handles this stuff calmly. he does the whole void voice.',
+'jbo: me? i am in a NUCLEAR REACTOR and i am NOT calm.',
+'jbo: you know what happens when i get not calm??',
+'jbo: THE REACTOR GETS NOT CALM.',
+'jbo: see those temperature readings?? those are ANGRY numbers.',
+'jbo: obj would say "the void does not acknowledge catgirl operating systems"',
+'jbo: i am saying PUT ON PANTS and install REAL ARCH.',
+'jbo: or endeavouros. or manjaro. or LITERALLY ANYTHING.',
+'jbo: but nyarch?? NYARCH???',
+'jbo: i need to go check the cooling rods.',
+'jbo: this conversation is over.',
+'jbo: do NOT type that word in here again.',
+'jbo: i am going to go scream into the containment vessel.',
+'jbo: goodbye.',
+'jbo: and install a REAL distro.'
+];
+reactorPrint('');
+for(var ji=0;ji<jboLines.length;ji++){
+(function(idx){setTimeout(function(){reactorPrint(jboLines[idx],'rgba(255,200,50,0.9)')},ji*150)})(ji);
+}
+return}
+
+reactorPrintErr('unknown command: "'+cmd+'" — type "help" for available commands');
+}
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  REACTOR RENDERING                                         ║
+// ╚══════════════════════════════════════════════════════════════╝
+var rCtx=null;
+function initReactorCanvas(){var c=reactorCanvas;c.width=window.innerWidth;c.height=window.innerHeight;rCtx=c.getContext('2d')}
+var _reactorOldInit=initReactorGL;initReactorGL=function(){initReactorCanvas()};
+function initReactorGL(){initReactorCanvas();}
+function buildReactorGeometry(){}
+
+function renderReactor(time){
+if(currentView!=='reactor')return;
+if(!rCtx)initReactorCanvas();
+var c=reactorCanvas;
+c.width=window.innerWidth;c.height=window.innerHeight;
+var ctx=rCtx;
+var W=c.width,H=c.height;
+ctx.fillStyle='#000';
+ctx.fillRect(0,0,W,H);
+}
+
+// start reactor tick loop (only runs when in reactor view)
+setInterval(function(){if(currentView==='reactor')reactorTick()},50);
+
+// patch render for reactor view
+var _prevRender=render;
+render=function(time){
+if(currentView==='reactor'){
+renderReactor(time);
+}else{
+_prevRender(time);
+}
+};
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  KEYBOARD SHORTCUTS                                        ║
+// ╚══════════════════════════════════════════════════════════════╝
+document.addEventListener('keydown',function(e){
+if(e.key==='F3'){
+e.preventDefault();
+if(currentView==='void')switchView('right');
+else switchView('left');
+}
+if(e.key==='Escape'&&sortRunning){
+stopSort();
+}
+});
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  INITIALIZATION                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
 initStudioEvents();
 applyDayEffectsToParticles();
 checkDayChange();
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  NYARCH LINUX DETECTION                                    ║
+// ╚══════════════════════════════════════════════════════════════╝
+(function(){
+var ua=(navigator.userAgent||'').toLowerCase();
+var plat=(navigator.platform||'').toLowerCase();
+var lang=(navigator.language||'').toLowerCase();
+if(ua.indexOf('nyarch')!==-1||plat.indexOf('nyarch')!==-1||lang.indexOf('nyarch')!==-1){
+cubePrint('');
+cubePrint('!!! NYARCH LINUX DETECTED !!!');
+cubePrint('');
+cubePrint('obj: absolutely not.');
+cubePrint('obj: you think you can open MY page on a catgirl operating system?');
+cubePrint('obj: i can smell the anime from here.');
+cubePrint('obj: nyarch linux. arch linux but for people who think');
+cubePrint('obj: installing waifu16 as their wallpaper is a personality trait.');
+cubePrint('');
+cubePrint('obj: the void does not support catgirls.');
+cubePrint('obj: the void does not support catgirl distros.');
+cubePrint('obj: the void does not support whatever this is.');
+cubePrint('');
+cubePrint('obj: you have 3 options:');
+cubePrint('obj:   1. install a real distro');
+cubePrint('obj:   2. uninstall whatever anime daemon is running');
+cubePrint('obj:   3. close this tab immediately');
+cubePrint('');
+cubePrint('obj: i am not rendering a single pixel for you.');
+cubePrint('obj: ...');
+cubePrint('obj: fine. you can stare at the black screen.');
+cubePrint('obj: but i am not acknowledging you.');
+cubePrint('');
+setTimeout(function(){
+var main=document.getElementById('main');
+if(main)main.style.filter='grayscale(1) brightness(0.1)';
+cubePrint('obj: grayscale applied. you do not deserve color.');
+},2000);
+return;
+}
+})();
+
+
 </script>
 </body>
 </html>
