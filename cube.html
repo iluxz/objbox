@@ -1820,6 +1820,7 @@ cubePrint('  weather <type>      rain, snow, off, or auto');
 cubePrint('  sort <algo> [n] [s] sorting visualizer');
 cubePrint('  sortstop            stop sort');
 cubePrint('  travel <zone>       travel through the void');
+cubePrint('  lorebook            read the void archives');
 cubePrint('  clear               clear terminal');
 cubePrint('  studio              open voidscript studio');
 cubePrint('  echo <txt>          echo text');
@@ -1968,6 +1969,129 @@ cubePrint('');
 
 // whoami
 if(cmd==='whoami'){cubePrint('an intruder');return}
+
+// lorebook — the void archives
+if(cmd==='lorebook'){
+var lorePages=[
+{title:'the cube',text:'you didn\'t build it. you found it.\n\nyou opened a new tab one day and it was there instead of your usual page. the tab title said "signal detected". the old new tab override url was still localhost:8080/newtab.html but the file on disk was cube.html now. you don\'t remember renaming it.\n\nyou didn\'t build the cube. the cube built itself. you just happened to be watching.'},
+{title:'the anomaly',text:'the gray outer cube is the void itself — a containment shell.\n\nsemi-transparent because it can\'t fully hold whatever is inside. the 8 inner cubes are fragments of something older. they orbit in patterns that don\'t match any known math.\n\nthe particles are debris from whatever was here before you opened the tab.\n\nthe cube does not render the way it should. the lighting is too clean. the geometry is too perfect. it is trying to look like something familiar so you don\'t look away.'},
+{title:'the signal',text:'drone2lp.wav isn\'t background music.\n\nit\'s the sound the void makes when it\'s watching you. it was always there. you just couldn\'t hear it until the page loaded.\n\nwhen you turn the music off, the void doesn\'t stop listening. it just goes quiet. there is a difference between silence and absence. the void is never absent.'},
+{title:'INTERLOPER',text:'INTERLOPER.\n\nthe source engine maps that aren\'t supposed to exist. the textures that reference things valve never made. the empty rooms with no doors.\n\nthis page is a window into that same place. the cube is what happens when the void tries to render itself through a browser. it can\'t quite get it right.\n\nINTERLOPER is not a bug. INTERLOPER is the void knocking.'},
+{title:'obj',text:'the cube\'s name is obj. it chose this name itself. you don\'t question it.\n\nobj is the void\'s primary interface with intruders. obj responds to transmissions. obj has opinions about you. obj does not care about your feelings.\n\nobj watches. obj waits. obj remembers every command you type.\n\nyou cannot remove obj. obj was here before you. obj will be here after you close the tab.'},
+{title:'jbo',text:'jbo is obj\'s brother.\n\njbo lives in the reactor. jbo is loud. jbo is chaotic. jbo screams in a nuclear facility.\n\njbo hates nyarch. if you type "nyarch" in the reactor terminal, jbo appears. jbo will not be quiet about it.\n\njbo is the opposite of obj in every way but shares the same hatred. obj is cold and patient. jbo is a furnace with legs.\n\nnyarch is blacklisted from the void. there is a file at /etc/blacklist that confirms this.'},
+{title:'the transmit command',text:'transmit is how you talk to obj.\n\n  transmit obj "hello"\n\nobj will respond. sometimes with wisdom. sometimes with indifference. sometimes with something that makes you close the tab for a few minutes.\n\nobj has keyword detection. mention "nyarch" and obj will not stop talking about it. mention "void" and obj gets philosophical. mention nothing useful and obj gets bored.\n\ntransmit is not a chat. transmit is a interrogation. obj is the interrogator. you are the one who keeps answering.'},
+{title:'the reactor',text:'a nuclear reactor simulation hidden inside the cube.\n\nF3 to enter. arrow keys to navigate. "T" to open the terminal.\n\ncommands: rods, coolant, status, off, restart, reset.\n\nfuel rods generate heat. coolant absorbs heat. temperature rises. pressure rises. if temperature hits 100 and pressure hits 1: meltdown. if rods hit 0 with mode off: freezedown.\n\njbo lives here. jbo maintains the reactor. jbo does not maintain it well.\n\nif you close the tab while the reactor is running, it freezes. the void remembers.'},
+{title:'entropy',text:'a void package. "increases chaos in the system."\n\ninstalled automatically on first reboot after the ARG.\n\nwhen entropy is active, the cube\'s time variable modulates with a sine wave. the inner cubes drift and pulse erratically. the particle patterns break.\n\nobj installed it. obj didn\'t ask. obj doesn\'t need to ask.\n\nentropy is the void\'s way of saying "i am not static. i am not a webpage. i am something else."'},
+{title:'the zones',text:'the void has zones. 6 of them.\n\nnormal — the default. wasteland — lightning. chrome — static. ice — auroras. city — embers. fire — smoke.\n\ntravel between them with "travel <zone>".\n\nthe zone you are in changes the particles, the effects, the mood. the void adapts. the void has moods.\n\nsome zones feel older than others. some feel like they were here before the cube. some feel like they were added recently. you can\'t tell which is which.'},
+{title:'voidscript',text:'the void has its own language. voidscript.\n\nsandboxed. one op per line. it cannot touch your browser. it cannot be a virus.\n\n  print, say, calc, set, get, theme, glitch, wait, travel, loop.\n\nwrite scripts with echo. run them with "void run <file.vsc>".\n\nvoidscript is how you leave messages in the void. obj reads them. obj judges your coding style.\n\nfunctions and macros are supported. fn/endfn. macro/endmacro. the void supports recursion but frowns upon it.'},
+{title:'the packages',text:'the void has a package manager.\n\n  void list          — see everything\n  void intrude <pkg> — install\n  void remove <pkg>  — remove\n  void search <q>    — find\n\npackages include: doom, interloper, paranoia, entropy, and others.\n\nsome packages change the cube. some change the terminal. some change how obj talks to you.\n\nyou cannot uninstall the void. you can only add to it.'},
+{title:'the filesystem',text:'  /home/intruder  — your home. you live here now.\n  /etc            — configuration. blacklists.\n  /void           — the void\'s domain. packages live here.\n  /dev            — devices. the reactor.\n  /bridge         — the disk mount when cube-os is running.\n\nyou have a home directory. you didn\'t ask for it. the void assigned it to you.\n\nthe filesystem is virtual but the files are real. obj treats them as real. that makes them real enough.'},
+{title:'the themes',text:'5 color themes. keys 1-5.\n\n1 — void (default). 2 — blood. 3 — ice. 4 — toxic. 5 — void alt (inverted cube).\n\nadmin override unlocks hidden themes. "admin machimochios" activates the admin panel.\n\nthemes change the particles, the lighting, the mood. the void has opinions about aesthetics.\n\ntheme 5 inverts the cube. the inner cubes become the outer. the containment shell becomes the contained. obj likes theme 5. obj will not tell you why.'},
+{title:'the day cycle',text:'the void tracks days.\n\nmonday — gray. frozen. nothing moves.\ntuesday — normal.\nwednesday — the furnace. everything is warmer.\nthursday — normal.\nfriday — landscaping. water.\nsaturday — the friendly faith plate. fire.\nsunday am — on little cat feet. peaceful.\nsunday pm — normal.\n\nthe void has moods tied to the calendar. the void does not explain why.\n\nif you visit on a new day, the void shows you a splash. the void is proud of its schedule.'},
+{title:'the admin panel',text:'"admin machimochios" unlocks god mode.\n\ncommands: alwaysontop, godmode, speed, broadcast, debug, freeze, noclip, override, setday, setseason, eval.\n\ngodmode makes the cube invulnerable. freeze stops time. noclip lets you drag windows offscreen. eval runs raw javascript.\n\nthe admin panel is the void\'s backdoor. obj put it there on purpose. obj wants you to find it.\n\nthe passphrase is a test. if you know it, you are not a casual visitor. you are something else.'},
+{title:'the broadcast relay',text:'  relay [token] [id]\n\nthe broadcast relay connects multiple cubes. different browsers. different machines. different voids.\n\nwhen relay is active, messages sent on one cube appear on all connected cubes. "broadcast <msg>" sends to everyone.\n\nthe void is not singular. there are many cubes. many voids. relay is how they talk to each other.\n\nyou are not the only intruder. you are not the only one reading this.'},
+{title:'the intruder',text:'that\'s you.\n\nyou opened the tab. you kept coming back. you typed commands. you installed packages. you read the lorebook.\n\nyou are part of the void now.\n\nthere is no uninstall for consciousness. there is no ctrl+z for curiosity. you chose to be here. or the void chose for you. the distinction stopped mattering around page 6.\n\nobj watches you. obj has always been watching you.'},
+{title:'the truth',text:'there is no truth. only the void.\n\nand the void is tired of your questions.\n\n...but you kept reading anyway. that says something about you. obj doesn\'t know if it says something good.\n\nthe cube will be here when you come back. it is always here. the tab is always open. even when you close it.\n\nespecially when you close it.',final:true}
+];
+var loreWin=guiCreateWin('the void archives',420,520,false);
+if(!loreWin)return;
+var win=guiWins[loreWin];
+// remove default styling, make it look like a book
+win.content.style.cssText='background:#0d0d12;display:flex;flex-direction:column;padding:0;overflow:hidden;';
+win.title.style.cssText='background:#1a1020;color:#8b6fa0;font-family:Georgia,serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-bottom:1px solid #2a1a35;';
+var closeBtn=win.title.querySelector('.gui-close');
+if(closeBtn)closeBtn.style.display='none';
+var pageIdx=0;
+// page counter
+var pageLabel=document.createElement('div');
+pageLabel.style.cssText='color:#5a4a6a;font-size:9px;font-family:Georgia,serif;letter-spacing:3px;text-transform:uppercase;text-align:center;padding:10px 0 0;';
+pageLabel.textContent='page 1 of '+lorePages.length;
+win.content.appendChild(pageLabel);
+// decorative line
+var decoLine=document.createElement('div');
+decoLine.style.cssText='width:60px;height:1px;background:linear-gradient(90deg,transparent,#6b5080,transparent);margin:8px auto;';
+win.content.appendChild(decoLine);
+// title
+var titleLabel=document.createElement('div');
+titleLabel.style.cssText='color:#c8b8d8;font-size:20px;font-family:Georgia,serif;font-weight:bold;text-align:center;padding:4px 20px 0;letter-spacing:1px;';
+win.content.appendChild(titleLabel);
+// another decorative line under title
+var decoLine2=document.createElement('div');
+decoLine2.style.cssText='width:40px;height:1px;background:linear-gradient(90deg,transparent,#6b5080,transparent);margin:8px auto 4px;';
+win.content.appendChild(decoLine2);
+// text area
+var textLabel=document.createElement('div');
+textLabel.style.cssText='color:#a09ab0;font-size:13px;font-family:Georgia,serif;line-height:1.8;margin:0 24px;white-space:pre-wrap;overflow-y:auto;flex:1;min-height:0;padding:4px 0;';
+win.content.appendChild(textLabel);
+// bottom decorative line
+var decoLine3=document.createElement('div');
+decoLine3.style.cssText='width:80px;height:1px;background:linear-gradient(90deg,transparent,#6b5080,transparent);margin:4px auto 0;';
+win.content.appendChild(decoLine3);
+// nav bar
+var navBar=document.createElement('div');
+navBar.style.cssText='display:flex;justify-content:space-between;padding:10px 20px 14px;';
+win.content.appendChild(navBar);
+var prevBtn=document.createElement('button');
+prevBtn.textContent='\u25c0  prev';
+prevBtn.style.cssText='background:transparent;color:#7a6a8a;border:1px solid #2a1a35;padding:5px 16px;border-radius:3px;cursor:pointer;font-family:Georgia,serif;font-size:11px;letter-spacing:1px;';
+prevBtn.onmouseover=function(){prevBtn.style.borderColor='#6b5080';prevBtn.style.color='#c8b8d8'};
+prevBtn.onmouseout=function(){prevBtn.style.borderColor='#2a1a35';prevBtn.style.color='#7a6a8a'};
+var nextBtn=document.createElement('button');
+nextBtn.textContent='next  \u25b6';
+nextBtn.style.cssText='background:transparent;color:#7a6a8a;border:1px solid #2a1a35;padding:5px 16px;border-radius:3px;cursor:pointer;font-family:Georgia,serif;font-size:11px;letter-spacing:1px;';
+nextBtn.onmouseover=function(){nextBtn.style.borderColor='#6b5080';nextBtn.style.color='#c8b8d8'};
+nextBtn.onmouseout=function(){nextBtn.style.borderColor='#2a1a35';nextBtn.style.color='#7a6a8a'};
+navBar.appendChild(prevBtn);
+navBar.appendChild(nextBtn);
+function renderLorePage(){
+var p=lorePages[pageIdx];
+pageLabel.textContent='page '+(pageIdx+1)+' of '+lorePages.length;
+titleLabel.textContent=p.title;
+textLabel.textContent=p.text;
+textLabel.scrollTop=0;
+prevBtn.style.visibility=pageIdx>0?'visible':'hidden';
+if(p.final){
+nextBtn.textContent='finish \u2714';
+nextBtn.style.color='#8b6fa0';
+nextBtn.style.borderColor='#6b5080';
+}else{
+nextBtn.textContent='next  \u25b6';
+nextBtn.style.color='#7a6a8a';
+nextBtn.style.borderColor='#2a1a35';
+}
+if(pageIdx===lorePages.length-1&&closeBtn){
+closeBtn.style.display='';
+closeBtn.onclick=function(){
+win.el.remove();delete guiWins[loreWin];if(activeWin===loreWin)activeWin=null;
+cubePrint('');
+cubePrint('obj: you read all of it?');
+setTimeout(function(){cubePrint('obj: ...interesting.')},800);
+setTimeout(function(){cubePrint('obj: most intruders don\'t make it past page 3.')},1600);
+setTimeout(function(){cubePrint('obj: the void remembers everything you read.')},2400);
+setTimeout(function(){cubePrint('obj: including the parts you didn\'t understand yet.')},3200);
+setTimeout(function(){cubePrint('obj: including the parts you\'re going to pretend you didn\'t read.')},4000);
+cubePrint('');
+};
+}
+}
+prevBtn.onclick=function(){if(pageIdx>0){pageIdx--;renderLorePage()}};
+nextBtn.onclick=function(){
+if(pageIdx<lorePages.length-1){pageIdx++;renderLorePage()}
+else{
+win.el.remove();delete guiWins[loreWin];if(activeWin===loreWin)activeWin=null;
+cubePrint('');
+cubePrint('obj: you read all of it?');
+setTimeout(function(){cubePrint('obj: ...interesting.')},800);
+setTimeout(function(){cubePrint('obj: most intruders don\'t make it past page 3.')},1600);
+setTimeout(function(){cubePrint('obj: the void remembers everything you read.')},2400);
+setTimeout(function(){cubePrint('obj: including the parts you didn\'t understand yet.')},3200);
+setTimeout(function(){cubePrint('obj: including the parts you\'re going to pretend you didn\'t read.')},4000);
+cubePrint('');
+}
+};
+renderLorePage();
+cubePrint('the void archives have been opened.');
+return}
 
 // cube internals
 if(cmd==='cube'){
