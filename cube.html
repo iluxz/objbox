@@ -2501,7 +2501,7 @@ var zenResponses=[
 if(Math.random()<0.12){zenActive=true}
 setTimeout(function(){
 if(zenActive){
-cubePrint('zen: '+zenResponses[Math.floor(Math.random()*zenResponses.length)]);
+termPrint('zen: '+zenResponses[Math.floor(Math.random()*zenResponses.length)],'rgba(255,230,0,1)');
 }else if(finalAngry){
 termPrint('obj: '+finalResponse,'rgba(255,0,0,1)');
 triggerGlitch();
