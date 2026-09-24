@@ -6730,7 +6730,7 @@ var u=skillState.upgrades[key];
 if(!u)return;
 if(!areaUnlockedFor(key)){cubeWarn('buy every skill in the previous area first');return}
 if(u.lv>=u.max){cubeWarn('upgrade maxed');return}
-if(upLv('skill_buyMax')>0&&skillState.buyMax){
+if((upLv('skill_buyMax')>0||isAdmin)&&skillState.buyMax){
 var _n=0,_tot=0,_lv=u.lv;
 while(_lv<u.max){var _cc=upCostAt(key,_lv);if(skillState.upPoints-_tot<_cc)break;_tot+=_cc;_lv++;_n++;if(_n>20000)break}
 if(_n<=0){cubeWarn('not enough upgrade points ('+skillState.upPoints+'/'+upCostAt(key,u.lv)+')');return}
