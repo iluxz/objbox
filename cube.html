@@ -132,6 +132,22 @@ canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 .buymax-toggle{display:inline-block;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);border-radius:6px;color:rgba(255,255,255,0.65);font-family:'Consolas',monospace;font-size:10px;letter-spacing:1px;padding:4px 12px;margin-bottom:10px;cursor:pointer}
 .buymax-toggle.on{border-color:rgba(255,210,60,0.8);color:rgba(255,210,60,1);box-shadow:0 0 8px rgba(255,210,60,0.3)}
 .buymax-toggle.locked{opacity:0.35;filter:grayscale(0.8)}
+#slotsPanel{position:fixed;top:0;left:0;right:0;bottom:0;z-index:70;background:rgba(0,0,0,0.94);display:none;flex-direction:column;align-items:center;justify-content:center;font-family:'Consolas',monospace;color:rgba(43,208,208,0.9);gap:18px}
+#slotsPanel.active{display:flex}
+#slotsPanel .title{font-size:16px;font-weight:bold;letter-spacing:3px}
+#slotsPanel .sub{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1px}
+#floppyRow{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.floppy{width:150px;background:linear-gradient(160deg,#1a1a2e,#0d0d1a);border:1px solid rgba(255,255,255,0.18);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.floppy.active{border-color:rgba(43,208,208,0.9);box-shadow:0 0 14px rgba(43,208,208,0.35)}
+.fl-shutter{width:70px;height:22px;background:linear-gradient(180deg,#b8b8c8,#6e6e7e);border-radius:2px;position:relative}
+.fl-shutter:after{content:'';position:absolute;left:26px;top:3px;width:18px;height:16px;background:#0a0a12;border-radius:1px}
+.fl-label{width:100%;background:rgba(240,240,245,0.92);border-radius:2px;padding:6px;min-height:56px;text-align:center}
+.fl-name{font-size:12px;font-weight:bold;color:#111;word-break:break-word}
+.fl-info{font-size:10px;color:#444;margin-top:4px;line-height:1.5}
+.fl-btns{display:flex;gap:6px}
+.fl-btns button{background:rgba(43,208,208,0.12);border:1px solid rgba(43,208,208,0.4);border-radius:4px;color:rgba(43,208,208,0.9);font-family:'Consolas',monospace;font-size:10px;padding:3px 8px;cursor:pointer}
+.fl-btns button:hover{background:rgba(43,208,208,0.3)}
+.fl-btns button.danger{border-color:rgba(255,80,80,0.4);color:rgba(255,80,80,0.9);background:rgba(255,80,80,0.1)}
 .up-area{border:1px solid rgba(255,255,50,0.25);border-radius:12px;background:rgba(255,255,50,0.03);overflow:hidden;--ac:rgba(255,255,50,0.85)}
 .up-area.locked{opacity:0.35;filter:grayscale(0.6);border-style:dashed}
 .up-area-head{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08);background:linear-gradient(180deg,rgba(255,255,50,0.06),transparent)}
@@ -286,6 +302,12 @@ the source code is a lie. the render is the truth.
 </div>
 </div>
 </div>
+<div id="slotsPanel">
+<div class="title">FLOPPY SHELF</div>
+<div class="sub">5 disks. pick your timeline. saving overwrites the disk.</div>
+<div id="floppyRow"></div>
+<button class="closeBtn" onclick="slotsClose()" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.4);border-radius:4px;color:rgba(255,80,80,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">close</button>
+</div>
 <div id="overlay"><div class="clock" id="clock">00:00</div><div class="date" id="date"></div></div>
 <div class="stats" id="stats"></div>
 <div class="hint" id="hint">drag to rotate | scroll to zoom | click shapes to morph | 1-7 for themes | F2: screenshot mode | ◀▶ switch views (reactor/core) | F4: core | click terminal to type</div>
@@ -417,6 +439,7 @@ END LOG
 <div class="help-cmd"><span class="hl">uptime</span> — show page uptime</div>
 <div class="help-cmd"><span class="hl">visits</span> — show total visit count</div>
 <div class="help-cmd"><span class="hl">skill</span> - open the skill tree</div>
+<div class="help-cmd"><span class="hl">slots</span> - open the floppy shelf (5 save disks)</div>
 <div class="help-cmd" data-skill-gate="finals"><span class="hl">upgrade</span> - open upgrade tree (locked until every skill)</div>
 <div class="help-cmd"><span class="hl">bgm moon</span> - play moon1857 (overdose)</div>
 <div class="help-cmd"><span class="hl">weather</span> &lt;rain|snow|off|auto&gt; — change weather</div>
@@ -1214,6 +1237,7 @@ if(bgm.paused)bgm.play();else bgm.pause();
 var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':bgm.src.includes('cat')?'on little cat feet':'void drone';
 cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
 'skill':{help:'skill - open the skill tree',fn:function(){skillOpen();return true}},
+'slots':{help:'slots - open the floppy shelf (5 save disks)',fn:function(){slotsOpen();return true}},
 'buymax':{help:'buymax - toggle buy-max (needs: Buy Max, area 3)',fn:function(){toggleBuyMax();return true}},
 'nothingcore':{help:'nothingcore - gaze through the nothing core (needs: ∅)',fn:function(){toggleNothingCore();return true}},
 'coreview':{help:'coreview - alias of nothingcore',fn:function(){toggleNothingCore();return true}},
@@ -2246,6 +2270,7 @@ cubePrint('  visits              show total visit count');
 cubePrint('  skill               open the skill tree');
 if(skillAllFinals())cubePrint('  upgrade             open upgrade tree');
 else cubeDim('  upgrade             upgrade tree (locked — buy every skill)');
+cubePrint('  slots               open the floppy shelf (5 save disks)');
 cubePrint('  weather <type>      rain, snow, off, or auto');
 cubePrint('  sort <algo> [n] [s] sorting visualizer');
 cubePrint('  sortstop            stop sort');
@@ -2353,6 +2378,7 @@ cubePrint('  perfmode          toggle performance mode');
 cubePrint('  uptime            show page uptime');
 cubePrint('  visits            show visit count');
 cubePrint('  skill             open skill tree');
+cubePrint('  slots             open the floppy shelf (5 save disks)');
 if(skillAllFinals())cubePrint('  upgrade           open upgrade tree');
 else cubeDim('  upgrade           upgrade tree (locked — buy every skill)');
 cubePrint('  weather <type>    rain, snow, off, auto');
@@ -5149,6 +5175,7 @@ voidScriptLang['perfmode']={help:'perfmode — toggle performance mode (reduce p
 voidScriptLang['uptime']={help:'uptime - show how long the page has been open',fn:function(){cubePrint('uptime: '+getUptime());return true}};
 voidScriptLang['visits']={help:'visits - show total visit count',fn:function(){cubePrint('visits: '+visitCount);return true}};
 voidScriptLang['skill']={help:'skill - open the skill tree',fn:function(){skillOpen();return true}};
+voidScriptLang['slots']={help:'slots - open the floppy shelf (5 save disks)',fn:function(){slotsOpen();return true}};
 voidScriptLang['buymax']={help:'buymax - toggle buy-max (needs: Buy Max, area 3)',fn:function(){toggleBuyMax();return true}};
 voidScriptLang['nothingcore']={help:'nothingcore - gaze through the nothing core (needs: ∅)',fn:function(){toggleNothingCore();return true}};
 voidScriptLang['coreview']={help:'coreview - alias of nothingcore',fn:function(){toggleNothingCore();return true}};
@@ -6972,6 +6999,84 @@ applySkillPan();
 function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active')}
 function openUpgradeTree(){skillOpen();if(!skillAllFinals()){cubeWarn('upgrade locked — buy every skill');return}panSkillToUpgrade()}
 function skillClose(){var el=document.getElementById('skillTree');if(el)el.classList.remove('active')}
+var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count'];
+var slotDefNames=['main','testing','slot 3','slot 4','slot 5'];
+function slotRead(n){try{var s=localStorage.getItem('cube_slot_'+n);if(!s)return null;var b=JSON.parse(s);if(b&&typeof b==='object')return b}catch(e){}return null}
+function slotActive(){try{var a=parseInt(localStorage.getItem('cube_active_slot')||'1',10);if(a>=1&&a<=5)return a}catch(e){}return 1}
+function slotsOpen(){renderSlots();var el=document.getElementById('slotsPanel');if(el)el.classList.add('active')}
+function slotsClose(){var el=document.getElementById('slotsPanel');if(el)el.classList.remove('active')}
+function renderSlots(){
+var row=document.getElementById('floppyRow');if(!row)return;row.innerHTML='';
+var act=slotActive();
+for(var n=1;n<=5;n++){
+(function(n){
+var b=slotRead(n);
+var name=b&&b.name?b.name:slotDefNames[n-1];
+var info='empty disk';
+if(b&&b.data){
+var pts='?',up='?',sk='?';
+try{var st=JSON.parse(b.data.cube_skill_state||'null');if(st){pts=st.points;up=st.upPoints;sk=st.owned?Object.keys(st.owned).length:0}}catch(e){}
+var dt='?';try{dt=new Date(b.at).toLocaleDateString()+' '+new Date(b.at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){}
+info=sk+' skills · '+pts+'↑ / '+up+'⬆<br>'+dt;
+}
+var d=document.createElement('div');
+d.className='floppy'+(n===act?' active':'');
+var btns='<div class="fl-btns"><button onclick="slotSave('+n+')">SAVE</button><button onclick="slotLoad('+n+')">LOAD</button><button onclick="slotRename('+n+')">NAME</button><button class="danger" onclick="slotDelete('+n+')">DEL</button></div>';
+d.innerHTML='<div class="fl-shutter"></div><div class="fl-label"><div class="fl-name">'+name.replace(/</g,'&lt;')+'</div><div class="fl-info">'+info+'</div></div>'+btns;
+row.appendChild(d);
+})(n);
+}
+}
+function slotSave(n){
+try{if(typeof skillSave==='function')skillSave()}catch(e){}
+var data={};
+for(var i=0;i<slotKeys.length;i++){try{var v=localStorage.getItem(slotKeys[i]);if(v!==null)data[slotKeys[i]]=v}catch(e){}}
+var old=slotRead(n);
+var blob={name:old&&old.name?old.name:slotDefNames[n-1],at:Date.now(),data:data};
+try{localStorage.setItem('cube_slot_'+n,JSON.stringify(blob));localStorage.setItem('cube_active_slot',String(n))}catch(e){cubeError('slots: disk '+n+' is write-protected (storage full)');return}
+cubeOk('slots: saved to disk '+n+' ('+blob.name+')');
+renderSlots();
+}
+function slotLoad(n){
+var act=slotActive();
+try{slotSave(act)}catch(e){}
+var b=slotRead(n);
+if(!b||!b.data){
+for(var i=0;i<slotKeys.length;i++){try{localStorage.removeItem(slotKeys[i])}catch(e){}}
+try{localStorage.setItem('cube_active_slot',String(n))}catch(e){}
+slotsClose();
+cubeOk('slots: disk '+n+' is blank. booting a fresh timeline...');
+setTimeout(function(){location.reload()},800);
+return}
+for(var k in b.data){try{localStorage.setItem(k,b.data[k])}catch(e){}}
+try{localStorage.setItem('cube_active_slot',String(n))}catch(e){}
+slotsClose();
+cubeOk('slots: loaded disk '+n+' ('+(b.name||slotDefNames[n-1])+'). rebooting timeline...');
+setTimeout(function(){location.reload()},800);
+}
+function slotDelete(n){
+var b=slotRead(n);
+if(!b){cubeWarn('slots: disk '+n+' is already blank');return}
+var ok=false;
+try{ok=confirm('erase disk '+n+' ("'+(b.name||slotDefNames[n-1])+'") forever?')}catch(e){}
+if(!ok)return;
+try{localStorage.removeItem('cube_slot_'+n)}catch(e){}
+cubeOk('slots: disk '+n+' erased.');
+renderSlots();
+}
+function slotRename(n){
+var b=slotRead(n);
+var cur=b&&b.name?b.name:slotDefNames[n-1];
+var name=null;
+try{name=prompt('name disk '+n+':',cur)}catch(e){}
+if(name===null||name===undefined)return;
+name=String(name).trim().slice(0,24)||cur;
+var blob=b||{at:0,data:null};
+blob.name=name;
+try{localStorage.setItem('cube_slot_'+n,JSON.stringify(blob))}catch(e){cubeError('slots: rename failed');return}
+cubeOk('slots: disk '+n+' is now "'+name+'"');
+renderSlots();
+}
 if(typeof refreshHelpLocks==='function')refreshHelpLocks();
 skillReapplyAll();
 skillUpReapplyAll();
