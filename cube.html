@@ -4096,7 +4096,7 @@ themeIndicator.style.color='rgba(43,208,208,0.4)';
 setTimeout(function(){themeIndicator.style.color='rgba(255,255,255,0.15)'},1500);
 }
 document.addEventListener('keydown',function(e){
-if(e.key>='1'&&e.key<='7'&&!e.ctrlKey&&!e.metaKey&&document.activeElement!==document.getElementById('termField')&&document.activeElement!==document.getElementById('studioCode')){
+if(e.key>='1'&&e.key<='7'&&!e.ctrlKey&&!e.metaKey&&document.activeElement!==document.getElementById('termField')&&document.activeElement!==document.getElementById('studioCode')&&!(typeof demoPlaying!=='undefined'&&demoPlaying)){
 if(themes[e.key])applyTheme(e.key);
 }
 if(e.key==='F2'){e.preventDefault();toggleScreenshotMode()}
