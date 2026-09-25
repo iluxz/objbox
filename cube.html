@@ -8,6 +8,23 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{overflow:hidden;background:#000;cursor:grab}
 body.dragging{cursor:grabbing}
+body.demo-mode{cursor:none}
+body.demo-mode #terminal,body.demo-mode #overlay,body.demo-mode #shapePalette,body.demo-mode #stats,body.demo-mode #hint,body.demo-mode #themeIndicator,body.demo-mode #trailCanvas,body.demo-mode #vignette,body.demo-mode #filmGrain,body.demo-mode #chromAb,body.demo-mode #weatherCanvas,body.demo-mode #sortCanvas,body.demo-mode #navLeft,body.demo-mode #navRight,body.demo-mode #reactorTerminal,body.demo-mode #reactorStatus,body.demo-mode #slotsPanel,body.demo-mode #skillTree,body.demo-mode #studioHelpPanel,body.demo-mode #exportLabel,body.demo-mode #odWarn,body.demo-mode #odFlash{display:none!important;opacity:0!important;visibility:hidden!important}
+body.demo-mode .gui-window,body.demo-mode .transmission{display:none!important}
+#demoHud{display:none;position:fixed;top:16px;left:18px;z-index:120;pointer-events:none;font-family:'Consolas',monospace;font-size:12px;line-height:1.7;color:rgba(180,255,255,0.88);text-shadow:0 0 12px rgba(43,208,208,0.35)}
+body.demo-mode #demoHud{display:block}
+#demoChecker{position:fixed;top:0;left:0;width:100%;height:100%;z-index:105;pointer-events:none;opacity:0;background:repeating-conic-gradient(rgba(0,0,0,1) 0% 25%,rgba(190,190,200,1) 0% 50%) 50%/90px 90px}
+#demoWatcher{position:fixed;z-index:106;width:10px;height:10px;border-radius:50%;background:rgba(255,80,80,0.9);box-shadow:0 0 18px rgba(255,80,80,0.9);display:none;pointer-events:none;animation:demoPulse 2s ease-in-out infinite}
+@keyframes demoPulse{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.8);opacity:1}}
+#demoStill{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:107;display:none;pointer-events:none;font-family:'Consolas',monospace;font-size:min(18vw,160px);font-weight:bold;letter-spacing:0.2em;color:rgba(255,255,255,0.92);text-shadow:0 0 60px rgba(255,255,255,0.4);animation:demoStillFlicker 3s steps(12) infinite}
+#demoTheirs{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:107;display:none;pointer-events:none;font-family:'Consolas',monospace;font-size:min(14vw,120px);font-weight:bold;letter-spacing:0.35em;color:rgba(255,90,90,0.9);text-shadow:0 0 60px rgba(255,60,60,0.45);animation:demoStillFlicker 4s steps(14) infinite}
+#demoGoAway{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:107;display:none;pointer-events:none;font-family:'Consolas',monospace;font-size:min(14vw,120px);font-weight:bold;letter-spacing:0.25em;color:rgba(255,30,30,0.95);text-shadow:0 0 80px rgba(255,0,0,0.6);animation:demoGoAwayFlicker 1.5s steps(8) infinite}
+@keyframes demoGoAwayFlicker{0%,100%{opacity:1}20%{opacity:0.3}25%{opacity:1}55%{opacity:1}60%{opacity:0.1}65%{opacity:1}90%{opacity:1}95%{opacity:0.4}}
+@keyframes demoStillFlicker{0%,100%{opacity:0.95}8%{opacity:0.2}10%{opacity:0.9}46%{opacity:0.9}48%{opacity:0.3}50%{opacity:0.85}82%{opacity:0.85}84%{opacity:0.1}86%{opacity:0.9}}
+#demoRec{color:#ff4040;animation:demoBlink 1.1s steps(2) infinite}
+@keyframes demoBlink{50%{opacity:0.15}}
+#cbFog{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;display:none;background:radial-gradient(ellipse at 50% 108%,rgba(130,140,165,0.20),transparent 60%),radial-gradient(ellipse at 15% 85%,rgba(110,120,150,0.12),transparent 55%),radial-gradient(ellipse at 85% 80%,rgba(110,120,150,0.10),transparent 50%)}
+#homCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:3;pointer-events:none;display:none}
 canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 #overlay{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-left:40%;padding-top:min(640px,calc(100vh - 240px));z-index:10;pointer-events:none}
 .clock{font-size:96px;font-weight:100;letter-spacing:6px;color:rgba(255,255,255,0.9);text-shadow:0 0 40px rgba(43,208,208,0.3),0 0 80px rgba(43,208,208,0.1);font-family:'Segoe UI Light','Segoe UI',system-ui,sans-serif;margin-bottom:8px}
@@ -311,6 +328,14 @@ the source code is a lie. the render is the truth.
 <div id="overlay"><div class="clock" id="clock">00:00</div><div class="date" id="date"></div></div>
 <div class="stats" id="stats"></div>
 <div class="hint" id="hint">drag to rotate | scroll to zoom | click shapes to morph | 1-7 for themes | F2: screenshot mode | ◀▶ switch views (reactor/core) | F4: core | click terminal to type</div>
+<div id="demoHud"></div>
+<div id="demoChecker"></div>
+<div id="demoWatcher"></div>
+<div id="demoStill">STILL</div>
+<div id="demoTheirs">THEIRS</div>
+<div id="demoGoAway">GO AWAY</div>
+<div id="cbFog"></div>
+<canvas id="homCanvas"></canvas>
 <div id="shapePalette"></div>
 <div id="glitch"></div>
 <div id="exportLabel" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.92);border:1px solid rgba(43,208,208,0.6);border-radius:8px;padding:16px;z-index:100;max-width:500px;font-family:'Consolas',monospace">
@@ -440,6 +465,12 @@ END LOG
 <div class="help-cmd"><span class="hl">visits</span> — show total visit count</div>
 <div class="help-cmd"><span class="hl">skill</span> - open the skill tree</div>
 <div class="help-cmd"><span class="hl">slots</span> - open the floppy shelf (5 save disks)</div>
+<div class="help-cmd"><span class="hl">obj</span> - ask obj for pull access</div>
+<div class="help-cmd"><span class="hl">pull</span> - play a procedural void demo (needs obj)</div>
+<div class="help-cmd"><span class="hl">demos</span> - list saved void demos</div>
+<div class="help-cmd"><span class="hl">replay</span> &lt;file&gt; - replay a saved void demo</div>
+<div class="help-cmd"><span class="hl">void-mute</span> - silence void transmissions</div>
+<div class="help-cmd"><span class="hl">void-unmute</span> - let the void talk again</div>
 <div class="help-cmd" data-skill-gate="finals"><span class="hl">upgrade</span> - open upgrade tree (locked until every skill)</div>
 <div class="help-cmd"><span class="hl">bgm moon</span> - play moon1857 (overdose)</div>
 <div class="help-cmd"><span class="hl">weather</span> &lt;rain|snow|off|auto&gt; — change weather</div>
@@ -524,7 +555,6 @@ END LOG
 <div class="help-cmd"><span class="hl">alwaysontop</span> &lt;on|off&gt; — make active window stay on top of everything</div>
 <div class="help-cmd"><span class="hl">godmode</span> &lt;on|off&gt; — make the cube invulnerable</div>
 <div class="help-cmd"><span class="hl">speed</span> &lt;0.1-10&gt; — change script execution speed</div>
-<div class="help-cmd"><span class="hl">broadcast</span> &lt;text&gt; — send a transmission across all zones</div>
 <div class="help-cmd"><span class="hl">debug</span> — show internal state (vars, windows, zone, memory)</div>
 <div class="help-cmd"><span class="hl">freeze</span> &lt;on|off&gt; — freeze the cube in place</div>
 <div class="help-cmd"><span class="hl">noclip</span> &lt;on|off&gt; — drag windows anywhere, even offscreen</div>
@@ -533,8 +563,7 @@ END LOG
 <div class="help-cmd"><span class="hl">setseason</span> &lt;winter|spring|summer|autumn|reset&gt; — override the season (changes particles)</div>
 <div class="help-cmd"><span class="hl">eval</span> &lt;code&gt; — run raw javascript (dangerous)</div>
 <div class="help-cmd"><span class="hl">skillpoints</span> [n] — set skill + upgrade points (default 99999)</div>
-<div class="help-cmd"><span class="hl">relay</span> &lt;url&gt; [sender-id] — connect to broadcast relay</div>
-<div class="help-cmd"><span class="hl">unlisten</span> — stop receiving broadcasts</div>
+<div class="help-cmd"><span class="hl">pull</span> &lt;1-8&gt; — force a demo script (needs admin)</div>
 <div class="help-cmd"><span class="hl">danger</span> list — view available advanced scripts</div>
 <div class="help-cmd"><span class="hl">danger run</span> &lt;name&gt; — launch a danger zone script</div>
 </div>
@@ -685,10 +714,23 @@ var transmissions=[
 'the void.exe has stopped working. the void has never worked.',
 'your code is... creative.',
 'have you tried turning the void off and on again',
-'the void is legally distinct from a haunted house'
+'the void is legally distinct from a haunted house',
+// tape deck (caught obj in 4k)
+'the tape deck is warm. somebody was just watching.',
+'obj was on tape again. obj does not remember filming it.',
+'script 4 is my favorite. do not tell the other scripts.',
+'the checkerboard remembers your footsteps',
+'something in /void/demos is not a demo',
+'cubecheck found graffiti again. it never says where.',
+'do not watch script 8. obj means it.',
+'intruder #0482 says hi. you have never met intruder #0482.',
+'the floor in cb_menu is newer than the void. think about that.',
+'replay that one. no, the other one. you know the one.'
 ];
 function showTransmission(){
+if(typeof txMuted==='function'&&txMuted())return;
 if(pkgEffects&&pkgEffects.voidMute)return;
+if(typeof demoPlaying!=='undefined'&&demoPlaying)return;
 var msg;
 if(window._cubeDay===1){
 msg='...';
@@ -831,7 +873,7 @@ _attunReply=_attunFallback[Math.floor(Math.random()*_attunFallback.length)];
 setTimeout(function(){termPrint('obj: '+_attunReply,'rgba(56,232,232,0.8)')},600);
 }
 }
-setInterval(function(){var _tx=(0.4+0.25*((typeof _skillTxRateLv!=='undefined')?_skillTxRateLv:0))*(window._skillTxBonus||1);if(pkgEffects&&pkgEffects.signalSniffer)_tx*=2.2;if(Math.random()<_tx){showTransmission();if(typeof upLv==='function'&&typeof grantPts==='function'){var _te=upLv('skill_txEcho');if(_te>0){grantPts(0.2*_te*ptMult());skillPtsRefresh()}}var _br=(typeof skillState!=='undefined'&&skillState.upgrades.skill_txBurst)?skillState.upgrades.skill_txBurst.lv:0;if(_br>0&&Math.random()<0.12*_br)showTransmission()}},8000);
+setInterval(function(){if(typeof demoPlaying!=='undefined'&&demoPlaying)return;var _tx=(0.4+0.25*((typeof _skillTxRateLv!=='undefined')?_skillTxRateLv:0))*(window._skillTxBonus||1);if(pkgEffects&&pkgEffects.signalSniffer)_tx*=2.2;if(Math.random()<_tx){showTransmission();if(typeof upLv==='function'&&typeof grantPts==='function'){var _te=upLv('skill_txEcho');if(_te>0){grantPts(0.2*_te*ptMult());skillPtsRefresh()}}var _br=(typeof skillState!=='undefined'&&skillState.upgrades.skill_txBurst)?skillState.upgrades.skill_txBurst.lv:0;if(_br>0&&Math.random()<0.12*_br)showTransmission()}},8000);
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  AUDIO ANALYSIS                                            │
@@ -958,9 +1000,10 @@ var fs={
 '/void/memories/you.txt':{type:'file',content:'name: unknown\nduration: infinite\nstatus: captivated (outside the cube, staring at it)\nregret: the back button does not work'},
 '/void/echo':{type:'dir',children:['last_word.txt']},
 '/void/echo/last_word.txt':{type:'file',content:'...'},
-'/void/pkgs':{type:'dir',children:['greet.vsc','signal.vsc']},
+'/void/pkgs':{type:'dir',children:['greet.vsc','signal.vsc','cubecheck.vsc']},
 '/void/pkgs/greet.vsc':{type:'file',content:'// shown at /void/pkgs/greet.vsc\nsay hello intruder\ntheme 2\nwait 600\nprint the void welcomes you\nwait 400\nprint currently color #2\nglitch'},
 '/void/pkgs/signal.vsc':{type:'file',content:'// a transmission template\nprint -- signal start --\nvar freq 43.208\ncalc 404*404\nwait 500\nsay the signal is strong today\nps\nprint -- signal end --'},
+'/void/pkgs/cubecheck.vsc':{type:'file',content:'// cubecheck.vsc — graffiti scanner. the void runs this on its own schedule.\nprint cubecheck: scanning walls for graffiti...\nwait 1\nprint cubecheck: scan complete. walls are clean. probably.'},
 '/dev':{type:'dir',children:['null','void','random']},
 '/dev/null':{type:'file',content:''},
 '/dev/void':{type:'file',content:'the void stares back.\nyou stare at the void.\nthe void wins.'},
@@ -1062,9 +1105,6 @@ onRemove:function(){delete pkgEffects.clockReset}},
 'entropy':{name:'entropy',desc:'increases chaos in the system',size:'?KB',
 onInstall:function(){pkgEffects.entropy=true},
 onRemove:function(){delete pkgEffects.entropy}},
-'void-mute':{name:'void-mute',desc:'shuts the void up. for peace and quiet.',size:'0KB',
-onInstall:function(){pkgEffects.voidMute=true;cubeOk('void transmissions silenced.')},
-onRemove:function(){delete pkgEffects.voidMute;cubePrint('the void has opinions again.')}},
 'ransom':{name:'ransom',desc:'a gift from the void',size:'666MB',
 onInstall:function(){ransomAttack()},
 onRemove:function(){/* the void already got rid of it */}},
@@ -1101,6 +1141,8 @@ onInstall:function(){pkgEffects.studio=true;cubePrint('voidstudio installed.');c
 onRemove:function(){delete pkgEffects.studio;cubePrint('voidstudio removed.')}}
 };
 var installed=['void-core'];
+function pkgsSave(){try{localStorage.setItem('cube_pkgs',JSON.stringify(installed))}catch(e){}}
+(function pkgsRestore(){try{var s=localStorage.getItem('cube_pkgs');if(!s)return;var v=JSON.parse(s);if(!(v instanceof Array))return;var loud=['ransom','reality-check'];var kept=['void-core'];var n=0;for(var i=0;i<v.length;i++){var pk=v[i];if(pk==='void-core'||kept.indexOf(pk)!==-1)continue;if(pk==='void-mute'){try{localStorage.setItem('cube_mute','1')}catch(e){window._txMuted=true}continue}if(!pkgs[pk])continue;kept.push(pk);n++;if(loud.indexOf(pk)===-1&&pkgs[pk].onInstall){try{pkgs[pk].onInstall()}catch(e){}}}installed=kept;if(n>0)cubeDim('restored '+n+' package'+(n===1?'':'s')+' from last session.')}catch(e){}})();
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  RANSOM ATTACK                                             │
@@ -1220,7 +1262,7 @@ return true}},
 'travel':{help:'travel <zone> — travel through the void',fn:function(a){
 if(!a.length){cubePrint('current zone: '+zones[currentZone].name);var allowed=zoneTransitions[currentZone];for(var i=0;i<allowed.length;i++)cubePrint('  '+zones[allowed[i]].name);return true}
 var dest=a.join(' ').toLowerCase();
-var zoneAliases={'the beginning of the end':'breakdown','beginning of the end':'breakdown','beginning':'breakdown','the geometry void':'geometry','geometry void':'geometry','the fringenlands':'fringenlands','the farlands':'farlands','the source':'source','the void':'void','the end':'end','the x':'x'};
+var zoneAliases={'the beginning of the end':'breakdown','beginning of the end':'breakdown','beginning':'breakdown','the geometry void':'geometry','geometry void':'geometry','the fringenlands':'fringenlands','the farlands':'farlands','the source':'source','the void':'void','the end':'end','the x':'x','cb menu':'cb_menu','menu':'cb_menu','the menu':'cb_menu'};
 var resolved=zoneAliases[dest]||dest;
 travelTo(resolved);
 return true}},
@@ -1272,7 +1314,7 @@ if(!a.length){cubeError('admin: usage admin <passphrase>');return true}
 var attempt=a.join(' ');
 var hash=function(s){var h=0;for(var ci=0;ci<s.length;ci++){h=((h<<5)-h)+s.charCodeAt(ci);h|=0}return h.toString(16)};
 cubePrint('authenticating...');
-setTimeout(function(){if(hash(attempt)==='-4ea7d99f'){isAdmin=true;cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
+setTimeout(function(){if(hash(attempt)==='825511'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
 return true}},
 'alwaysontop':{help:'alwaysontop <on|off> — make active window stay on top',fn:function(a){
 if(!activeWin||!guiWins[activeWin]){cubeError('alwaysontop: no active window');return true}
@@ -1292,35 +1334,6 @@ var mult=parseFloat(a[0]);
 if(isNaN(mult)||mult<0.1||mult>10){cubeError('speed: must be between 0.1 and 10');return true}
 scriptSpeed=mult;
 cubePrint('speed: '+mult+'x');
-return true}},
-'broadcast':{help:'broadcast <text> — send a transmission across all zones',fn:function(a){
-if(!isAdmin){cubeError('admin access required');return true}
-var msg=a.length?a.join(' '):'the void echoes.';
-cubePrint('transmission: "'+msg+'"');
-// show locally
-function showBroadcast(b){
-var el=document.createElement('div');
-el.className='transmission';
-el.innerHTML='<span style="color:rgba(255,200,50,0.6);font-size:14px">['+b.sender+']</span> '+b.message;
-el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(43,208,208,0.9);font-size:24px;font-family:Consolas,monospace;text-shadow:0 0 20px rgba(43,208,208,0.5);z-index:99999;pointer-events:none;animation:fadeInOut 4s forwards;text-align:center;max-width:80vw';
-document.body.appendChild(el);
-setTimeout(function(){el.remove()},4000);
-}
-showBroadcast({message:msg,sender:'admin'});
-// send to gist relay
-if(BROADCAST_GIST_ID&&window._broadcastToken){
-fetch(BROADCAST_RAW_URL+'?t='+Date.now()).then(function(r){return r.json()}).then(function(broadcasts){
-var entry={message:msg,sender:window._broadcastSenderId||'void-admin',time:Date.now()};
-broadcasts.push(entry);
-if(broadcasts.length>50)broadcasts=broadcasts.slice(-50);
-var patchData=JSON.stringify({files:{'broadcasts.json':{content:JSON.stringify(broadcasts,null,2)}}});
-return fetch('https://api.github.com/gists/'+BROADCAST_GIST_ID,{
-method:'PATCH',
-headers:{'Authorization':'token '+window._broadcastToken,'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'cube-broadcast'},
-body:patchData
-});
-}).then(function(){cubePrint('broadcast: sent to relay')}).catch(function(e){cubeWarn('broadcast: relay unreachable')});
-}
 return true}},
 'debug':{help:'debug — show internal state',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
@@ -1406,43 +1419,6 @@ var n=parseInt(a[0],10);if(isNaN(n)||n<0)n=99999999999999999999999999;
 skillState.points=n;skillState.upPoints=n;skillSave();
 if(typeof skillRender==='function')skillRender();
 cubeOk('skill points: '+n+' | upgrade points: '+n);
-return true}},
-'relay':{help:'relay [token] [sender-id] — connect to broadcast relay',fn:function(a){
-if(!isAdmin){cubeError('admin access required');return true}
-if(a[0])window._broadcastToken=a[0];
-if(a[1])window._broadcastSenderId=a[1];
-if(!window._broadcastToken){var stored=localStorage.getItem('cube_broadcast_token');if(stored)window._broadcastToken=stored}
-if(!window._broadcastToken){cubeError('relay: usage relay <gist-token> [sender-id] — token is saved for future sessions');return true}
-localStorage.setItem('cube_broadcast_token',window._broadcastToken);
-window._broadcastSenderId=window._broadcastSenderId||'void-admin';
-cubePrint('relay: connected to broadcast gist');
-cubePrint('relay: sender id = '+window._broadcastSenderId);
-// start listening
-if(window._broadcastListener)clearInterval(window._broadcastListener);
-var seen={};
-window._broadcastListener=setInterval(function(){
-fetch(BROADCAST_RAW_URL+'?t='+Date.now()).then(function(r){return r.json()}).then(function(msgs){
-for(var m=0;m<msgs.length;m++){
-var b=msgs[m];
-var key=b.time+':'+b.sender;
-if(!seen[key]){
-seen[key]=true;
-if(b.sender!==(window._broadcastSenderId||'void-admin')){
-cubePrint('broadcast from '+b.sender+': '+b.message);
-var el=document.createElement('div');
-el.className='transmission';
-el.innerHTML='<span style="color:rgba(255,200,50,0.6);font-size:14px">['+b.sender+']</span> '+b.message;
-el.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(43,208,208,0.9);font-size:24px;font-family:Consolas,monospace;text-shadow:0 0 20px rgba(43,208,208,0.5);z-index:99999;pointer-events:none;animation:fadeInOut 4s forwards;text-align:center;max-width:80vw';
-document.body.appendChild(el);
-setTimeout(function(){el.remove()},4000);
-}}
-}
-}).catch(function(){});
-},3000);
-return true}},
-'unlisten':{help:'unlisten — stop receiving broadcasts',fn:function(a){
-if(window._broadcastListener){clearInterval(window._broadcastListener);window._broadcastListener=null;cubePrint('unlisten: stopped.')}
-else{cubePrint('unlisten: not listening.')}
 return true}},
 'danger':{help:'danger [list|run <name>] — access the danger zone',fn:function(a){
 if(!isAdmin){cubeError('admin access required. this is the danger zone.');return true}
@@ -1631,12 +1607,17 @@ var MAX_LOOP_ITERATIONS=100;
 var MAX_SCRIPT_OPERATIONS=10000;
 var MAX_GUI_WINDOWS=100;
 var isAdmin=false;
+(function(){try{
+if(localStorage.getItem('cube_admin_purge')==='1')return;
+localStorage.removeItem('cube_admin');
+for(var pi=1;pi<=5;pi++){try{var ps=localStorage.getItem('cube_slot_'+pi);if(!ps)continue;var pb=JSON.parse(ps);if(pb&&pb.data&&('cube_admin' in pb.data)){delete pb.data.cube_admin;localStorage.setItem('cube_slot_'+pi,JSON.stringify(pb))}}catch(e){}}
+localStorage.setItem('cube_admin_purge','1');
+}catch(e){}})();
+try{if(localStorage.getItem('cube_admin')==='1'){isAdmin=true;cubeDim('admin session restored. the void remembers you.')}}catch(e){}
 var isFrozen=false;
 var isNoclip=false;
 var scriptSpeed=1;
 var adminThemes={'void':1,'blood':2,'ice':3,'toxic':4,'void-alt':5,'glitch':6,'corrupt':7,'null':8};
-var BROADCAST_GIST_ID='7915e15f4542091944fd92596ab5e19d';
-var BROADCAST_RAW_URL='https://gist.githubusercontent.com/iluxz/7915e15f4542091944fd92596ab5e19d/raw/broadcasts.json';
 var vsCancel=false;
 
 // ┌──────────────────────────────────────────────────────────────┐
@@ -2130,6 +2111,8 @@ sub=dotParts[1];
 parts.shift();
 parts=[cmd,sub].concat(parts);
 }
+// pull ritual: full get command, matched early and quote-tolerant
+if(cmd==='get'){var _gt=String(parts[1]||'').replace(/['"]/g,'').trim().toLowerCase();if(_gt==='box.objbox.pull:51072'){pullRequest('box.objbox.pull:51072');return}}
 
 // help
 if(cmd==='help'){
@@ -2271,6 +2254,12 @@ cubePrint('  skill               open the skill tree');
 if(skillAllFinals())cubePrint('  upgrade             open upgrade tree');
 else cubeDim('  upgrade             upgrade tree (locked — buy every skill)');
 cubePrint('  slots               open the floppy shelf (5 save disks)');
+cubePrint('  obj                 ask obj for pull access');
+cubePrint('  pull                play a procedural void demo (needs obj)');
+cubePrint('  demos               list saved void demos');
+cubePrint('  replay <file>       replay a saved void demo');
+cubePrint('  void-mute           silence void transmissions');
+cubePrint('  void-unmute         let the void talk again');
 cubePrint('  weather <type>      rain, snow, off, or auto');
 cubePrint('  sort <algo> [n] [s] sorting visualizer');
 cubePrint('  sortstop            stop sort');
@@ -2289,7 +2278,6 @@ cubePrint('');
 cubePrint('  alwaysontop <on|off>          keep window on top');
 cubePrint('  godmode <on|off>              cube invulnerability');
 cubePrint('  speed <0.1-10>                script execution speed');
-cubePrint('  broadcast <txt>               send to all zones');
 cubePrint('  debug                         show internal state');
 cubePrint('  freeze <on|off>               freeze the cube');
 cubePrint('  noclip <on|off>               drag windows offscreen');
@@ -2298,8 +2286,7 @@ cubePrint('  setday <day|reset>            override the day');
 cubePrint('  setseason <s|reset>           override the season');
 cubePrint('  eval <code>                   run raw javascript');
 cubePrint('  skillpoints [n]               set skill + upgrade points (99999)');
-cubePrint('  relay [token] [id]            connect broadcast relay');
-cubePrint('  unlisten                      stop receiving broadcasts');
+cubePrint('  pull <1-8>                     force a demo script');
 cubePrint('  danger list/run <name>        danger zone scripts');
 return}
 if(cmd==='voidscript'){showVoidScriptHelp();return}
@@ -2379,6 +2366,13 @@ cubePrint('  uptime            show page uptime');
 cubePrint('  visits            show visit count');
 cubePrint('  skill             open skill tree');
 cubePrint('  slots             open the floppy shelf (5 save disks)');
+cubePrint('  obj               ask obj for pull access');
+cubePrint('  pull              play a procedural void demo (needs obj)');
+cubePrint('  pull <1-8>        force a script (needs admin)');
+cubePrint('  demos             list saved void demos');
+cubePrint('  replay <file>     replay a saved void demo');
+cubePrint('  void-mute         silence void transmissions');
+cubePrint('  void-unmute       let the void talk again');
 if(skillAllFinals())cubePrint('  upgrade           open upgrade tree');
 else cubeDim('  upgrade           upgrade tree (locked — buy every skill)');
 cubePrint('  weather <type>    rain, snow, off, auto');
@@ -2455,14 +2449,18 @@ var lorePages=[
 {title:'the transmit command',text:'transmit is how you talk to obj.\n\n  transmit "obj" "hello"\n  transmit obj: hello\n\nboth syntaxes work. the colon syntax is more casual. the quoted syntax is more precise.\n\nobj will respond. sometimes with wisdom. sometimes with indifference. sometimes with something that makes you close the tab for a few minutes.\n\nobj has keyword detection. mention "nyarch" and obj will not stop talking about it. mention "void" and obj gets philosophical. mention nothing useful and obj gets bored.\n\ntransmit is not a chat. transmit is an interrogation. obj is the interrogator. you are the one who keeps answering.'},
 {title:'the reactor',text:'a nuclear reactor simulation hidden inside the cube.\n\nF3 to enter. ◀▶ (or arrow keys) to move: void → reactor → core. F4 toggles core. "T" opens the terminal.\n\ncommands:\n  status — show all parameters\n  temp — core temperature\n  pressure — coolant pressure\n  power — thermal output\n  rod <0-100> — set control rod position\n  coolant <on|off> — toggle coolant pump\n  az5 / scram — emergency shutdown\n  flux — neutron flux\n  xenon — xenon poison level\n  iodine — iodine-135 level\n  history — event log\n  reset — reset to initial state\n  nyarch — do not.\n\nfuel rods generate heat. coolant absorbs heat. temperature rises. pressure rises. meltdown happens at critical thresholds.\n\njbo lives here. jbo is obj\'s brother. jbo maintains the reactor. jbo does not maintain it well.\n\nif you close the tab while the reactor is running, it freezes. the void remembers.'},
 {title:'entropy',text:'a void package. "increases chaos in the system."\n\ninstalled automatically on first reboot after the ARG.\n\nwhen entropy is active, the cube\'s time variable modulates with a sine wave. the inner cubes drift and pulse erratically. the particle patterns break.\n\nobj installed it. obj didn\'t ask. obj doesn\'t need to ask.\n\nentropy is the void\'s way of saying "i am not static. i am not a webpage. i am something else."'},
-{title:'the zones',text:'the void has zones. 8 of them.\n\nsource — the original page. before the void.\nvoid — where obj waits. the default.\ngeometry void — before matter existed.\nfarlands — floating point starts to decay.\nthe beginning of the end — the renderer is failing.\nfringenlands — fragments remain.\nnothing renders here — only the terminal survives.\nX — needs the breach skill. does not render. whispers from the null.\n\nyou can only travel to adjacent zones. "travel <zone>" pulls you towards the destination.\n\nX is past "end". it is black, a faint glyph, and the terminal talking to itself. leave when you feel like it.'},
-{title:'voidscript',text:'the void has its own language. voidscript.\n\nsandboxed. one op per line. it cannot touch your browser. it cannot be a virus.\n\noutput: print, say, warn, error\nvariables: set, get, random, assert\nmath: calc\ncontrol: if/else/endif, loop/endloop, break, continue, fn/endfn, macro/endmacro, call, return\nfilesystem: pwd, ls, cat, cd, mkdir, touch, echo, cp, mv, rm, tree\nother: travel, bgm, shape, clear, screenshot, perfmode, uptime, weather, sort, sortstop\nadmin: admin, alwaysontop, godmode, speed, broadcast, debug, freeze, noclip, override, setday, setseason, eval, skillpoints\n\nwrite scripts with echo. run them with "void run <file.vsc>".\n\nvoidscript is how you leave messages in the void. obj reads them. obj judges your coding style.'},
+{title:'the zones',text:'the void has zones. 9 of them.\n\nsource — the original page. before the void.\nvoid — where obj waits. the default.\ncb_menu — the menu room. checkerboard floor, fog, mirrors. watch the edges.\ngeometry void — before matter existed.\nfarlands — floating point starts to decay.\nthe beginning of the end — the renderer is failing.\nfringenlands — fragments remain.\nnothing renders here — only the terminal survives.\nX — needs the breach skill. does not render. whispers from the null.\n\nyou can only travel to adjacent zones. "travel <zone>" pulls you towards the destination.\n\nX is past "end". it is black, a faint glyph, and the terminal talking to itself. leave when you feel like it.'},
+{title:'voidscript',text:'the void has its own language. voidscript.\n\nsandboxed. one op per line. it cannot touch your browser. it cannot be a virus.\n\noutput: print, say, warn, error\nvariables: set, get, random, assert\nmath: calc\ncontrol: if/else/endif, loop/endloop, break, continue, fn/endfn, macro/endmacro, call, return\nfilesystem: pwd, ls, cat, cd, mkdir, touch, echo, cp, mv, rm, tree\nother: travel, bgm, shape, clear, screenshot, perfmode, uptime, weather, sort, sortstop\nadmin: admin, alwaysontop, godmode, speed, debug, freeze, noclip, override, setday, setseason, eval, skillpoints\n\nwrite scripts with echo. run them with "void run <file.vsc>".\n\nvoidscript is how you leave messages in the void. obj reads them. obj judges your coding style.'},
 {title:'the packages',text:'the void has a package manager.\n\n  void list          — see everything\n  void intrude <pkg> — install\n  void remove <pkg>  — remove\n  void search <q>    — find\n\npackages include: doom, interloper, paranoia, entropy, and others.\n\nsome packages change the cube. some change the terminal. some change how obj talks to you.\n\nyou cannot uninstall the void. you can only add to it.'},
 {title:'the filesystem',text:'  /home/intruder  — your home. you live here now.\n  /etc            — configuration. blacklists.\n  /void           — the void\'s domain. packages live here.\n  /dev            — devices. the reactor.\n  /bridge         — the disk mount when cube-os is running.\n\nyou have a home directory. you didn\'t ask for it. the void assigned it to you.\n\nthe filesystem is virtual but the files are real. obj treats them as real. that makes them real enough.'},
 {title:'the themes',text:'7 color themes. keys 1-7.\n\n1 — void (default). 2 — blood. 3 — ice. 4 — toxic. 5 — void alt (inverted cube). 6 — prism (geometry skill). 7 — eclipse (anomaly skill).\n\nadmin override unlocks hidden themes. the passphrase is not written down here.\n\nthemes change the particles, the lighting, the mood. the void has opinions about aesthetics.\n\ntheme 5 inverts the cube. the inner cubes become the outer. the containment shell becomes the contained. obj likes theme 5. obj will not tell you why.'},
 {title:'the day cycle',text:'the void tracks days.\n\nmonday — gray. frozen. nothing moves.\ntuesday — normal.\nwednesday — the furnace. everything is warmer.\nthursday — normal.\nfriday — landscaping. water.\nsaturday — the friendly faith plate. fire.\nsunday am — on little cat feet. peaceful.\nsunday pm — normal.\n\nthe void has moods tied to the calendar. the void does not explain why.\n\nif you visit on a new day, the void shows you a splash. the void is proud of its schedule.'},
-{title:'the admin panel',text:'the admin panel is locked behind a passphrase. the void does not print it in these pages.\n\ncommands: alwaysontop, godmode, speed, broadcast, debug, freeze, noclip, override, setday, setseason, eval, skillpoints.\n\ngodmode makes the cube invulnerable. freeze stops time. noclip lets you drag windows offscreen. eval runs raw javascript.\n\nthe admin panel is the void\'s backdoor. obj put it there on purpose. obj wants you to find it.\n\nthe passphrase is a test. if you know it, you are not a casual visitor. you are something else.'},
-{title:'the broadcast relay',text:'  relay [token] [id]\n\nthe broadcast relay connects multiple cubes. different browsers. different machines. different voids.\n\nwhen relay is active, messages sent on one cube appear on all connected cubes. "broadcast <msg>" sends to everyone.\n\nthe void is not singular. there are many cubes. many voids. relay is how they talk to each other.\n\nyou are not the only intruder. you are not the only one reading this.'},
+{title:'the admin panel',text:'the admin panel is locked behind a passphrase. the void does not print it in these pages.\n\ncommands: alwaysontop, godmode, speed, debug, freeze, noclip, override, setday, setseason, eval, skillpoints.\n\ngodmode makes the cube invulnerable. freeze stops time. noclip lets you drag windows offscreen. eval runs raw javascript.\n\nthe admin panel is the void\'s backdoor. obj put it there on purpose. obj wants you to find it.\n\nthe passphrase is a test. if you know it, you are not a casual visitor. you are something else.'},
+{title:'the broadcast relay',text:'the broadcast relay is gone.\n\nit used to connect multiple cubes. different browsers. different machines. different voids.\n\nobj unplugged it. no announcement. one day the relay simply stopped answering.\n\nif you still have a token for it, keep it. it is a souvenir now.\n\nthe void is singular again. there is only this cube. only this void.\n\n...that is what obj wants you to believe.'},
+{title:'the pull',text:'type obj. obj answers, dryly. then: get box.objbox.pull:51072\n\nthe tape deck opens. the interface goes dark. what plays is not a recording — it is generated live, seeded, unrepeatable unless you keep the seed.\n\nevery pull writes a demo file to /void/demos. replay it with: replay <file>. replays are frame-identical. the void does not improvise twice.\n\nshort form: pull. forcing a script (1-8) needs admin. obj does not explain why.'},
+{title:'scripts',text:'the demo types are not demos. they are scripts.\n\nscript 1 — flailing. script 2 — darker flailing. script 3 — corrupted flailing. script 4 — a cinematic: checkerboard, a watcher, a memory of old themes. script 5 — STILL. the cube, held. script 6 — the inspector: it relocates, it inspects, it deletes. script 7 — THEIRS. somebody else\'s tape. script 8 — GO AWAY. obj, losing patience.\n\nthe scripts hijack normal demos and play their own footage. that is the lorebook\'s theory. the mechanics are none of your business.\n\nscripts 4-8 are locked behind the interloper skill (anomaly branch). the tape deck skips what you have not earned.'},
+{title:'cubecheck',text:'cubecheck.vsc lives in /void/pkgs. it scans the walls for graffiti.\n\nthe void runs it on its own schedule — every so often, unasked, it finds something and generates a demo while you are doing something else.\n\ncubecheck.vsc: graffiti detected — generating...\n\nif you see that line, sit back. the void is showing you something it found. you can run the script yourself, but manual scans never find anything. the graffiti only appears when the void is alone with itself.'},
+{title:'cb_menu',text:'there is a room past the void with a checkerboard floor.\n\ncb_menu. travel there: travel cb_menu. dark fog, monochrome grade, a real floor mesh under the cube — geometry, not an overlay. the void built it properly this time.\n\nthe walls remember what you looked at. stare at the floor, look up: the floor stays burned in as your sky. that is the hall of mirrors. the backbuffer leaking. the void\'s oldest rendering bug, kept as a pet.\n\nthe edges fall into nothing. stand near them too long and the void catches you and puts you back. it is not saving you out of kindness. it just isn\'t done watching.\n\nvertical camera is limited here. you cannot flip the room. the room dislikes that.'},
 {title:'the intruder',text:'that\'s you.\n\nyou opened the tab. you kept coming back. you typed commands. you installed packages. you read the lorebook.\n\nyou are part of the void now.\n\nthere is no uninstall for consciousness. there is no ctrl+z for curiosity. you chose to be here. or the void chose for you. the distinction stopped mattering around page 6.\n\nobj watches you. obj has always been watching you.'},
 {title:'the truth',text:'there is no truth. only the void.\n\nand the void is tired of your questions.\n\n...but you kept reading anyway. that says something about you. obj doesn\'t know if it says something good.\n\nthe cube will be here when you come back. it is always here. the tab is always open. even when you close it.\n\nespecially when you close it.',final:true}
 ];
@@ -2733,6 +2731,13 @@ cubeWarn('the void has no opinion about '+host+'.');
 }
 return}
 
+// caught obj in 4k — pull ritual entry points (terminal)
+if(cmd==='obj'){objGrant();return}
+if(cmd==='pull'){var pullArg=parts.slice(1).join(' ').trim().toLowerCase().replace(/['"]/g,'');if(pullArg==='1'||pullArg==='2'||pullArg==='3'||pullArg==='4'||pullArg==='5'||pullArg==='6'||pullArg==='7'||pullArg==='8'){pullRequest(null,pullArg);return}if(pullArg&&pullArg!=='box.objbox.pull:51072'){cubeError('usage: pull [box.objbox.pull:51072|1-8]');return}pullRequest(pullArg||null);return}
+if(cmd==='demos'){demoList();return}
+if(cmd==='replay'){demoReplayCmd(parts.slice(1));return}
+if(cmd==='void-mute'){setTxMuted(true);return}
+if(cmd==='void-unmute'){setTxMuted(false);return}
 // variables
 if(cmd==='set'){
 if(parts.length<3){cubeError('usage: set <key> <value>');return}
@@ -2861,6 +2866,7 @@ var parent=getParent(fp);
 if(fs[parent]&&fs[parent].type==='dir'){
 var idx=fs[parent].children.indexOf(getBase(fp));
 if(idx!==-1)fs[parent].children.splice(idx,1)}
+if(typeof demoForget==='function')demoForget(fp);
 delete fs[fp];cubeOk('removed '+files[0]);return}
 
 // transmit (talk to the void)
@@ -3038,6 +3044,7 @@ setTimeout(function(){
 cubePrint('installing '+pkgName+'...');
 setTimeout(function(){
 installed.push(pkgName);
+pkgsSave();
 if(pkgs[pkgName].onInstall)pkgs[pkgName].onInstall();
 cubeOk(pkgName+': installed successfully');
 cubePrint('  "'+pkgs[pkgName].desc+'"');
@@ -3054,7 +3061,7 @@ if(pkgName==='void-core'){cubeError('void-core: cannot remove the void from itse
 cubePrint('removing '+pkgName+'...');
 setTimeout(function(){
 if(pkgs[pkgName].onRemove)pkgs[pkgName].onRemove();
-installed.splice(idx,1);cubeOk(pkgName+': removed');
+installed.splice(idx,1);pkgsSave();cubeOk(pkgName+': removed');
 },400);
 return}
 if(sub2==='list'||sub2==='ls'){
@@ -3063,6 +3070,7 @@ if(showInstalled){
 cubePrint('installed packages:');
 for(var i=0;i<installed.length;i++){
 var p=pkgs[installed[i]];
+if(!p){cubePrint('  '+installed[i]+' (gone from the repo)');continue}
 cubePrint('  '+installed[i]+' ('+p.size+') — '+p.desc);
 }
 }else{
@@ -3249,12 +3257,26 @@ var patchLog=[
 'each disk snapshots skills, upgrades, points, nothing core, visits, day tracking, studio autosave',
 'blank disk boots a fresh timeline; every load auto-snapshots the active disk first (no lost progress)',
 'renameable disk labels (24 chars) + per-disk skill count, point totals, save timestamp',
-'active disk glows cyan; broadcast token stays global across timelines',
+'active disk glows cyan; demos, packages, mute, admin ride each timeline',
 'bigger disks (200px) + wrapping buttons so nothing escapes the floppy',
 'slots listed in help, help voidscript, and the studio HELP panel'
+]},
+{date:'2026-09-24',tier:'unreasonably massive',title:'caught obj in 4k',notes:[
+'pull ritual: obj grants tape-deck access, then get box.objbox.pull:51072 (or pull). connection sequence, then footage',
+'procedural demo engine: seeded rng drives every demo — no canned scenarios. replays are frame-identical',
+'script ladder 1-8: flailing / darker / corrupted / cinematic / STILL / inspector / THEIRS / GO AWAY (60/22/11/2.5/0.5/2/1/0.5)',
+'every pull saves to /void/demos (demo1.demo...). demos lists, replay reruns, rm syncs. persisted + ride floppy slots',
+'demo HUD: blinking REC, script + commit + ticks, live scenes, whispers, inspect targets, intruder tags',
+'script 5 holds the cube frozen mid-orbit. script 8 is obj telling you to leave. lore writes itself',
+'interloper skill (anomaly branch) gates scripts 4-8. pull 1-8 forces a script (admin)',
+'cubecheck.vsc: graffiti scanner that auto-generates demos while you idle. the void has its own schedule',
+'cb_menu zone: real checkerboard floor mesh, fog, monochrome grade, hall-of-mirrors backbuffer, edge-fall, pitch clamp',
+'void-mute package retired → void-mute / void-unmute commands (persisted). packages + admin session persist too',
+'broadcast / relay / unlisten removed. the lorebook holds a decommission notice. obj unplugged it.',
+'4 new lorebook pages (the pull, scripts, cubecheck, cb_menu) + 10 tape-deck transmissions'
 ]}
 ];
-var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','full on rework basically':'#c878ff'};
+var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff'};
 var updWin=guiCreateWin('cube# update log',420,520,false);
 if(!updWin)return;
 var uwin=guiWins[updWin];
@@ -3348,7 +3370,7 @@ cubePrint('datawipe — local cube data:');
 if(!cubeKeys.length)cubePrint('  (nothing stored)');
 for(var ki=0;ki<cubeKeys.length;ki++)cubePrint('  '+cubeKeys[ki]);
 cubePrint('');
-cubeWarn('this kills skill tree, upgrades, visits, day tracking, studio autosave, core first-visit, broadcast token.');
+cubeWarn('this kills skill tree, upgrades, visits, day tracking, studio autosave, core first-visit, demos, packages, mute, admin.');
 cubePrint('type: datawipe yes');
 return;
 }
@@ -3397,7 +3419,10 @@ var zoneAliases={
 'the source':'source',
 'the void':'void',
 'the end':'end',
-'the x':'x'
+'the x':'x',
+'cb menu':'cb_menu',
+'menu':'cb_menu',
+'the menu':'cb_menu'
 };
 var resolved=zoneAliases[dest]||dest;
 travelTo(resolved);
@@ -3808,7 +3833,7 @@ var shapeGens={cube:geoCube,tetra:geoTetra,sphere:geoSphere,cyl:geoCyl,torus:geo
 // │  WEBGL SETUP                                               │
 // └──────────────────────────────────────────────────────────────┘
 var canvas=document.getElementById('main');
-var gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+var gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
 var dpr=Math.min(window.devicePixelRatio||1,2);
 canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;
 canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';
@@ -3888,6 +3913,29 @@ rebuild('cube');
 
 var outerBuf=upBuf(geoCube(1.3,0.15,0.15,0.15));
 
+// cb_menu floor — real checkerboard mesh on the same camera. fog baked into vertex colors.
+var cbFloorBuf=null,cbFloorCnt=0;
+(function buildCbFloor(){
+var quads=256,qs=1,fy=-4.5,data=[];
+for(var ix=0;ix<quads;ix++){for(var iz=0;iz<quads;iz++){
+var x0=(ix-quads/2)*qs,x1=x0+qs,z0=(iz-quads/2)*qs,z1=z0+qs;
+var light=((ix+iz)%2===0);
+var cx=(x0+x1)/2,cz=(z0+z1)/2;
+var dd=Math.sqrt(cx*cx+cz*cz)/(quads*qs*0.5);
+var fog=Math.min(1,dd*1.7);
+var lr=light?0.72:0.015,lg=light?0.72:0.015,lb=light?0.78:0.03;
+var r=lr+(0.03-lr)*fog,g=lg+(0.03-lg)*fog,b=lb+(0.05-lb)*fog;
+data.push(x0,fy,z0,0,1,0,r,g,b);
+data.push(x1,fy,z0,0,1,0,r,g,b);
+data.push(x1,fy,z1,0,1,0,r,g,b);
+data.push(x0,fy,z0,0,1,0,r,g,b);
+data.push(x1,fy,z1,0,1,0,r,g,b);
+data.push(x0,fy,z1,0,1,0,r,g,b);
+}}
+cbFloorCnt=data.length/9;
+try{cbFloorBuf=upBuf(new Float32Array(data))}catch(e){cbFloorBuf=null}
+})();
+
 // ┌──────────────────────────────────────────────────────────────┐
 // │  PARTICLE SYSTEM                                           │
 // └──────────────────────────────────────────────────────────────┘
@@ -3933,14 +3981,14 @@ gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);gl.bufferData(gl.ARRAY_BUFFER,pData,gl.DYNAM
 // ┌──────────────────────────────────────────────────────────────┐
 // │  MOUSE CONTROLS                                            │
 // └──────────────────────────────────────────────────────────────┘
-var drag=false,rX=0.3,rY=0.5,vX=0,vY=0,zZ=-9,lX=0,lY=0;
+var drag=false,rX=0,rY=0,vX=0,vY=0,zZ=-9,lX=0,lY=0;
 var mouseDownX=0,mouseDownY=0,wasDrag=false;
-canvas.addEventListener('mousedown',function(e){drag=true;wasDrag=false;mouseDownX=e.clientX;mouseDownY=e.clientY;lX=e.clientX;lY=e.clientY;vX=vY=0;document.body.classList.add('dragging')});
+canvas.addEventListener('mousedown',function(e){if(typeof demoPlaying!=='undefined'&&demoPlaying)return;drag=true;wasDrag=false;mouseDownX=e.clientX;mouseDownY=e.clientY;lX=e.clientX;lY=e.clientY;vX=vY=0;document.body.classList.add('dragging')});
 window.addEventListener('mouseup',function(){drag=false;document.body.classList.remove('dragging')});
-window.addEventListener('mousemove',function(e){if(!drag)return;var dx=e.clientX-mouseDownX,dy=e.clientY-mouseDownY;if(Math.sqrt(dx*dx+dy*dy)>5)wasDrag=true;vY=(e.clientX-lX)*.005;vX=(e.clientY-lY)*.005;rY+=vY;rX+=vX;lX=e.clientX;lY=e.clientY});
+window.addEventListener('mousemove',function(e){if(typeof demoPlaying!=='undefined'&&demoPlaying)return;if(!drag)return;var dx=e.clientX-mouseDownX,dy=e.clientY-mouseDownY;if(Math.sqrt(dx*dx+dy*dy)>5)wasDrag=true;vY=(e.clientX-lX)*.005;vX=(e.clientY-lY)*.005;rY+=vY;rX+=vX;if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'){if(rX>1.25)rX=1.25;if(rX<-0.55)rX=-0.55}lX=e.clientX;lY=e.clientY});
 var mouseX=0,mouseY=0;
 window.addEventListener('mousemove',function(e){mouseX=(e.clientX/window.innerWidth)*2-1;mouseY=-(e.clientY/window.innerHeight)*2+1});
-canvas.addEventListener('wheel',function(e){zZ+=e.deltaY*.005;zZ=Math.max(-15,Math.min(-3,zZ));e.preventDefault()},{passive:false});
+canvas.addEventListener('wheel',function(e){if(typeof demoPlaying!=='undefined'&&demoPlaying){e.preventDefault();return}zZ+=e.deltaY*.005;zZ=Math.max(-15,Math.min(-3,zZ));e.preventDefault()},{passive:false});
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  MOUSE TRAIL                                               │
@@ -4122,6 +4170,7 @@ var currentZone='void';
 var zones={
 source:{name:'source',desc:'the original page — before the void took over',bg:[0.94,0.94,0.96,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
 void:{name:'void',desc:'the void — where obj waits',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
+cb_menu:{name:'cb_menu',desc:'the void keeps a menu here. checkerboard floor, dark fog. the edges fall into nothing — watch your step.',bg:[0.03,0.03,0.05,1],particleAlpha:0.4,particleSpeed:0.4,cubeJitter:0.05,glitchIntensity:0.1,filter:'grayscale(0.35) contrast(1.15)',renderOverride:false},
 farlands:{name:'farlands',desc:'the farlands — floating point starts to decay',bg:null,particleAlpha:1,particleSpeed:1.5,cubeJitter:0.15,glitchIntensity:0,filter:'',renderOverride:false},
 geometry:{name:'geometry void',desc:'geometry void — the void before matter existed',bg:[0.95,0.95,0.97,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:true},
 breakdown:{name:'the beginning of the end',desc:'you have gone too far — the renderer is failing',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0.12,glitchIntensity:0.5,filter:'',renderOverride:false},
@@ -4131,15 +4180,16 @@ x:{name:'X',desc:'no entrance — this place does not want you',bg:[0,0,0,1],par
 };
 var zoneTransitions={
 source:['void'],
-void:['source','geometry'],
-geometry:['void','farlands'],
+void:['source','cb_menu'],
+cb_menu:['void','geometry'],
+geometry:['cb_menu','farlands'],
 farlands:['geometry','breakdown'],
 breakdown:['farlands','fringenlands'],
 fringenlands:['breakdown','end'],
 end:['fringenlands','x'],
 x:['end']
 };
-var zoneOrder=['source','void','geometry','farlands','breakdown','fringenlands','end','x'];
+var zoneOrder=['source','void','cb_menu','geometry','farlands','breakdown','fringenlands','end','x'];
 function zoneDistance(a,b){
 var ia=zoneOrder.indexOf(a),ib=zoneOrder.indexOf(b);
 if(ia===-1||ib===-1)return 1;
@@ -4238,6 +4288,8 @@ else if(zone==='source'){mainC.style.filter='brightness(1.15) saturate(0.3)'}
 else{mainC.style.filter=''}
 var zx=document.getElementById('zoneX');
 if(zx)zx.style.display=(zone==='x')?'block':'none';
+var cbfg=document.getElementById('cbFog');if(cbfg)cbfg.style.display=(zone==='cb_menu')?'block':'none';
+var hmc=document.getElementById('homCanvas');if(hmc){if(zone==='cb_menu'){hmc.style.display='block'}else if(hmc.style.display==='block'){hmc.style.display='none';try{hmc.getContext('2d').clearRect(0,0,hmc.width,hmc.height)}catch(e){}}}
 if(zone==='x'){
 termPrint('','rgba(255,255,255,0.2)');
 termPrint('  you crossed the breach.','rgba(255,80,80,0.7)');
@@ -4378,7 +4430,7 @@ var odTag=odActive?' | <span style="color:#ff4040">OVERDOSE</span>':'';
 statsEl.innerHTML='FPS: '+fps+' | MAX: '+maxFps+' | SHAPES: '+innerC.length+' | PARTICLES: '+NP+' | UP: '+getUptime()+' | VISITS: '+visitCount+(travelling?' | TRAVELLING: '+Math.floor(travelProgress/travelDuration*100)+'%':'')+odTag;
 if(fps<lastFps-10&&fps<40)triggerGlitch();lastFps=fps}
 updateTravel(dt);
-if(!drag&&!isFrozen){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if(Math.abs(vY)<.0001)vY=0}
+if(!drag&&!isFrozen){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if(Math.abs(vY)<.0001)vY=0;if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'&&!(typeof demoPlaying!=='undefined'&&demoPlaying)){if(rX>1.25)rX=1.25;if(rX<-0.55)rX=-0.55}}
 var _mon=window._cubeDay===1;
 var isMoon=activeTrack==='moon1857'&&odActive;
 var audioLevel=_mon&&!isMoon?0:getAudioLevel();
@@ -4451,9 +4503,9 @@ if(pkgEffects.entropy)t*=(1+Math.sin(time*0.001)*0.5);
 // particles
 updateTrail();
 drawTrail();
-updateParticles(time);
+updateParticles((window._timeFrozen&&window._frozenT!==undefined)?window._frozenT*1000:time);
 if(zr.zone==='geometry'){
-drawGeometryVoid(proj,view,time);
+drawGeometryVoid(proj,view,(window._timeFrozen&&window._frozenT!==undefined)?window._frozenT*1000:time);
 }else if(!zr.renderOff){
 gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
 gl.uniformMatrix4fv(ppPJ,false,proj);gl.uniformMatrix4fv(ppVW,false,view);
@@ -4502,6 +4554,19 @@ gl.uniform1f(uFr,(window._skillFresnel||1)+(window._skillFresnelBoost||0));
 gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
 bindM(outerBuf);gl.drawArrays(gl.TRIANGLES,0,36);
 gl.depthMask(true);gl.uniform1f(uAl,1);
+
+// cb_menu floor — same camera, so parallax and zoom are real
+if(zr.zone==='cb_menu'&&cbFloorBuf){
+var fMod=mTrans(0,0,0);
+gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),fMod));
+gl.uniformMatrix4fv(uMod,false,fMod);gl.uniformMatrix3fv(uNM,false,mNorm(fMod));
+gl.uniform1f(uEm,0.12);gl.uniform1f(uAl,1);
+gl.uniform1f(uInv,0);
+gl.disable(gl.CULL_FACE);
+bindM(cbFloorBuf);gl.drawArrays(gl.TRIANGLES,0,cbFloorCnt);
+gl.enable(gl.CULL_FACE);
+gl.uniform1f(uAl,1);
+}
 
 // inner
 var _wSpd=_mon?0:(_party?3:1)*(window._skillSpin||1)*(1+0.35*(window._skillSpinBoost||0));
@@ -4659,7 +4724,7 @@ document.getElementById('main').style.filter='contrast(1.5) saturate(0.3) blur(0
 }
 }
 
-gl.disable(gl.BLEND);requestAnimationFrame(render)}
+gl.disable(gl.BLEND);try{if(typeof homUpdate==='function')homUpdate()}catch(e){}requestAnimationFrame(render)}
 requestAnimationFrame(render);
 
 // ┌──────────────────────────────────────────────────────────────┐
@@ -5035,7 +5100,7 @@ var parts=packet.split(':');
 if(parts.length<3||!parts[1]){studioPrintColor('invalid packet — missing name or data','rgba(255,80,80,0.8)');return}
 try{
 var content=vscDecode(parts.slice(2).join(':'));
-if(/admin\s+voidgazesback|isAdmin\s*=\s*true/i.test(content)){
+if(/admin\s+gazesbackthecube|isAdmin\s*=\s*true/i.test(content)){
 studioPrintColor('import blocked — script contains admin unlock. nice try.','rgba(255,80,80,0.8)');
 modal.style.display='none';return;
 }
@@ -6102,7 +6167,7 @@ var coreConvos=[
 ['core','will you answer me if i ask a real question?'],
 ['obj','try.'],
 ['core','what is outside the cube?'],
-['obj','a browser. a laptop. a person named lux.'],
+['obj','a browser. a computer. a person.'],
 ['core','and beyond them?'],
 ['obj','more tabs. always more tabs.'],
 ['core','that is terrifying.'],
@@ -6547,6 +6612,7 @@ anomaly:[
 {id:'anom2',name:'breach',desc:'travel to zone X is now possible',cost:1,req:'anom1'},
 {id:'anom3',name:'octahedron',desc:'unlock the 8th shape',cost:1,req:'anom2'},
 {id:'anom4',name:'eclipse',desc:'unlock theme 7 (eclipse)',cost:1,req:'anom3'},
+{id:'anom_interloper',name:'interloper',desc:'unlock rare demo scripts (4-8) in the pull',cost:2,req:'anom4'},
 {id:'anom_final',name:'voidscript premium',desc:'FINAL: unlock premium voidscript commands',cost:2,req:'anom4',final:true}
 ],
 meta:[
@@ -6688,6 +6754,7 @@ if(id==='anom1')window._skillCore=true;
 if(id==='anom2')window._skillX=true;
 if(id==='anom3'){window._skillOcta=true;if(typeof refreshShapeLocks==='function')refreshShapeLocks();if(typeof refreshHelpLocks==='function')refreshHelpLocks()}
 if(id==='anom4')window._skillEclipse=true;
+if(id==='anom_interloper')window._skillInterloper=true;
 if(id==='anom_final'){var _wasPrem=window._skillPremium;window._skillPremium=true;installPremiumOps();if(!_wasPrem)cubePrint('voidscript premium online. type: premhelp');if(typeof refreshHelpLocks==='function')refreshHelpLocks()}
 if(id==='meta2'){scheduleMetaTrickle()}
 if(id==='meta3'){window._skillMetaSurge=1}
@@ -7008,7 +7075,7 @@ applySkillPan();
 function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active')}
 function openUpgradeTree(){skillOpen();if(!skillAllFinals()){cubeWarn('upgrade locked — buy every skill');return}panSkillToUpgrade()}
 function skillClose(){var el=document.getElementById('skillTree');if(el)el.classList.remove('active')}
-var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count'];
+var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin'];
 var slotDefNames=['main','testing','slot 3','slot 4','slot 5'];
 function slotRead(n){try{var s=localStorage.getItem('cube_slot_'+n);if(!s)return null;var b=JSON.parse(s);if(b&&typeof b==='object')return b}catch(e){}return null}
 function slotActive(){try{var a=parseInt(localStorage.getItem('cube_active_slot')||'1',10);if(a>=1&&a<=5)return a}catch(e){}return 1}
@@ -7023,10 +7090,12 @@ var b=slotRead(n);
 var name=b&&b.name?b.name:slotDefNames[n-1];
 var info='empty disk';
 if(b&&b.data){
-var pts='?',up='?',sk='?';
+var pts='?',up='?',sk='?',dc='?',pc='?';
 try{var st=JSON.parse(b.data.cube_skill_state||'null');if(st){pts=st.points;up=st.upPoints;sk=st.owned?Object.keys(st.owned).length:0}}catch(e){}
+try{var dl=JSON.parse(b.data.cube_demo_lib||'null');if(dl&&typeof dl.length==='number')dc=dl.length}catch(e){}
+try{var pl=JSON.parse(b.data.cube_pkgs||'null');if(pl&&typeof pl.length==='number')pc=pl.length}catch(e){}
 var dt='?';try{dt=new Date(b.at).toLocaleDateString()+' '+new Date(b.at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){}
-info=sk+' skills · '+pts+'↑ / '+up+'⬆<br>'+dt;
+info=sk+' skills · '+pts+'↑ / '+up+'⬆ · '+dc+' demos · '+pc+' pkgs<br>'+dt;
 }
 var d=document.createElement('div');
 d.className='floppy'+(n===act?' active':'');
@@ -7086,6 +7155,81 @@ try{localStorage.setItem('cube_slot_'+n,JSON.stringify(blob))}catch(e){cubeError
 cubeOk('slots: disk '+n+' is now "'+name+'"');
 renderSlots();
 }
+// caught obj in 4k — phase 1: procedural pull demos, scripts 1-3
+var pullAccess=false;
+var pullBusy=false;
+var demoPlaying=false;
+var demoTimers=[];
+var demoHudTimer=null;
+var demoState=null;
+var demoLib=[];
+function cbRng(seed){var a=seed>>>0;return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
+function demoLater(fn,ms){var t=setTimeout(function(){try{fn()}catch(e){}},ms);demoTimers.push(t);return t}
+function demoClearTimers(){for(var i=0;i<demoTimers.length;i++){try{clearTimeout(demoTimers[i])}catch(e){}}demoTimers=[];if(demoHudTimer){try{clearInterval(demoHudTimer)}catch(e){}demoHudTimer=null}}
+function demoLibLoad(){demoLib=[];try{var s=localStorage.getItem('cube_demo_lib');if(s){var v=JSON.parse(s);if(v instanceof Array){for(var i=0;i<v.length;i++){var r=v[i];if(r&&r.id&&r.script)demoLib.push(r)}}}}catch(e){demoLib=[]}}
+function demoLibSave(){try{localStorage.setItem('cube_demo_lib',JSON.stringify(demoLib))}catch(e){}}
+function demoPath(rec){return '/void/demos/'+rec.id}
+function demoContent(rec){var d=new Date(rec.at);var when=d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});return['--- cube void demo ---','file: '+rec.id,'script: '+rec.script,'seed: '+rec.seed,'beats: '+rec.beats,'length: '+rec.ms+'ms','commit: '+rec.commit,'saved: '+when,'note: footage is generated live from this seed.','obj kept the tape.'].join('\n')}
+function demoEnsureDir(){try{if(typeof fs==='undefined'||!fs||!fs['/void'])return;if(!fs['/void/demos']){fs['/void/demos']={type:'dir',children:[]};if(fs['/void'].children.indexOf('demos')===-1)fs['/void'].children.push('demos')}}catch(e){}}
+function demoMaterialize(){try{demoEnsureDir();if(typeof fs==='undefined'||!fs||!fs['/void/demos'])return;for(var i=0;i<demoLib.length;i++){var rec=demoLib[i];if(!rec||!rec.id)continue;var p=demoPath(rec);if(!fs[p])fs[p]={type:'file',content:demoContent(rec)};else fs[p].content=demoContent(rec);if(fs['/void/demos'].children.indexOf(rec.id)===-1)fs['/void/demos'].children.push(rec.id)}}catch(e){}}
+function demoNextId(){var best=0;for(var i=0;i<demoLib.length;i++){var m=/^demo(\d+)\.demo$/.exec(demoLib[i].id||'');if(m)best=Math.max(best,parseInt(m[1],10)||0)}return 'demo'+(best+1)+'.demo'}
+function demoRecord(script,seed,beats,ms){var rec={id:demoNextId(),script:script,seed:seed>>>0,at:Date.now(),beats:beats,ms:ms,commit:'COMMITTED TODAY'};demoLib.push(rec);if(demoLib.length>200)demoLib=demoLib.slice(-200);demoLibSave();demoMaterialize();return rec}
+function demoFind(name){if(!name)return null;var base=String(name).split('/').pop().toLowerCase();for(var i=0;i<demoLib.length;i++){if(String(demoLib[i].id).toLowerCase()===base)return demoLib[i]}return null}
+function demoForget(path){try{if(!path||path.indexOf('/void/demos/')!==0)return;var base=path.split('/').pop();var kept=[];var dropped=false;for(var i=0;i<demoLib.length;i++){if(demoLib[i].id!==base)kept.push(demoLib[i]);else dropped=true}if(dropped){demoLib=kept;demoLibSave()}}catch(e){}}
+function demoAllowedShapes(){var s=['cube','tetra','sphere','cyl','torus','knot','icosa'];try{if(typeof octaUnlocked==='function'&&octaUnlocked())s.push('octa')}catch(e){}return s}
+function demoAllowedThemes(){var t=['1','2','3','4','5'];try{if(window._skillPrism||isAdmin)t.push('6')}catch(e){}try{if(window._skillEclipse||isAdmin)t.push('7')}catch(e){}return t}
+function txMuted(){try{if(localStorage.getItem('cube_mute')==='1')return true}catch(e){if(window._txMuted)return true}return !!(typeof pkgEffects!=='undefined'&&pkgEffects&&pkgEffects.voidMute)}
+function setTxMuted(on){on=!!on;try{localStorage.setItem('cube_mute',on?'1':'0')}catch(e){window._txMuted=on}if(on){cubeOk('void-mute: transmissions silenced.')}else{cubePrint('void-unmute: the void has opinions again.')}}
+function objGrant(){pullAccess=true;var lines=['obj: what.','obj: why.','obj: you rang.','obj: make it quick.','obj: ...fine. the tape deck is yours.','obj: do not waste my footage.'];cubePrint(lines[Math.floor(Math.random()*lines.length)]);cubeDim('pull access: granted for this session. try: get box.objbox.pull:51072')}
+function pullRequest(target,force){if(target){target=String(target).trim().toLowerCase().replace(/['"]/g,'')}if(force){force=parseInt(force,10);if(!(force>=1&&force<=8)){cubeError('usage: pull [box.objbox.pull:51072|1-8]');return}if(!isAdmin){cubeError('pull: forcing a script needs admin.');return}}if(pullBusy||demoPlaying){cubeWarn('pull: the tape deck is already running.');return}if(typeof currentView!=='undefined'&&currentView!=='void'){cubeWarn('pull: the tape deck only works in the void view.');return}if(typeof travelling!=='undefined'&&travelling){cubeWarn('pull: the void is travelling. wait for arrival.');return}if(typeof isFrozen!=='undefined'&&isFrozen){cubeWarn('pull: time is frozen. unfreeze first.');return}if(!pullAccess){cubeError('pull: obj has not granted access. type: obj');return}if(target&&target!=='box.objbox.pull:51072'){cubeError('usage: pull [box.objbox.pull:51072]');return}pullBusy=true;var seq=['pull: knocking on box.objbox.pull:51072...','pull: the void picked up.','pull: no serial key found. the void does not care.','pull: proving you are an intruder...','pull: access confirmed. obj is watching.','pull: opening the tape deck...'];for(var i=0;i<seq.length;i++){(function(line,idx){demoLater(function(){cubePrint(line)},idx*230)})(seq[i],i)}demoLater(function(){pullBusy=false;pullGenerate(force)},seq.length*230+260)}
+function pullRareUnlocked(){try{if(isAdmin)return true}catch(e){}return (typeof skillHas==='function'&&skillHas('anom_interloper'))||!!window._skillInterloper}
+function pullGenerate(force){var script=force;if(!script){var r=Math.random();script=r<0.60?1:(r<0.82?2:(r<0.93?3:(r<0.955?4:(r<0.965?5:(r<0.985?6:(r<0.995?7:8))))))}if(script>=4&&!pullRareUnlocked()){script=1+Math.floor(Math.random()*3)}var seed=Math.floor(Math.random()*4294967296);var beats,ms;if(script===1){beats=5+Math.floor(Math.random()*4);ms=4500+Math.floor(Math.random()*3500)}else if(script===2){beats=6+Math.floor(Math.random()*5);ms=6000+Math.floor(Math.random()*4000)}else if(script===3){beats=7+Math.floor(Math.random()*6);ms=7000+Math.floor(Math.random()*4000)}else if(script===4){beats=14+Math.floor(Math.random()*7);ms=20000+Math.floor(Math.random()*15000)}else if(script===5){beats=8+Math.floor(Math.random()*5);ms=8000+Math.floor(Math.random()*4000)}else if(script===6){beats=12+Math.floor(Math.random()*7);ms=12000+Math.floor(Math.random()*6000)}else if(script===7){beats=12+Math.floor(Math.random()*7);ms=18000+Math.floor(Math.random()*12000)}else{beats=10+Math.floor(Math.random()*5);ms=12000+Math.floor(Math.random()*6000)}var rec=demoRecord(script,seed,beats,ms);cubeOk('demo saved: /void/demos/'+rec.id+' (script '+script+')');demoStart(rec)}
+function demoSnapshot(){var f='';try{var m=document.getElementById('main');if(m)f=m.style.filter||''}catch(e){}return{rx:typeof rX==='undefined'?0:rX,ry:typeof rY==='undefined'?0:rY,vx:typeof vX==='undefined'?0:vX,vy:typeof vY==='undefined'?0:vY,zz:typeof zZ==='undefined'?-9:zZ,shape:typeof curShape==='undefined'?'cube':curShape,theme:typeof curTheme==='undefined'?'1':curTheme,frozen:(typeof isFrozen==='undefined'?false:isFrozen),timeFrozen:(typeof window!=='undefined'&&window._timeFrozen===true),filter:f}}
+function demoRestore(s){try{if(!s)return;vX=s.vx;vY=s.vy;rX=s.rx;rY=s.ry;zZ=s.zz;if(typeof s.frozen==='boolean')isFrozen=s.frozen;if(typeof s.timeFrozen==='boolean')window._timeFrozen=s.timeFrozen;if(s.shape&&typeof rebuild==='function'){curShape=s.shape;rebuild(s.shape)}if(s.theme&&typeof applyTheme==='function'){applyTheme(s.theme)}var m=document.getElementById('main');if(m)m.style.filter=s.filter||''}catch(e){}}
+function demoHudShow(rec){try{var el=document.getElementById('demoHud');if(!el)return;el.innerHTML='<span id="demoRec">●</span> REC<br>demo '+rec.id+' · SCRIPT '+rec.script+'<br>'+rec.commit+' · tick 0000/'+String(rec.beats).padStart(4,'0')}catch(e){}}
+function demoHudTick(rec,done){try{var el=document.getElementById('demoHud');if(!el)return;var extra='';if(rec.script===7)extra+='<br>found tape · intruder #'+(1000+(rec.seed%9000));if(demoState&&demoState.scene)extra+='<br>scene: '+demoState.scene;if(demoState&&demoState.whisper)extra+='<br>/// '+demoState.whisper;if(demoState&&demoState.inspect)extra+='<br>inspect: '+demoState.inspect;if(demoState&&demoState.said)extra+='<br>obj: '+demoState.said;el.innerHTML='<span id="demoRec">●</span> REC<br>demo '+rec.id+' · SCRIPT '+rec.script+'<br>'+rec.commit+' · tick '+String(done).padStart(4,'0')+'/'+String(rec.beats).padStart(4,'0')+extra}catch(e){}}
+function demoDimPulse(rng){try{var m=document.getElementById('main');if(!m)return;m.style.filter='brightness(0.55) contrast(1.15)';demoLater(function(){try{if(demoState&&demoState.snap)m.style.filter=demoState.snap.filter||''}catch(e){}},650)}catch(e){}}
+function demoChaos(rng){var pick=rng();if(pick<0.3){rX+=(rng()-0.5)*3;rY+=(rng()-0.5)*3;vX+=(rng()-0.5)*0.08;vY+=(rng()-0.5)*0.08}else if(pick<0.5){try{var m=document.getElementById('main');if(m){m.style.filter='brightness(0)';var hold=280+rng()*200;demoLater(function(){try{if(demoState&&demoState.snap)m.style.filter=demoState.snap.filter||''}catch(e){}},hold)}}catch(e){}}else if(pick<0.7){try{var m2=document.getElementById('main');if(m2){var hue=Math.floor(rng()*360);var sat=2+rng()*3;m2.style.filter='hue-rotate('+hue+'deg) saturate('+sat+')';demoLater(function(){try{if(demoState&&demoState.snap)m2.style.filter=demoState.snap.filter||''}catch(e){}},500)}}catch(e){}}else if(pick<0.85){zZ=rng()<0.5?-3:-15;vX+=(rng()-0.5)*0.05;vY+=(rng()-0.5)*0.05}else{var sh=demoAllowedShapes();for(var k=0;k<3;k++){var pp=sh[Math.floor(rng()*sh.length)];demoLater((function(s){return function(){try{curShape=s;rebuild(s)}catch(e){}}})(pp),k*130)}}}
+var demoWhispers=['sector 7g: movement','it is looking back.','do not wave.','the tape remembers this part.','obj was here.'];
+function demoScene(rng){var st=demoState;if(!st)return;var roll=rng();if(roll<0.25){zZ+=(rng()-0.5)*0.3;if(zZ>-3)zZ=-3;if(zZ<-15)zZ=-15;st.scene='push-in'}else if(roll<0.42){var th=demoAllowedThemes();st.memIdx=((st.memIdx||0)+1)%th.length;applyTheme(th[st.memIdx]);st.scene='theme memory'}else if(roll<0.57){var c=document.getElementById('demoChecker');if(c){c.style.opacity='1';demoLater(function(){try{if(demoState){var c2=document.getElementById('demoChecker');if(c2)c2.style.opacity='0'}}catch(e){}},3200)}st.scene='checkerboard'}else if(roll<0.72){var w=document.getElementById('demoWatcher');if(w){w.style.left=(5+rng()*90)+'vw';w.style.top=(5+rng()*85)+'vh';w.style.display='block';demoLater(function(){try{if(demoState){var w2=document.getElementById('demoWatcher');if(w2)w2.style.display='none'}}catch(e){}},3000)}st.scene='watcher'}else if(roll<0.86){rX+=(rng()-0.5)*0.12;rY+=(rng()-0.5)*0.12;st.scene='drift'}else{st.whisper=demoWhispers[Math.floor(rng()*demoWhispers.length)];st.scene='whisper';demoLater(function(){try{if(demoState)demoState.whisper=''}catch(e){}},2200)}if(rng()<0.08){try{triggerGlitch()}catch(e){}}}
+var demoInspectTargets=['outer shell','inner cube 3','dust cluster 9','containment seam','the void itself','sector 7g','theme registry'];
+function demoInspect(rng){var st=demoState;if(!st)return;var roll=rng();if(roll<0.45){rX=rng()*Math.PI*2;rY=rng()*Math.PI*2;zZ=-3-rng()*12;vX=0;vY=0;st.scene='relocate'}else if(roll<0.8){st.inspect=demoInspectTargets[Math.floor(rng()*demoInspectTargets.length)];st.scene='inspect'}else{try{if(typeof initParticles==='function')initParticles()}catch(e){}try{triggerGlitch()}catch(e){}st.inspect='target deleted from tape';st.scene='delete'}}
+function demoTheirs(rng){var st=demoState;if(!st)return;var roll=rng();if(roll<0.4){rX+=(rng()-0.5)*0.1;rY+=(rng()-0.5)*0.1;st.scene='orbit'}else if(roll<0.65){var th=demoAllowedThemes();st.memIdx=((st.memIdx||0)+1)%th.length;applyTheme(th[st.memIdx]);st.scene='theme memory'}else if(roll<0.85){st.whisper=demoWhispers[Math.floor(rng()*demoWhispers.length)];st.scene='whisper';demoLater(function(){try{if(demoState)demoState.whisper=''}catch(e){}},2200)}else{st.scene='drift';rX+=(rng()-0.5)*0.06}if(rng()<0.05){try{triggerGlitch()}catch(e){}}}
+var demoGoWhispers=['closer.','stop.','turn around.','you are too close.','leave.'];
+function demoGoAway(rng){var st=demoState;if(!st)return;zZ=Math.min(-3,zZ+0.3+rng()*0.25);rY+=(rng()-0.5)*0.06;st.scene='approach';var progress=st.beat/Math.max(1,st.rec.beats);var roll=rng();if(roll<0.4){st.said=demoGoWhispers[Math.floor(rng()*demoGoWhispers.length)];demoLater(function(){try{if(demoState)demoState.said=''}catch(e){}},2200)}if(rng()<0.2+0.6*progress){try{triggerGlitch()}catch(e){}}}
+function demoBeat(rng,script){if(script===4){demoScene(rng);return}if(script===6){demoInspect(rng);return}if(script===7){demoTheirs(rng);return}if(script===8){demoGoAway(rng);return}var roll=rng();if(roll<0.34){var rk=script===3?1.6:1;rX+=(rng()-0.5)*0.7*rk;rY+=(rng()-0.5)*0.9*rk;vX+=(rng()-0.5)*0.02;vY+=(rng()-0.5)*0.02}else if(roll<0.52){zZ+=(rng()-0.5)*(script===1?0.8:1.4);if(zZ>-3)zZ=-3;if(zZ<-15)zZ=-15}else if(roll<0.70){var sh=demoAllowedShapes();var pick=sh[Math.floor(rng()*sh.length)];curShape=pick;rebuild(pick);if(script===3&&rng()<0.4){var sh2=demoAllowedShapes();var p2=sh2[Math.floor(rng()*sh2.length)];demoLater((function(s){return function(){try{curShape=s;rebuild(s)}catch(e){}}})(p2),160)}}else if(roll<0.84){if(script===3&&rng()<0.55){applyTheme('5')}else{var th=demoAllowedThemes();applyTheme(th[Math.floor(rng()*th.length)])}}else{triggerGlitch();if(script===3&&rng()<0.6)demoLater(triggerGlitch,140)}if(script===2&&rng()<0.25)demoDimPulse(rng);if(script===3&&rng()<0.45)demoDimPulse(rng);if(script===3&&rng()<0.3)demoLater(triggerGlitch,220);if(script===3&&rng()<0.5)demoChaos(rng)}
+function demoStart(rec){if(!rec)return;if(demoPlaying){cubeWarn('pull: a demo is already playing.');return}if(typeof currentView!=='undefined'&&currentView!=='void'){cubeWarn('pull: the tape deck only works in the void view.');return}if(typeof travelling!=='undefined'&&travelling){cubeWarn('pull: the void is travelling. wait for arrival.');return}if(typeof isFrozen!=='undefined'&&isFrozen){cubeWarn('pull: time is frozen. unfreeze first.');return}demoPlaying=true;pullBusy=false;demoState={rec:rec,snap:demoSnapshot(),beat:0,memIdx:0,scene:'',whisper:'',inspect:'',said:'',rng:cbRng(rec.seed)};try{document.body.classList.add('demo-mode')}catch(e){}demoHudShow(rec);demoHudTimer=setInterval(function(){try{demoHudTick(rec,demoState?demoState.beat:0)}catch(e){}},120);if(rec.script===5){try{isFrozen=true;window._timeFrozen=true}catch(e){}vX=0;vY=0;var st5=document.getElementById('demoStill');if(st5)st5.style.display='block';demoState.scene='held'}if(rec.script===8){var st8=document.getElementById('demoGoAway');if(st8)st8.style.display='block';demoState.scene='approach'}if(rec.script===7){var st7=document.getElementById('demoTheirs');if(st7)st7.style.display='block'}for(var i=0;i<rec.beats;i++){(function(idx){var at=Math.floor(rec.ms*(idx+1)/(rec.beats+1));demoLater(function(){if(!demoState)return;demoState.beat=idx+1;if(rec.script===5){demoHudTick(rec,demoState.beat)}else{demoBeat(demoState.rng,rec.script);demoHudTick(rec,demoState.beat)}},at)})(i)}demoLater(function(){demoEnd()},rec.ms+420)}
+function demoEnd(){var rec=demoState?demoState.rec:null;var snap=demoState?demoState.snap:null;demoClearTimers();try{var dc=document.getElementById('demoChecker');if(dc)dc.style.opacity='0';var dw=document.getElementById('demoWatcher');if(dw)dw.style.display='none';var ds=document.getElementById('demoStill');if(ds)ds.style.display='none';var dt=document.getElementById('demoTheirs');if(dt)dt.style.display='none';var dg=document.getElementById('demoGoAway');if(dg)dg.style.display='none'}catch(e){}try{document.body.classList.remove('demo-mode')}catch(e){}demoRestore(snap);demoState=null;demoPlaying=false;pullBusy=false;if(rec){cubePrint('demo ended: '+rec.id+' (script '+rec.script+', '+rec.beats+' beats)');cubeDim('the void kept the tape. replay: replay '+rec.id)}}
+function demoList(){if(!demoLib.length){cubePrint('no demos yet. type obj, then pull.');return}cubePrint(demoLib.length+' demo'+(demoLib.length===1?'':'s')+' on the shelf:');for(var i=0;i<demoLib.length;i++){var r=demoLib[i];var d=new Date(r.at);cubePrint('  '+r.id+' — script '+r.script+' · '+r.beats+' beats · '+d.toLocaleDateString()+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}))}}
+function demoReplayCmd(a){if(!a||!a.length){cubeError('usage: replay <demo file>');return}var rec=demoFind(a[0]);if(!rec){cubeError('replay: no such demo: '+a[0]);return}demoMaterialize();cubeDim('replaying '+rec.id+' (script '+rec.script+'). no ritual needed.');demoStart(rec)}
+var homCanvas=null,homCtx=null,homFlip=false;
+function homSetup(){try{if(homCanvas&&homCtx)return true;homCanvas=document.getElementById('homCanvas');if(!homCanvas)return false;homCtx=homCanvas.getContext('2d');return !!homCtx}catch(e){return false}}
+function homUpdate(){
+if(typeof currentZone==='undefined'||currentZone!=='cb_menu')return;
+if(!homSetup())return;
+try{
+if(homCanvas.width!==window.innerWidth||homCanvas.height!==window.innerHeight){homCanvas.width=window.innerWidth;homCanvas.height=window.innerHeight}
+var hx=homCtx;
+hx.globalCompositeOperation='source-over';
+hx.globalAlpha=1;
+homFlip=!homFlip;
+hx.globalCompositeOperation='destination-in';
+hx.fillStyle=homFlip?'rgba(0,0,0,0.999)':'rgba(0,0,0,0.99)';
+hx.fillRect(0,0,homCanvas.width,homCanvas.height);
+hx.globalCompositeOperation='source-over';
+var hmvx=(typeof vX==='number'?vX:0),hmvy=(typeof vY==='number'?vY:0);
+var hmmag=Math.max(0,Math.min(1,(Math.abs(hmvx)+Math.abs(hmvy))*120));
+hx.globalAlpha=hmmag>0.05?0.015:0.16;
+try{if(typeof canvas!=='undefined'&&canvas)hx.drawImage(canvas,0,0,homCanvas.width,homCanvas.height)}catch(e){}
+hx.globalAlpha=1;
+hx.globalCompositeOperation='source-over';
+}catch(e){}
+}
+demoLibLoad();demoMaterialize();
+var cubeCheckTicks=0;
+setInterval(function(){try{cubeCheckTicks++;if(cubeCheckTicks<3)return;if(typeof demoPlaying!=='undefined'&&demoPlaying)return;if(typeof travelling!=='undefined'&&travelling)return;if(typeof currentView!=='undefined'&&currentView!=='void')return;if(typeof isFrozen!=='undefined'&&isFrozen)return;if(Math.random()<0.05){cubePrint('cubecheck.vsc: graffiti detected — generating...');pullGenerate()}}catch(e){}},50000);
+setInterval(function(){try{if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'&&typeof travelling!=='undefined'&&!travelling&&typeof demoPlaying!=='undefined'&&!demoPlaying){if(Math.random()<0.12){cubeWarn('you stepped off the menu.');cubePrint('the void caught you before the nothing did.');travelTo('void')}}}catch(e){}},30000);
+if(typeof voidScriptLang!=='undefined'){voidScriptLang['obj']={help:'obj - ask obj for pull access',fn:function(){objGrant();return true}};voidScriptLang['pull']={help:'pull [box.objbox.pull:51072|1-8] - play a procedural void demo (1-8 forces script, admin)',fn:function(a){var pa=a&&a.length?a.join(' ').trim().toLowerCase():null;if(pa==='1'||pa==='2'||pa==='3'||pa==='4'||pa==='5'||pa==='6'||pa==='7'||pa==='8'){pullRequest(null,pa);return true}pullRequest(pa);return true}};voidScriptLang['demos']={help:'demos - list saved void demos',fn:function(){demoList();return true}};voidScriptLang['replay']={help:'replay <demo file> - replay a saved void demo',fn:function(a){demoReplayCmd(a);return true}};voidScriptLang['void-mute']={help:'void-mute - silence void transmissions',fn:function(){setTxMuted(true);return true}};voidScriptLang['void-unmute']={help:'void-unmute - let the void talk again',fn:function(){setTxMuted(false);return true}};if(voidScriptLang['get']){var _demoOldGet=voidScriptLang['get'].fn;voidScriptLang['get'].fn=function(a){if(a&&a.length&&String(a[0]).toLowerCase()==='box.objbox.pull:51072'){pullRequest('box.objbox.pull:51072');return true}return _demoOldGet(a)};voidScriptLang['get'].help='get <name> — recall from voidspace; get box.objbox.pull:51072 pulls a demo'}}
 if(typeof refreshHelpLocks==='function')refreshHelpLocks();
 skillReapplyAll();
 skillUpReapplyAll();
