@@ -3283,7 +3283,9 @@ var patchLog=[
 'knot geometry rewritten: old triangles were zero-area slivers along the tangent. now a real double-sided tube',
 'cyl + octa were wound inside-out - backface culling ate them. cyl 128/128 faces outward, octa 8/8',
 'floppy shelf: BACKUP SHELF / RESTORE SHELF - one json moves all 5 disks + state between browsers',
-'admin flag never rides in a backup file. re-auth with the passphrase on the new browser'
+'admin flag never rides in a backup file. re-auth with the passphrase on the new browser',
+'cube was still clickable during demos - clicks now bounce off during playback (was morphing your cube mid-recording)',
+'weather is no longer rigged: autumn always meant rain every day. now a per-day roll decides rain/clear/snow, deterministic per date, changes at midnight'
 ]}
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff'};
@@ -4061,6 +4063,7 @@ function(){cubePrint('obj: click again. i dare you.');curShape=curShape==='cube'
 document.addEventListener('click',function(e){
 if(studioOpen)return;
 if(wasDrag)return;
+if(typeof demoPlaying!=='undefined'&&demoPlaying)return;
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
@@ -5252,10 +5255,13 @@ weatherCtx.fill();
 function autoWeather(){
 if(weatherType!=='off')return;
 var s=currentDayData.seasonIdx;
-if(s===0)initWeather('snow'); // winter
-else if(s===1)initWeather('rain'); // spring
-else if(s===2)initWeather('off'); // summer
-else initWeather('rain'); // autumn
+var d=new Date();
+var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+var r=(Math.imul(seed,2654435761)>>>0)/4294967296;
+if(s===0)initWeather(r<0.55?'snow':(r<0.8?'off':'rain'));
+else if(s===1)initWeather(r<0.4?'rain':(r<0.75?'off':'snow'));
+else if(s===2)initWeather(r<0.8?'off':'rain');
+else initWeather(r<0.45?'rain':(r<0.85?'off':'snow'));
 }
 autoWeather();
 
