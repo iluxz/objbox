@@ -49,13 +49,13 @@ don't stare at it too long. the inner cubes start matching your breathing. that'
 
 ## run it
 
-```
-python -m http.server 8080
-```
+you don't.
 
-then throw open `localhost:8080`. you can double-click the file but the audio and the void prefer being served.
+getting this file onto your disk means breaking clause 2 of the LICENSE, and copyright law still stands in this. so:
 
-https://iluxz.github.io/objbox/cube.html works too — that's the real home now
+https://iluxz.github.io/objbox/cube.html
+
+that's the real home. ctrl+shift+r if the void looks stale.
 
 ## build history
 
