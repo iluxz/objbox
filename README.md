@@ -55,7 +55,7 @@ python -m http.server 8080
 
 then throw open `localhost:8080`. you can double-click the file but the audio and the void prefer being served.
 
-https://unpiloted-portal-unbundle.ngrok-free.dev/cube.html probably also works for a bit but i wouldn't rely on it forever
+https://iluxz.github.io/objbox/cube.html works too — that's the real home now
 
 ## build history
 
