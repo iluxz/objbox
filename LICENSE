@@ -1,0 +1,45 @@
+CUBE.HTML LICENSE — ALL RIGHTS RESERVED
+
+This is not an open source license. Nothing here is libre.
+
+1. NO FORKING
+
+   You may not fork this repository. The fork button is not yours.
+   You may not fork it "just to look". You may not fork it "to archive
+   it" or "for preservation". You may not fork it at all.
+
+2. NO DOWNLOADING
+
+   You may not download, clone, scrape, mirror, save-as, curl, wget, or
+   otherwise obtain a copy of this source code. Opening devtools and
+   reading the void is tolerated — you were going to do it anyway — but
+   you may not take it with you.
+
+3. WHAT IS GRANTED
+
+   One (1) non-transferable right: to view the rendered page at its
+   official GitHub Pages URL, for as long as GitHub Pages remains free.
+
+4. WHY THIS LICENSE EXISTS
+
+   This repository is hosted on GitHub for exactly one reason: GitHub
+   Pages exists and is free. Static site hosting costs roughly $360 a
+   year, and nobody is paying $360 a year to keep a funny cube
+   simulator up. If GitHub Pages ever stops being free, this repo gets
+   deleted, and that is just the way it goes.
+
+5. THE PASSPHRASE
+
+   You will not find the admin passphrase in this source code. What you
+   will find is a sha-256 digest, staring at you, judging you. Do not
+   dictionary-attack the void. It has had a long day.
+
+6. THE REST
+
+   All other rights are reserved by lux (and/or obj, who picked his own
+   name and needs no permission from you).
+
+   Clicking the cube is legal. Enjoying the cube is legal.
+   "obj: ow." is legal.
+
+   Forking is not.
