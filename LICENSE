@@ -34,7 +34,15 @@ This is not an open source license. Nothing here is libre.
    will find is a sha-256 digest, staring at you, judging you. Do not
    dictionary-attack the void. It has had a long day.
 
-6. THE REST
+6. THE ARCHIVE EXCEPTION
+
+   Notwithstanding clause 1, the repository known as "retroobj" is
+   expressly legal. It is an archive of the first commit of this
+   repository — a fossil, frozen in time — and it does not count as a
+   fork or a download. One (1) archive is allowed. It is the original
+   sin and it stays.
+
+7. THE REST
 
    All other rights are reserved by lux (and/or obj, who picked his own
    name and needs no permission from you).
