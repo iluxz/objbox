@@ -321,8 +321,10 @@ the source code is a lie. the render is the truth.
 </div>
 <div id="slotsPanel">
 <div class="title">FLOPPY SHELF</div>
-<div class="sub">5 disks. pick your timeline. saving overwrites the disk.</div>
+<div class="sub">5 disks. pick your timeline. saving overwrites the disk. backup/restore moves the whole shelf between browsers.</div>
 <div id="floppyRow"></div>
+<div class="fl-btns" style="margin-top:16px"><button onclick="slotBackup()">BACKUP SHELF</button><button onclick="slotRestore()">RESTORE SHELF</button></div>
+<input type="file" id="shelfFile" accept=".json,application/json" style="display:none">
 <button class="closeBtn" onclick="slotsClose()" style="background:rgba(255,80,80,0.15);border:1px solid rgba(255,80,80,0.4);border-radius:4px;color:rgba(255,80,80,0.9);font-family:'Consolas',monospace;font-size:11px;padding:4px 12px;cursor:pointer">close</button>
 </div>
 <div id="overlay"><div class="clock" id="clock">00:00</div><div class="date" id="date"></div></div>
@@ -1279,7 +1281,7 @@ if(bgm.paused)bgm.play();else bgm.pause();
 var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':bgm.src.includes('cat')?'on little cat feet':'void drone';
 cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
 'skill':{help:'skill - open the skill tree',fn:function(){skillOpen();return true}},
-'slots':{help:'slots - open the floppy shelf (5 save disks)',fn:function(){slotsOpen();return true}},
+'slots':{help:'slots - open the floppy shelf (5 save disks, backup/restore to move browsers)',fn:function(){slotsOpen();return true}},
 'buymax':{help:'buymax - toggle buy-max (needs: Buy Max, area 3)',fn:function(){toggleBuyMax();return true}},
 'nothingcore':{help:'nothingcore - gaze through the nothing core (needs: ∅)',fn:function(){toggleNothingCore();return true}},
 'coreview':{help:'coreview - alias of nothingcore',fn:function(){toggleNothingCore();return true}},
@@ -3274,6 +3276,14 @@ var patchLog=[
 'void-mute package retired → void-mute / void-unmute commands (persisted). packages + admin session persist too',
 'broadcast / relay / unlisten removed. the lorebook holds a decommission notice. obj unplugged it.',
 '4 new lorebook pages (the pull, scripts, cubecheck, cb_menu) + 10 tape-deck transmissions'
+]},
+{date:'2026-09-25',tier:'patch',title:'the shapes were mostly lies',notes:[
+'palette previews for sphere/torus/knot rendered nothing - color values were being fed in as geometry params',
+'sphere + cyl got real segment counts, one genShape() call site now feeds render AND preview',
+'knot geometry rewritten: old triangles were zero-area slivers along the tangent. now a real double-sided tube',
+'cyl + octa were wound inside-out - backface culling ate them. cyl 128/128 faces outward, octa 8/8',
+'floppy shelf: BACKUP SHELF / RESTORE SHELF - one json moves all 5 disks + state between browsers',
+'admin flag never rides in a backup file. re-auth with the passphrase on the new browser'
 ]}
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff'};
@@ -3750,10 +3760,10 @@ var d=[],hh=h/2;
 for(var i=0;i<seg;i++){
 var a0=i/seg*Math.PI*2,a1=(i+1)/seg*Math.PI*2;
 var x0=Math.cos(a0)*rad,z0=Math.sin(a0)*rad,x1=Math.cos(a1)*rad,z1=Math.sin(a1)*rad;
-d.push(x0,hh,z0,x0,0,z0,r,g,b);d.push(x0,-hh,z0,x0,0,z0,r*0.7,g*0.7,b*0.7);d.push(x1,hh,z1,x1,0,z1,r,g,b);
-d.push(x1,hh,z1,x1,0,z1,r,g,b);d.push(x0,-hh,z0,x0,0,z0,r*0.7,g*0.7,b*0.7);d.push(x1,-hh,z1,x1,0,z1,r*0.7,g*0.7,b*0.7);
-d.push(0,hh,0,0,1,0,r,g,b);d.push(x0,hh,z0,0,1,0,r,g,b);d.push(x1,hh,z1,0,1,0,r,g,b);
-d.push(0,-hh,0,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x1,-hh,z1,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x0,-hh,z0,0,-1,0,r*0.5,g*0.5,b*0.5)}
+d.push(x0,hh,z0,x0,0,z0,r,g,b);d.push(x1,hh,z1,x1,0,z1,r,g,b);d.push(x0,-hh,z0,x0,0,z0,r*0.7,g*0.7,b*0.7);
+d.push(x1,hh,z1,x1,0,z1,r,g,b);d.push(x1,-hh,z1,x1,0,z1,r*0.7,g*0.7,b*0.7);d.push(x0,-hh,z0,x0,0,z0,r*0.7,g*0.7,b*0.7);
+d.push(0,hh,0,0,1,0,r,g,b);d.push(x1,hh,z1,0,1,0,r,g,b);d.push(x0,hh,z0,0,1,0,r,g,b);
+d.push(0,-hh,0,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x0,-hh,z0,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x1,-hh,z1,0,-1,0,r*0.5,g*0.5,b*0.5)}
 return new Float32Array(d)
 }
 function geoTorus(R,rad,seg,r,g,b){
@@ -3778,19 +3788,30 @@ d.push(v3[0],v3[1],v3[2],n3[0],n3[1],n3[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
 return new Float32Array(d)
 }
 function geoKnot(R,rad,seg,p,q,r,g,b){
-var d=[];
-for(var i=0;i<seg*4;i++){var a0=i/(seg*4)*Math.PI*2,a1=(i+1)/(seg*4)*Math.PI*2;
-var b0=(i%seg)/seg*Math.PI*2,b1=((i+1)%seg)/seg*Math.PI*2;
+var d=[],sides=4;
 function kp(a){var rr=R+rad*Math.cos(q*a);return[rr*Math.cos(p*a),rad*Math.sin(q*a),rr*Math.sin(p*a)]}
-var v0=kp(a0),v1=kp(a1);
-var nd=[(v1[0]-v0[0])*0.1,(v1[1]-v0[1])*0.1,(v1[2]-v0[2])*0.1];
-var nl=Math.sqrt(nd[0]*nd[0]+nd[1]*nd[1]+nd[2]*nd[2])||1;
-var no=[nd[0]/nl,nd[1]/nl,nd[2]/nl];
-var sh=0.5+0.5*Math.cos(b0);
-d.push(v0[0],v0[1],v0[2],no[0],no[1],no[2],r*sh,g*sh,b*sh);
-d.push(v1[0],v1[1],v1[2],no[0],no[1],no[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
-d.push((v0[0]+v1[0])/2+no[0]*rad*0.3,(v0[1]+v1[1])/2+no[1]*rad*0.3,(v0[2]+v1[2])/2+no[2]*rad*0.3,no[0],no[1],no[2],r*sh*0.6,g*sh*0.6,b*sh*0.6);
-}
+function push(v,flip){d.push(v[0],v[1],v[2],flip?-v[3]:v[3],flip?-v[4]:v[4],flip?-v[5]:v[5],v[6],v[7],v[8])}
+var prevRing=null;
+for(var i=0;i<=seg;i++){
+var a=i/seg*Math.PI*2;
+var cv=kp(a),nv=kp(a+0.001);
+var T=[nv[0]-cv[0],nv[1]-cv[1],nv[2]-cv[2]];
+var tl=Math.sqrt(T[0]*T[0]+T[1]*T[1]+T[2]*T[2])||1;T=[T[0]/tl,T[1]/tl,T[2]/tl];
+var up=Math.abs(T[1])>0.99?[1,0,0]:[0,1,0];
+var N=[T[1]*up[2]-T[2]*up[1],T[2]*up[0]-T[0]*up[2],T[0]*up[1]-T[1]*up[0]];
+var nl=Math.sqrt(N[0]*N[0]+N[1]*N[1]+N[2]*N[2])||1;N=[N[0]/nl,N[1]/nl,N[2]/nl];
+var B=[T[1]*N[2]-T[2]*N[1],T[2]*N[0]-T[0]*N[2],T[0]*N[1]-T[1]*N[0]];
+var ring=[];
+for(var k=0;k<sides;k++){
+var th=k/sides*Math.PI*2,ct=Math.cos(th),st=Math.sin(th);
+var nx=N[0]*ct+B[0]*st,ny=N[1]*ct+B[1]*st,nz=N[2]*ct+B[2]*st;
+var sh=0.55+0.45*ny;
+ring.push([cv[0]+nx*rad,cv[1]+ny*rad,cv[2]+nz*rad,nx,ny,nz,r*sh,g*sh,b*sh])}
+if(prevRing){for(var k=0;k<sides;k++){var k2=(k+1)%sides;
+var A=prevRing[k],Bv=prevRing[k2],C=ring[k2],D=ring[k];
+push(A,0);push(Bv,0);push(C,0);push(A,0);push(C,0);push(D,0);
+push(A,1);push(C,1);push(Bv,1);push(A,1);push(D,1);push(C,1)}}
+prevRing=ring}
 return new Float32Array(d)
 }
 function geoIcosa(s,r,g,b){
@@ -3814,7 +3835,7 @@ return new Float32Array(d)
 function geoOcta(s,r,g,b){
 var h=s,d=[];
 var V=[[0,h,0],[h,0,0],[0,0,h],[-h,0,0],[0,0,-h],[0,-h,0]];
-var F=[[0,1,2],[0,2,3],[0,3,4],[0,4,1],[5,2,1],[5,3,2],[5,4,3],[5,1,4]];
+var F=[[0,2,1],[0,3,2],[0,4,3],[0,1,4],[5,1,2],[5,2,3],[5,3,4],[5,4,1]];
 for(var fi=0;fi<8;fi++){
 var v0=V[F[fi][0]],v1=V[F[fi][1]],v2=V[F[fi][2]];
 var e1=[v1[0]-v0[0],v1[1]-v0[1],v1[2]-v0[2]],e2=[v2[0]-v0[0],v2[1]-v0[1],v2[2]-v0[2]];
@@ -3828,6 +3849,13 @@ d.push(v2[0],v2[1],v2[2],no[0],no[1],no[2],r*sh*0.8,g*sh*0.8,b*sh*0.8);
 return new Float32Array(d)
 }
 var shapeGens={cube:geoCube,tetra:geoTetra,sphere:geoSphere,cyl:geoCyl,torus:geoTorus,knot:geoKnot,icosa:geoIcosa,octa:geoOcta};
+function genShape(shape,r,g,b){
+if(shape==='sphere')return geoSphere(0.35,24,r,g,b);
+if(shape==='cyl')return geoCyl(0.26,0.5,32,r,g,b);
+if(shape==='torus')return geoTorus(0.25,0.1,24,r,g,b);
+if(shape==='knot')return geoKnot(0.28,0.1,72,2,3,r,g,b);
+return shapeGens[shape](0.35,r,g,b)
+}
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  WEBGL SETUP                                               │
@@ -3902,10 +3930,7 @@ iBufs=[];iCnts=[];
 for(var i=0;i<innerC.length;i++){
 var c=innerC[i],r=c.c[0],g=c.c[1],b=c.c[2];
 var d;
-if(shape==='torus')d=shapeGens[shape](0.25,0.1,16,r,g,b);
-else if(shape==='knot')d=shapeGens[shape](0.2,0.08,24,2,3,r,g,b);
-else if(shape==='icosa')d=shapeGens[shape](0.35,r,g,b);
-else d=shapeGens[shape](0.35,r,g,b);
+d=genShape(shape,r,g,b);
 iBufs.push(upBuf(d));iCnts.push(d.length/9);
 }
 }
@@ -4128,7 +4153,7 @@ try{
 var pgl=cvs.getContext('webgl',{antialias:true,alpha:true});
 if(pgl){pgl.enable(pgl.DEPTH_TEST);pgl.enable(pgl.CULL_FACE);pgl.clearColor(0,0,0,0);pgl.clear(pgl.COLOR_BUFFER_BIT|pgl.DEPTH_BUFFER_BIT);
 var pp=mkP(pgl,VS,FS);pgl.useProgram(pp);
-var data=pv.g(0.4,pv.co[0],pv.co[1],pv.co[2]);
+var data=genShape(pv.n,pv.co[0],pv.co[1],pv.co[2]);
 var pb=pgl.createBuffer();pgl.bindBuffer(pgl.ARRAY_BUFFER,pb);pgl.bufferData(pgl.ARRAY_BUFFER,data,pgl.STATIC_DRAW);
 var pa=pgl.getAttribLocation(pp,'aPos'),pn=pgl.getAttribLocation(pp,'aNorm'),pc=pgl.getAttribLocation(pp,'aCol');
 pgl.enableVertexAttribArray(pa);pgl.vertexAttribPointer(pa,3,pgl.FLOAT,false,S,0);
@@ -7154,6 +7179,54 @@ blob.name=name;
 try{localStorage.setItem('cube_slot_'+n,JSON.stringify(blob))}catch(e){cubeError('slots: rename failed');return}
 cubeOk('slots: disk '+n+' is now "'+name+'"');
 renderSlots();
+}
+function slotBackup(){
+var pack={v:1,kind:'cube-shelf',at:Date.now(),active:slotActive(),slots:{},state:{}};
+for(var n=1;n<=5;n++){var b=slotRead(n);if(b)pack.slots[n]=b}
+for(var i=0;i<slotKeys.length;i++){var k=slotKeys[i];if(k==='cube_admin')continue;try{var v=localStorage.getItem(k);if(v!==null)pack.state[k]=v}catch(e){}}
+try{
+var blob=new Blob([JSON.stringify(pack)],{type:'application/json'});
+var a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download='cube-shelf-'+new Date().toISOString().slice(0,10)+'.json';
+document.body.appendChild(a);a.click();
+setTimeout(function(){try{URL.revokeObjectURL(a.href);a.remove()}catch(e){}},500);
+var ns=0;for(var s in pack.slots)ns++;
+cubeOk('slots: shelf backed up ('+ns+' disks). the file works in any browser.');
+}catch(e){cubeError('slots: backup failed (storage blocked?)')}
+}
+function slotRestore(){
+var inp=document.getElementById('shelfFile');if(!inp)return;
+inp.value='';
+inp.onchange=function(){
+var f=inp.files&&inp.files[0];if(!f)return;
+var rd=new FileReader();
+rd.onload=function(){
+var pack=null;
+try{pack=JSON.parse(rd.result)}catch(e){}
+if(!pack||pack.kind!=='cube-shelf'||(!pack.slots&&!pack.state)){cubeError('restore: not a cube shelf file');return}
+var ns=0,nk=0;
+if(pack.slots)ns=Object.keys(pack.slots).length;
+if(pack.state)nk=Object.keys(pack.state).length;
+if(!ns&&!nk){cubeError('restore: shelf file is empty');return}
+var ok=false;
+try{ok=confirm('restore this shelf into THIS browser? current saves will be replaced.')}catch(e){}
+if(!ok)return;
+try{
+for(var i=0;i<slotKeys.length;i++){try{localStorage.removeItem(slotKeys[i])}catch(e){}}
+try{localStorage.removeItem('cube_active_slot')}catch(e){}
+for(var n=1;n<=5;n++){try{localStorage.removeItem('cube_slot_'+n)}catch(e){}}
+if(pack.slots){for(var k in pack.slots){if(!/^[1-5]$/.test(String(k)))continue;localStorage.setItem('cube_slot_'+k,JSON.stringify(pack.slots[k]))}}
+if(pack.state){for(var k in pack.state){if(k==='cube_admin')continue;try{localStorage.setItem(k,String(pack.state[k]))}catch(e){}}}
+if(pack.active)localStorage.setItem('cube_active_slot',String(pack.active));
+}catch(e){cubeError('restore: write failed (storage full?)');return}
+slotsClose();
+cubeOk('restore: shelf imported ('+ns+' disks, '+nk+' keys). admin flag is never imported. rebooting timeline...');
+setTimeout(function(){location.reload()},800)
+};
+rd.readAsText(f)
+};
+inp.click()
 }
 // caught obj in 4k — phase 1: procedural pull demos, scripts 1-3
 var pullAccess=false;
