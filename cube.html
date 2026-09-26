@@ -3169,6 +3169,7 @@ if(sub2==='run'){
 if(!parts[2]){cubeError('usage: void run <file.vsc>');return}
 var rp=resolvePath(parts[2]);
 if(!fs[rp]||fs[rp].type==='dir'){cubeError(rp+': no such file');return}
+if(rp==='/void/pkgs/cubecheck.vsc'){realCubeCheck();return}
 runVoidScript(fs[rp].content,rp);
 return}
 if(sub2==='export'){
@@ -7309,6 +7310,26 @@ function objGrant(){pullAccess=true;var lines=['obj: what.','obj: why.','obj: yo
 function pullRequest(target,force){if(target){target=String(target).trim().toLowerCase().replace(/['"]/g,'')}if(force){force=parseInt(force,10);if(!(force>=1&&force<=8)){cubeError('usage: pull [box.objbox.pull:51072|1-8]');return}if(!isAdmin){cubeError('pull: forcing a script needs admin.');return}}if(pullBusy||demoPlaying){cubeWarn('pull: the tape deck is already running.');return}if(typeof currentView!=='undefined'&&currentView!=='void'){cubeWarn('pull: the tape deck only works in the void view.');return}if(typeof travelling!=='undefined'&&travelling){cubeWarn('pull: the void is travelling. wait for arrival.');return}if(typeof isFrozen!=='undefined'&&isFrozen){cubeWarn('pull: time is frozen. unfreeze first.');return}if(!pullAccess){cubeError('pull: obj has not granted access. type: obj');return}if(target&&target!=='box.objbox.pull:51072'){cubeError('usage: pull [box.objbox.pull:51072]');return}pullBusy=true;var seq=['pull: knocking on box.objbox.pull:51072...','pull: the void picked up.','pull: no serial key found. the void does not care.','pull: proving you are an intruder...','pull: access confirmed. obj is watching.','pull: opening the tape deck...'];for(var i=0;i<seq.length;i++){(function(line,idx){demoLater(function(){cubePrint(line)},idx*230)})(seq[i],i)}demoLater(function(){pullBusy=false;pullGenerate(force)},seq.length*230+260)}
 function pullRareUnlocked(){try{if(isAdmin)return true}catch(e){}return (typeof skillHas==='function'&&skillHas('anom_interloper'))||!!window._skillInterloper}
 function pullGenerate(force){var script=force;if(!script){var r=Math.random();script=r<0.60?1:(r<0.82?2:(r<0.93?3:(r<0.955?4:(r<0.965?5:(r<0.985?6:(r<0.995?7:8))))))}if(script>=4&&!pullRareUnlocked()){script=1+Math.floor(Math.random()*3)}var seed=Math.floor(Math.random()*4294967296);var beats,ms;if(script===1){beats=5+Math.floor(Math.random()*4);ms=4500+Math.floor(Math.random()*3500)}else if(script===2){beats=6+Math.floor(Math.random()*5);ms=6000+Math.floor(Math.random()*4000)}else if(script===3){beats=7+Math.floor(Math.random()*6);ms=7000+Math.floor(Math.random()*4000)}else if(script===4){beats=14+Math.floor(Math.random()*7);ms=20000+Math.floor(Math.random()*15000)}else if(script===5){beats=8+Math.floor(Math.random()*5);ms=8000+Math.floor(Math.random()*4000)}else if(script===6){beats=12+Math.floor(Math.random()*7);ms=12000+Math.floor(Math.random()*6000)}else if(script===7){beats=12+Math.floor(Math.random()*7);ms=18000+Math.floor(Math.random()*12000)}else{beats=10+Math.floor(Math.random()*5);ms=12000+Math.floor(Math.random()*6000)}var rec=demoRecord(script,seed,beats,ms);cubeOk('demo saved: /void/demos/'+rec.id+' (script '+script+')');demoStart(rec)}
+var cubeCheckBusy=false;
+function realCubeCheck(){
+if(cubeCheckBusy){cubePrint('cubecheck: already scanning.');return}
+cubeCheckBusy=true;
+cubePrint('cubecheck: scanning walls for graffiti...');
+setTimeout(function(){cubePrint('cubecheck: pass 2/2 - cross-referencing transmissions...')},900);
+setTimeout(function(){
+try{
+if(Math.random()<0.4){
+var where=['north wall, sector 7g','the containment seam','behind the outer shell','inner cube 3, fresh paint','the floor under the palette'][Math.floor(Math.random()*5)];
+cubeWarn('cubecheck: graffiti detected - '+where+'.');
+cubePrint('cubecheck: generating tape from the mark...');
+pullGenerate();
+}else{
+cubePrint('cubecheck: scan complete. walls are clean. probably.');
+}
+}catch(e){cubeError('cubecheck: scan interrupted. the walls moved.')}
+cubeCheckBusy=false;
+},2100)
+}
 function demoSnapshot(){var f='';try{var m=document.getElementById('main');if(m)f=m.style.filter||''}catch(e){}return{rx:typeof rX==='undefined'?0:rX,ry:typeof rY==='undefined'?0:rY,vx:typeof vX==='undefined'?0:vX,vy:typeof vY==='undefined'?0:vY,zz:typeof zZ==='undefined'?-9:zZ,shape:typeof curShape==='undefined'?'cube':curShape,theme:typeof curTheme==='undefined'?'1':curTheme,frozen:(typeof isFrozen==='undefined'?false:isFrozen),timeFrozen:(typeof window!=='undefined'&&window._timeFrozen===true),filter:f}}
 function demoRestore(s){try{if(!s)return;vX=s.vx;vY=s.vy;rX=s.rx;rY=s.ry;zZ=s.zz;if(typeof s.frozen==='boolean')isFrozen=s.frozen;if(typeof s.timeFrozen==='boolean')window._timeFrozen=s.timeFrozen;if(s.shape&&typeof rebuild==='function'){curShape=s.shape;rebuild(s.shape)}if(s.theme&&typeof applyTheme==='function'){applyTheme(s.theme)}var m=document.getElementById('main');if(m)m.style.filter=s.filter||''}catch(e){}}
 function demoHudShow(rec){try{var el=document.getElementById('demoHud');if(!el)return;el.innerHTML='<span id="demoRec">●</span> REC<br>demo '+rec.id+' · SCRIPT '+rec.script+'<br>'+rec.commit+' · tick 0000/'+String(rec.beats).padStart(4,'0')}catch(e){}}
