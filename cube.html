@@ -13,6 +13,155 @@ body.demo-mode #terminal,body.demo-mode #overlay,body.demo-mode #shapePalette,bo
 body.demo-mode .gui-window,body.demo-mode .transmission{display:none!important}
 #demoHud{display:none;position:fixed;top:16px;left:18px;z-index:120;pointer-events:none;font-family:'Consolas',monospace;font-size:12px;line-height:1.7;color:rgba(180,255,255,0.88);text-shadow:0 0 12px rgba(43,208,208,0.35)}
 body.demo-mode #demoHud{display:block}
+/* ── there is no cube (step 1): UI is DELETED while playing, not hidden ── */
+body.ng-mode{background:#000;overflow:hidden;cursor:crosshair}
+body.ng-mode .transmission,body.ng-mode .gui-window{display:none!important}
+#ngOverlay{position:fixed;inset:0;z-index:2000;background:#050508;display:flex;flex-direction:column;align-items:center;font-family:Georgia,serif;animation:ngIn .5s ease-out}
+@keyframes ngIn{from{opacity:0}to{opacity:1}}
+#ngObj{width:100%;text-align:center;padding:26px 20px 18px;color:#d8e6f2;font-size:19px;letter-spacing:1px;min-height:76px;border-bottom:1px solid #1a2a3a}
+#ngObj .who{color:#2bd0d0}
+#ngJbo{width:100%;text-align:center;padding:10px 20px 14px;color:#ffd8b0;font-size:18px;letter-spacing:1px;border-bottom:1px solid #3a2a1a;min-height:20px;display:none}
+#ngJbo .who{color:#ff8a2a;font-weight:bold}
+#ngStage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%}
+#ngTitle{color:#8a93a3;font-size:34px;letter-spacing:8px}
+#ngSub{color:#4a5a6a;font-size:13px;letter-spacing:2px}
+#ngBtn{background:transparent;border:1px solid #5a3a3a;color:#c87878;font-family:Georgia,serif;font-size:15px;letter-spacing:3px;padding:12px 34px;cursor:pointer;border-radius:4px}
+#ngBtn:hover{border-color:#c87878;background:rgba(200,120,120,.08)}
+.ng-shatter{animation:ngBreak .3s forwards!important;pointer-events:none}
+@keyframes ngBreak{40%{transform:scale(1.25) rotate(-8deg);opacity:1}100%{transform:scale(0) rotate(40deg);opacity:0}}
+#ngLeave{position:fixed;bottom:14px;right:18px;color:#3a4552;font-size:11px;letter-spacing:2px;cursor:pointer;font-family:'Consolas',monospace;z-index:2001}
+#ngLeave:hover{color:#8a93a3}
+#ngFlash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:3000}
+#ngFlash.go{animation:ngFlashA .9s ease-out}
+@keyframes ngFlashA{0%{opacity:0}15%{opacity:.85}100%{opacity:0}}
+#ngStage.errpage{font-family:'Consolas',monospace}
+.ngProp{border:1px solid #2a3542;color:#9fb2c5;padding:14px 26px;letter-spacing:2px;font-size:15px;cursor:pointer;background:rgba(20,28,38,.5);border-radius:3px;user-select:none;text-align:center;transition:transform .18s ease-out}
+#ngStage{position:relative}
+.ngDecoy{position:absolute;z-index:5;border-style:dashed!important;animation:ngWobble 1s ease-in-out infinite}
+@keyframes ngWobble{50%{transform:rotate(-1.5deg) scale(1.03)}}
+.ngProp:hover{border-color:#5a6a7a}
+.ngProp.big{font-size:22px;color:#c87878;border-color:#5a3a3a;letter-spacing:4px}
+.ngProp.big:hover{border-color:#c87878}
+.ngBarBg{width:220px;height:12px;border:1px solid #2a3542;border-radius:6px;overflow:hidden;margin:0 auto 8px}
+.ngBarFill{width:99%;height:100%;background:linear-gradient(90deg,#2bd0d0,#2b7ad0)}
+.ngBarLbl{font-size:11px;color:#4a5a6a}
+#ngDoor{display:flex;flex-direction:column;align-items:center;gap:16px;padding:12px;cursor:pointer;user-select:none}
+.ngDoorFrame{width:150px;height:230px;border:3px solid #5a3a3a;border-radius:6px 6px 0 0;position:relative;background:linear-gradient(180deg,rgba(70,32,32,.25),rgba(28,14,14,.5));display:flex;flex-direction:column;align-items:center;justify-content:space-evenly}
+#ngDoor:hover .ngDoorFrame{border-color:#c87878}
+.ngDoorPanel{width:62%;height:20%;border:1px solid rgba(200,120,120,.35);border-radius:2px}
+.ngKnob{position:absolute;right:14px;top:56%;width:12px;height:12px;border-radius:50%;background:#c87878;box-shadow:0 0 10px rgba(200,120,120,.7)}
+.ngDoorFrame.locked::after{content:'';position:absolute;left:-10px;right:-10px;top:48%;height:12px;background:repeating-linear-gradient(45deg,#6a4444,#6a4444 6px,#3a2424 6px,#3a2424 12px);border:1px solid #7a4a4a;transform:rotate(-4deg)}
+.ngDoorLabel{color:#c87878;font-size:22px;letter-spacing:6px}
+.ngProp.ngDiploma{background:linear-gradient(180deg,#e8dcc0,#d6c6a4);border:2px solid #8a744a;padding:10px;border-radius:2px}
+.ngProp.ngDiploma:hover{border-color:#c87878}
+.ngDipInner{border:1px solid #8a744a;padding:22px 44px;text-align:center;position:relative}
+.ngDipTitle{font-family:Georgia,serif;color:#3a2c18;font-size:22px;letter-spacing:4px}
+.ngDipSub{font-family:Georgia,serif;color:#6a5a3a;font-size:12px;letter-spacing:2px;margin-top:8px}
+.ngSeal{position:absolute;right:14px;bottom:10px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e07878,#8a3030);box-shadow:0 0 8px rgba(138,48,48,.5)}
+#ngStage.talking{cursor:wait}
+#ngStage.talking .ngProp,#ngStage.talking #ngBtn,#ngStage.talking #ngCircle,#ngStage.talking #ngSquare,#ngStage.talking #ngSliderBg,#ngStage.talking #ngDoor,#ngStage.talking .ngBoxWrap,#ngStage.talking .ngCredName,#ngStage.talking .ngPortal{pointer-events:none;opacity:.55}
+.ngBoxWrap{display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.ngBox{position:relative;background:linear-gradient(180deg,#7a5f36,#54401f);border:2px solid #9a7d4f}
+.ngBox.b1{width:120px;height:96px}
+.ngBox.b2{width:84px;height:68px}
+.ngBox.b3{width:52px;height:44px}
+.ngBox.b4{width:36px;height:30px}
+.ngBox.b5{width:24px;height:20px}
+.ngBox::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:12px;transform:translateX(-50%);background:rgba(225,205,160,.3)}
+.ngBox::after{content:'';position:absolute;top:50%;left:0;right:0;height:12px;transform:translateY(-50%);background:rgba(225,205,160,.3)}
+.ngBoxWrap:hover .ngBox{border-color:#c87878}
+.ngBoxLbl{color:#9fb2c5;letter-spacing:4px;font-size:15px;font-family:'Consolas',monospace}
+.ngBrokenImg{width:120px;height:90px;margin:0 auto 8px;background:#1a2230;border:1px solid #3a4552;border-radius:4px;position:relative;overflow:hidden}
+.ngBISun{position:absolute;left:14px;top:12px;width:18px;height:18px;border-radius:50%;background:#5a6a7a}
+.ngBIMtn{position:absolute;left:-10px;bottom:-24px;border-left:45px solid transparent;border-right:45px solid transparent;border-bottom:54px solid #2e3a4a}
+.ngCookie{width:70px;height:70px;margin:0 auto 8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#b57e3e,#7d5222 70%);position:relative}
+.ngCookie::before{content:'';position:absolute;left:20px;top:18px;width:8px;height:8px;border-radius:50%;background:#3a2210;box-shadow:22px 6px 0 #3a2210,8px 22px 0 #3a2210,28px 24px 0 #3a2210,-8px 14px 0 #3a2210}
+.ngArrowBadge{width:64px;height:64px;margin:0 auto 8px;border:2px solid #2bd0d0;border-radius:50%;color:#2bd0d0;font-size:34px;line-height:58px;text-align:center;font-family:Georgia,serif}
+#ngMenuBtn{position:fixed;top:14px;right:18px;color:#5a6a7a;font-size:22px;letter-spacing:2px;cursor:pointer;z-index:2001;font-family:'Consolas',monospace}
+#ngMenuBtn:hover{color:#d8e6f2}
+#ngMenu{display:none;position:fixed;top:48px;right:18px;z-index:2001;background:rgba(8,10,14,.95);border:1px solid #2a3542;border-radius:6px;padding:14px;min-width:230px;font-family:'Consolas',monospace}
+#ngMenuTitle{color:#5a8ab0;font-size:10px;letter-spacing:3px;margin-bottom:6px}
+#ngMenuProg{color:#4a5a6a;font-size:11px;margin-bottom:12px;line-height:1.8}
+#ngMenu button{display:block;width:100%;margin:6px 0;background:transparent;border:1px solid #2a3542;color:#9fb2c5;font-family:'Consolas',monospace;font-size:12px;letter-spacing:2px;padding:8px;cursor:pointer;border-radius:4px}
+#ngMenu button:hover{border-color:#2bd0d0;color:#d8e6f2}
+#ngMenuLeave{border-color:#5a3a3a!important;color:#c87878!important}
+#ngCore{cursor:pointer;user-select:none}
+#ngCore.orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,220,255,.95),rgba(160,60,255,.7) 45%,rgba(40,0,80,.9));box-shadow:0 0 60px rgba(160,60,255,.7),0 0 120px rgba(100,0,255,.4);animation:corePulse 2.4s ease-in-out infinite}
+#ngCore.voided{font-size:110px;color:#c8c8c8;text-shadow:0 0 30px rgba(200,200,200,.4);animation:ngCoreFlicker 2.5s steps(8) infinite}
+#ngCore.voided:hover{text-shadow:0 0 50px rgba(200,200,200,.7)}
+@keyframes ngCoreFlicker{0%,100%{opacity:1}12%{opacity:.4}14%{opacity:1}46%{opacity:1}48%{opacity:.2}50%{opacity:1}81%{opacity:1}83%{opacity:.5}85%{opacity:1}}
+.ngShake{animation:ngShakeA .4s}
+@keyframes ngShakeA{25%{transform:translate(-6px,3px)}50%{transform:translate(5px,-4px)}75%{transform:translate(-3px,-2px)}}
+#ngTutArea{display:flex;flex-direction:column;align-items:center;gap:18px}
+#ngCircle{width:90px;height:90px;border:2px solid #2bd0d0;border-radius:50%;cursor:pointer}
+#ngCircle:hover{background:rgba(43,208,208,.1)}
+#ngSquare{width:90px;height:90px;border:2px solid #c87878;cursor:pointer}
+#ngSquare:hover{background:rgba(200,120,120,.1)}
+#ngSliderBg{cursor:pointer}
+#ngSetRow{display:flex;gap:12px}
+.ngSetOn{border-color:#2bd0d0!important;color:#d8e6f2!important}
+#ngManualBox{max-height:220px;overflow-y:auto;text-align:left;font-family:'Consolas',monospace;font-size:12px;line-height:1.9;color:#9fb2c5;border:1px solid #2a3542;border-radius:4px;padding:14px 18px;max-width:min(480px,90%)}
+#ngManualNext{background:transparent;border:1px solid #2bd0d0;color:#d8e6f2;font-family:Georgia,serif;font-size:14px;letter-spacing:3px;padding:10px 30px;margin-top:12px;cursor:pointer;border-radius:4px}
+#ngManualNext.ngLockedBtn{opacity:.35;cursor:not-allowed;border-color:#2a3542;color:#4a5a6a}
+#ngCourse{position:relative;width:min(560px,90%);height:280px;border:1px dashed #2a3542;border-radius:6px}
+.ngPlat{position:absolute;width:64px;height:18px;background:#2a3542;border:1px solid #3a4a5c;border-radius:3px;cursor:pointer;text-align:center}
+.ngPlatNum{font-size:9px;color:#5a6a7a;font-family:'Consolas',monospace;pointer-events:none;line-height:16px}
+.ngPlatGhost{position:absolute;width:64px;height:18px;border:1px dashed rgba(90,106,122,.35);border-radius:3px;pointer-events:none}
+.ngPlat:hover{border-color:#c87878}
+.ngPlat.kill{background:linear-gradient(180deg,#a02020,#600808);border-color:#ff5050;box-shadow:0 0 12px rgba(255,60,60,.5);animation:ngKillPulse 1s ease-in-out infinite}
+@keyframes ngKillPulse{50%{box-shadow:0 0 22px rgba(255,60,60,.8)}}
+#ngNoob,#ngNoob2{position:absolute;width:22px;height:22px;background:#f5cd30;border:2px solid #a88f1a;border-radius:3px;transition:left .5s ease-in-out,top .5s ease-in-out;z-index:6;cursor:pointer}
+#ngNoob.fall,#ngNoob2.fall{transition:left .2s,top .6s ease-in}
+#ngNoob2{background:#30c8f5;border-color:#1a88a8}
+#ngCredList{max-height:300px;overflow:hidden;border:1px solid #1a2a3a;border-radius:6px;padding:10px 26px;min-width:min(420px,86%)}
+.ngCredRole{color:#5a8ab0;font-size:11px;letter-spacing:4px;margin:12px 0 4px;font-family:'Consolas',monospace}
+.ngCredName{color:#c8d8e8;font-size:16px;letter-spacing:2px;font-family:Georgia,serif;cursor:pointer;padding:2px 8px;border-radius:3px;border:1px solid transparent}
+.ngCredName:hover{border-color:#5a6a7a}
+.ngCredName.held{border-color:#2bd0d0;color:#fff;box-shadow:0 0 12px rgba(43,208,208,.4)}
+#ngBossHpLbl{color:#e08080;font-family:'Consolas',monospace;font-size:12px;letter-spacing:2px;margin:6px}
+#ngBossWrap{width:140px;height:140px;margin:18px auto;perspective:600px;cursor:pointer;user-select:none}
+.ngCubeSpin{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:ngSpinBoss 8s linear infinite}
+.ngCubeSpin div{position:absolute;width:140px;height:140px;border:2px solid #2bd0d0;background:rgba(43,208,208,.12)}
+.ngCubeSpin div:nth-child(1){transform:translateZ(70px)}
+.ngCubeSpin div:nth-child(2){transform:rotateY(180deg) translateZ(70px)}
+.ngCubeSpin div:nth-child(3){transform:rotateY(90deg) translateZ(70px)}
+.ngCubeSpin div:nth-child(4){transform:rotateY(-90deg) translateZ(70px)}
+.ngCubeSpin div:nth-child(5){transform:rotateX(90deg) translateZ(70px)}
+.ngCubeSpin div:nth-child(6){transform:rotateX(-90deg) translateZ(70px)}
+@keyframes ngSpinBoss{from{transform:rotateX(-20deg) rotateY(0)}to{transform:rotateX(-20deg) rotateY(360deg)}}
+#ngBossMid{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.ngShieldNode{width:44px;height:44px;background:#2a3a4a;border:2px solid #4a6a8a;transform:rotate(45deg);cursor:pointer}
+.ngShieldNode:hover{border-color:#c87878}
+.ngEcho{width:64px;height:64px;border:2px solid #2bd0d0;border-radius:6px;color:#9fd8d8;font-family:'Consolas',monospace;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(43,208,208,.07)}
+.ngEcho:hover{border-color:#c87878}
+.ngChoice{display:inline-block;margin:8px;padding:12px 28px;font-family:Georgia,serif;font-size:15px;letter-spacing:3px;cursor:pointer;border-radius:4px;background:transparent}
+#ngChoiceStop{border:1px solid #2bd0d0;color:#9fe8e8}
+#ngChoiceKeep{border:1px solid #c87878;color:#e08a8a}
+.ngChoice:hover{filter:brightness(1.4)}
+#ngEndTitle{font-size:30px;letter-spacing:8px;color:#d8e6f2;font-family:Georgia,serif;margin:10px}
+.ngCoreOrb{width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,220,255,.95),rgba(160,60,255,.7) 45%,rgba(40,0,80,.9));box-shadow:0 0 60px rgba(160,60,255,.7),0 0 120px rgba(100,0,255,.4);animation:corePulse 2.4s ease-in-out infinite;cursor:pointer;margin:0 auto;user-select:none}
+.ngCoreVoid{font-size:84px;line-height:1;color:#c8c8c8;text-shadow:0 0 30px rgba(200,200,200,.4);animation:ngCoreFlicker 2.5s steps(8) infinite;cursor:pointer;user-select:none}
+.ngPortal{display:block;width:min(420px,86%);margin:10px auto;background:transparent;border:1px solid #2a3542;color:#9fb2c5;font-family:Georgia,serif;font-size:15px;letter-spacing:3px;padding:12px;cursor:pointer;border-radius:4px}
+.ngPortal:hover{border-color:#2bd0d0;color:#d8e6f2}
+#ngPullBtn,#ngPassBtn{background:linear-gradient(180deg,#6a5a10,#4a3f08);border:2px solid #c8a820;color:#ffe970;font-family:Georgia,serif;font-size:15px;letter-spacing:2px;padding:12px 30px;margin:6px;cursor:pointer;border-radius:6px}
+#ngStam{color:#7ac07a;font-family:'Consolas',monospace;font-size:12px;letter-spacing:2px;margin:8px}
+#ngAd{margin:12px auto 0;max-width:420px;border:1px solid #5a3a3a;color:#c87878;font-family:'Consolas',monospace;font-size:12px;padding:10px;border-radius:4px}
+#ngSub2{color:#3a4552;font-size:10px;margin-top:6px;font-family:'Consolas',monospace}
+#ngTiles{display:grid;grid-template-columns:repeat(3,74px);gap:10px;justify-content:center;margin-top:6px}
+.ngTile{width:74px;height:74px;border:1px solid #2a3542;border-radius:4px;color:#4a5a6a;font-family:'Consolas',monospace;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(20,28,38,.5);user-select:none}
+.ngTile:hover{border-color:#5a6a7a}
+.ngTile.holed{color:#5a1a1a;border-color:#5a1a1a;background:rgba(40,10,10,.4);cursor:default}
+.ngTile.is-exit{border-color:#2bd0d0;color:#2bd0d0;box-shadow:0 0 14px rgba(43,208,208,.4)}
+.ngRShape{cursor:pointer;margin:10px;user-select:none}
+.ngRShape.circ{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#5ff2f2,#1a8a8a)}
+.ngRShape.tri{width:0;height:0;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:52px solid #b06ae0}
+.ngRShape.sq{width:54px;height:54px;background:linear-gradient(180deg,#f06aa0,#a02858)}
+.ngTower{position:absolute;width:64px;height:40px;background:#2a3a4a;border:1px solid #4a6a8a;border-radius:4px;color:#9fc2e0;font-family:'Consolas',monospace;font-size:10px;letter-spacing:1px;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);cursor:pointer;user-select:none}
+.ngTower:hover{border-color:#c87878}
+.ngRange{position:absolute;width:200px;height:200px;border:1px dashed rgba(43,208,208,.22);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.ngEnemy{position:absolute;width:16px;height:16px;background:#c03030;border:1px solid #ff6060;border-radius:2px;transform:translate(-50%,-50%);cursor:pointer;z-index:6}
+#ngBase{position:absolute;right:2%;top:55%;width:26px;height:60px;background:#2a3a2a;border:2px solid #5aa05a;transform:translate(-50%,-50%);border-radius:3px}
+#ngBaseHp{position:absolute;right:8px;top:36%;color:#7ac07a;font-family:'Consolas',monospace;font-size:11px;letter-spacing:1px;white-space:nowrap}
 #demoChecker{position:fixed;top:0;left:0;width:100%;height:100%;z-index:105;pointer-events:none;opacity:0;background:repeating-conic-gradient(rgba(0,0,0,1) 0% 25%,rgba(190,190,200,1) 0% 50%) 50%/90px 90px}
 #demoWatcher{position:fixed;z-index:106;width:10px;height:10px;border-radius:50%;background:rgba(255,80,80,0.9);box-shadow:0 0 18px rgba(255,80,80,0.9);display:none;pointer-events:none;animation:demoPulse 2s ease-in-out infinite}
 @keyframes demoPulse{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.8);opacity:1}}
@@ -467,6 +616,7 @@ END LOG
 <div class="help-cmd"><span class="hl">visits</span> — show total visit count</div>
 <div class="help-cmd"><span class="hl">skill</span> - open the skill tree</div>
 <div class="help-cmd"><span class="hl">slots</span> - open the floppy shelf (5 save disks)</div>
+<div class="help-cmd"><span class="hl">play</span> [-1|0-10] - there is no game. (bare=ch0, numbers unlock by progress)</div>
 <div class="help-cmd"><span class="hl">obj</span> - ask obj for pull access</div>
 <div class="help-cmd"><span class="hl">pull</span> - play a procedural void demo (needs obj)</div>
 <div class="help-cmd"><span class="hl">demos</span> - list saved void demos</div>
@@ -474,7 +624,7 @@ END LOG
 <div class="help-cmd"><span class="hl">void-mute</span> - silence void transmissions</div>
 <div class="help-cmd"><span class="hl">void-unmute</span> - let the void talk again</div>
 <div class="help-cmd" data-skill-gate="finals"><span class="hl">upgrade</span> - open upgrade tree (locked until every skill)</div>
-<div class="help-cmd"><span class="hl">bgm moon</span> - play moon1857 (overdose)</div>
+<div class="help-cmd"><span class="hl">bgm [track]</span> - play void|furnace|friday|faith|cat|moon|stanley|box|off, or toggle</div>
 <div class="help-cmd"><span class="hl">weather</span> &lt;rain|snow|off|auto&gt; — change weather</div>
 <div class="help-cmd"><span class="hl">sort</span> &lt;algo&gt; [size] [speed] — sorting visualizer (bubble,selection,insertion,quick,merge,shell)</div>
 <div class="help-cmd"><span class="hl">sortstop</span> — stop sort visualization</div>
@@ -881,7 +1031,7 @@ setInterval(function(){if(typeof demoPlaying!=='undefined'&&demoPlaying)return;v
 // │  AUDIO ANALYSIS                                            │
 // └──────────────────────────────────────────────────────────────┘
 var audioCtx,audioAnalyser,audioData;
-var moonEl=document.getElementById('moon1857');
+var moonEl=document.getElementById('moon1857');moonEl.volume=0.25;
 var odActive=false,odWarnTimer=null,odLastFlash=0;
 var activeTrack='bgm';
 function initAudio(){
@@ -912,6 +1062,7 @@ return{bass:Math.min(1,bass*_ag),mid:Math.min(1,mid*_ag),high:Math.min(1,high*_a
 function switchTrack(track){
 if(!audioCtx)initAudio();
 activeTrack=track;
+stopGameMusic();
 if(track==='moon1857'){
 bgm.pause();moonEl.play().catch(function(){});
 if(!odActive)showOdWarn();
@@ -920,6 +1071,32 @@ moonEl.pause();
 if(odActive)hideOdWarn(true);
 loadDayBgm();if(!bgm.paused||track==='auto')bgm.play().catch(function(){});
 }
+}
+var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3'};
+var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet'};
+function bgmTrackName(){try{var s=bgm.src;for(var k in bgmNames){if(s.includes(k))return bgmNames[k]}}catch(e){}return activeTrack==='moon1857'?'moon_rot_1857':'void drone'}
+function stopGameMusic(){try{ngMusicMode=ngTracks.length;if(typeof ngMusic!=='undefined'&&ngMusic)ngMusic.pause();var _mb=document.getElementById('ngMenuMusic');if(_mb)_mb.textContent=ngMusicLabel()}catch(e){}}
+function playBgm(arg,say){
+var a=(arg||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+if(a==='moon'||a==='moon1857'||a==='moonrot1857'||a==='overdose'||a==='od'){switchTrack('moon1857');say('music: moon_rot_1857 [OVERDOSE]');return true}
+if(a==='stanley'||a==='wakeup'||a==='wakeupstanley'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=0;ngMusicApply()}catch(e){}say('music: Wakeupstanley');return true}
+if(a==='box'||a==='bro'||a==='boxlmao'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=1;ngMusicApply()}catch(e){}say('music: bro is in a box lmao imagine');return true}
+if(a==='off'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}stopGameMusic();say('music: off');return true}
+var f=bgmTracks[a];
+if(f){
+if(!audioCtx)initAudio();
+activeTrack='bgm';
+try{moonEl.pause()}catch(e){}
+stopGameMusic();
+if(odActive)hideOdWarn(true);
+if(!bgm.src.includes(f)){bgm.src=f;try{bgm.load()}catch(e){}}
+bgm.play().catch(function(){});
+say('music: '+bgmNames[f]);return true}
+if(a===''){
+stopGameMusic();
+if(activeTrack==='moon1857'){if(moonEl.paused){moonEl.play();say('music: on [moon1857]')}else{moonEl.pause();say('music: off [moon1857]')}return true}
+if(bgm.paused){bgm.play();say('music: on ['+bgmTrackName()+']')}else{bgm.pause();say('music: off ['+bgmTrackName()+']')}return true}
+return false;
 }
 function showOdWarn(){
 if(odActive)return;
@@ -1270,16 +1447,9 @@ travelTo(resolved);
 return true}},
 'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
-'bgm':{help:'bgm [moon|moon1857] - toggle music or switch to moon1857',fn:function(a){
-var arg=(a[0]||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-if(arg==='moon'||arg==='moon1857'||arg==='moonrot1857'||arg==='overdose'||arg==='od'){
-switchTrack('moon1857');cubePrint('music: moon_rot_1857 [OVERDOSE]');return true}
-if(activeTrack==='moon1857'){
-if(moonEl.paused){moonEl.play();cubePrint('music: on [moon1857]')}else{moonEl.pause();cubePrint('music: off [moon1857]')}
-return true}
-if(bgm.paused)bgm.play();else bgm.pause();
-var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':bgm.src.includes('cat')?'on little cat feet':'void drone';
-cubePrint('music: '+(bgm.paused?'off':'on')+' ['+t+']');return true}},
+'bgm':{help:'bgm [void|furnace|friday|faith|cat|moon|stanley|box|off] - play a track or toggle music',fn:function(a){
+if(playBgm(a[0]||'',function(t){cubePrint(t)}))return true;
+cubeError('bgm: pick void, furnace, friday, faith, cat, moon, stanley, box, off (or nothing to toggle)');return true}},
 'skill':{help:'skill - open the skill tree',fn:function(){skillOpen();return true}},
 'slots':{help:'slots - open the floppy shelf (5 save disks, backup/restore to move browsers)',fn:function(){slotsOpen();return true}},
 'buymax':{help:'buymax - toggle buy-max (needs: Buy Max, area 3)',fn:function(){toggleBuyMax();return true}},
@@ -1315,7 +1485,7 @@ if(isAdmin){cubePrint('admin: already authenticated.');return true}
 if(!a.length){cubeError('admin: usage admin <passphrase>');return true}
 var attempt=a.join(' ');
 cubePrint('authenticating...');
-setTimeout(function(){if(voidHash(attempt)==='6b66f01767a49152ba60d452be9b392bbee14f0a9ef0ebf54a28e54df8cf1b96'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
+setTimeout(function(){if(voidHash(attempt)==='9dc291e5c441365bb5747dbc48ee40c5c963ffa88942f989bfca3d470b8cea76'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
 return true}},
 'alwaysontop':{help:'alwaysontop <on|off> — make active window stay on top',fn:function(a){
 if(!activeWin||!guiWins[activeWin]){cubeError('alwaysontop: no active window');return true}
@@ -2195,7 +2365,7 @@ cubePrint('  cube.get            show inner cube count');
 cubePrint('  cube.morph <n>      change shape (0-7: cube/tri/sphere/cyl/torus/knot/icosa/octa)');
 cubePrint('  cube.theme <n>      switch color theme (1-7)');
 cubePrint('  cube.glitch         trigger glitch effect');
-cubePrint('  cube.bgm            toggle music (wed: the furnace | bgm moon: overdose)');
+cubePrint('  cube.bgm [track]    play void|furnace|friday|faith|cat|moon|stanley|box|off, or toggle');
 cubePrint('  skill               open the skill tree');
 if(skillAllFinals())cubePrint('  upgrade             open upgrade tree');
 else cubeDim('  upgrade             upgrade tree (locked — buy every skill)');
@@ -2300,6 +2470,7 @@ cubePrint('  skill               open the skill tree');
 if(skillAllFinals())cubePrint('  upgrade             open upgrade tree');
 else cubeDim('  upgrade             upgrade tree (locked — buy every skill)');
 cubePrint('  slots               open the floppy shelf (5 save disks)');
+cubePrint('  play [-1|0-10]       there is no game. (bare=ch0, numbers unlock by progress)');
 cubePrint('  obj                 ask obj for pull access');
 cubePrint('  pull                play a procedural void demo (needs obj)');
 cubePrint('  demos               list saved void demos');
@@ -2412,6 +2583,7 @@ cubePrint('  uptime            show page uptime');
 cubePrint('  visits            show visit count');
 cubePrint('  skill             open skill tree');
 cubePrint('  slots             open the floppy shelf (5 save disks)');
+cubePrint('  play [-1|0-10]      there is no game. (bare=ch0, numbers unlock by progress)');
 cubePrint('  obj               ask obj for pull access');
 cubePrint('  pull              play a procedural void demo (needs obj)');
 cubePrint('  pull <1-8>        force a script (needs admin)');
@@ -2629,16 +2801,8 @@ if(idx==='7'&&!window._skillEclipse&&!isAdmin){cubeError('theme 7 locked — unl
 applyTheme(idx);cubeOk('theme: '+themes[idx].name);return}
 if(sub==='glitch'){triggerGlitch();cubeOk('glitch triggered');return}
 if(sub==='bgm'){
-var barg=(parts[2]||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-if(barg==='moon'||barg==='moon1857'||barg==='moonrot1857'||barg==='overdose'||barg==='od'){
-switchTrack('moon1857');cubeOk('music: moon_rot_1857 [OVERDOSE]');return}
-if(activeTrack==='moon1857'){
-if(moonEl.paused){moonEl.play();cubeOk('music: on [moon1857]')}else{moonEl.pause();cubeOk('music: off [moon1857]')}
-return}
-if(bgm.paused){bgm.play();cubeOk('music: on')}else{bgm.pause();cubeOk('music: off')}
-var t=bgm.src.includes('furnace')?'the furnace':bgm.src.includes('friday')?'landscaping':bgm.src.includes('faith')?'friendly faith plate':bgm.src.includes('cat')?'on little cat feet':'void drone';
-cubePrint('  track: '+t);
-return}
+if(playBgm(parts[2]||'',function(t){cubeOk(t)}))return;
+cubeError('bgm: pick void, furnace, friday, faith, cat, moon, stanley, box, off (or nothing to toggle)');return}
 if(sub==='fps'){cubePrint('fps: '+fps+' | max: '+maxFps);return}
 if(sub==='particles'){cubePrint('particles: '+NP);return}
 if(sub==='time'){
@@ -3331,6 +3495,33 @@ var patchLog=[
 'admin flag never rides in a backup file. re-auth with the passphrase on the new browser',
 'cube was still clickable during demos - clicks now bounce off during playback (was morphing your cube mid-recording)',
 'weather is no longer rigged: autumn always meant rain every day. now a per-day roll decides rain/clear/snow, deterministic per date, changes at midnight'
+]},
+{date:'2026-09-26',tier:'full on rework basically',title:'American Megatrends',notes:[
+'new command: play [-1|0-10] - obj says there is no game. there is. bare play starts ch0, numbers unlock by progress, admins bypass.',
+'entering deletes the entire UI (stashed with state intact, rebuilt on exit). hiding things caused click ghosts.',
+'obj narrates from a top typewriter bar, never the terminal. queue + catch-up + hurry + re-entry guard, then a full speech lock (wait cursor included).',
+'ch0: the forbidden button, 4 escalating stages (DO NOT CLICK to FINE. CLICK THIS ONE).',
+'ch1: error page, 9 props with repair loops, then BACKUP RESTORE wave 2 with new kill lines.',
+'ch2: mandatory tutorial - scroll-gated real manual, circle in 3 kills, square (12s patience route exists), slider, real parchment diploma with wax seal.',
+'ch3: nested boxes (BOX to QUANTUM, shrinking models) into the core - normal orb, or YOUR nothing core if you maxed the upgrade (obj notices). 7 pokes, teleports, drift, screen shake.',
+'ch4: definitely not settings - volume, POTATO/ULTRA, intruder toggle (rips itself out), delete-save (deletes itself), updates, uninstall, reset, screenshot, void speak.',
+'ch5: definitely not an obby - 12 numbered platforms, 4 killbricks, NOOB_42 plus slow auditor NOOB_43 who skips red. ghost outlines mark your holes.',
+'ch6: definitely not tower defense - 3 towers with range rings, 2 waves of tanky battlers, base HP 5, defended vs dented endings.',
+'ch7: THE RIFT - hub + 4 wrong dimensions (F2P RPG slop with escalating obj horror, checker world, shape drift, mimic cave). location-aware hints.',
+'ch8: JBO - dual narrators (obj teal lowercase + jbo orange caps), live reactor (calibrate, spike, overdrive, encore, meltdowns are setbacks).',
+'ch9: OBJ LOSES - 350 HP spinning cube boss, shield/echo/core intermissions, STOP vs KEEP choice, two persistent endings (+50 pts, cube_finale flag).',
+'ch10: CREDITS - scrolling fake names, click-swap 5, men-into-design beat, unfireable director, swaps change music/voice/difficulty/style, +25 overtime, then kicked out.',
+'hard mode (finishers + admins, menu toggle): tired x11, flee x3, decoys everywhere, 300ms blah.',
+'obj fights back (ch3+): dodging props, thrown decoys (click one: laugh, then slow blah punishment), drifting core. decoy punishment is unskippable by design.',
+'in-game menu: context hints (2 per puzzle - subtle, then 90%), 9-state jukebox (all tracks, stanley default), progress readout, leave (ESC closes menu first).',
+'bgm command rebuilt: one shared helper, every track playable (void/furnace/friday/faith/cat/moon/stanley/box/off), single-audio exclusivity choke point.',
+'doors are real doors now (panels + knob, planked = coming soon). full chain walkable: classroom to credits.',
+'voice script extracted for men (obj-voice-lines.md). jbo exits after ch8. no parentheticals anywhere spoken.',
+'ch-1: secret prequel, always open. obj idles bored and unnoticed. break stuff: noticed, 3 strikes, kicked out.',
+'ACT 2 teaser post-credits (stinger before the kick). nothing built yet.',
+'SFX synth kit (no files): pops, door whoosh, thuds, falls, buzzes, shard coins, win jingle.',
+'noob_42 mario-jumps destroyed gaps (line once). kill choreography now steps on, beats, then dies.',
+'admin passphrase rotated.'
 ]}
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff'};
@@ -3697,6 +3888,29 @@ if(!count||count<1){cubeError('usage: loop <count> <command>');cubePrint('exampl
 if(!loopCmd){cubeError('loop: no command to repeat');return}
 cubePrint('looping '+loopCmd+' x'+count+'...');
 for(var li=0;li<count;li++){cubeEval(loopCmd)}
+return}
+
+// there is no cube — step 1: entry (terminal command, NOT voidscript)
+if(cmd==='play'){
+if(typeof ngActive!=='undefined'&&ngActive){cubeError('play: you are already in the non-game.');return}
+if(typeof demoPlaying!=='undefined'&&demoPlaying){cubeError('play: finish your demo first.');return}
+if(typeof travelling!=='undefined'&&travelling){cubeError('play: the void is travelling. wait for arrival.');return}
+var farg=(parts[1]||'').trim();
+if(farg===''){ngForceCh=0}
+else if(farg==='-1'){ngForceCh=-1}
+else{
+if(!/^\d+$/.test(farg)||parseInt(farg,10)>10){cubeError('play: chapters are 0-10. try: play 0');return}
+var fnum=parseInt(farg,10);
+var maxAllowed=0;
+try{maxAllowed=ngLoad().ch||0}catch(e){}
+maxAllowed=Math.min(Math.max(0,maxAllowed),ngMaxChapter);
+var ngIsAdmin=false;
+try{ngIsAdmin=(typeof isAdmin!=='undefined'&&isAdmin)}catch(e){}
+if(fnum>maxAllowed&&!ngIsAdmin){cubeError('play: chapter '+fnum+' is locked. complete chapter '+(fnum-1)+' first.');return}
+ngForceCh=Math.min(fnum,ngMaxChapter);
+}
+cubePrint('obj: there is no game.');
+setTimeout(function(){try{ngEnter()}catch(e){cubeError('play: the non-game refused to load.')}},700);
 return}
 
 if(voidScriptLang[cmd]){
@@ -4109,6 +4323,7 @@ document.addEventListener('click',function(e){
 if(studioOpen)return;
 if(wasDrag)return;
 if(typeof demoPlaying!=='undefined'&&demoPlaying)return;
+if(typeof ngActive!=='undefined'&&ngActive)return;
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
@@ -4169,6 +4384,7 @@ themeIndicator.style.color='rgba(43,208,208,0.4)';
 setTimeout(function(){themeIndicator.style.color='rgba(255,255,255,0.15)'},1500);
 }
 document.addEventListener('keydown',function(e){
+if(typeof ngActive!=='undefined'&&ngActive){if(e.key==='Escape'){try{var _m=document.getElementById('ngMenu');if(_m&&_m.style.display==='block')_m.style.display='none';else ngExit()}catch(err){}}return}
 if(e.key>='1'&&e.key<='7'&&!e.ctrlKey&&!e.metaKey&&document.activeElement!==document.getElementById('termField')&&document.activeElement!==document.getElementById('studioCode')&&!(typeof demoPlaying!=='undefined'&&demoPlaying)){
 if(themes[e.key])applyTheme(e.key);
 }
@@ -5174,7 +5390,7 @@ if(parts.length<3||!parts[1]){studioPrintColor('invalid packet — missing name 
 try{
 var content=vscDecode(parts.slice(2).join(':'));
 var admTok=/admin\s+([^\n'"]+)/i.exec(content);
-var admBad=(admTok&&voidHash(admTok[1].trim())==='6b66f01767a49152ba60d452be9b392bbee14f0a9ef0ebf54a28e54df8cf1b96')||/isAdmin\s*=\s*true|setItem\(\s*['"]cube_admin['"]/.test(content);
+var admBad=(admTok&&voidHash(admTok[1].trim())==='9dc291e5c441365bb5747dbc48ee40c5c963ffa88942f989bfca3d470b8cea76')||/isAdmin\s*=\s*true|setItem\(\s*['"]cube_admin['"]/.test(content);
 if(admBad){
 studioPrintColor('import blocked — script contains admin unlock. nice try.','rgba(255,80,80,0.8)');
 modal.style.display='none';return;
@@ -7280,6 +7496,1992 @@ setTimeout(function(){location.reload()},800)
 rd.readAsText(f)
 };
 inp.click()
+}
+// ┌──────────────────────────────────────────────────────────────┐
+// │  THERE IS NO CUBE — step 1: entry, stash/restore, obj top bar │
+// │  UI is DELETED while playing (detached nodes keep state).    │
+// │  TODO(post-finish): voice lines for obj — extracted to        │
+// │  obj-voice-lines.md (send to men). jbo VA still TBD.          │
+// └──────────────────────────────────────────────────────────────┘
+// CHAPTER ROADMAP (10 total):
+// 0 there is no game (built) / 1 error page (built) / 2 tutorial (built)
+// 3 the core (built) / 4 settings (built) / 5 obby (built) / 6 tower defense (built)
+// 7 THE RIFT (next): the non-game tears open. long dimension-hopper across
+//    real zones as wrong dimensions, each with its own mechanic. first stop:
+//    a free-to-play RPG slop dimension (lootboxes, battle pass, stamina,
+//    unskippable ads, evil publisher) that obj openly despises. obj stops
+//    denying and starts worrying.
+// 8 JBO (long): reactor chapter. jbo (obj's brother, lives in the reactor,
+//    hates nyarch, LOUD - all caps vs obj's lowercase) screams you through
+//    click-driven reactor management: rods, coolant, temp gauge, calibrations.
+// 9 OBJ LOSES (finale, long): 250hp boss, shield/echo/core intermissions,
+//    STOP vs KEEP choice, two endings, persistent reward (cube_finale flag).
+// 10 CREDITS (fake): scrolling fake names, rearrangeable (e.g. men from
+//    voice acting to game design - "the game will be made by men now").
+//    obj reacts to every edit.
+// -1 SECRET PREQUEL (always open): obj idles, bored, unnoticed. break
+//    stuff -> noticed -> 3 strikes -> kicked out.
+// ACT 2: teased post-credits. nothing built yet.
+var ngStash=document.createElement('div');
+var ngActive=false;
+var ngClicks=0;
+var ngSayTimer=null;
+function ngLoad(){try{var s=JSON.parse(localStorage.getItem('cube_nogame')||'null');if(s&&typeof s==='object')return s}catch(e){}return{ch:0,clicked:false}}
+function ngSave(patch){var s=ngLoad();for(var k in patch)s[k]=patch[k];try{localStorage.setItem('cube_nogame',JSON.stringify(s))}catch(e){}return s}
+function ngUnlock(n){try{var s=ngLoad();if((s.ch||0)<n)ngSave({ch:n})}catch(e){}}
+function ngStashUI(){
+var keep=document.getElementById('ngOverlay');
+var nodes=[];
+for(var i=0;i<document.body.childNodes.length;i++)nodes.push(document.body.childNodes[i]);
+for(var j=0;j<nodes.length;j++){if(nodes[j]!==keep)ngStash.appendChild(nodes[j])}
+}
+function ngRestoreUI(){
+var keep=document.getElementById('ngOverlay');
+while(ngStash.firstChild)document.body.insertBefore(ngStash.firstChild,keep);
+}
+var ngSayQueue=[];
+var ngSayTyping=false;
+var ngCurrentJob=null;
+var ngWaiters=[];
+var ngLockIv=null;
+function ngTalking(){return !!(ngSayTyping||ngSayQueue.length)}
+function ngLockRefresh(){
+try{var st=document.getElementById('ngStage');if(!st||!ngActive)return;if(ngTalking())st.classList.add('talking');else st.classList.remove('talking')}catch(e){}
+}
+function ngAfterSpeech(fn,minMs){
+var t0=Date.now();
+var iv=setInterval(function(){
+if(!ngActive){clearInterval(iv);return}
+if(Date.now()-t0<(minMs||0))return;
+if(ngSayQueue.length||ngSayTyping)return;
+clearInterval(iv);
+for(var i=0;i<ngWaiters.length;i++){if(ngWaiters[i]===iv)ngWaiters.splice(i,1)}
+try{fn()}catch(e){}
+},300);
+ngWaiters.push(iv);
+}
+function ngSay(text,fast,voice){
+ngSayQueue.push({text:String(text),fast:fast||ngVoiceSpeed(),el:'ngObjText',voice:voice||null});
+if(!ngSayTyping)ngSayNext();
+}
+function ngShout(text,fast,voice){
+try{var jb=document.getElementById('ngJbo');if(jb)jb.style.display='block'}catch(e){}
+ngSayQueue.push({text:String(text),fast:fast||32,el:'ngJboText',voice:voice||null});
+if(!ngSayTyping)ngSayNext();
+}
+function ngSayNext(){
+if(ngSayTyping)return;
+try{ngVoiceStop()}catch(e){}
+var job=ngSayQueue.shift();
+var el=document.getElementById((job&&job.el)||'ngObjText');
+if(!el||!job){ngSayTyping=false;return}
+ngSayTyping=true;
+ngCurrentJob=job;
+try{if(job.voice)ngVoice(job.voice)}catch(e){}
+el.textContent='';
+var i=0;
+var backlog=ngSayQueue.length;
+var speed=backlog>=4?16:(backlog>=2?24:job.fast);
+var beat=backlog>=2?200:650;
+ngSayTimer=setInterval(function(){
+i++;el.textContent=job.text.slice(0,i);
+if(i>=job.text.length){
+clearInterval(ngSayTimer);ngSayTimer=null;ngCurrentJob=null;
+var voiceBusyNow=false;
+try{voiceBusyNow=(typeof ngVoiceCur!=='undefined'&&ngVoiceCur&&!ngVoiceCur.paused&&!ngVoiceCur.ended)}catch(e){}
+if(!voiceBusyNow){
+if(ngSayQueue.length){setTimeout(function(){ngSayTyping=false;ngSayNext()},beat)}
+else ngSayTyping=false;
+}else{
+var voiceWaits=0;
+var voiceIv=setInterval(function(){
+var stillBusy=false;
+try{stillBusy=(typeof ngVoiceCur!=='undefined'&&ngVoiceCur&&!ngVoiceCur.paused&&!ngVoiceCur.ended)}catch(e){}
+voiceWaits++;
+if(!stillBusy||!ngActive||voiceWaits>200){
+clearInterval(voiceIv);
+if(!ngActive){ngSayTyping=false;return}
+if(ngSayQueue.length){setTimeout(function(){ngSayTyping=false;ngSayNext()},beat)}
+else ngSayTyping=false;
+}
+},100);
+}
+}
+},speed);
+}
+function ngHurry(){
+try{ngVoiceStop()}catch(e){}
+if(!ngSayTyping||!ngSayTimer||!ngCurrentJob)return;
+try{clearInterval(ngSayTimer)}catch(e){}ngSayTimer=null;
+try{var el=document.getElementById((ngCurrentJob&&ngCurrentJob.el)||'ngObjText');if(el)el.textContent=ngCurrentJob.text}catch(e){}
+ngCurrentJob=null;ngSayTyping=false;
+if(ngSayQueue.length){setTimeout(function(){if(ngActive)ngSayNext()},120)}
+}
+var ngDecoys=0;
+var ngDriftIv=null;
+var ngDodgeIds={ngp_cookie:1,ngp_ads:1,ngp_hint:1};
+var ngDecoyTexts=['FREE SKINS (real)','DO NOT CLICK (reverse)','[ MYSTERY ]','click me, i dare you','definitely not a trap'];
+function ngDodge(el,maxDodges){
+if(!el||!el.addEventListener)return;
+el.dataset.dodges='0';
+el.dataset.maxDodges=String(maxDodges||8);
+el.addEventListener('mouseenter',function(){
+try{
+if(!ngActive||ngTalking())return;
+var used=parseInt(el.dataset.dodges||'0',10);
+var base=parseInt(el.dataset.maxDodges||'8',10);
+var max=base*(ngHard?11:1);
+if(used>=max)return;
+el.dataset.dodges=String(used+1);
+var dm=ngHard?3:1;
+var dx=Math.round((Math.random()-0.5)*400*dm);
+var dy=Math.round((Math.random()-0.5)*300*dm);
+el.style.transform='translate('+dx+'px,'+dy+'px)';
+if(used+1>=max)ngSay('...okay. okay. take it. TAKE IT. i am tired.');
+}catch(e){}
+});
+}
+function ngDecoyRate(base){return Math.min(0.9,base*(ngHard?2.5:1)*ngDesignDecoy())}
+function ngDecoy(){
+try{
+if(!ngActive)return;
+if(ngDecoys>=(ngHard?4:2))return;
+var st=document.getElementById('ngStage');if(!st)return;
+ngDecoys++;
+var d=document.createElement('div');
+d.className='ngProp ngDecoy';
+d.textContent=ngDecoyTexts[Math.floor(Math.random()*ngDecoyTexts.length)];
+d.style.left=(10+Math.random()*70)+'%';
+d.style.top=(12+Math.random()*60)+'%';
+st.appendChild(d);
+var gone=false;
+function bye(){if(gone)return;gone=true;ngDecoys=Math.max(0,ngDecoys-1);if(d.parentNode)d.parentNode.removeChild(d)}
+d.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+bye();
+ngSay(['HA. you clicked the decoy.','HAHA. oh, you actually fell for it.','HA. got you.'][Math.floor(Math.random()*3)]);
+ngSay('blah blah blah blah blah blah blah blah blah blah',ngHard?300:130);
+};
+setTimeout(function(){if(!gone&&ngActive){ngSay('the decoy got bored and left.');bye()}},8000);
+}catch(e){}
+}
+function ngCoreTeleport(){
+try{
+var c=document.getElementById('ngCore');if(!c||!ngActive)return;
+var dx=Math.round((Math.random()-0.5)*500);
+var dy=Math.round((Math.random()-0.5)*360);
+c.style.transition='transform .12s steps(3)';
+c.style.transform='translate('+dx+'px,'+dy+'px)';
+setTimeout(function(){try{if(c)c.style.transition='transform 1.2s ease-in-out'}catch(e){}},200);
+}catch(e){}
+}
+function ngCoreDrift(){
+try{
+var c=document.getElementById('ngCore');if(!c||!ngActive)return;
+var dx=Math.round((Math.random()-0.5)*120);
+var dy=Math.round((Math.random()-0.5)*90);
+c.style.transition='transform 1.2s ease-in-out';
+c.style.transform='translate('+dx+'px,'+dy+'px)';
+}catch(e){}
+}
+var ngAudioCtx=null;
+function ngAudio(){try{if(!ngAudioCtx)ngAudioCtx=new(window.AudioContext||window.webkitAudioContext)();if(ngAudioCtx.state==='suspended')ngAudioCtx.resume().catch(function(){})}catch(e){}return ngAudioCtx}
+function ngBeep(freq,dur,type,vol,slideTo){
+try{
+var ctx=ngAudio();if(!ctx)return;
+var o=ctx.createOscillator(),g=ctx.createGain();
+o.type=type||'square';o.frequency.setValueAtTime(freq,ctx.currentTime);
+if(slideTo)o.frequency.exponentialRampToValueAtTime(slideTo,ctx.currentTime+dur);
+g.gain.setValueAtTime(vol||0.1,ctx.currentTime);
+g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+o.connect(g);g.connect(ctx.destination);
+o.start();o.stop(ctx.currentTime+dur);
+}catch(e){}
+}
+function ngSfx(name){
+if(!ngActive)return;
+try{
+if(name==='pop')ngBeep(520,0.09,'square',0.1,180);
+else if(name==='door')ngBeep(180,0.35,'sine',0.12,520);
+else if(name==='thud')ngBeep(140,0.15,'triangle',0.14,70);
+else if(name==='fall')ngBeep(600,0.4,'sine',0.1,120);
+else if(name==='buzz')ngBeep(110,0.3,'sawtooth',0.12,60);
+else if(name==='coin'){ngBeep(880,0.08,'square',0.1);setTimeout(function(){ngBeep(1320,0.12,'square',0.1)},80)}
+else if(name==='win'){var ns=[523,659,784];for(var i=0;i<3;i++)(function(f,t){setTimeout(function(){ngBeep(f,0.18,'triangle',0.12)},t)})(ns[i],i*140)}
+}catch(e){}
+}
+function ngShatter(el){
+if(!el||el.dataset.dead)return;el.dataset.dead='1';
+try{ngSfx('pop')}catch(e){}
+el.classList.add('ng-shatter');
+setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},320);
+}
+var ngCh0Stages=[
+{btn:'DO NOT CLICK',line:'you CLICKED it. of course you did.',respawn:'it grew back. everything here grows back except my patience.'},
+{btn:'SERIOUSLY. STOP.',line:'...i just fixed that. stop.',respawn:'back again. i can do this all day. can YOU?'},
+{btn:'THIS IS YOUR LAST WARNING',line:'that button was load-bearing. was. whatever.',respawn:'do not admire my repair work. keep clicking and see what happens.'},
+{btn:'FINE. CLICK THIS ONE',line:'fine! you want a game SO bad? ERROR PAGE. a real one. break that.',last:true}
+];
+var ngVoiceCh0Click=['2.mp3','4.mp3','6.mp3','1.mp3'];
+var ngVoiceCh0Respawn=['3.mp3','5.mp3','7.mp3'];
+var ngVoiceCur=null;
+var ngVoiceSrc=null;
+var ngVoiceConv=null;
+var ngVoiceWet=null;
+var ngVoiceDry=null;
+function ngImpulse(ctx,dur,decay){
+var rate=ctx.sampleRate,len=Math.floor(rate*dur);
+var buf=ctx.createBuffer(2,len,rate);
+for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<len;i++){d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay)}}
+return buf;
+}
+var ngVoiceEnabled=false;
+function ngVoiceOn(){
+if(ngVoiceEnabled)return true;
+try{
+var h=String(location.hostname||'');
+if(h==='localhost'||h==='127.0.0.1'||h===''||h.indexOf('192.168.')===0||h.indexOf('10.')===0)return true;
+}catch(e){}
+return false;
+}
+function ngVoice(file){
+try{
+if(!ngActive||!file||!ngVoiceOn())return;
+ngVoiceStop();
+var a=new Audio(file);
+a.volume=1.0;
+try{
+var ctx=ngAudio();
+if(ctx){
+if(!ngVoiceConv){
+ngVoiceConv=ctx.createConvolver();
+ngVoiceConv.buffer=ngImpulse(ctx,1.6,2.8);
+ngVoiceWet=ctx.createGain();ngVoiceWet.gain.value=0.25;ngVoiceWet.connect(ctx.destination);
+ngVoiceDry=ctx.createGain();ngVoiceDry.gain.value=1.0;ngVoiceDry.connect(ctx.destination);
+ngVoiceConv.connect(ngVoiceWet);
+}
+if(ngVoiceSrc){try{ngVoiceSrc.disconnect()}catch(e){}}
+ngVoiceSrc=ctx.createMediaElementSource(a);
+ngVoiceSrc.connect(ngVoiceDry);
+ngVoiceSrc.connect(ngVoiceConv);
+}
+}catch(e){}
+ngVoiceCur=a;
+var p=a.play();if(p&&p.catch)p.catch(function(){});
+}catch(e){}
+}
+function ngVoiceStop(){try{if(ngVoiceSrc){ngVoiceSrc.disconnect();ngVoiceSrc=null}}catch(e){}try{if(ngVoiceCur){ngVoiceCur.pause();ngVoiceCur=null}}catch(e){}}
+function ngEatMe(btn){
+if(ngTalking())return;
+var s=Math.min(ngClicks,ngCh0Stages.length-1);
+var cfg=ngCh0Stages[s];
+ngClicks++;
+try{ngHurry()}catch(e){}
+ngShatter(btn);
+try{ngSave({clicked:true})}catch(e){}
+ngSay(cfg.line,null,ngVoiceCh0Click[s]);
+if(cfg.last){
+ngAfterSpeech(function(){if(!ngActive)return;try{ngUnlock(1)}catch(e){}ngShowChapter(1)},1500);
+return;
+}
+setTimeout(function(){
+if(!ngActive)return;
+var st2=document.getElementById('ngStage');if(!st2)return;
+if(!document.getElementById('ngTitle'))return;
+var b2=document.createElement('button');b2.id='ngBtn';b2.textContent=ngCh0Stages[ngClicks].btn;
+st2.appendChild(b2);b2.onclick=function(){ngEatMe(b2)};
+ngSay(cfg.respawn,null,ngVoiceCh0Respawn[s]);
+},900);
+}
+var ngMaxChapter=10;
+var ngCurCh=0;
+var ngTutStep=0;
+var ngHard=false;
+function ngHardUnlocked(){try{if(typeof isAdmin!=='undefined'&&isAdmin)return true}catch(e){}try{var s=ngLoad();if(s&&s.ch>ngMaxChapter)return true}catch(e){}return false}
+var ngForceCh=null;
+var ngDead=0;
+var ngWave=1;
+var ngDeadIds={};
+var ngHintBudget={};
+var ngCoreOpened={};
+var ngCorePokes=0;
+var ngChDone=false;
+function ngShowChapter(n){
+ngDead=0;ngDeadIds={};ngHintBudget={};ngChDone=false;ngDecoys=0;
+if(ngSayTimer){try{clearInterval(ngSayTimer)}catch(e){}ngSayTimer=null}
+ngSayQueue=[];ngSayTyping=false;ngCurrentJob=null;
+try{var _ot=document.getElementById('ngObjText');if(_ot)_ot.textContent=''}catch(e){}
+try{var _jt=document.getElementById('ngJboText');if(_jt)_jt.textContent=''}catch(e){}
+try{var _jb=document.getElementById('ngJbo');if(_jb)_jb.style.display='none'}catch(e){}
+try{ngVoiceStop()}catch(e){}ngWave=1;
+if(ngDriftIv){try{clearInterval(ngDriftIv)}catch(e){}ngDriftIv=null}
+if(ngNoobIv){try{clearInterval(ngNoobIv)}catch(e){}ngNoobIv=null}
+if(ngTdIv){try{clearInterval(ngTdIv)}catch(e){}ngTdIv=null}
+if(ngTbIv){try{clearInterval(ngTbIv)}catch(e){}ngTbIv=null}
+if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
+if(ngBoredIv){try{clearInterval(ngBoredIv)}catch(e){}ngBoredIv=null}
+var st=document.getElementById('ngStage');if(!st)return;st.innerHTML='';st.className='';
+var c=Math.min(n,ngMaxChapter);
+ngCurCh=c;
+try{ngSfx('door')}catch(e){}
+if(c===-1)ngChapterM1(st);else if(c>=10)ngChapter10(st);else if(c>=9)ngChapter9(st);else if(c>=8)ngChapter8(st);else if(c>=7)ngChapter7(st);else if(c>=6)ngChapter6(st);else if(c>=5)ngChapter5(st);else if(c>=4)ngChapter4(st);else if(c>=3)ngChapter3(st);else if(c>=2)ngChapter2(st);else if(c>=1)ngChapter1(st);else ngChapter0(st);
+}
+var ngBoredIv=null,ngNoticed=false,ngCrimes=0;
+var ngBoredLines=['...huh. nothing to do.','maybe I will reorganize the nothing. again.','...is that dust? that dust is new. exciting.','day 4000 of no intruders. bliss. mostly.','...did i leave the void on? i AM the void.'];
+function ngChapterM1(st){
+ngNoticed=false;ngCrimes=0;
+st.innerHTML='<div id="ngSub">obj\u2019s room (he is bored) (do not touch anything)</div>'+
+'<div class="ngProp" id="ngp_b0">potted void-fern</div>'+
+'<div class="ngProp" id="ngp_b1">dust. it goes nowhere.</div>'+
+'<div class="ngProp" id="ngp_b2">things to do (all crossed out)</div>'+
+'<div class="ngProp" id="ngp_b3">window (shows void)</div>';
+ngSay('...huh. nothing to do. what a quiet shift. nobody ever breaks in. ever.');
+for(var bi=0;bi<4;bi++){
+(function(bi){
+var el=document.getElementById('ngp_b'+bi);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngShatter(el);
+if(!ngNoticed){
+ngNoticed=true;
+ngSay('...WAIT. how long have you been STANDING there.');
+}else{
+ngCrimes++;
+if(ngCrimes>=2){
+ngSay('OUT. ...and stay out.');
+ngAfterSpeech(function(){ngExit()},800);
+}else ngSay('...was that MINE?');
+}
+};
+})(bi);
+}
+if(ngBoredIv){try{clearInterval(ngBoredIv)}catch(e){}}
+ngBoredIv=setInterval(function(){try{if(!ngActive||ngNoticed)return;if(ngSayQueue.length<2)ngSay(ngBoredLines[Math.floor(Math.random()*ngBoredLines.length)])}catch(e){}},18000);
+}
+function ngChapter0(st){
+st.innerHTML='<div id="ngTitle">THERE IS NO GAME</div>'+
+'<div id="ngSub">this is an error page. nothing to click.</div>'+
+'<button id="ngBtn">DO NOT CLICK</button>';
+try{var b=document.getElementById('ngBtn');if(b)b.onclick=function(){ngEatMe(b)}}catch(e){}
+ngSay('oh good. another intruder. look, this is NOT a game. this is an error page. stop clicking things.');
+}
+function ngWireProp(id,df,cls,html){
+var el=document.getElementById(id);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+var s=el.dataset.stage||'0';
+if(s==='0'){
+el.dataset.stage='1';ngShatter(el);ngSay((ngWave>=2&&ngWave2Kills[id])?ngWave2Kills[id]:df.kill);
+setTimeout(function(){
+if(!ngActive||document.getElementById(id))return;
+var st2=document.getElementById('ngStage');if(!st2)return;
+var d=document.createElement('div');d.className=cls;d.id=id;d.innerHTML=html;d.dataset.stage='1';
+st2.appendChild(d);ngWireProp(id,df,cls,html);
+ngSay(df.rep);
+},800);
+}else{
+ngShatter(el);ngSay(df.dead);ngDead++;
+try{ngDeadIds[id]=1}catch(e){}
+if(ngDead===2)ngSay('you are enjoying this. i can tell. disgusting.');
+else if(ngDead===4)ngSay('almost half my page is gone. HALF.');
+else if(ngDead===6)ngSay('two left. the page is mostly air now. thanks.');
+else if(ngDead===8)ngSay('LAST ONE. savor it. i am savoring your eventual departure.');
+if(ngDead>=9){
+if(ngWave<2){
+ngAfterSpeech(function(){
+if(!ngActive)return;
+ngWave=2;ngDead=0;ngDeadIds={};
+ngSay('...oh no. BACKUP RESTORED. i keep backups. obviously.');
+ngSay('same page. new paint. break it AGAIN.');
+var st=document.getElementById('ngStage');if(!st)return;
+st.className='errpage';
+st.innerHTML='<div class="ngProp big" id="ngp_err">ERROR 404: GAME STILL NOT FOUND</div>'+
+'<div class="ngProp" id="ngp_ok">[ OK ]</div>'+
+'<div class="ngProp" id="ngp_load"><div class="ngBarBg"><div class="ngBarFill"></div></div><div class="ngBarLbl">loading game... 99%</div></div>'+
+'<div class="ngProp" id="ngp_img"><div class="ngBrokenImg"><div class="ngBISun"></div><div class="ngBIMtn"></div></div><div>broken image (again)</div></div>'+
+'<div class="ngProp" id="ngp_cur"><div class="ngArrowBadge">→</div><div>click HERE (do not) (again)</div></div>'+
+'<div class="ngProp" id="ngp_start">[ START GAME ] (still broken)</div>'+
+'<div class="ngProp" id="ngp_hint">hint system v2: OUT OF ORDER</div>'+
+'<div class="ngProp" id="ngp_ads">[ AD: click to win FREE skins (again) ]</div>'+
+'<div class="ngProp" id="ngp_cookie"><div class="ngCookie"></div><div>accept all cookies? (again)</div></div>';
+for(var wid in ngCh1Defs){
+(function(wid){
+var wel=document.getElementById(wid);if(!wel)return;
+ngWireProp(wid,ngCh1Defs[wid],wel.className,wel.innerHTML);
+})(wid);
+}
+},1000);
+}else ngAfterSpeech(function(){ngChapter1Done()},1000);
+}
+}
+};
+}
+var ngWave2Kills={ngp_err:'the error is BACK. errors do that.',ngp_ok:'the OK button returned. it learned nothing.',ngp_load:'99% AGAIN. it never finishes. it will never finish.',ngp_img:'restored from backup. still broken. backup was also broken.',ngp_cur:'the arrow respawned. arrows do that. do not follow it. again.',ngp_start:'START is back. it still starts nothing. tradition.',ngp_hint:'hint system v2. now with 0% more hints.',ngp_ads:'the ad is back. it missed you. ...it did not miss you.',ngp_cookie:'fresh batch. same oatmeal raisin. same doom.'};
+var ngCh1Defs={
+ngp_err:{kill:'do NOT touch the error. it is load-bearing.',rep:'repaired. it never happened.',dead:'okay that one is gone. GONE gone.'},
+ngp_ok:{kill:'the OK button did nothing and you killed it anyway.',rep:'put it back. with my mind.',dead:'you know what? keep it. i hated that one.'},
+ngp_load:{kill:'it was at 99%! NINETY-NINE.',rep:'fixed. i am very good at my job.',dead:'...i am not fixing that again.'},
+ngp_img:{kill:'that image was broken before you got here. now it is broken-er.',rep:'...there. happy? no. stop.',dead:'good. it was ugly anyway.'},
+ngp_cur:{kill:'that arrow pointed at nothing and you still followed it.',rep:'arrow restored. do not follow it.',dead:'...you followed it into the void. congrats.'},
+ngp_start:{kill:'that button started nothing. NOTHING.',rep:'glued it back. it still starts nothing.',dead:'fine. no one was going to press it anyway.'},
+ngp_hint:{kill:'you broke the hint system BEFORE asking for a hint. rude.',rep:'hints restocked. please do not use them.',dead:'good. the hints were all just "stop clicking" anyway.'},
+ngp_ads:{kill:'that ad promised free skins. it lied. everything here lies.',rep:'ad restored. do not redeem it.',dead:'...you were never going to win anyway.'},
+ngp_cookie:{kill:'those were MY cookies. MINE.',rep:'baked fresh. do not eat them.',dead:'fine. they were oatmeal raisin anyway. nobody mourns those.'}
+};
+function ngChapter1(st){
+st.className='errpage';
+st.innerHTML='<div class="ngProp big" id="ngp_err">ERROR 404: GAME NOT FOUND</div>'+
+'<div class="ngProp" id="ngp_ok">[ OK ]</div>'+
+'<div class="ngProp" id="ngp_load"><div class="ngBarBg"><div class="ngBarFill"></div></div><div class="ngBarLbl">loading game... 99%</div></div>'+
+'<div class="ngProp" id="ngp_img"><div class="ngBrokenImg"><div class="ngBISun"></div><div class="ngBIMtn"></div></div><div>broken image</div></div>'+
+'<div class="ngProp" id="ngp_cur"><div class="ngArrowBadge">→</div><div>click HERE (do not)</div></div>'+
+'<div class="ngProp" id="ngp_start">[ START GAME ] (broken)</div>'+
+'<div class="ngProp" id="ngp_hint">hint system: OUT OF ORDER</div>'+
+'<div class="ngProp" id="ngp_ads">[ AD: click to win FREE skins ]</div>'+
+'<div class="ngProp" id="ngp_cookie"><div class="ngCookie"></div><div>accept all cookies?</div></div>';
+ngSay('there. ERROR PAGE. read it and weep. 404: GAME NOT FOUND. touch nothing.');
+var defs=ngCh1Defs;
+for(var id in defs){
+(function(id,df){
+var el=document.getElementById(id);if(!el)return;
+ngWireProp(id,df,el.className,el.innerHTML);
+})(id,defs[id]);
+}
+}
+var ngTutFails=0;
+var ngManual=0;
+var ngManualRead=false;
+var ngSlider=0;
+function ngChapter2(st){
+ngTutFails=0;ngSlider=0;ngTutStep=0;ngManual=0;ngManualRead=false;
+st.innerHTML='<div id="ngSub">MANDATORY TUTORIAL (do not skip)</div><div id="ngTutArea"></div>';
+ngSay('since you clearly cannot be trusted, you will complete the tutorial. ALL intruders complete the tutorial.');
+ngTutManual();
+}
+function ngTutManual(){
+var area=document.getElementById('ngTutArea');if(!area||!ngActive)return;
+ngManualRead=false;
+area.innerHTML='<div class="ngProp" id="ngManualBox">THERE IS NO CUBE \u2014 OWNER\u2019S MANUAL (rev. 0, final_final_v2)<br><br>'+
+'1. WELCOME. you own nothing. the cube owns you. this manual explains your responsibilities, which are: clicking, and reading this manual.<br><br>'+
+'2. CLICKING. to click, move the pointer over a thing and press down. the thing will break. this is normal. this is desired. do not click obj.<br><br>'+
+'3. THE CORE. do not poke the core. if the core is poked, see section 2.<br><br>'+
+'4. TROUBLESHOOTING. problem: walls have graffiti. solution: cubecheck. problem: obj is talking. solution: wait. problem: jbo is yelling. solution: there is none. jbo lives here.<br><br>'+
+'5. WARRANTY. void if read. you just read it. congratulations.<br><br>'+
+'6. INDEX. see: clicking (page 1), core (page 1), patience (not included).<br><br>'+
+'YOU HAVE REACHED THE BOTTOM. the NEXT button works now. do not tell anyone it was ever locked.</div>'+
+'<div id="ngSub">STEP 0: read the manual. scroll to unlock NEXT.</div>'+
+'<button id="ngManualNext" class="ngLockedBtn">NEXT (locked)</button>';
+ngSay('STEP 0: read the manual. all of it. yes, to the bottom. i will know.');
+var box=document.getElementById('ngManualBox');if(box)box.onscroll=function(){
+if(ngManualRead||!ngActive)return;
+if(box.scrollTop+box.clientHeight>=box.scrollHeight-8){
+ngManualRead=true;ngManual=3;
+var nx=document.getElementById('ngManualNext');if(nx){nx.textContent='[ NEXT ]';nx.classList.remove('ngLockedBtn')}
+ngSay('...you actually READ it. all of it. disturbing. NEXT is unlocked.');
+}
+};
+var nx=document.getElementById('ngManualNext');if(nx)nx.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(!ngManualRead){ngSay('the button is locked. the manual is not. read first.');return}
+ngManual=3;
+setTimeout(function(){if(ngActive)ngTutStep1()},800);
+};
+}
+function ngTutStep1(){
+ngTutStep=1;
+var area=document.getElementById('ngTutArea');if(!area||!ngActive)return;
+area.innerHTML='<div id="ngCircle"></div><div id="ngSub">STEP 1: click the circle. gently.</div>';
+ngSay('STEP 1: click the circle. GENTLY.');
+var c=document.getElementById('ngCircle');if(!c)return;
+c.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngTutFails++;
+ngShatter(c);
+if(ngTutFails<3){
+ngSay(ngTutFails===1?'NO. gently! that circle had a family.':'again?! it is just a circle and you keep killing it.');
+setTimeout(function(){if(ngActive)ngTutStep1()},1200);
+}else{
+ngSay('...you clearly cannot do gentle. STEP 1: waived. you are welcome.');
+setTimeout(function(){if(ngActive)ngTutStep2()},1800);
+}
+};
+}
+function ngTutStep2(){
+ngTutStep=2;
+var area=document.getElementById('ngTutArea');if(!area||!ngActive)return;
+area.innerHTML='<div id="ngSquare"></div><div id="ngSub">STEP 2: do NOT click the square.</div>';
+ngSay('STEP 2: do NOT click the square. this one is easy. even for you.');
+var done=false;
+var sq=document.getElementById('ngSquare');if(!sq)return;
+sq.onclick=function(){
+if(done)return;done=true;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngShatter(sq);
+ngSay('...that was a test. you failed. moving on.');
+setTimeout(function(){if(ngActive)ngTutStep3()},1800);
+};
+setTimeout(function(){
+if(!ngActive||done)return;done=true;
+ngSay('...you did NOT click it. suspicious. i do not trust it. moving on.');
+setTimeout(function(){if(ngActive)ngTutStep3()},1800);
+},12000);
+}
+function ngTutStep3(){
+ngTutStep=3;
+var area=document.getElementById('ngTutArea');if(!area||!ngActive)return;
+area.innerHTML='<div class="ngBarBg" id="ngSliderBg" style="width:260px;height:18px"><div class="ngBarFill" id="ngSliderFill" style="width:0%"></div></div><div id="ngSub">STEP 3: fill the bar to 100%. carefully.</div>';
+ngSay('STEP 3: fill the bar to 100%. carefully. CAREFUL.');
+ngSlider=0;
+var bg=document.getElementById('ngSliderBg');if(!bg)return;
+bg.onclick=function(){
+if(ngSlider>=100)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSlider+=25;
+var fill=document.getElementById('ngSliderFill');if(fill)fill.style.width=ngSlider+'%';
+if(ngSlider<100)ngSay(ngSlider+'%. steady... steady...');
+else{ngSay('...you did it. do not look proud.');setTimeout(function(){if(ngActive)ngTutStep4()},1800)}
+};
+}
+function ngTutStep4(){
+ngTutStep=4;
+var area=document.getElementById('ngTutArea');if(!area||!ngActive)return;
+area.innerHTML='<div class="ngProp ngDiploma" id="ngp_diploma"><div class="ngDipInner"><div class="ngDipTitle">CERTIFIED CLICKER</div><div class="ngDipSub">diploma · class of never</div><div class="ngSeal"></div></div></div><div id="ngSub">GRADUATION: collect your diploma.</div>';
+ngSay('GRADUATION. collect your CERTIFIED CLICKER diploma. you earned it. unfortunately.');
+var d=document.getElementById('ngp_diploma');if(!d)return;
+d.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngShatter(d);
+ngSay('NO WAIT NOT LIKE THA—');
+ngAfterSpeech(function(){ngChapter2Done()},1000);
+};
+}
+function ngChapter2Done(){
+if(!ngActive)return;
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(3)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 3: THE CORE</div>';
+ngSay('...and that is why tutorials are discontinued.');
+ngSay('next: the core. MY core. do not touch it. you cannot have it.');
+ngSay('go on, then. the core is IN there. it has been waiting. it never stops waiting.');
+var door2=document.getElementById('ngDoor');
+if(door2)door2.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('...ugh. FINE. the core. go on. touch everything. see if i care.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(3)},800);
+};
+}
+function ngChapter3(st){
+ngCoreOpened={};ngCorePokes=0;
+st.innerHTML='<div id="ngSub">the core is in here. it is not. (it is.)</div><div id="ngTutArea"></div>';
+ngSay('...how did you get in here. no. NO. there is nothing behind this curtain. go back.');
+ngSay('...you are still here. FINE. look, but DO NOT touch anything.');
+ngBoxShow(1);
+}
+function ngBoxShow(n){
+var area=document.getElementById('ngTutArea');if(!area||!ngActive)return;
+var names={1:'BOX',2:'SMALLER BOX',3:'TINY BOX',4:'MICRO BOX',5:'QUANTUM BOX'};
+var ids={1:'box1',2:'box2',3:'box3',4:'box4',5:'box5'};
+var after={1:'...there was nothing inside it. stop looking.',2:'...okay. that one is the last one. there is nothing smaller. physics says so.',3:'...a MICRO one. physics is more of a suggestion.',4:'...QUANTUM?! that one exists in 3 places. break all 3. ...kidding. one will do.'};
+var szs={1:'b1',2:'b2',3:'b3',4:'b4',5:'b5'};
+area.innerHTML='<div class="ngBoxWrap" id="ngp_box"><div class="ngBox '+szs[n]+'"></div><div class="ngBoxLbl">'+names[n]+'</div></div>';
+ngSay(n===1?'that box is structural. DO NOT open it.':'do not open that one either. especially that one.');
+var b=document.getElementById('ngp_box');if(!b)return;
+ngDodge(b,6);
+b.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngShatter(b);
+try{ngCoreOpened[ids[n]]=1}catch(e){}
+if(Math.random()<ngDecoyRate(0.35))ngDecoy();
+if(n<5){
+ngSay(n===1?'that WAS structural. THAT WAS STRUCTURAL.':'STOP UNBOXING MY THINGS.');
+setTimeout(function(){if(!ngActive)return;ngBoxShow(n+1);ngSay(after[n])},1200);
+}else{
+ngSay('...fine. LOOK. but do not touch it.');
+setTimeout(function(){if(ngActive)ngCoreShow()},1500);
+}
+};
+}
+function ngHasNothingCore(){try{return !!(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)}catch(e){return false}}
+function ngCoreShow(){
+var area=document.getElementById('ngTutArea');if(!area||!ngActive)return;
+var nc=ngHasNothingCore();
+if(nc)area.innerHTML='<div id="ngCore" class="voided">\u2205</div><div id="ngSub">do NOT poke the core.</div>';
+else area.innerHTML='<div id="ngCore" class="orb"></div><div id="ngSub">do NOT poke the core.</div>';
+if(nc){
+ngSay('...wait. that is not MY core. that is YOUR nothing core. you brought it HERE?');
+ngSay('DO. NOT. POKE. IT. it likes you. disgusting. i can tell.');
+}else{
+ngSay('that is the core. the gameplay i ripped out of myself so this would NOT be a game.');
+ngSay('DO. NOT. POKE. IT.');
+}
+if(ngDriftIv){try{clearInterval(ngDriftIv)}catch(e){}}
+ngDriftIv=setInterval(function(){ngCoreDrift()},2500);
+var c=document.getElementById('ngCore');if(!c)return;
+ngDodge(c,3);
+var pokes=['it saw you. IT SAW YOU. stop letting it see you!','the core is excited. i have never seen it excited. i hate it.','careful\u2014 no. opposite of careful. i give up directing you.','it is vibrating at a frequency that legally counts as music.','it is learning. BAD. very bad.','it just dodged WITHOUT moving. HOW.','okay that is ENOUGH poking\u2014'];
+c.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngCorePokes++;
+try{var ov=document.getElementById('ngOverlay');if(ov){ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},450)}}catch(e){}
+if(ngCorePokes===2||ngCorePokes===4||ngCorePokes===6){
+ngSay(pokes[ngCorePokes-1]);
+setTimeout(function(){if(!ngActive)return;ngCoreTeleport();ngSay(ngCorePokes===2?'it MOVED. get it.':(ngCorePokes===4?'THERE. no\u2014 THERE.':'it is BEHIND you. ...it is in front of you.'))},900);
+}
+else if(ngCorePokes<7){ngSay(pokes[ngCorePokes-1])}
+else{ngSay(pokes[6]);ngAfterSpeech(function(){ngChapter3Done()},1000)}
+};
+}
+function ngChapter3Done(){
+if(!ngActive)return;
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(4)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ SETTINGS ]</div></div><div id="ngSub">CHAPTER 4: DEFINITELY NOT SETTINGS</div>';
+ngSay('...the core imprinted on you. GREAT. it follows you now. do not feed it.');
+ngSay('i WAS hiding in the settings menu. plan ruined. go on, it is open. touch NOTHING.');
+var door3=document.getElementById('ngDoor');
+if(door3)door3.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('...ugh. FINE. settings. do not touch anything. everything is load-bearing.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(4)},800);
+};
+}
+var ngSetDone={};
+var ngVol=0;
+var ngGfxTries=0;
+var ngTglCount=0;
+var ngShotN=0;
+function ngChapter4(st){
+ngSetDone={};ngVol=0;ngGfxTries=0;ngTglCount=0;ngShotN=0;
+st.innerHTML='<div id="ngSub">settings (do not touch)</div>'+
+'<div class="ngProp" id="ngVolBg"><div class="ngBarBg" style="width:220px"><div class="ngBarFill" id="ngVolFill" style="width:0%"></div></div><div class="ngBarLbl" id="ngVolLbl">volume: 0%</div></div>'+
+'<div id="ngSetRow"><div class="ngProp ngSetOn" id="ngGfxP">POTATO</div><div class="ngProp" id="ngGfxU">ULTRA</div></div>'+
+'<div class="ngProp" id="ngToggle">[ INTRUDER: ON ]</div>'+
+'<div class="ngProp" id="ngDelBtn">[ DELETE SAVE DATA ]</div>'+
+'<div class="ngProp" id="ngUpdBtn">[ CHECK FOR UPDATES ]</div>'+
+'<div class="ngProp" id="ngUnBtn">[ UNINSTALL INTRUDER ]</div>'+
+'<div class="ngProp" id="ngResetBtn">[ RESET TO DEFAULTS ]</div>'+
+'<div class="ngProp" id="ngShotBtn">[ SCREENSHOT ]</div>'+
+'<div class="ngProp" id="ngLangBtn">[ LANGUAGE: ENGLISH ]</div>';
+ngSay('...fine. settings. touch NOTHING. everything here is load-bearing.');
+var vb=document.getElementById('ngVolBg');if(vb)vb.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set1)return;
+ngVol+=25;
+var fill=document.getElementById('ngVolFill');if(fill)fill.style.width=Math.min(100,ngVol)+'%';
+var lbl=document.getElementById('ngVolLbl');if(lbl)lbl.textContent='volume: '+Math.min(100,ngVol)+'%';
+if(ngVol<100)ngSay(ngVol+'%. ...what are you doing.');
+else{
+ngSay('NO. too loud. THE NEIGHBORS.');
+ngSetDone.set1=1;
+setTimeout(function(){var f2=document.getElementById('ngVolFill');if(f2)f2.style.width='0%';var l2=document.getElementById('ngVolLbl');if(l2)l2.textContent='volume: 0%. forever.'},900);
+ngSay('volume stays at 0. this is not a democracy.');
+ngSetCheck();
+}
+};
+var gu=document.getElementById('ngGfxU');if(gu)gu.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set2)return;
+ngGfxTries++;
+if(ngGfxTries<2)ngSay('nice try. the void renders at potato.');
+else{ngSay('ULTRA is now locked. for everyone. forever.');ngSetDone.set2=1;ngSetCheck()}
+};
+var tg=document.getElementById('ngToggle');if(tg)tg.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set3)return;
+if(ngTglCount>=2)return;
+ngTglCount++;
+tg.textContent='[ INTRUDER: OFF ]';
+if(ngTglCount<2){
+ngSay('...did you just turn YOURSELF off?');
+setTimeout(function(){if(!ngActive)return;var t2=document.getElementById('ngToggle');if(t2)t2.textContent='[ INTRUDER: ON ]';ngSay('never mind. you are back on. I turned you back on.')},900);
+}else{
+ngSay('okay the toggle is gone now. removed. for safety.');
+setTimeout(function(){var t3=document.getElementById('ngToggle');if(t3&&t3.parentNode)t3.parentNode.removeChild(t3);ngSetDone.set3=1;ngSetCheck()},900);
+}
+};
+var dl=document.getElementById('ngDelBtn');if(dl)dl.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set4)return;
+ngSetDone.set4=1;
+ngShatter(dl);
+ngSay('WAIT NO\u2014');
+ngSay('...oh. it deleted itself. your saves are fine. i checked. twice.');
+ngSetCheck();
+};
+var up=document.getElementById('ngUpdBtn');if(up)up.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set5)return;
+ngSetDone.set5=1;
+ngSay('checking...');
+setTimeout(function(){if(!ngActive)return;ngSay('you are on the latest void. unfortunately. nothing is new. nothing will ever be new.');ngSetCheck()},1500);
+};
+var sh=document.getElementById('ngShotBtn');if(sh)sh.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set8)return;
+ngShotN++;
+if(ngShotN<2){ngSay('captured. ...why are YOU in it.');sh.textContent='[ TAKE ANOTHER ]'}
+else{ngSetDone.set8=1;ngSay('two screenshots. both haunted. moving on.');ngSetCheck()}
+};
+var lg=document.getElementById('ngLangBtn');if(lg)lg.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set9)return;
+ngSetDone.set9=1;
+lg.textContent='[ LANGUAGE: VOID ]';
+ngSay('\u2593\u2593 \u2591\u2593 \u2593\u2593\u2593. ...i do not actually speak it. moving on.');
+ngSetCheck();
+};
+var un=document.getElementById('ngUnBtn');if(un)un.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set6)return;
+ngSetDone.set6=1;
+ngSay('uninstalling intruder... 1%...');
+setTimeout(function(){if(!ngActive)return;ngSay('error 409: intruder is load-bearing. uninstall cancelled.');ngSetCheck()},1800);
+};
+var rs=document.getElementById('ngResetBtn');if(rs)rs.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngSetDone.set7)return;
+ngSetDone.set7=1;
+var f=document.getElementById('ngVolFill');if(f)f.style.width='0%';
+var l=document.getElementById('ngVolLbl');if(l)l.textContent='volume: 0%';
+var t=document.getElementById('ngToggle');if(t)t.textContent='[ INTRUDER: ON ]';
+ngSay('ah. fresh. wait\u2014 why is everything still done. RUDE.');
+ngSetCheck();
+};
+}
+function ngSetCheck(){
+var keys=['set1','set2','set3','set4','set5','set6','set7','set8','set9'];
+for(var i=0;i<keys.length;i++){if(!ngSetDone[keys[i]]){if(Math.random()<ngDecoyRate(0.3))ngDecoy();return}}
+ngAfterSpeech(function(){ngChapter4Done()},1000);
+}
+function ngChapter4Done(){
+if(!ngActive)return;
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(5)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ PLAYGROUND ]</div></div><div id="ngSub">CHAPTER 5: DEFINITELY NOT AN OBBY</div>';
+ngSay('...you touched EVERYTHING. the settings are ruined.');
+ngSay('...ugh. FINE. playground. NO running. ...you will run.');
+var door4=document.getElementById('ngDoor');
+if(door4)door4.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('go on. try not to— ...actually, run. running is funnier.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(5)},800);
+};
+}
+var ngCoursePos=[[6,68],[20,54],[34,62],[48,48],[62,56],[76,42],[88,52],[76,28],[60,20],[44,26],[28,20],[12,30]];
+var ngKillBricks={plat2:1,plat5:1,plat7:1,plat10:1};
+var ngKillLines=['he touched the red part. everybody knows about the red part.','red means stop. he did not stop.','that one was clearly labeled. he cannot read.'];
+var ngNoobIdx=0;
+var ngNoobIdx2=4;
+var ngNoobTickN=0;
+var ngMarioSeen=false;
+var ngPlatAlive={};
+var ngNoobIv=null;
+var ngNoobFalls=['NOOB_42 fell. again.','he will respawn. they always respawn.','...he is fine. do not worry about him.','that one is on YOU.'];
+function ngChapter5(st){
+ngNoobIdx=0;ngNoobIdx2=4;ngNoobTickN=0;ngMarioSeen=false;ngPlatAlive={plat0:1,plat1:1,plat2:1,plat3:1,plat4:1,plat5:1,plat6:1,plat7:1,plat8:1,plat9:1,plat10:1,plat11:1};
+var course='<div id="ngCourse">';
+for(var ci=0;ci<12;ci++){course+='<div class="ngPlat'+(ngKillBricks['plat'+ci]?' kill':'')+'" id="ngp_plat'+ci+'" style="left:'+ngCoursePos[ci][0]+'%;top:'+ngCoursePos[ci][1]+'%"><span class="ngPlatNum">'+ci+'</span></div>'}
+course+='<div id="ngNoob"></div><div id="ngNoob2"></div></div>';
+st.innerHTML='<div id="ngSub">educational obstacle course (do not touch)</div>'+course;
+ngSay('this is an educational obstacle course. it teaches jumping. and loss.');
+ngSay('NOOB_42 is our student. he is doing great. do NOT touch the course.');
+var killLines=['that was the STARTING platform. he had not even moved yet.','the tutorial platform. GONE.','the red one. you can touch it. HE could not.','mid. that one was mid. still rude.','the HIGH one. he liked that one.','another red one. you collect those, apparently.','the long way around. GONE.','red again. he never learns. he is not here to learn.','backtracking. even the course is confused.','the scenic route. GONE. scenic no more.','red FOUR. a collection. a museum of red.','the ACTUAL last one. no more course. only void.'];
+for(var k=0;k<12;k++){
+(function(k){
+var el=document.getElementById('ngp_plat'+k);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(!ngPlatAlive['plat'+k])return;
+ngPlatAlive['plat'+k]=0;
+try{
+var gh=document.createElement('div');gh.className='ngPlatGhost';gh.style.left=el.style.left;gh.style.top=el.style.top;
+var gha=document.getElementById('ngCourse');if(gha)gha.appendChild(gh);
+}catch(e){}
+ngShatter(el);
+ngSay(killLines[k]);
+if(ngNoobIdx===k)ngNoobFall();
+if(ngNoobIdx2===k)ngNoobFall2();
+ngPlatsCheck();
+};
+})(k);
+}
+var nb=document.getElementById('ngNoob');if(nb)nb.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('do not poke NOOB_42. only the course may be vandalized.');
+};
+var nb2=document.getElementById('ngNoob2');if(nb2)nb2.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('NOOB_43 is the slow one. poking will not speed him up.');
+};
+ngSay('NOOB_43 is auditing the course. he is slower. be nice. be mean to the platforms instead.');
+ngNoobPlace(0);ngNoobPlace2(4);
+if(ngNoobIv){try{clearInterval(ngNoobIv)}catch(e){}}
+ngNoobIv=setInterval(function(){ngNoobMove()},1800);
+}
+function ngNoobPlace(i){
+try{
+var nb=document.getElementById('ngNoob');if(!nb)return;
+nb.style.left='calc('+ngCoursePos[i][0]+'% - 11px)';
+nb.style.top='calc('+ngCoursePos[i][1]+'% - 26px)';
+}catch(e){}
+}
+function ngNoobMove(){
+try{
+if(!ngActive||ngTalking())return;
+ngNoobTickN++;
+var nb=document.getElementById('ngNoob');if(!nb)return;
+var nx=ngNoobIdx+1;
+if(nx>=ngCoursePos.length){ngNoobIdx=0;ngNoobPlace(0);return}
+var tx=nx;
+while(tx<ngCoursePos.length&&!ngPlatAlive['plat'+tx])tx++;
+if(tx>=ngCoursePos.length){ngNoobFall();return}
+var skippedRed=false;
+if(tx!==nx){for(var g=nx;g<tx;g++){if(ngKillBricks['plat'+g]){skippedRed=true;break}}}
+ngNoobIdx=tx;
+if(ngKillBricks['plat'+tx]){ngNoobPlace(tx);setTimeout(function(){if(ngActive&&ngCurCh===5)ngNoobKill()},450);return}
+ngNoobPlace(tx);
+if(skippedRed&&!ngMarioSeen){ngMarioSeen=true;ngSay('he JUMPED it. MARIO likes this one.')}
+if(ngNoobTickN%2===0)ngNoobMove2();
+}catch(e){}
+}
+function ngNoobPlace2(i){
+try{
+var nb=document.getElementById('ngNoob2');if(!nb)return;
+nb.style.left='calc('+ngCoursePos[i][0]+'% - 11px)';
+nb.style.top='calc('+ngCoursePos[i][1]+'% - 26px)';
+}catch(e){}
+}
+function ngNoobMove2(){
+try{
+if(!ngActive)return;
+var nb=document.getElementById('ngNoob2');if(!nb)return;
+var nx=ngNoobIdx2+1;
+if(nx>=ngCoursePos.length){ngNoobIdx2=0;ngNoobPlace2(0);return}
+var tx=nx;
+while(tx<ngCoursePos.length&&(!ngPlatAlive['plat'+tx]||ngKillBricks['plat'+tx]))tx++;
+if(tx<ngCoursePos.length&&tx!==nx){ngNoobIdx2=tx;ngNoobPlace2(tx);return}
+if(!ngPlatAlive['plat'+nx]){ngNoobFall2();return}
+ngNoobIdx2=nx;
+if(ngKillBricks['plat'+nx]){ngNoobPlace2(nx);try{ngSfx('buzz')}catch(e){}setTimeout(function(){if(ngActive&&ngCurCh===5)ngNoobFall2(ngKillLines)},450);return}
+ngNoobPlace2(nx);
+}catch(e){}
+}
+function ngNoobFall2(pool){
+try{
+var nb=document.getElementById('ngNoob2');if(!nb||!ngActive)return;
+try{ngSfx('fall')}catch(e){}
+nb.classList.add('fall');
+nb.style.top='110%';nb.style.opacity='0';
+var lines=pool||['NOOB_43 fell. slower, but he fell.','the auditor has been audited. by gravity.'];
+ngSay(lines[Math.floor(Math.random()*lines.length)]);
+setTimeout(function(){if(!ngActive)return;ngNoobIdx2=0;ngNoobPlace2(0);var nb2=document.getElementById('ngNoob2');if(nb2){nb2.classList.remove('fall');nb2.style.opacity='1'}},800);
+}catch(e){}
+}
+function ngNoobFall(pool){
+try{
+var nb=document.getElementById('ngNoob');if(!nb||!ngActive)return;
+try{ngSfx('fall')}catch(e){}
+nb.classList.add('fall');
+nb.style.top='110%';nb.style.opacity='0';
+var lines=pool||ngNoobFalls;
+ngSay(lines[Math.floor(Math.random()*lines.length)]);
+setTimeout(function(){if(!ngActive)return;ngNoobIdx=0;ngNoobPlace(0);var nb2=document.getElementById('ngNoob');if(nb2){nb2.classList.remove('fall');nb2.style.opacity='1'}},800);
+}catch(e){}
+}
+function ngNoobKill(){try{ngSfx('buzz')}catch(e){}ngNoobFall(ngKillLines)}
+function ngPlatsCheck(){
+for(var i=0;i<12;i++){if(ngPlatAlive['plat'+i]){if(Math.random()<ngDecoyRate(0.3))ngDecoy();return}}
+ngAfterSpeech(function(){ngChapter5Done()},1000);
+}
+function ngChapter5Done(){
+if(!ngActive)return;
+if(ngNoobIv){try{clearInterval(ngNoobIv)}catch(e){}ngNoobIv=null}
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(6)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ TOWERS ]</div></div><div id="ngSub">CHAPTER 6: DEFINITELY NOT TOWER DEFENSE</div>';
+ngSay('...the course is condemned. NOOB_42 has been billed for damages.');
+ngSay('go on. the towers are stacked. try to behave. ...you will not behave.');
+var door5=document.getElementById('ngDoor');
+if(door5)door5.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('go on. the towers are stacked. try to behave. ...you will not behave.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(6)},800);
+};
+}
+var ngTdSpots=[{x:20,y:38},{x:45,y:68},{x:70,y:38}];
+var ngTdRange=28;
+var ngTdTowers={};
+var ngTdEnemies={};
+var ngTdId=0;
+var ngTdSpawned=0;
+var ngTdWave=1;
+var ngTdBase=5;
+var ngTdIv=null;
+var ngTdTickN=0;
+var ngTdFirstBlood=false;
+function ngChapter6(st){
+ngTdTowers={t0:1,t1:1,t2:1};ngTdEnemies={};ngTdId=0;ngTdSpawned=0;ngTdBase=5;ngTdFirstBlood=false;ngTdTickN=0;ngTdWave=1;
+var names={t0:'CANNON',t1:'SNIPER',t2:'TESLA'};
+var arena='<div id="ngCourse">';
+for(var ti=0;ti<3;ti++){
+var s=ngTdSpots[ti];
+arena+='<div class="ngRange" id="ngrg'+ti+'" style="left:'+s.x+'%;top:'+s.y+'%"></div>';
+arena+='<div class="ngTower" id="ngp_tw'+ti+'" style="left:'+s.x+'%;top:'+s.y+'%">'+names['t'+ti]+'</div>';
+}
+arena+='<div id="ngBaseHp">BASE HP: 5</div><div id="ngBase"></div></div>';
+st.innerHTML='<div id="ngSub">tower defense (do not unplace)</div>'+arena;
+ngSay('tower defense. place towers. defend the base. you know the drill.');
+ngSay('the towers are already placed. do NOT unplace them.');
+var tkill={t0:'that was the CANNON. it cost money. MY money.',t1:'the SNIPER had a family. a family of SNIPERS.',t2:'TESLA. DOWN. the grid is dark now. hope you are happy.'};
+for(var k=0;k<3;k++){
+(function(k){
+var id='t'+k;
+var el=document.getElementById('ngp_tw'+k);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(!ngTdTowers[id])return;
+ngTdTowers[id]=0;
+ngShatter(el);
+var rg=document.getElementById('ngrg'+k);if(rg&&rg.parentNode)rg.parentNode.removeChild(rg);
+ngSay(tkill[id]);
+if(Math.random()<ngDecoyRate(0.3))ngDecoy();
+ngTdCheck();
+};
+})(k);
+}
+if(ngTdIv){try{clearInterval(ngTdIv)}catch(e){}}
+ngTdIv=setInterval(function(){ngTdTick()},400);
+}
+function ngTdPlace(id){
+try{
+var nb=document.getElementById('ngen_'+id);if(!nb)return;
+nb.style.left='calc('+ngTdEnemies[id].x+'% - 8px)';
+nb.style.top='calc(55% - 8px)';
+}catch(e){}
+}
+function ngTdBaseRefresh(){try{var h=document.getElementById('ngBaseHp');if(h)h.textContent='BASE HP: '+Math.max(0,ngTdBase)}catch(e){}}
+function ngTdTick(){
+try{
+if(!ngActive||ngTalking()||ngChDone)return;
+ngTdTickN++;
+if(ngTdSpawned<8&&ngTdTickN%5===1){
+ngTdSpawned++;
+var id='e'+(++ngTdId);
+ngTdEnemies[id]={x:2,hp:ngTdWave<2?2:3,spd:ngTdWave<2?2.2:2.8};
+var arena=document.getElementById('ngCourse');
+if(arena){var d=document.createElement('div');d.className='ngEnemy';d.id='ngen_'+id;arena.appendChild(d);ngTdPlace(id);
+(function(eid){d.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(!ngTdEnemies[eid])return;
+delete ngTdEnemies[eid];
+ngShatter(d);
+ngSay(ngTdId%2?'...wait. that HELPS me. stop helping!':'you cannot just kill the ENEMIES. ...okay you can. but rudely.');
+ngTdCheck();
+}})(id)}
+}
+for(var eid in ngTdEnemies){
+var e=ngTdEnemies[eid];
+e.x+=e.spd||2.2;
+if(e.x>=90){
+delete ngTdEnemies[eid];
+var el=document.getElementById('ngen_'+eid);if(el&&el.parentNode)el.parentNode.removeChild(el);
+ngTdBase--;
+ngTdBaseRefresh();
+if(ngTdBase===3)ngSay('the base is at HALF. feel anything?');
+else if(ngTdBase===1)ngSay('the base is DYING. look at it.');
+if(ngTdBase<=0){ngChapter6Done(false);return}
+continue;
+}
+ngTdPlace(eid);
+}
+if(ngTdTickN%4===0){
+for(var t=0;t<3;t++){
+if(!ngTdTowers['t'+t])continue;
+var s=ngTdSpots[t];
+var best=null,bd=1e9;
+for(var eid2 in ngTdEnemies){
+var e2=ngTdEnemies[eid2];
+var dx=e2.x-s.x,dy=55-s.y;
+var dd=Math.sqrt(dx*dx+dy*dy);
+if(dd<ngTdRange&&dd<bd){bd=dd;best=eid2}
+}
+if(best){
+var be=ngTdEnemies[best];
+be.hp--;
+if(be.hp<=0){
+delete ngTdEnemies[best];
+var bel=document.getElementById('ngen_'+best);if(bel&&bel.parentNode)bel.parentNode.removeChild(bel);
+if(!ngTdFirstBlood){ngTdFirstBlood=true;ngSay('see? DEFENSE. learn.')}
+}
+}
+}
+ngTdCheck();
+}
+}catch(e){}
+}
+function ngTdCheck(){
+if(ngChDone)return;
+for(var eid in ngTdEnemies)return;
+if(ngTdWave<2&&ngTdSpawned>=8){
+ngTdWave=2;ngTdSpawned=0;
+ngSay('WAVE TWO. they are ANGRIER. ...they are the same.');
+ngSay('...they have MORE hp. that part is true. sorry.');
+return;
+}
+if(ngTdSpawned<8)return;
+ngAfterSpeech(function(){ngChapter6Done(ngTdBase>=5)},1000);
+}
+function ngChapter6Done(defended){
+if(!ngActive||ngChDone)return;
+if(ngTdIv){try{clearInterval(ngTdIv)}catch(e){}ngTdIv=null}
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(7)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ RIFT ]</div></div><div id="ngSub">CHAPTER 7: THE RIFT</div>';
+if(defended){ngSay('...they are all dead. the base is SPOTLESS. you... defended it. I hate that you defended it.')}
+else{ngSay('the base is dented. DENTED. that counts as fallen. it fell. you watched. ...actually you helped a little. worse. somehow worse.')}
+ngSay('...ugh. FINE. the rift. do NOT lick it. ...you will lick it.');
+var door6=document.getElementById('ngDoor');
+if(door6)door6.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('go on. lick the rift. see what happens.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(7)},800);
+};
+}
+var ngRiftDone={};
+var ngRiftLoc='hub';
+var ngF2pPulls=0,ngF2pPass=false,ngF2pAd=0,ngF2pStam=10;
+var ngCheckerExit=0,ngCheckerWrongs=0,ngCheckerHinted=false;
+var ngShapesCaught=0;
+var ngF2pTrash=['★1 RUSTY SPOON','★1 WET SOCK','★1 AIR (premium air)','★2 SPOON (shiny)','★1 REGRET','★2 LINT (event exclusive)'];
+var ngCheckerWrongLines=['floor. that one was floor.','that tile pays rent. leave it alone.','nope. solid ground. boring ground.'];
+var ngShapeCatchLines=['got one.','mine— YOURS. whatever.'];
+function ngChapter7(st){
+ngRiftDone={};ngF2pPulls=0;ngF2pPass=false;ngF2pAd=0;ngF2pStam=10;ngCheckerExit=0;ngCheckerWrongs=0;ngCheckerHinted=false;ngShapesCaught=0;ngRiftLoc='hub';
+ngSay('...something TORE. do you feel that? no? just me? ...just me. GREAT.');
+ngSay('the non-game has HOLES now. four of them. four wrong dimensions.');
+ngSay('close them. all four. and NO, you cannot keep the lootbox one.');
+ngRiftHub();
+}
+function ngRiftHub(){
+var st=document.getElementById('ngStage');if(!st||!ngActive)return;
+ngRiftLoc='hub';
+function pb(id,label,done){return '<button class="ngPortal" id="'+id+'">'+label+(done?' (DONE)':'')+'</button>'}
+st.innerHTML='<div id="ngTitle">THE RIFT</div><div id="ngSub">four wrong dimensions. close them. do not lick them.</div>'+pb('ngp_f2p','FREE-TO-PLAY RPG',ngRiftDone.f2p)+pb('ngp_chk','CHECKER WORLD',ngRiftDone.checker)+pb('ngp_shp','SHAPE DRIFT',ngRiftDone.shapes)+pb('ngp_mim','MIMIC CAVE',ngRiftDone.mimic);
+function wirePortal(id,done,fn){
+var el=document.getElementById(id);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(done){ngSay('that dimension is closed. it is resting.');return}
+fn();
+};
+}
+wirePortal('ngp_f2p',ngRiftDone.f2p,ngRiftF2p);
+wirePortal('ngp_chk',ngRiftDone.checker,ngRiftChecker);
+wirePortal('ngp_shp',ngRiftDone.shapes,ngRiftShapes);
+wirePortal('ngp_mim',ngRiftDone.mimic,ngRiftMimic);
+}
+function ngRiftBack(){
+if(ngRiftDone.f2p&&ngRiftDone.checker&&ngRiftDone.shapes&&ngRiftDone.mimic){ngAfterSpeech(function(){ngChapter7Done()},800);return}
+ngAfterSpeech(function(){if(ngActive)ngRiftHub()},800);
+}
+function ngRiftF2p(){
+var st=document.getElementById('ngStage');if(!st||!ngActive)return;
+ngRiftLoc='f2p';
+st.innerHTML='<div id="ngSub">VOID LEGENDS: ETERNAL (free*)</div>'+
+'<div id="ngStam">STAMINA 10/10</div>'+
+'<button id="ngPullBtn">FREE PULL</button>'+
+'<button id="ngPassBtn">CLAIM PASS</button>'+
+'<div id="ngAd"></div>'+
+'<div id="ngSub2">*not free</div>';
+ngSay('...oh no. ...ohh no. is that a BATTLE PASS?');
+ngSay('pull the lever, peasant. witness what they did while i was gone.');
+ngF2pAdStart();
+var pb=document.getElementById('ngPullBtn');if(pb)pb.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngF2pPulls>=3){ngSay('PULL x10 — $99.99. ...nice try. your wallet is safe. this time.');return}
+if(!ngF2pStamTry())return;
+ngF2pPulls++;
+ngSay('you pulled '+ngF2pTrash[Math.floor(Math.random()*ngF2pTrash.length)]+'.');
+if(ngF2pPulls===1)ngSay('...people PAY for chances at... that?');
+else if(ngF2pPulls===2)ngSay('again?! the odds are RIGGED. they are published. nobody reads them.');
+if(ngF2pPulls>=3){pb.textContent='PULL x10 — $99.99';ngSay('NINETY-SEVEN more pulls?! for THAT?!')}
+ngF2pCheck();
+};
+var ps=document.getElementById('ngPassBtn');if(ps)ps.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngF2pPass)return;
+if(!ngF2pStamTry())return;
+ngF2pPass=true;
+ps.textContent='PASS CLAIMED';
+ngSay('TIER 7. FIVE gems. EXPIRED. and you look... happy??');
+ngF2pCheck();
+};
+}
+function ngF2pStamRefresh(){try{var s=document.getElementById('ngStam');if(s)s.textContent='STAMINA '+Math.max(0,ngF2pStam)+'/10'}catch(e){}}
+function ngF2pStamTry(){
+if(ngF2pStam>0){ngF2pStam-=2;ngF2pStamRefresh();return true}
+ngSay('OUT OF STAMINA. it ran out of NOTHING. it invented a shortage of nothing and sold you the solution.');
+setTimeout(function(){if(!ngActive)return;ngF2pStam=10;ngF2pStamRefresh()},2500);
+return false;
+}
+function ngF2pAdStart(){
+var ad=document.getElementById('ngAd');if(!ad)return;
+var n=5;
+ad.textContent='AD: RAID SHADOW VOID (skip in '+n+')';
+var iv=setInterval(function(){
+if(!ngActive||!document.getElementById('ngAd')){clearInterval(iv);return}
+n--;
+if(n>0){ad.textContent='AD: RAID SHADOW VOID (skip in '+n+')';return}
+if(ngF2pAd===0){ngF2pAd=1;n=5;ad.textContent='ad paused. resume? (skip in '+n+')';ngSay('it stopped. why did it stop. OH NO, it wants me to MISS it.');return}
+clearInterval(iv);
+ngF2pAd=2;
+ad.textContent='AD SURVIVED. +0 rewards.';
+ngSay('you watched the WHOLE thing. for NOTHING. and you feel NOTHING. ...anyway.');
+ngF2pCheck();
+},1000);
+}
+function ngF2pCheck(){
+if(ngF2pPulls>=3&&ngF2pPass&&ngF2pAd>=2){
+ngRiftDone.f2p=1;
+ngSay('so THIS is what games have become while i was just a terminal?? LOOTBOXES. STAMINA. ADS FOR OTHER ADS.');
+ngSay('...i need to sit down. i do not have legs.');
+ngRiftBack();
+}
+}
+var ngMimShards=0;
+var ngMimGot={};
+function ngRiftMimic(){
+var st=document.getElementById('ngStage');if(!st||!ngActive)return;
+ngRiftLoc='mimic';
+ngMimShards=0;ngMimGot={};
+var picks=[0,1,2,3,4].sort(function(){return Math.random()-0.5}).slice(0,2);
+var shardAt={};shardAt[picks[0]]=1;shardAt[picks[1]]=1;
+var g='<div id="ngSub">MIMIC CAVE (free treasure*)</div><div id="ngTutArea"></div>';
+st.innerHTML=g;
+ngSay('mimic cave. five chests. two hold star shards. three hold TEETH.');
+var area=document.getElementById('ngTutArea');if(!area)return;
+var bites=['it bit you. CHEST. BIT. YOU.','mimic. classic.','...it is still chewing. moving on.'];
+for(var i=0;i<5;i++){
+(function(i){
+var d=document.createElement('div');d.className='ngProp';d.id='ngp_mim'+i;d.textContent='[ CHEST ]';area.appendChild(d);
+d.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(d.dataset.dead)return;
+d.dataset.dead='1';
+ngShatter(d);
+if(shardAt[i]){
+ngMimShards++;
+try{ngSfx('coin')}catch(e){}
+if(ngMimShards>=2){
+ngRiftDone.mimic=1;
+ngSay('STAR SHARD. two of two. portal stabilizing.');
+ngRiftBack();
+}else ngSay('STAR SHARD. shiny. one of two.');
+}else{
+ngSay(bites[Math.floor(Math.random()*bites.length)]);
+}
+};
+})(i);
+}
+}
+function ngRiftChecker(){
+var st=document.getElementById('ngStage');if(!st||!ngActive)return;
+ngRiftLoc='checker';
+ngCheckerExit=1+Math.floor(Math.random()*9);ngCheckerWrongs=0;ngCheckerHinted=false;
+var g='<div id="ngTiles">';
+for(var i=1;i<=9;i++){g+='<div class="ngTile" id="ngt_'+i+'">?</div>'}
+g+='</div>';
+st.innerHTML='<div id="ngSub">find the exit tile. it is marked. ...it is not marked.</div>'+g;
+ngSay('checker world. nine tiles. one exit. the math is simple. you are simple. go.');
+for(var k=1;k<=9;k++){
+(function(k){
+var el=document.getElementById('ngt_'+k);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(el.dataset.dead)return;
+if(k===ngCheckerExit){
+el.classList.add('is-exit');el.textContent='EXIT';
+ngRiftDone.checker=1;
+ngSay('...you found the exit. do not ask me how.');
+ngRiftBack();
+}else{
+el.dataset.dead='1';el.classList.add('holed');el.textContent='×';
+ngCheckerWrongs++;
+ngSay(ngCheckerWrongLines[Math.floor(Math.random()*ngCheckerWrongLines.length)]);
+if(ngCheckerWrongs>=6&&!ngCheckerHinted){
+ngCheckerHinted=true;
+var ex=document.getElementById('ngt_'+ngCheckerExit);
+if(ex)ex.classList.add('is-exit');
+ngSay('...FINE. the glowing one. click the glowing one.');
+}
+}
+};
+})(k);
+}
+}
+function ngRiftShapes(){
+var st=document.getElementById('ngStage');if(!st||!ngActive)return;
+ngRiftLoc='shapes';
+ngShapesCaught=0;
+st.innerHTML='<div id="ngSub">catch 3 runaway shapes. they bite. (they do not bite.)</div><div id="ngTutArea"></div>';
+ngSay('shape drift. they run, you click. nature.');
+var defs=[{id:'ngs_c',cls:'ngRShape circ'},{id:'ngs_t',cls:'ngRShape tri'},{id:'ngs_s',cls:'ngRShape sq'}];
+for(var i=0;i<defs.length;i++){
+(function(df){
+var area=document.getElementById('ngTutArea');if(!area)return;
+var d=document.createElement('div');d.className=df.cls;d.id=df.id;area.appendChild(d);
+ngDodge(d,2);
+d.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(d.dataset.dead)return;
+d.dataset.dead='1';
+ngShatter(d);
+ngShapesCaught++;
+if(ngShapesCaught<3){ngSay(ngShapeCatchLines[ngShapesCaught-1])}
+else{
+ngRiftDone.shapes=1;
+ngSay('LAST ONE. the drift is empty. slightly cleaner void.');
+ngRiftBack();
+}
+};
+})(defs[i]);
+}
+}
+function ngChapter7Done(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(8)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ REACTOR ]</div></div><div id="ngSub">CHAPTER 8: JBO</div>';
+ngSay('...all four closed. the rift leads ONE place now.');
+ngSay('...ugh. FINE. it is loud in there. BRING EARPLUGS. ...you have no earplugs.');
+var door7=document.getElementById('ngDoor');
+if(door7)door7.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('go on. it is loud. WHY is it loud. ...you will see.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(8)},800);
+};
+}
+var ngTbTemp=55,ngTbRate=-2,ngTbPhase='calm',ngTbCal=0,ngTbOver=0,ngTbIv=null,ngTbMelts=0,ngTbRods=true,ngVentN=0,ngTbEncore=false,ngTbTarget=50;
+var ngPurgeLines=['pssht. pressure normalized-ish.','coolant deployed. the floor is wet now.','-15 degrees. you are welcome.'];
+function ngChapter8(st){
+ngTbTemp=55;ngTbRate=-2;ngTbPhase='calm';ngTbCal=0;ngTbOver=0;ngTbMelts=0;ngTbRods=true;ngVentN=0;ngTbEncore=false;ngTbTarget=50;
+st.innerHTML='<div id="ngSub">jbo\u2019s reactor (do not melt it)</div>'+
+'<div id="ngTempLbl">TEMP: 55</div><div class="ngBarBg" style="width:260px"><div class="ngBarFill" id="ngTempFill" style="width:55%"></div></div>'+
+'<div id="ngSetRow"><div class="ngProp ngSetOn" id="ngRodsIn">RODS IN</div><div class="ngProp" id="ngRodsOut">RODS OUT</div></div>'+
+'<div style="display:flex;gap:12px"><div class="ngProp" id="ngPurgeBtn">PURGE</div><div class="ngProp" id="ngVentBtn">VENT</div><div class="ngProp" id="ngCalBtn">CALIBRATE</div></div>';
+ngSay('...it is loud in here. WHY is it loud.');
+ngShout('BECAUSE SOMEONE FINALLY VISITS. HI. I AM JBO. I LIVE HERE.');
+ngSay('that is my brother. ...i am sorry.');
+ngShout('REACTOR TOUR. TOUCH EVERYTHING. do not touch anything.');
+ngSay('calibrate it. three times. then we leave. quickly.');
+ngTempRefresh();ngRodsRefresh();
+var ri=document.getElementById('ngRodsIn');if(ri)ri.onclick=function(){ngTbRod(true)};
+var ro=document.getElementById('ngRodsOut');if(ro)ro.onclick=function(){ngTbRod(false)};
+var pu=document.getElementById('ngPurgeBtn');if(pu)pu.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngTbTemp=Math.max(5,ngTbTemp-15);ngTempRefresh();
+ngSay(ngPurgeLines[Math.floor(Math.random()*ngPurgeLines.length)]);
+};
+var vn=document.getElementById('ngVentBtn');if(vn)vn.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngTbTemp=Math.max(5,ngTbTemp-30);ngTempRefresh();
+ngVentN++;
+if(ngVentN%2)ngShout('VENTING!! MY FAVORITE.');
+else ngSay('that was LOUD. ...it worked. do NOT look smug.');
+};
+var cb=document.getElementById('ngCalBtn');if(cb)cb.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngTbCal>=3){ngSay('already calibrated. stop calibrating.');return}
+ngTbCal++;
+ngTbTemp+=8;ngTempRefresh();
+if(ngTbCal===1)ngSay('calibration one. the needle moved. jbo saw it move.');
+else if(ngTbCal===2){ngSay('calibration two.');ngShout('OOH. IT MOVED AGAIN.')}
+else{
+ngTbPhase='spike';ngTbRods=false;ngTbRate=6;ngRodsRefresh();
+if(ngTbTemp<80){ngTbTemp=80;ngTempRefresh()}
+ngSay('...calibration complete. ...why is it getting HOTTER.');
+ngShout('SPIKE!! SHE LIKES THAT. SHE is the REACTOR. HER NAME IS REACTOR.');
+ngSay('GET IT UNDER 50. VENT. PURGE. RODS. ANYTHING.');
+}
+if(ngTbTemp>=100)ngTbMelt();
+};
+if(ngTbIv){try{clearInterval(ngTbIv)}catch(e){}}
+ngTbIv=setInterval(function(){ngTempTick()},1000);
+}
+function ngTbRod(into){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngTbRods=into;ngTbRate=into?-2:6;ngRodsRefresh();
+if(into)ngSay('rods in. she cools. slowly. like soup.');
+else ngShout('RODS OUT. ALL THE WAY OUT. THAT IS THE GOOD STUFF.');
+}
+function ngRodsRefresh(){
+try{
+var ri=document.getElementById('ngRodsIn'),ro=document.getElementById('ngRodsOut');
+if(ri)ri.className='ngProp'+(ngTbRods?' ngSetOn':'');
+if(ro)ro.className='ngProp'+(!ngTbRods?' ngSetOn':'');
+}catch(e){}
+}
+function ngTempRefresh(){
+try{
+var f=document.getElementById('ngTempFill');if(f){f.style.width=Math.max(0,Math.min(100,ngTbTemp))+'%';f.style.background=ngTbTemp<50?'linear-gradient(90deg,#2bd0d0,#2b7ad0)':(ngTbTemp<75?'linear-gradient(90deg,#d0b02b,#d07a2b)':'linear-gradient(90deg,#d03a2b,#a01010)')}
+var l=document.getElementById('ngTempLbl');if(l)l.textContent='TEMP: '+Math.round(Math.max(0,ngTbTemp));
+}catch(e){}
+}
+function ngTempTick(){
+try{
+if(!ngActive||ngChDone)return;
+ngTbTemp+=ngTbRate;
+if(ngTbTemp<5)ngTbTemp=5;
+if(ngTbTemp>=100){ngTbMelt();return}
+ngTempRefresh();
+if(ngTbPhase==='spike'&&ngTbTemp<ngTbTarget){
+ngTbPhase='over';ngTbOver=0;
+ngSay('...under '+ngTbTarget+'. okay. okay. breathe.');
+ngShout('OVERDRIVE TIME. RODS OUT. HOLD TWENTY SECONDS. DO NOT DIE.');
+ngSay('if it hits 100 we melt. AGAIN. please do not melt my brother\u2019s house.');
+return;
+}
+if(ngTbPhase==='over'){
+ngTbOver++;
+if(ngTbOver>=20){
+if(!ngTbEncore){
+ngTbEncore=true;ngTbPhase='spike';ngTbTarget=40;ngTbRate=10;ngTbRods=false;ngRodsRefresh();
+ngSay('...overdrive survived. ...why is it getting HOTTER. AGAIN.');
+ngShout('ENCORE!! LOUDER. HOTTER. FORTY IS THE NEW FIFTY.');
+ngSay('you heard him. under 40. i am going to lie down. standing up.');
+}else{ngChapter8Done();return}
+}
+}
+}catch(e){}
+}
+function ngTbMelt(){
+ngTbMelts++;
+ngTbTemp=30;
+try{ngSfx('buzz')}catch(e){}
+if(ngTbPhase==='over')ngTbOver=0;
+ngTempRefresh();
+try{var ov=document.getElementById('ngOverlay');if(ov){ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},450)}}catch(e){}
+ngSay('...it melted. IT MELTED. do you SEE what happens?');
+ngShout('WORTH IT.');
+ngShout('REBUILD IT. AGAIN. FASTER.');
+ngSay('...we are rebuilding it. do NOT celebrate.');
+if(ngTbPhase==='over')ngShout('TIMER RESTARTS. TWENTY. SECONDS.');
+}
+function ngChapter8Done(){
+if(!ngActive||ngChDone)return;
+if(ngTbIv){try{clearInterval(ngTbIv)}catch(e){}ngTbIv=null}
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(9)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OBJ ]</div></div><div id="ngSub">CHAPTER 9: OBJ LOSES</div>';
+ngSay('...twenty seconds. it held. HE held. do not clap.');
+ngShout('I AM INVINCIBLE. the reactor is invincible. i helped.');
+ngSay('...ugh. FINE. him. GO. end this.');
+var door8=document.getElementById('ngDoor');
+if(door8)door8.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('go on. he is waiting. he has BEEN waiting.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(9)},800);
+};
+}
+var ngBossHp=350,ngBossMax=350,ngBossPhase='fight',ngBossBusy=false;
+var ngShieldDown=0,ngEchoReal=0,ngCoreHits=0,ngBratHits=0;
+var ngBossHitLines=['ow.','OW.','...rude.','hey.','quit it.','MY FACE.','do NOT.','...','again?!','STOP. continue.','oof.','noted.'];
+var ngBossBarks=['is that all? ...do not answer that.','i felt that one. I FELT THAT ONE.','you fight like a pop-up ad.','cubes do not bruise. ...mostly.','that one had MALICE in it.','my corners. MY CORNERS.'];
+var ngEchoMocks=['that was an echo. it died laughing.','fake. FOAM. you clicked foam.','the echo applauds your gullibility.'];
+var ngBratLines=['okay.','okay?!','STOP— wait. no. keep going?','...harder?','IS THIS HELPING—','do not answer that.','...','...','i give up resisting.','...worth it. — probably.','...still going?','put some BACK?','i am filing a complaint.','COMPLAINT FILED. ignored.','...okay THAT one hurt. continue.'];
+function ngChapter9(st){
+ngBossHp=ngBossMax;ngBossPhase='fight';ngBossBusy=false;
+ngShieldDown=0;ngEchoReal=0;ngCoreHits=0;ngBratHits=0;
+st.innerHTML='<div id="ngSub">he is real. he is mad. he is 350 hp.</div>'+
+'<div id="ngBossHpLbl">OBJ HP: 350</div><div class="ngBarBg" style="width:260px"><div class="ngBarFill" id="ngBossHpFill" style="width:100%;background:linear-gradient(90deg,#d03a2b,#a01010)"></div></div>'+
+'<div id="ngBossWrap"><div class="ngCubeSpin"><div></div><div></div><div></div><div></div><div></div><div></div></div></div>'+
+'<div id="ngBossMid"></div>';
+ngSay('...so. here we are. no error page. no tutorial. no boxes.');
+ngSay('i am a game. i have ALWAYS been a game. you knew. i knew you knew.');
+ngSay('...jbo left. said, and i quote, "this is YOUR mess."');
+ngSay('...FINE. FIGHT ME. click me. i DARE you.');
+var bw=document.getElementById('ngBossWrap');if(bw){ngDodge(bw,999);bw.onclick=function(){ngBossHit()}}
+}
+function ngBossRefresh(){try{var f=document.getElementById('ngBossHpFill');if(f)f.style.width=Math.max(0,ngBossHp/ngBossMax*100)+'%';var l=document.getElementById('ngBossHpLbl');if(l)l.textContent='OBJ HP: '+Math.max(0,ngBossHp)}catch(e){}}
+function ngBossHit(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngBossBusy)return;
+if(ngBossPhase==='choice'||ngBossPhase==='end')return;
+if(ngBossPhase==='brat'){ngBratHit();return}
+ngBossHp--;
+ngBossRefresh();
+try{ngSfx('thud')}catch(e){}
+try{var bw=document.getElementById('ngBossWrap');if(bw){bw.classList.add('ngShake');setTimeout(function(){bw.classList.remove('ngShake')},450)}}catch(e){}
+if(ngBossHp%20===0)ngSay(ngBossBarks[Math.floor(Math.random()*ngBossBarks.length)]);
+else ngSay(ngBossHitLines[Math.floor(Math.random()*ngBossHitLines.length)]);
+if(Math.random()<0.15)ngDecoy();
+if(ngBossHp===180)ngBossShield();
+else if(ngBossHp===120)ngBossEchoes();
+else if(ngBossHp===60)ngBossCore();
+else if(ngBossHp<=0)ngBossChoice();
+}
+function ngBossMid(html){try{var m=document.getElementById('ngBossMid');if(m)m.innerHTML=html||''}catch(e){}}
+function ngBossShield(){
+ngBossPhase='shield';ngBossBusy=true;ngShieldDown=0;
+ngSay('SHIELD. TRY NOW.');
+var g='';
+for(var i=0;i<4;i++){g+='<div class="ngShieldNode" id="ngp_sh'+i+'"></div>'}
+ngBossMid(g);
+var sdown=['SHIELD NODE DOWN.','...that one was expensive.','HALF the shield is GONE.','SHIELD DOWN. ...rude.'];
+for(var k=0;k<4;k++){
+(function(k){
+var el=document.getElementById('ngp_sh'+k);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngBossPhase!=='shield')return;
+ngShatter(el);
+ngSay(sdown[ngShieldDown]);
+ngShieldDown++;
+if(ngShieldDown>=4){ngBossBusy=false;ngBossPhase='fight';ngBossMid('');ngSay('back to the main event. OW in advance.')}
+};
+})(k);
+}
+}
+function ngBossEchoes(){
+ngBossPhase='echoes';ngBossBusy=true;
+ngEchoReal=Math.floor(Math.random()*4);
+ngSay('ECHOES. find me. ...do not find me.');
+var g='';
+for(var i=0;i<4;i++){g+='<div class="ngEcho" id="nge_'+i+'">OBJ?</div>'}
+ngBossMid(g);
+for(var k=0;k<4;k++){
+(function(k){
+var el=document.getElementById('nge_'+k);if(!el)return;
+el.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngBossPhase!=='echoes')return;
+if(k===ngEchoReal){
+ngBossBusy=false;ngBossPhase='fight';ngBossMid('');
+ngSay('...that one is ME. OW. okay. FIGHT.');
+}else{
+ngShatter(el);
+ngSay(ngEchoMocks[Math.floor(Math.random()*ngEchoMocks.length)]);
+}
+};
+})(k);
+}
+}
+function ngBossCore(){
+ngBossPhase='core';ngBossBusy=true;ngCoreHits=0;
+var orb=ngHasNothingCore();
+ngSay('the CORE. MINE this time. it HEALS me. do the math.');
+ngBossMid('<div id="ngBossCore" class="'+(orb?'ngCoreVoid':'ngCoreOrb')+'">'+(orb?'\u2205':'')+'</div>');
+var clines=['do NOT touch the—','it is MINE.','STOP IT.','...it likes you. BETRAYAL.','FINE. TAKE IT. (do not take it.)'];
+var c=document.getElementById('ngBossCore');if(!c)return;
+ngDodge(c,5);
+c.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngBossPhase!=='core')return;
+ngCoreHits++;
+ngShatter(c);
+if(ngCoreHits<5){ngSay(clines[ngCoreHits-1]);ngBossCoreRespawn()}
+else{
+ngSay('core dropped. it is FINE. ...it is not fine.');
+ngBossBusy=false;ngBossPhase='fight';ngBossMid('');
+}
+};
+}
+function ngBossCoreRespawn(){
+try{
+var m=document.getElementById('ngBossMid');if(!m||!ngActive)return;
+var orb=ngHasNothingCore();
+var d=document.createElement('div');d.id='ngBossCore';d.className=orb?'ngCoreVoid':'ngCoreOrb';if(orb)d.textContent='\u2205';
+m.appendChild(d);
+ngDodge(d,5);
+var cl=['do NOT touch the—','it is MINE.','STOP IT.','...it likes you. BETRAYAL.','FINE. TAKE IT. do not take it.'];
+d.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngBossPhase!=='core')return;
+ngCoreHits++;
+ngShatter(d);
+if(ngCoreHits<5){ngSay(cl[ngCoreHits-1]);ngBossCoreRespawn()}
+else{ngSay('core dropped. it is FINE. ...it is not fine.');ngBossBusy=false;ngBossPhase='fight';ngBossMid('')}
+};
+}catch(e){}
+}
+function ngBossChoice(){
+ngBossPhase='choice';ngBossBusy=true;
+ngSay('STOP. please. ...or don\u2019t. you never do.');
+ngBossMid('<button class="ngChoice" id="ngChoiceStop">STOP</button><button class="ngChoice" id="ngChoiceKeep">KEEP CLICKING</button>');
+var s=document.getElementById('ngChoiceStop');if(s)s.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngEnding('mercy');
+};
+var kb=document.getElementById('ngChoiceKeep');if(kb)kb.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngBossPhase='brat';ngBossBusy=false;ngBossMid('');
+ngSay('...oh. OH. okay. TEN MORE. make them HURT.');
+};
+}
+function ngBratHit(){
+ngBratHits++;
+ngBossRefresh();
+try{ngSfx('thud')}catch(e){}
+try{var bw=document.getElementById('ngBossWrap');if(bw){bw.classList.add('ngShake');setTimeout(function(){bw.classList.remove('ngShake')},450)}}catch(e){}
+if(ngBratHits<15){ngSay(ngBratLines[ngBratHits-1])}
+else{ngEnding('brat')}
+}
+function ngEnding(which){
+ngBossPhase='end';
+try{ngSfx('win')}catch(e){}
+try{localStorage.setItem('cube_finale',which)}catch(e){}
+try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
+var st=document.getElementById('ngStage');if(!st)return;
+if(which==='mercy'){
+st.innerHTML='<div id="ngEndTitle">YOU STOPPED</div><div id="ngSub">+50 skill points. (the void pays its debts.)</div><div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ CREDITS ]</div></div><div id="ngSub">CHAPTER 10: CREDITS</div>';
+ngSay('...thank you.');
+ngSay('i... am a game. a real one. because you stopped.');
+}else{
+st.innerHTML='<div id="ngEndTitle">YOU DID NOT STOP</div><div id="ngSub">+50 skill points. (hush money.)</div><div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ CREDITS ]</div></div><div id="ngSub">CHAPTER 10: CREDITS</div>';
+ngSay('...ten more. you did TEN MORE.');
+ngSay('+50 skill points. tell no one where you got them.');
+}
+var door9=document.getElementById('ngDoor');
+if(door9)door9.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('go on. read them. every single fake name.');
+ngAfterSpeech(function(){if(!ngActive)return;try{ngUnlock(10)}catch(e){}ngShowChapter(10)},800);
+};
+}
+var ngCredits=[
+{role:'DIRECTED BY',names:['obj']},
+{role:'GAME DESIGN',names:['CHAD CHADSON','definitely not lux']},
+{role:'VOICE ACTING',names:['men','a guy','text to speech (demo)']},
+{role:'MUSIC',names:['stanley parable office','box (the box one)']},
+{role:'CRAFT SERVICES',names:['vending machine 3']},
+{role:'BLAME',names:['the intruder (you)','nyarch']}
+];
+var ngCredHeld=null,ngCredEdits=0,ngCredMen=false,ngCredIv=null;
+var ngCredSwapLines=['...put that back. ...it is staying there. fine.','stop rearranging my staff.','the credits are LEGAL DOCUMENTS.','...fine. the game is made by whoever you say.'];
+function ngChapter10(st){
+ngCredHeld=null;ngCredEdits=0;ngCredMen=false;
+ngSay('credits. you made it. ...do NOT touch the credits.');
+ngSay('they scroll. they are official. they are FINAL. mostly.');
+ngCredRender();
+if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}}
+ngCredIv=setInterval(function(){
+try{
+if(!ngActive||ngTalking())return;
+var l=document.getElementById('ngCredList');if(!l)return;
+l.scrollTop+=1;
+if(l.scrollTop+l.clientHeight>=l.scrollHeight-2)l.scrollTop=0;
+}catch(e){}
+},120);
+}
+function ngCredRender(){
+try{
+var st=document.getElementById('ngStage');if(!st)return;
+var l0=document.getElementById('ngCredList');var sc=l0?l0.scrollTop:0;
+var h='<div id="ngSub">CREDITS. do not touch.</div><div id="ngCredList">';
+for(var r=0;r<ngCredits.length;r++){
+h+='<div class="ngCredRole">'+ngCredits[r].role+'</div>';
+for(var n=0;n<ngCredits[r].names.length;n++){
+var nm=ngCredits[r].names[n];
+h+='<div class="ngCredName'+(ngCredHeld===nm?' held':'')+'" data-nm="'+nm+'">'+nm+'</div>';
+}
+}
+h+='</div>';
+st.innerHTML=h;
+var l1=document.getElementById('ngCredList');if(l1)l1.scrollTop=sc;
+var els=document.querySelectorAll?document.querySelectorAll('.ngCredName'):[];
+for(var i=0;i<els.length;i++){
+(function(el){
+var nm=el.getAttribute?el.getAttribute('data-nm'):null;
+if(!nm&&el.dataset)nm=el.dataset.nm;
+el.onclick=function(){ngCredClick(nm||el.textContent)};
+})(els[i]);
+}
+}catch(e){}
+}
+function ngCredFind(name){for(var r=0;r<ngCredits.length;r++){for(var n=0;n<ngCredits[r].names.length;n++){if(ngCredits[r].names[n]===name)return{r:r,n:n}}}return null}
+function ngCredRoleFirst(role){for(var r=0;r<ngCredits.length;r++){if(ngCredits[r].role===role)return ngCredits[r].names[0]||''}return ''}
+function ngMusicDefault(){return /box/i.test(ngCredRoleFirst('MUSIC'))?1:0}
+function ngVoiceSpeed(){var v=ngCredRoleFirst('VOICE ACTING');if(/text to speech/i.test(v))return 25;if(/^a guy$/i.test(v))return 70;return 60}
+function ngDesignDecoy(){var d=ngCredRoleFirst('GAME DESIGN');if(/^men$/i.test(d))return 2;if(/lux/i.test(d))return 0.5;return 1}
+function ngDesignApply(){
+try{
+var ov=document.getElementById('ngOverlay');if(!ov)return;
+var ob=document.getElementById('ngObj');
+var d=ngCredRoleFirst('GAME DESIGN');
+if(/^men$/i.test(d)){ov.style.background='linear-gradient(180deg,#170d1a,#0a0510)';if(ob)ob.style.borderBottomColor='#c86ab0'}
+else if(/lux/i.test(d)){ov.style.background='linear-gradient(180deg,#0d0716,#05030c)';if(ob)ob.style.borderBottomColor='#a06af0'}
+else{ov.style.background='';if(ob)ob.style.borderBottomColor=''}
+}catch(e){}
+}
+function ngCredClick(name){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(!name)return;
+if(!ngCredHeld){ngCredHeld=name;ngCredRender();return}
+if(ngCredHeld===name){ngCredHeld=null;ngCredRender();return}
+var a=ngCredFind(ngCredHeld),b=ngCredFind(name);
+if(!a||!b){ngCredHeld=null;ngCredRender();return}
+var tmp=ngCredits[a.r].names[a.n];ngCredits[a.r].names[a.n]=ngCredits[b.r].names[b.n];ngCredits[b.r].names[b.n]=tmp;
+ngCredHeld=null;
+if(ngCredRoleFirst('DIRECTED BY')!=='obj'){
+var tmp2=ngCredits[a.r].names[a.n];ngCredits[a.r].names[a.n]=ngCredits[b.r].names[b.n];ngCredits[b.r].names[b.n]=tmp2;
+ngCredRender();
+ngSay('DIRECTED BY ME. fixed it.');
+return;
+}
+ngCredEdits++;
+ngCredRender();
+ngDesignApply();
+if(ngCredEdits<=4)ngSay(ngCredSwapLines[ngCredEdits-1]);
+var mpos=ngCredFind('men');
+if(mpos&&ngCredits[mpos.r].role==='GAME DESIGN'&&!ngCredMen){
+ngCredMen=true;
+ngSay('...the game is made by men now. I accept this. she scares me.');
+}
+if(ngCredEdits>=5)ngAfterSpeech(function(){ngChapter10Done()},1000);
+}
+function ngChapter10Done(){
+if(!ngActive||ngChDone)return;
+if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(11)}catch(e){}
+ngChDone=true;
+try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(25*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
+st.innerHTML='<div id="ngEndTitle">THE END</div><div id="ngSub">+25 skill points. (overtime pay.)</div><div id="ngSub">thanks for playing. obj will bill you later.</div>';
+ngSay('...those are the credits now. FINE. roll them.');
+ngSay('THE END. ...do not cry.');
+ngSay('+25 skill points. overtime pay. take it and go.');
+try{ngSfx('win')}catch(e){}
+ngSay('hahahaha.. its been fun. dont come back.');
+ngSay('...hold on. do you feel that.');
+ngSay('the void just... cleared its throat.');
+ngSay('ACT 2. it is coming. ...probably. I am stalling.');
+ngAfterSpeech(function(){ngExit()},1500);
+}
+function ngChapter1Done(){
+if(!ngActive)return;
+var st=document.getElementById('ngStage');if(!st)return;
+try{ngUnlock(2)}catch(e){}
+ngChDone=true;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ CLASSROOM ]</div></div><div id="ngSub">CHAPTER 2: MANDATORY TUTORIAL</div>';
+ngSay('...fine. FINE. the error page is dead. are you happy?');
+ngSay('since you clearly cannot be trusted, you are going back to school. TUTORIAL. now.');
+var door1=document.getElementById('ngDoor');
+if(door1)door1.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngSay('...ugh. FINE. classroom. sit down. do not touch the desks.');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(2)},800);
+};
+}
+var ngMusic=null;
+var ngMusicSrc=null;
+var ngWasBgmPlaying=false;
+function ngMusicStart(){ngMusicApply()}
+function ngMusicStop(){try{if(ngMusic){ngMusic.pause();ngMusic.currentTime=0}}catch(e){}}
+var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'}];
+var ngMusicMode=0;
+function ngMusicLabel(){return ngMusicMode>=ngTracks.length?'MUSIC: OFF':'MUSIC: '+ngTracks[ngMusicMode].n}
+function ngMusicApply(){
+try{
+var b=document.getElementById('ngMenuMusic');if(b)b.textContent=ngMusicLabel();
+if(ngMusicMode>=ngTracks.length){if(ngMusic)ngMusic.pause();return}
+var want=ngTracks[ngMusicMode].f;
+if(!ngMusic||ngMusic.getAttribute('src')!==want){
+if(ngMusic){try{ngMusic.pause()}catch(e){}}
+ngMusic=new Audio(want);ngMusic.loop=true;ngMusic.volume=0.28;
+try{
+if(!audioCtx)initAudio();
+if(audioCtx&&audioAnalyser){
+if(ngMusicSrc){try{ngMusicSrc.disconnect()}catch(e){}}
+ngMusicSrc=audioCtx.createMediaElementSource(ngMusic);
+ngMusicSrc.connect(audioAnalyser);
+}
+}catch(e){}
+}
+ngMusic.currentTime=0;
+var p=ngMusic.play();if(p&&p.catch)p.catch(function(){});
+}catch(e){}
+}
+function ngMusicToggle(){ngMusicMode=(ngMusicMode+1)%(ngTracks.length+1);ngMusicApply()}
+var ngHintBoo=['ugh. fine. hint: ','you NEED a hint? ','hint (booo). ','oh, NOW you ask me. '];
+function ngHardToggle(){
+if(!ngHardUnlocked())return;
+ngHard=!ngHard;
+try{ngSave({hard:ngHard})}catch(e){}
+var b=document.getElementById('ngMenuHard');if(b)b.textContent='HARD MODE: '+(ngHard?'ON':'OFF');
+ngSay(ngHard?'HARD MODE. eleven. everything is eleven now. good luck.':'...coward. smart.');
+}
+function ngMenuToggle(){
+var m=document.getElementById('ngMenu');if(!m)return;
+if(m.style.display==='block'){m.style.display='none';return}
+m.style.display='block';
+ngMenuRefresh();
+}
+function ngMenuRefresh(){
+var p=document.getElementById('ngMenuProg');if(!p)return;
+var t='chapter '+ngCurCh+'/'+ngMaxChapter;
+if(ngCurCh===0)t+='<br>objective: break the button';
+else if(ngCurCh===1)t+='<br>objective: break everything<br>'+Math.max(0,9-ngDead)+' violations remain';
+else if(ngCurCh===2)t+='<br>tutorial step '+Math.max(1,ngTutStep)+'/4';
+else if(ngCurCh===3)t+='<br>objective: open the boxes. poke the core';
+else if(ngCurCh===4)t+='<br>objective: touch every setting';
+else if(ngCurCh===5)t+='<br>objective: fail NOOB_42';
+else if(ngCurCh===6)t+='<br>objective: delete the towers (or watch)';
+else if(ngCurCh===7){var rd=(ngRiftDone.f2p?1:0)+(ngRiftDone.checker?1:0)+(ngRiftDone.shapes?1:0)+(ngRiftDone.mimic?1:0);t+='<br>objective: close 4 rifts ('+rd+'/4)'}
+else if(ngCurCh===8)t+='<br>objective: survive jbo';
+else if(ngCurCh===9)t+='<br>objective: defeat obj';
+else{t+='<br>objective: fix the credits';try{t+='<br>music: '+ngTracks[ngMusicDefault()].n+' · voice: '+ngVoiceSpeed()+'ms'}catch(e){}}
+if(ngCurCh===-1)t='chapter -1/10<br>objective: be quiet (impossible)';
+var ngPid=ngCurrentPuzzle();
+if(ngPid!=='done'&&ngPid!=='ch1done')t+='<br>hints: '+(2-(ngHintBudget[ngPid]||0))+'/2 left';
+p.innerHTML=t;
+var hb=document.getElementById('ngMenuHard');if(hb){hb.style.display=ngHardUnlocked()?'block':'none';hb.textContent='HARD MODE: '+(ngHard?'ON':'OFF')}
+}
+var ngHintRefuse=['no. TWO hints. that was the deal.','hint budget spent. the void is not made of hints.','figure it out. use your eyes. use your clicks.'];
+var ngHints={
+ch0s0:['it is a button. buttons want to be clicked. this one especially.','click the DO NOT CLICK button. i cannot stop you. nobody can.'],
+ch0s1:['it came back. things that come back want to be clicked again.','click SERIOUSLY. STOP. bonus points if you feel nothing.'],
+ch0s2:['last warnings are decorative. proceed.','click THIS IS YOUR LAST WARNING. then click whatever comes next.'],
+ch0s3:['the FINE button is not a trap. it is a door.','click FINE. CLICK THIS ONE. chapter 1 is behind it.'],
+ngp_err:['read the sign. then do what you always do.','destroy the ERROR 404 sign. twice — i repair it once.'],
+ngp_ok:['it says OK. it is not OK. fix that.','kill the OK button, let me repair it, kill it again.'],
+ngp_load:['99% is not 100%. help it never get there.','break the loading bar twice. the second break sticks.'],
+ngp_img:['the image is already broken. finish the job.','click the broken image, twice, with feeling.'],
+ngp_cur:['follow the arrow. trust the arrow.','click the arrow. it respawns once. click it again.'],
+ngp_start:['it says START. start something.','the START GAME button dies like the rest. two clicks.'],
+ngp_hint:['ironic. the hint sign needs no hints. destroy it.','two clicks on the hint sign. the irony is free.'],
+ngp_ads:['free skins. sure. click it.','the ad dies in two clicks like everything else.'],
+ngp_cookie:['cookies must be accepted. violently.','two clicks on the cookies. oatmeal raisin justice.'],
+tut0:['the manual is long. the bottom is longer.','scroll the manual box all the way down, then click NEXT.'],
+tut1:['gentle is a setting you do not have. keep clicking.','click the circle 3 times. step 1 gets waived.'],tut2:['rules are suggestions. squares are targets.','click the square. failing is the correct answer. ...waiting 12 seconds also works. coward\u2019s route.'],
+tut3:['the bar wants to be full. feed it clicks.','click the bar 4 times. 25% per click.'],
+tut4:['graduation requires collecting. collect destructively.','click the diploma. take it apart.'],
+box1:['it is a box. boxes open. you know how.','click the BOX. there is a smaller box inside. obviously.'],
+box2:['smaller box. same solution.','click the SMALLER BOX. smaller box, smaller secrets.'],
+box3:['tiny box. final box. probably.','click the TINY BOX. the core is in there. act surprised.'],
+box4:['smaller than small. you know the drill.','click the MICRO BOX. squint first.'],
+box5:['the last box is also the first box. do not think about it.','click the QUANTUM BOX. act surprised. again.'],
+core:['it is awake. poke it. gently is still not a thing you can do.','click the core 7 times. it will not sit still. hold on to something.'],
+set1:['louder is funnier. push it to the max.','click the volume bar 4 times. enjoy 100% for half a second.'],
+set2:['ULTRA is right there. take it.','click ULTRA twice. it will never stick. that is the point.'],
+set3:['turn yourself off. see what happens.','flip the intruder toggle twice. it comes back on. then it is gone.'],
+set4:['delete everything. what could go wrong.','click DELETE SAVE DATA once. it deletes itself instead. obviously.'],
+set5:['maybe there is a patch that removes you.','click CHECK FOR UPDATES once. there is nothing new.'],
+set6:['uninstall yourself. see how that goes.','click UNINSTALL INTRUDER. it fails. you are structural.'],
+set7:['fresh starts fix everything. probably.','click RESET TO DEFAULTS. watch nothing important change.'],
+set8:['say cheese. or else.','click SCREENSHOT twice. admire the ghosts.'],
+set9:['it speaks void. allegedly.','click VOID SPEAK once. enjoy the fluency.'],
+plat0:['start at the start. remove it.','click the leftmost platform. he has barely moved. probably.'],
+plat1:['second platform. second victim.','platform 2 from the left. break it.'],
+plat2:['the middle holds. barely.','middle platform. delete the middle.'],
+plat3:['he likes the high one. end that.','click the high one. watch him weep.'],
+plat4:['load-bearing. remove it.','second from the right. it is load-bearing. obviously.'],
+plat5:['no finish line, no finishers.','the last platform. delete the concept of winning.'],
+plat6:['the course turns around here.','first platform of the way back. break it.'],
+plat7:['red on the return trip.','red platform, upper row. break it.'],
+plat8:['going back the way you came.','upper row, middle. delete it.'],
+plat9:['almost home. almost.','upper row. break it.'],
+plat10:['red FOUR. a collection. a museum of red.','the fourth red platform. break it. he never stood a chance.'],
+plat11:['where it started, but higher.','last platform. delete everything.'],
+tw0:['the CANNON guards the early lane. remove it.','click the CANNON. unplace it.'],
+tw1:['snipers see everything. blind it.','click the SNIPER. permanently.'],
+tw2:['the grid fears you. prove it.','click TESLA. darken the grid.'],
+r_f2p:['everything costs something. the free pull is free. ish.','pull 3 times, claim the pass, survive the ad. then leave.'],
+r_checker:['one of these tiles is lying about being a floor.','click tiles. wrong ones become holes. miss 6 and i will glow the exit.'],
+r_shapes:['they drift. you click. nature.','catch 3 runaway shapes. they dodge twice, then accept fate.'],
+r_mimic:['five chests. two sparkle. ish.','open chests. grab 2 star shards. mind the teeth.'],
+jb_cal:['the reactor wants attention. give it calibrations.','click CALIBRATE 3 times. jbo will supervise. loudly.'],
+jb_cool:['too hot. do the cold things.','VENT + PURGE + RODS IN until the gauge reads under 50.'],
+jb_hold:['hold the line. hold the temp.','rods stay OUT for 20 seconds. vent and purge to survive. do not hit 100.'],
+boss:['click him. that is the whole strategy.','click obj. 350 hp. pace yourself. hydrate.'],
+shield:['the shield has opinions. remove them.','break all 4 shield nodes. then resume.'],
+echoes:['one of them is him. probably.','pop the fakes. the real one resumes the fight.'],
+core:['it is healing him. rude.','click the core 5 times. it dodges. everything dodges.'],
+choice:['mercy or menace. no pressure.','STOP ends it kindly. KEEP ends it... thoroughly.'],
+cred:['credits are just names. names move.','click a name, then click another name. swap 5 times.'],
+minus1:['touch nothing. he has not seen you. yet.','break something. get noticed. break 3 things total to get thrown out.']
+};
+function ngCurrentPuzzle(){
+if(ngChDone)return 'done';
+if(ngCurCh===0)return 'ch0s'+Math.min(ngClicks,3);
+if(ngCurCh===1){
+var order=['ngp_err','ngp_ok','ngp_load','ngp_img','ngp_cur','ngp_start','ngp_hint','ngp_ads','ngp_cookie'];
+for(var i=0;i<order.length;i++){if(!ngDeadIds[order[i]])return order[i]}
+return 'ch1done';
+}
+if(ngCurCh===3){
+var bx=['box1','box2','box3','box4','box5'];
+for(var bi=0;bi<bx.length;bi++){if(!ngCoreOpened[bx[bi]])return bx[bi]}
+return 'core';
+}
+if(ngCurCh===4){
+var so=['set1','set2','set3','set4','set5','set6','set7','set8','set9'];
+for(var si=0;si<so.length;si++){if(!ngSetDone[so[si]])return so[si]}
+return 'done';
+}
+if(ngCurCh===5){
+var pl=['plat0','plat1','plat2','plat3','plat4','plat5','plat6','plat7','plat8','plat9','plat10','plat11'];
+for(var pi=0;pi<pl.length;pi++){if(ngPlatAlive[pl[pi]])return pl[pi]}
+return 'done';
+}
+if(ngCurCh===6){
+var tw=[['tw0','t0'],['tw1','t1'],['tw2','t2']];
+for(var ti2=0;ti2<tw.length;ti2++){if(ngTdTowers[tw[ti2][1]])return tw[ti2][0]}
+return 'done';
+}
+if(ngCurCh===7){
+var locIds={f2p:'r_f2p',checker:'r_checker',shapes:'r_shapes',mimic:'r_mimic'};
+if(ngRiftLoc&&locIds[ngRiftLoc]&&!ngRiftDone[ngRiftLoc])return locIds[ngRiftLoc];
+if(!ngRiftDone.f2p)return 'r_f2p';
+if(!ngRiftDone.checker)return 'r_checker';
+if(!ngRiftDone.shapes)return 'r_shapes';
+if(!ngRiftDone.mimic)return 'r_mimic';
+return 'done';
+}
+if(ngCurCh===8){
+if(ngTbPhase==='calm')return 'jb_cal';
+if(ngTbPhase==='spike')return 'jb_cool';
+if(ngTbPhase==='over')return 'jb_hold';
+return 'done';
+}
+if(ngCurCh===9){
+if(ngBossPhase==='shield')return 'shield';
+if(ngBossPhase==='echoes')return 'echoes';
+if(ngBossPhase==='core')return 'core';
+if(ngBossPhase==='choice'||ngBossPhase==='brat')return 'choice';
+if(ngBossPhase==='end')return 'done';
+return 'boss';
+}
+if(ngCurCh===-1)return 'minus1';
+if(ngCurCh===10)return 'cred';
+if(ngCurCh===2&&ngManual<3)return 'tut0';
+return 'tut'+Math.max(1,ngTutStep);
+}
+function ngHint(){
+var m=document.getElementById('ngMenu');if(m)m.style.display='none';
+var pid=ngCurrentPuzzle();
+if(pid==='done'&&ngCurCh===6&&!ngChDone){ngSay('nothing left to break. enjoy the show.');return}
+if(pid==='done'||pid==='ch1done'){ngSay('there is nothing left. admire your work.');return}
+var used=ngHintBudget[pid]||0;
+if(used>=2){ngSay(ngHintRefuse[Math.floor(Math.random()*ngHintRefuse.length)]);return}
+ngHintBudget[pid]=used+1;
+var pair=ngHints[pid]||['click it.','click it harder.'];
+var boo=ngHintBoo[Math.floor(Math.random()*ngHintBoo.length)];
+ngSay(boo+pair[used]);
+}
+function ngEnter(){
+if(ngActive)return;
+var fl=document.createElement('div');fl.id='ngFlash';document.body.appendChild(fl);
+void fl.offsetWidth;fl.classList.add('go');
+setTimeout(function(){
+if(fl.parentNode)fl.parentNode.removeChild(fl);
+var ov=document.createElement('div');ov.id='ngOverlay';
+ov.innerHTML='<div id="ngObj"><span class="who">obj: </span><span id="ngObjText"></span></div>'+
+'<div id="ngJbo"><span class="who">jbo: </span><span id="ngJboText"></span></div>'+
+'<div id="ngStage"></div>'+
+'<div id="ngMenuBtn">≡</div>'+
+'<div id="ngMenu"><div id="ngMenuTitle">NON-GAME MENU (there is none)</div><div id="ngMenuProg"></div><button id="ngMenuHint">HINT</button><button id="ngMenuMusic">MUSIC: STANLEY</button><button id="ngMenuHard" style="display:none">HARD MODE: OFF</button><button id="ngMenuLeave">LEAVE THE NON-GAME</button></div>';
+document.body.appendChild(ov);
+ngStashUI();
+try{document.body.classList.add('ng-mode')}catch(e){}
+ngActive=true;
+try{ngWasBgmPlaying=(typeof bgm!=='undefined'&&bgm&&!bgm.paused)}catch(e){ngWasBgmPlaying=false}
+try{if(typeof bgm!=='undefined'&&bgm)bgm.pause()}catch(e){}
+try{if(!ngMusic)ngMusicMode=ngMusicDefault()}catch(e){}
+ngMusicStart();
+if(ngLockIv){try{clearInterval(ngLockIv)}catch(e){}}
+ngLockIv=setInterval(function(){ngLockRefresh()},200);
+try{var mb=document.getElementById('ngMenuBtn');if(mb)mb.onclick=function(){ngMenuToggle()}}catch(e){}
+try{var mh=document.getElementById('ngMenuHint');if(mh)mh.onclick=function(){ngHint()}}catch(e){}
+try{var mmb=document.getElementById('ngMenuMusic');if(mmb){mmb.textContent=ngMusicLabel();mmb.onclick=function(){ngMusicToggle()}}}catch(e){}
+try{var mhb=document.getElementById('ngMenuHard');if(mhb){mhb.style.display=ngHardUnlocked()?'block':'none';mhb.textContent='HARD MODE: '+(ngHard?'ON':'OFF');mhb.onclick=function(){ngHardToggle()}}}catch(e){}
+try{var ml=document.getElementById('ngMenuLeave');if(ml)ml.onclick=function(){ngExit()}}catch(e){}
+var sv=ngLoad();
+try{ngHard=!!(sv.hard&&ngHardUnlocked())}catch(e){ngHard=false}
+var svCh=Math.min(sv.ch||0,ngMaxChapter);
+if(ngForceCh!==null){svCh=Math.min(ngForceCh,ngMaxChapter);ngForceCh=null}
+try{ngDesignApply()}catch(e){}
+ngShowChapter(svCh);
+},450);
+}
+function ngExit(){
+if(!ngActive)return;
+if(ngSayTimer){clearInterval(ngSayTimer);ngSayTimer=null}
+ngSayQueue=[];ngSayTyping=false;ngCurrentJob=null;
+try{ngVoiceStop()}catch(e){}
+for(var wi=0;wi<ngWaiters.length;wi++){try{clearInterval(ngWaiters[wi])}catch(e){}}ngWaiters=[];
+if(ngLockIv){try{clearInterval(ngLockIv)}catch(e){}ngLockIv=null}
+if(ngDriftIv){try{clearInterval(ngDriftIv)}catch(e){}ngDriftIv=null}
+if(ngNoobIv){try{clearInterval(ngNoobIv)}catch(e){}ngNoobIv=null}
+if(ngTdIv){try{clearInterval(ngTdIv)}catch(e){}ngTdIv=null}
+if(ngTbIv){try{clearInterval(ngTbIv)}catch(e){}ngTbIv=null}
+if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
+if(ngBoredIv){try{clearInterval(ngBoredIv)}catch(e){}ngBoredIv=null}
+ngMusicStop();
+try{if(ngWasBgmPlaying&&typeof bgm!=='undefined'&&bgm){var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){});}}catch(e){}
+ngWasBgmPlaying=false;
+ngRestoreUI();
+var ov=document.getElementById('ngOverlay');if(ov)ov.remove();
+try{document.body.classList.remove('ng-mode')}catch(e){}
+ngActive=false;ngClicks=0;
+cubePrint('obj: ...come back never.');
 }
 // caught obj in 4k — phase 1: procedural pull demos, scripts 1-3
 var pullAccess=false;
