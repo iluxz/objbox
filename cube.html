@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -624,7 +624,7 @@ END LOG
 <div class="help-cmd"><span class="hl">void-mute</span> - silence void transmissions</div>
 <div class="help-cmd"><span class="hl">void-unmute</span> - let the void talk again</div>
 <div class="help-cmd" data-skill-gate="finals"><span class="hl">upgrade</span> - open upgrade tree (locked until every skill)</div>
-<div class="help-cmd"><span class="hl">bgm [track]</span> - play void|furnace|friday|faith|cat|moon|stanley|box|off, or toggle</div>
+<div class="help-cmd"><span class="hl">bgm [track]</span> - play void|furnace|friday|faith|cat|oneshot|moon|stanley|box|off, or toggle</div>
 <div class="help-cmd"><span class="hl">weather</span> &lt;rain|snow|off|auto&gt; — change weather</div>
 <div class="help-cmd"><span class="hl">sort</span> &lt;algo&gt; [size] [speed] — sorting visualizer (bubble,selection,insertion,quick,merge,shell)</div>
 <div class="help-cmd"><span class="hl">sortstop</span> — stop sort visualization</div>
@@ -1068,12 +1068,12 @@ bgm.pause();moonEl.play().catch(function(){});
 if(!odActive)showOdWarn();
 }else{
 moonEl.pause();
-if(odActive)hideOdWarn(true);
+if(odActive)hideOdWarn(false);
 loadDayBgm();if(!bgm.paused||track==='auto')bgm.play().catch(function(){});
 }
 }
-var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3'};
-var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet'};
+var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4'};
+var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)'};
 function bgmTrackName(){try{var s=bgm.src;for(var k in bgmNames){if(s.includes(k))return bgmNames[k]}}catch(e){}return activeTrack==='moon1857'?'moon_rot_1857':'void drone'}
 function stopGameMusic(){try{ngMusicMode=ngTracks.length;if(typeof ngMusic!=='undefined'&&ngMusic)ngMusic.pause();var _mb=document.getElementById('ngMenuMusic');if(_mb)_mb.textContent=ngMusicLabel()}catch(e){}}
 function playBgm(arg,say){
@@ -1088,7 +1088,7 @@ if(!audioCtx)initAudio();
 activeTrack='bgm';
 try{moonEl.pause()}catch(e){}
 stopGameMusic();
-if(odActive)hideOdWarn(true);
+if(odActive)hideOdWarn(false);
 if(!bgm.src.includes(f)){bgm.src=f;try{bgm.load()}catch(e){}}
 bgm.play().catch(function(){});
 say('music: '+bgmNames[f]);return true}
@@ -1114,7 +1114,7 @@ if(odWarnTimer){clearInterval(odWarnTimer);odWarnTimer=null}
 document.getElementById('odWarn').style.display='none';
 if(!silent){odActive=false;var fl=document.getElementById('odFlash');fl.className='';document.body.style.filter='';var vg=document.getElementById('vignette');if(vg)vg.style.background='';}
 }
-function odKill(){if(odWarnTimer){clearInterval(odWarnTimer);odWarnTimer=null}document.getElementById('odWarn').style.display='none';odActive=false;var fl=document.getElementById('odFlash');fl.className='';document.body.style.filter='';if(activeTrack==='moon1857'){moonEl.pause();activeTrack='bgm';loadDayBgm()}}
+function odKill(){if(odWarnTimer){clearInterval(odWarnTimer);odWarnTimer=null}document.getElementById('odWarn').style.display='none';odActive=false;var fl=document.getElementById('odFlash');fl.className='';document.body.style.filter='';var vg=document.getElementById('vignette');if(vg)vg.style.background='';if(activeTrack==='moon1857'){moonEl.pause();activeTrack='bgm';loadDayBgm()}}
 moonEl.addEventListener('play',function(){if(!audioCtx)initAudio()});
 
 // ┌──────────────────────────────────────────────────────────────┐
@@ -1447,9 +1447,10 @@ travelTo(resolved);
 return true}},
 'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
-'bgm':{help:'bgm [void|furnace|friday|faith|cat|moon|stanley|box|off] - play a track or toggle music',fn:function(a){
+'bgm':{help:'bgm [void|furnace|friday|faith|cat|oneshot|moon|stanley|box|off] - play a track or toggle music',fn:function(a){
 if(playBgm(a[0]||'',function(t){cubePrint(t)}))return true;
-cubeError('bgm: pick void, furnace, friday, faith, cat, moon, stanley, box, off (or nothing to toggle)');return true}},
+cubeError('bgm: pick void, furnace, friday, faith, cat, oneshot, moon, stanley, box, off (or nothing to toggle)');return true}},
+'odkill':{help:'odkill - antidote: end overdose, clear screen filters, restore normal music',fn:function(){odKill();cubeOk('overdose cleared. the room stops ringing.');return true}},
 'skill':{help:'skill - open the skill tree',fn:function(){skillOpen();return true}},
 'slots':{help:'slots - open the floppy shelf (5 save disks, backup/restore to move browsers)',fn:function(){slotsOpen();return true}},
 'buymax':{help:'buymax - toggle buy-max (needs: Buy Max, area 3)',fn:function(){toggleBuyMax();return true}},
@@ -2365,7 +2366,7 @@ cubePrint('  cube.get            show inner cube count');
 cubePrint('  cube.morph <n>      change shape (0-7: cube/tri/sphere/cyl/torus/knot/icosa/octa)');
 cubePrint('  cube.theme <n>      switch color theme (1-7)');
 cubePrint('  cube.glitch         trigger glitch effect');
-cubePrint('  cube.bgm [track]    play void|furnace|friday|faith|cat|moon|stanley|box|off, or toggle');
+cubePrint('  cube.bgm [track]    play void|furnace|friday|faith|cat|oneshot|moon|stanley|box|off, or toggle');
 cubePrint('  skill               open the skill tree');
 if(skillAllFinals())cubePrint('  upgrade             open upgrade tree');
 else cubeDim('  upgrade             upgrade tree (locked — buy every skill)');
@@ -7611,7 +7612,6 @@ if(ngSayQueue.length){setTimeout(function(){if(ngActive)ngSayNext()},120)}
 }
 var ngDecoys=0;
 var ngDriftIv=null;
-var ngDodgeIds={ngp_cookie:1,ngp_ads:1,ngp_hint:1};
 var ngDecoyTexts=['FREE SKINS (real)','DO NOT CLICK (reverse)','[ MYSTERY ]','click me, i dare you','definitely not a trap'];
 function ngDodge(el,maxDodges){
 if(!el||!el.addEventListener)return;
@@ -9227,7 +9227,7 @@ var ngMusicSrc=null;
 var ngWasBgmPlaying=false;
 function ngMusicStart(){ngMusicApply()}
 function ngMusicStop(){try{if(ngMusic){ngMusic.pause();ngMusic.currentTime=0}}catch(e){}}
-var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'}];
+var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'},{f:'oneshot_trap.mp4',n:'ONESHOT'}];
 var ngMusicMode=0;
 function ngMusicLabel(){return ngMusicMode>=ngTracks.length?'MUSIC: OFF':'MUSIC: '+ngTracks[ngMusicMode].n}
 function ngMusicApply(){
@@ -9510,7 +9510,7 @@ if(cubeCheckBusy){cubePrint('cubecheck: already scanning.');return}
 cubeCheckBusy=true;
 cubePrint('cubecheck: scanning walls for graffiti...');
 setTimeout(function(){cubePrint('cubecheck: pass 2/2 - cross-referencing transmissions...')},900);
-setTimeout(function(){
+setTimeout(function(){	
 try{
 if(Math.random()<0.4){
 var where=['north wall, sector 7g','the containment seam','behind the outer shell','inner cube 3, fresh paint','the floor under the palette'][Math.floor(Math.random()*5)];
@@ -9635,7 +9635,7 @@ if(_e>=_ecap)return;
 skillState.entropy=_e+1;skillSave();
 cubePrint('[upgrade] entropy: +5% income forever (stack '+skillState.entropy+'/'+_ecap+')');
 },600000/(1+upLv('skill_goldenAge')));
-
+//slammy
 </script>
 </body>
 </html>
