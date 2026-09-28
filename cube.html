@@ -3583,73 +3583,6 @@ var patchLog=[
 'seconds get suspicion. minutes get counting. hours get a cold seat. days get a warning (and an invitation).',
 'first visit gets a greeting. every visit gets a number. the void keeps receipts.'
 ]},
-{date:'2026-09-27',tier:'update',title:'STATIC (act 2, ch11)',notes:[
-'ACT 2 begins. play 11 (requires ch10 done). max chapter is now 20.',
-'new shared infra: ngGarble text scramble, signal tuner, static sfx, tumor-voice line style.',
-'ch11 STATIC: tune 3 rounds of scrambled signal (randomized targets + shrinking tolerance every run), obj furious throughout, INTERLOPER whisper at the end.',
-'hard mode preserved for ACT 1 finishers (was gated on old max chapter). tuner steps shrink in hard mode.',
-'ch12 door opened in the WRONG ADDRESS update below.'
-]},
-{date:'2026-09-27',tier:'update',title:'WRONG ADDRESS (act 2, ch12)',notes:[
-'ch11 done screen now unlocks + opens ch12. the taped door was real all along.',
-'ch12 WRONG ADDRESS: a fake cube# tab, confidently wrong about everything. 6 anomalies (8 in hard mode).',
-'every anomaly is interactive now: cycle the prompt to cube#>, pick the real time from 3 clocks, decode the transmission in 3 clicks, catch the visit counter above 1, interrogate the greeting 3 times, flip the display to teal.',
-'all evidence logged -> keypad finale: 4-digit code is your REAL clock time (HHMM). the fake clock lied. yours does not.',
-'wrong obj defends each find. all found breaks character: ...you are not mine.',
-'first locked door used the caution-tape CSS (it sat unused since ACT 1). ch13 door is taped now.',
-'+30 skill points. (detective fee.)'
-]},
-{date:'2026-09-27',tier:'update',title:'BLACKOUT (act 2, ch13)',notes:[
-'ch12 done screen now unlocks + opens ch13.',
-'ch13 BLACKOUT: the dark eats light. your cursor is a flashlight (110px radius, follows the mouse).',
-'quest chain: find the fuse, find the bulb, then wake the EXIT. 3 decoys: a rock, a painted exit, an asleep grue (do not wake it).',
-'opens with the fake-obj debrief (discount obj. value-brand obj. obj-flavored). obj whispers at 85ms pacing.',
-'jbo screams once mid-chapter because he cannot find you. obj shushes him.',
-'v2: positions randomize every run + reshuffle after every find. light shrank (80px, 60px hard). brownouts kill the light every 25s. grue wakes on 2nd poke (1st in hard) for a 4s blackout. hard also reshuffles every 5 clicks.',
-'+35 skill points. (overtime.) ch14 door is taped.'
-]},
-{date:'2026-09-27',tier:'update',title:'SIGNAL LOST (act 2, ch14)',notes:[
-'ch13 done screen now unlocks + opens ch14.',
-'ch14 SIGNAL LOST: obj is offline. core leads her first full chapter.',
-'symbol-sequence puzzle: watch the pattern, repeat it. 4 rounds (lengths 3-6), randomized every run. fail = polite devastation + replay.',
-'core roasts politely (somehow worse). obj interjects twice and hates all of it.',
-'new #ngCore voice bar (rose) + ngCore() queue voice, reusable for ch15+. hints in ch14 are core-voiced.',
-'hard mode: pattern flashes faster (380ms vs 600ms).',
-'mercy rule: 2 fails on a round = one slow replay (850ms). core suffers with you.',
-'+40 skill points. (tutoring fee.) ch15 door is taped.'
-]},
-{date:'2026-09-27',tier:'update',title:'INTERLOPER (act 2, ch15)',notes:[
-'ch14 done screen now unlocks + opens ch15.',
-'ch15 INTERLOPER: first contact. tumor-voice debut (lowercase, hungry, >: energy, garble-resolved lines).',
-'interrogation: 4 questions read from YOUR save (visit count, STOP/KEEP finale, obj\u2019s favorite thing) + a rigged finale (do you like me? — every answer is correct).',
-'v2: 6 questions (added whisper-memory + dark-guide-memory — unguessable without playing), tumor speaks slower (2.2s resolve + hold), second obj interject.',
-'wrong answers loop smugger each time; 3rd fail gives the answer. hard mode reshuffles options on every fail.',
-'obj sidelined the whole chapter (do not answer it. / it is reading your save. / we are leaving. NOW. (again.)).',
-'+45 skill points. (interrogation fee.) ch16 door is taped.'
-]},
-{date:'2026-09-27',tier:'update',title:'achievements',notes:[
-'new command: ach. 25 achievements GUI (progress bar, gold unlocks), persistent, ride the shelf backup like everything else.',
-'progression (visits 1/10/100, chapters, both finales), admin, packages, entropy, hard mode — detected automatically.',
-'event ones: rm -rf / (undeletable), winget (deprecated), transmit nyarch (forbidden word), reactor meltdown, waking the grue, leaving the non-game.',
-'v2: cb_menu survival (5/10/30/60 min best streak, falls + exits close it) + oracle 1% wink x5 (blessed). survival odds at 12%/30s: 5min 28%, 10min 8%, 30min legend, 60min myth.',
-'v3: witness (25 winks, ≈2500 asks) pays +25 upgrade points. the nothing-upgrade of achievements.',
-'v4: 13 more (39 total). night owl, completionist, nothing-core, hoarder, overclocked, archivist, author, silence, should-not-have, frequent caller (100 asks), doorstep (ch19), absolute zero (freezedown), voidborn (breach X).',
-'v5: 8 more (47 total). lux batch: action 2, elegant (zero mistakes — every buzz counts, incl. tuner/tut/checker/decoys), professional robbery (<30min full run), running from the internet (<40min hard), fiddlesticks (act1 hard replay), superprofessional (act2 hard), nyarch x10 (obj snaps on #10), oxford (48 secret OED words to obj). run timer starts on fresh play, hard flags recorded at completion.',
-'v6: dedup + sections (54 total). deleted finished business (dupe of action 2) + doorstep (cut per lux). ach window now has 8 sections: void itself / non-game / endings / admin & toys / long grind / skill & self / speedrun & prestige / act 2 case files (lil bro). dividers excluded from count + progress bar.',
-'v7: trivial (55 total). elegant on hard mode. flawless full run with eleven on. pops alongside elegant when you pull it off.',
-'v8: every achievement pays out. reward table (55 entries): gimmes +5 skill, milestones +10-15, grinds +15-30, prestige +25-50 skill +5-25 upgrade. witness keeps its bespoke +25u. new unlocks pay instantly with a receipt line; old unlocks get backpaid in one lump sum next boot (tracked via cube_ach_paid, no double-pay). window rows show payouts.',
-'v9: giveach admin command. unlocks every achievement at once, backpaid in bulk via achRetro (2 lines, flood-safe). listed in voidscript + admin panel help.',
-'v10: brute (56 total). the final boss: flawless + sub-30min + hard, all in ONE run (own cube_brute flag, no cross-run contamination). pays +100 skill +50 upgrade. sits after trivial.',
-'v11: 7 side quests (63 total). globe-trotter (all 9 zones, visited-set in travel code), meet the family (jbo reactor trigger), shut up (flood guard trip), blacksmith (forge .vsc to /void/pkgs), sorted (sort viz complete), under pressure (reactor pressure warning), pen pal (50 transmits). balance: resident 15->25, menu_60 30->50, trivial 50/25->75/40.',
-'datawipe kills them. the void giveth and the void datawipeth.'
-]},
-{date:'2026-09-27',tier:'bug fix',title:'the void has a flood policy',notes:[
-'loop 5000 oracle as admin hung the tab (5000 DOM prints, no cap applies to admins).',
-'new output flood guard: >300 terminal lines in 5s auto-terminates the script, admin or not. legit bursts (help ~60) never touch it.',
-'stuck kill-flag now resets on every script run (a killed script no longer poisons the next one).',
-'studio preview unroll capped for admins too (999999 -> 1000).',
-'ps: the studio KILL button exists. use it before the page gives up.'
-]},
 {date:'2026-09-28',tier:'beyond rework',title:'Stimulation',notes:[
 'achievements went from a checklist to an economy. 63 total across 9 sections (void itself / non-game / endings / admin & toys / long grind / skill & self / speedrun & prestige / side quests / act 2 case files).',
 'lux batch: action 2, professional robbery (<30min), running from the internet (<40min hard), fiddlesticks (act1 hard replay), superprofessional (act2 hard), nyarch x10 (obj snaps on #10), oxford (48 secret OED words).',
@@ -3659,21 +3592,6 @@ var patchLog=[
 'giveach admin command: all 63 at once, paid in bulk, 2 lines. deduped finished business + doorstep along the way.',
 'balance: resident 15->25, menu_60 30->50, trivial 50/25->75/40. brute stays king.'
 ]},
-{date:'2026-09-28',tier:'patch',title:'passphrase rotated',notes:[
-'admin passphrase rotated. old hash retired.',
-'boot purge bumped (purge2): wipes cube_admin + strips it from all 5 shelf slots on next load, with a notice. re-auth with the current passphrase.',
-'shelf export/import already skip cube_admin both directions. play command still gates chapters by unlock (admins bypass by design).'
-]},
-{date:'2026-09-28',tier:'patch',title:'hud timers',notes:[
-'always-on-top HUD: SESSION (page uptime) + RUN (live speedrun clock, tenths). fixed top-right, click-through, self-heals across non-game stash cycles.',
-'RUN reads the same cube_run_start the achievements use — what you see is what robbery/netrun judge. green under par (30min, 40min hard), red over, dim when idle.',
-'hidden in screenshot mode like everything else.'
-]},
-{date:'2026-09-28',tier:'patch',title:'hud timers v2 + play 0 fix',notes:[
-'HUD is one draggable pill now (position persists to shelf). default spawn raised after it overlapped the palette, the clock, and obj in turn.',
-'RUN is active-play-time: freezes on exit, ignores refresh gaps, resumes on re-entry. speedrun achievements judge play time, not tab-open time. exiting mid-run works as a pause.',
-'fixed play 0 landing in ch20 (fresh-run reset skipped the forceChapter assignment; bare play worked, play 0 did not). routing simmed for all inputs.'
-]}
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8'};
 var updWin=guiCreateWin('cube# update log',420,520,false);
@@ -4061,6 +3979,7 @@ var ngIsAdmin=false;
 try{ngIsAdmin=(typeof isAdmin!=='undefined'&&isAdmin)}catch(e){}
 if(fnum>maxAllowed&&!ngIsAdmin){cubeError('play: chapter '+fnum+' is locked. complete chapter '+(fnum-1)+' first.');return}
 ngForceCh=Math.min(fnum,ngMaxChapter);
+try{localStorage.setItem('cube_run_valid','0');localStorage.removeItem('cube_run_ms')}catch(e){}
 if(fnum===18&&typeof ngDoorReplayReset==='function'){ngDoorReplayReset()}
 if(fnum===19&&typeof ngMornReplayReset==='function'){ngMornReplayReset()}
 }
@@ -5869,7 +5788,7 @@ function achSkill(){try{return JSON.parse(localStorage.getItem('cube_skill_state
 function achOracleN(){try{return parseInt(localStorage.getItem('cube_oracle_n')||'0',10)||0}catch(e){return 0}}
 function ngMistake(){try{var s=ngLoad();ngSave({mist:(s.mist||0)+1})}catch(e){}}
 function ngMistN(){try{return ngLoad().mist||0}catch(e){return 0}}
-function ngRunMark(){try{localStorage.setItem('cube_run_start',String(Date.now()));try{localStorage.removeItem('cube_run_ms')}catch(e){}try{localStorage.setItem('cube_run_acc','0');localStorage.removeItem('cube_run_last')}catch(e){}}catch(e){}}
+function ngRunMark(){try{localStorage.setItem('cube_run_start',String(Date.now()));try{localStorage.removeItem('cube_run_ms')}catch(e){}try{localStorage.setItem('cube_run_acc','0');localStorage.removeItem('cube_run_last')}catch(e){}try{localStorage.setItem('cube_run_valid','1')}catch(e){}}catch(e){}}
 function ngRunAcc(){try{return parseInt(localStorage.getItem('cube_run_acc')||'0',10)||0}catch(e){return 0}}
 function ngRunMs(){try{var acc=ngRunAcc();var start=0;try{start=parseInt(localStorage.getItem('cube_run_start')||'0',10)||0}catch(e){};if(start<=0&&acc<=0)return -1;var active=false;try{active=(typeof ngActive!=='undefined'&&ngActive)}catch(e){};if(active){var last=0;try{last=parseInt(localStorage.getItem('cube_run_last')||'0',10)||0}catch(e){};if(last>0)acc+=Date.now()-last}return acc}catch(e){return -1}}
 function ngNyarchN(){try{return parseInt(localStorage.getItem('cube_nyarch_n')||'0',10)||0}catch(e){return 0}}
@@ -7824,7 +7743,7 @@ applySkillPan();
 function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active')}
 function openUpgradeTree(){skillOpen();if(!skillAllFinals()){cubeWarn('upgrade locked — buy every skill');return}panSkillToUpgrade()}
 function skillClose(){var el=document.getElementById('skillTree');if(el)el.classList.remove('active')}
-var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_run_acc','cube_run_last'];
+var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_run_acc','cube_run_last'];
 var slotDefNames=['main','testing','slot 3','slot 4','slot 5'];
 function slotRead(n){try{var s=localStorage.getItem('cube_slot_'+n);if(!s)return null;var b=JSON.parse(s);if(b&&typeof b==='object')return b}catch(e){}return null}
 function slotActive(){try{var a=parseInt(localStorage.getItem('cube_active_slot')||'1',10);if(a>=1&&a<=5)return a}catch(e){}return 1}
@@ -9716,7 +9635,7 @@ if(!ngActive||ngChDone)return;
 if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
 var st=document.getElementById('ngStage');if(!st)return;
 try{ngUnlock(11)}catch(e){}
-try{if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act1_hard','1')}}catch(e){}
+try{if(typeof ngHard!=='undefined'&&ngHard){var _rv1='0';try{_rv1=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv1==='1')localStorage.setItem('cube_act1_hard','1')}}catch(e){}
 try{if(typeof achScan==='function')achScan()}catch(e){}
 ngChDone=true;
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(25*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
@@ -11928,10 +11847,7 @@ if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
 ngChDone=true;
 try{localStorage.setItem('cube_act2','1')}catch(e){}
 try{if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act2_hard','1')}}catch(e){}
-try{var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms))}}catch(e){}
-try{if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}}catch(e){}
-try{if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1')}}catch(e){}
-try{if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=1800000){localStorage.setItem('cube_brute','1')}}}catch(e){}
+try{var _rv='0';try{_rv=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv==='1'){var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms))}if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1');var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=1800000){localStorage.setItem('cube_brute','1')}}if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act2_hard','1')}}else{try{localStorage.removeItem('cube_run_ms')}catch(e){}}}catch(e){}
 try{if(typeof achScan==='function')achScan()}catch(e){}
 try{ngUnlock(21)}catch(e){}
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
