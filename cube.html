@@ -20,6 +20,28 @@ body.ng-mode .transmission,body.ng-mode .gui-window{display:none!important}
 @keyframes ngIn{from{opacity:0}to{opacity:1}}
 #ngObj{width:100%;text-align:center;padding:26px 20px 18px;color:#d8e6f2;font-size:19px;letter-spacing:1px;min-height:76px;border-bottom:1px solid #1a2a3a}
 #ngObj .who{color:#2bd0d0}
+.ngCoreOrb{width:110px;height:110px;margin:4px auto 2px;border-radius:50%;background:radial-gradient(circle at 50% 42%,#ffd7ec 0%,#ff9ecd 28%,#7a2d5a 62%,#12060e 100%);box-shadow:0 0 34px rgba(255,158,207,0.55),0 0 90px rgba(255,158,207,0.25);animation:corePulse 3.2s ease-in-out infinite}
+@keyframes corePulse{0%,100%{transform:scale(1);box-shadow:0 0 34px rgba(255,158,207,0.55),0 0 90px rgba(255,158,207,0.25)}50%{transform:scale(1.06);box-shadow:0 0 52px rgba(255,190,220,0.8),0 0 120px rgba(255,158,207,0.35)}}
+#ngSeqShow{transition:text-shadow .18s ease}
+#ngSeqShow.ngSeqGlow{text-shadow:0 0 14px #ffd7ec,0 0 34px #ff9ecd,0 0 70px rgba(255,158,207,0.8)}
+.ngGlitchIn{animation:glitchIn .38s steps(2) both}
+@keyframes glitchIn{0%{transform:translate(-6px,2px);filter:hue-rotate(90deg) saturate(3);opacity:0}30%{transform:translate(5px,-3px);filter:none;opacity:1}55%{transform:translate(-3px,1px) skewX(6deg)}80%{transform:translate(2px,0)}100%{transform:none}}
+.ngDreamKiller{font-family:Consolas,monospace;font-size:64px;letter-spacing:10px;color:#ff2244;text-align:center;margin:6px 0;text-shadow:-3px 0 #00e5ff,3px 0 #ff00aa;animation:killerJitter .3s steps(2) infinite}
+@keyframes killerJitter{0%{transform:translate(0) skewX(0)}25%{transform:translate(-4px,2px) skewX(4deg)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,-2px) skewX(-4deg)}100%{transform:translate(0)}}
+.ngDreamFxA{position:absolute;inset:0;pointer-events:none}
+.ngDreamVig{background:radial-gradient(ellipse at center,transparent 38%,rgba(180,0,0,0.6) 100%);animation:vigPulse 1s ease-in-out infinite}
+@keyframes vigPulse{50%{opacity:.35}}
+.ngDreamRust{background:radial-gradient(ellipse at center,rgba(120,60,10,0.15) 0%,rgba(150,70,10,0.55) 100%);animation:rustSpread 2.4s ease-in forwards}
+@keyframes rustSpread{from{opacity:0;transform:scale(1.35)}to{opacity:1;transform:scale(1)}}
+.ngDreamShred{background:repeating-linear-gradient(90deg,transparent 0 26px,rgba(0,0,0,0.88) 26px 34px);animation:shredSlide .45s linear infinite}
+@keyframes shredSlide{to{transform:translateX(34px)}}
+.ngDreamFlash{background:#fff;animation:flashFade .6s ease-out forwards}
+@keyframes flashFade{from{opacity:.9}to{opacity:0}}
+.ngDreamPhoneGlow{animation:phoneRing .5s ease-in-out infinite}
+@keyframes phoneRing{50%{box-shadow:0 0 26px rgba(255,233,168,0.95)}}
+.ngDreamSnow{background:repeating-linear-gradient(115deg,rgba(200,220,255,0.07) 0 3px,transparent 3px 9px);animation:snowDrift 1.2s linear infinite}
+@keyframes snowDrift{to{transform:translate(-36px,36px)}}
+#ngDreamMain .ngtopt{width:auto!important;min-width:220px;max-width:88vw;padding:10px 26px;white-space:nowrap}
 #ngJbo{width:100%;text-align:center;padding:10px 20px 14px;color:#ffd8b0;font-size:18px;letter-spacing:1px;border-bottom:1px solid #3a2a1a;min-height:20px;display:none}
 #ngJbo .who{color:#ff8a2a;font-weight:bold}
 #ngCore{width:100%;text-align:center;padding:10px 20px 14px;color:#f5d8e8;font-size:18px;letter-spacing:1px;border-bottom:1px solid #3a1a2a;min-height:20px;display:none}
@@ -746,6 +768,9 @@ END LOG
 <div class="help-cmd"><span class="hl">oracle</span> — the void answers one question</div>
 <div class="help-cmd"><span class="hl">sigpeek</span> — force a transmission now</div>
 <div class="help-cmd"><span class="hl">mail</span> — read your act 2 mail</div>
+<div class="help-cmd"><span class="hl">bios</span> — open the cube setup utility</div>
+<div class="help-cmd"><span class="hl">jedec</span> — query timing control status</div>
+<div class="help-cmd"><span class="hl">dream</span> — fall asleep in the void</div>
 <div class="help-cmd"><span class="hl">particlesurge</span> — temporarily triple particle count</div>
 <div class="help-cmd"><span class="hl">objmode</span> — briefly speak as obj</div>
 <div class="help-cmd"><span class="hl">xray</span> — dump skill + theme state</div>
@@ -808,8 +833,8 @@ bgm.addEventListener('play',function(){if(typeof currentZone!=='undefined'&&curr
 // │  CLOCK                                                     │
 // └──────────────────────────────────────────────────────────────┘
 function updateClock(){var n=new Date();
-document.getElementById('clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-document.getElementById('date').textContent=n.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
+var _ck=document.getElementById('clock');if(_ck)_ck.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+var _dt=document.getElementById('date');if(_dt)_dt.textContent=n.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
 updateClock();setInterval(updateClock,1000);
 
 // ┌──────────────────────────────────────────────────────────────┐
@@ -1050,7 +1075,22 @@ _attunReply=_attunFallback[Math.floor(Math.random()*_attunFallback.length)];
 setTimeout(function(){termPrint('obj: '+_attunReply,'rgba(56,232,232,0.8)')},600);
 }
 }
-setInterval(function(){if(typeof demoPlaying!=='undefined'&&demoPlaying)return;var _tx=(0.4+0.25*((typeof _skillTxRateLv!=='undefined')?_skillTxRateLv:0))*(window._skillTxBonus||1);if(pkgEffects&&pkgEffects.signalSniffer)_tx*=2.2;if(Math.random()<_tx){showTransmission();if(typeof upLv==='function'&&typeof grantPts==='function'){var _te=upLv('skill_txEcho');if(_te>0){grantPts(0.2*_te*ptMult());skillPtsRefresh()}}var _br=(typeof skillState!=='undefined'&&skillState.upgrades.skill_txBurst)?skillState.upgrades.skill_txBurst.lv:0;if(_br>0&&Math.random()<0.12*_br)showTransmission()}},8000);
+setInterval(function(){if(typeof demoPlaying!=='undefined'&&demoPlaying)return;var _tx=(0.4+0.25*((typeof _skillTxRateLv!=='undefined')?_skillTxRateLv:0))*(window._skillTxBonus||1);if(pkgEffects&&pkgEffects.signalSniffer)_tx*=2.2;try{_tx*=tsMul()}catch(e){}if(Math.random()<_tx){showTransmission();if(typeof upLv==='function'&&typeof grantPts==='function'){var _te=upLv('skill_txEcho');if(_te>0){grantPts(0.2*_te*ptMult());skillPtsRefresh()}}var _br=(typeof skillState!=='undefined'&&skillState.upgrades.skill_txBurst)?skillState.upgrades.skill_txBurst.lv:0;if(_br>0&&Math.random()<0.12*_br)showTransmission()}},8000);
+function ngMidnightDream(){
+try{
+var d=new Date();if(d.getHours()!==0)return;
+var day=d.toDateString(),done=null;
+try{done=localStorage.getItem('cube_dream_day')}catch(e){}
+if(done===day)return;
+if(typeof ngActive!=='undefined'&&ngActive)return;
+try{localStorage.setItem('cube_dream_day',day)}catch(e){}
+try{if(typeof cubeDim==='function')cubeDim('it is midnight. the void dreams. you dream too.')}catch(e){}
+try{ngDreamLong=true}catch(e){}
+try{ngForceCh=21;ngEnter()}catch(e){}
+}catch(e){}
+}
+try{setInterval(function(){try{ngMidnightDream()}catch(e){}},30000)}catch(e){}
+try{setTimeout(function(){try{ngMidnightDream()}catch(e){}},9000)}catch(e){}
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  AUDIO ANALYSIS                                            │
@@ -1514,7 +1554,7 @@ if(isAdmin){cubePrint('admin: already authenticated.');return true}
 if(!a.length){cubeError('admin: usage admin <passphrase>');return true}
 var attempt=a.join(' ');
 cubePrint('authenticating...');
-setTimeout(function(){if(voidHash(attempt)==='53bfb51b659bcdae769314a6c7871ffa00fb73b2c3720e97910293578e161e33'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
+setTimeout(function(){if(voidHash(attempt)==='9e1b274e268e0a5419e14f109cbf07a199d4938108888c0b5b16a92fec80b193'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
 return true}},
 'alwaysontop':{help:'alwaysontop <on|off> — make active window stay on top',fn:function(a){
 if(!activeWin||!guiWins[activeWin]){cubeError('alwaysontop: no active window');return true}
@@ -1575,6 +1615,9 @@ var state=a[0]?a[0].toLowerCase():'on';
 window._edgeWalk=state==='on';
 cubePrint('edgewalk: '+state+(state==='on'?' — your boots grip the checkerboard. the edge cannot take you.':' — the edge is back. watch your step.'));
 return true}},
+'bios':{help:'bios - open the cube setup utility',fn:function(a){biosOpen();return true}},
+'jedec':{help:'jedec - query timing control status',fn:function(a){cubePrint('JEDEC TIMING CONTROL: '+(jedecOff()?'DISABLED. everything runs 1.25x. stability not guaranteed.':'ENFORCED. timings optimal. the void is stable because JEDEC holds it still.'));return true}},
+'dream':{help:'dream - fall asleep in the void',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}var seeded=false;try{seeded=localStorage.getItem('cube_pwned')==='1'}catch(e){}cubePrint(seeded?'you sleep. the void shuffles tonight\u2019s loop.':'you sleep. the void tucks you in. (it does not.)');setTimeout(function(){try{ngDreamSeed=seeded?(Date.now()%2147483647):null}catch(e){}ngForceCh=21;ngEnter()},1500);return true}},
 'override':{help:'override theme <1-8> — access hidden themes',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
 if(!a.length||a[0].toLowerCase()!=='theme'){cubeError('usage: override theme <1-8>');return true}
@@ -2308,9 +2351,14 @@ step();
 // │  PACKAGE FORGE                                             │
 // └──────────────────────────────────────────────────────────────┘
 function forgePackage(name){
+name=String(name||'').toLowerCase().replace(/[^a-z0-9_\-\.]/g,'').replace(/^\.+/,'');
+if(!name){cubeError('usage: void forge <name>');return}
 if(pkgs[name]){cubeError('package "'+name+'" already exists in the void');return}
-cubePrint('forging package "'+name+'"...');
-cubePrint('');
+var fp='/void/pkgs/'+name.replace(/\.vsc$/,'')+'.vsc';
+if(typeof fs!=='undefined'&&fs[fp]){cubeError('"'+fp+'" already forged. try: void run '+fp);return}
+if(typeof fs!=='undefined'){fs[fp]={type:'file',content:'// forged by the void\n// one op per line. try: say hello\nsay forged.'};try{var fpar=getParent(fp);if(fs[fpar]&&fs[fpar].type==='dir')fs[fpar].children.push(getBase(fp))}catch(e){}}
+try{ach('blacksmith')}catch(e){}
+cubeOk('forged '+fp+' (blacksmith: achievement checked)');
 cubePrint('voidscript editor — one op per line. available ops:');
 var ops=Object.keys(voidScriptLang);
 for(var k=0;k<ops.length;k++){cubePrint('  '+ops[k].padEnd(8)+' — '+voidScriptLang[ops[k]].help)}
@@ -3085,6 +3133,7 @@ if(fs[destPath]&&fs[destPath].type==='dir')destPath=(destPath==='/'?'':destPath)
 var destParent=getParent(destPath);
 if(!fs[destParent]||fs[destParent].type!=='dir'){cubeError(destParent+': no such directory');return}
 fs[destPath]={type:'file',content:fs[sourcePath].content};
+try{if(destPath.indexOf('/void/pkgs/')===0&&/\.vsc$/.test(destPath)){ach('blacksmith')}}catch(e){}
 if(fs[destParent].children.indexOf(getBase(destPath))===-1)fs[destParent].children.push(getBase(destPath));
 if(cmd==='mv'){var sourceParent=getParent(sourcePath);if(fs[sourceParent]){var sourceIndex=fs[sourceParent].children.indexOf(getBase(sourcePath));if(sourceIndex!==-1)fs[sourceParent].children.splice(sourceIndex,1)}delete fs[sourcePath]}
 cubeOk((cmd==='cp'?'copied ':'moved ')+parts[1]+' to '+parts[2]);return}
@@ -3178,6 +3227,7 @@ var lowerMsg=msg.toLowerCase();
 var oxWords=['petrichor','apricity','defenestration','sesquipedalian','floccinaucinihilipilification','widdershins','perendinate','erinaceous','ultracrepidarian','pandiculation','quockerwodger','agelast','borborygmus','cacoethes','callipygian','crepuscular','cunctation','deipnophobia','exsibilate','fantods','flummery','inaniloquent','jeremiad','jirble','kerfuffle','lickspittle','mumpsimus','nudiustertian','snollygoster','taradiddle','cockalorum','gubbins','jentacular','wamble','tittle','octothorpe','interrobang','aglet','minatory','nugatory','opsimath','otiose','quiddity','sternutation','tintinnabulation','velleity','zugzwang','yare'];
 function oxHit(s){var t=' '+String(s||'').toLowerCase().replace(/[^a-z]+/g,' ').replace(/ +/g,' ')+' ';for(var i=0;i<oxWords.length;i++){if(t.indexOf(' '+oxWords[i]+' ')!==-1)return oxWords[i]}return null}
 try{localStorage.setItem('cube_transmit_n',String(achTxN()+1))}catch(e){}
+try{if(typeof achScan==='function')achScan()}catch(e){}
 var oxW=oxHit(msg);
 if(oxW){try{localStorage.setItem('cube_oxford','1')}catch(e){}try{ach('oxford')}catch(e){}cubePrint('');cubePrint('obj: ...'+oxW+'.');cubePrint('obj: an oxford word. page-stained. leather-bound. expensive.');cubePrint('obj: did you swallow a dictionary or are you showing off.');cubePrint('obj: noted. the void respects vocabulary. barely.');cubePrint('');return}
 // nyarch detection — obj goes feral
@@ -3320,6 +3370,7 @@ installed.push(pkgName);
 pkgsSave();
 if(pkgs[pkgName].onInstall)pkgs[pkgName].onInstall();
 cubeOk(pkgName+': installed successfully');
+try{if(typeof achScan==='function')achScan()}catch(e){}
 cubePrint('  "'+pkgs[pkgName].desc+'"');
 },400);
 },300);
@@ -3592,8 +3643,14 @@ var patchLog=[
 'giveach admin command: all 63 at once, paid in bulk, 2 lines. deduped finished business + doorstep along the way.',
 'balance: resident 15->25, menu_60 30->50, trivial 50/25->75/40. brute stays king.'
 ]},
+{date:'2026-09-29',tier:'EMERGENCY',title:'user feedback in HELL',notes:[
+'the act 2 feedback came back. all of it. from below.',
+'several act 2 levels reworked after review. we are not naming them.',
+'new command: dream. for when reading the feedback stops working.',
+'more coming. this one is short because the fire alarm is not.',
+]},
 ];
-var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8'};
+var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144'};
 var updWin=guiCreateWin('cube# update log',420,520,false);
 if(!updWin)return;
 var uwin=guiWins[updWin];
@@ -4021,10 +4078,17 @@ e.preventDefault();termOutput.innerHTML='';
 termEl.addEventListener('click',function(){termField.focus()});
 
 // boot sequence (boot speed upgrade peeks localStorage - skill code loads in later script block)
+function jedecOff(){try{return localStorage.getItem('cube_jedec')==='0'}catch(e){return false}}
+function tsMul(){return jedecOff()?1.25:1}
 var bootDelay=5000;
 try{var _ss0=localStorage.getItem('cube_skill_state');if(_ss0){var _p0=JSON.parse(_ss0);if(_p0&&_p0.owned&&_p0.owned.term1)bootDelay=0}}catch(e){}
 termField.disabled=true;
 termPrompt.style.opacity='0.3';
+window._biosBootWin=true;window._biosPostDone=false;
+function biosBootDone(){
+if(!window._biosBootWin)return;
+window._biosBootWin=false;
+try{var bb=document.getElementById('biosBoot');if(bb)bb.remove()}catch(e){}
 termPrint('connection establishing...','rgba(255,200,50,0.5)');
 setTimeout(function(){
 termPrint('connection established.','rgba(100,255,100,0.6)');
@@ -4034,6 +4098,121 @@ termField.disabled=false;
 termPrompt.style.opacity='1';
 termField.focus();
 },bootDelay);
+}
+(function(){
+var d=document.createElement('div');d.id='biosBoot';
+d.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:99990;font-family:Consolas,monospace;font-size:15px;color:#c8c8c8;padding:24px 28px;cursor:pointer';
+document.body.appendChild(d);
+d.onclick=function(){try{biosBootDone()}catch(e){}};
+var jl='ENFORCED';try{if(typeof jedecOff==='function'&&jedecOff())jl='DISABLED (unoptimized)'}catch(e){}
+var lines=['cube BIOS v1.3 — POST','CPU: VOID-1 @ 4.04GHz ... OK','MEMORY: 65536K ... OK','JEDEC TIMING CONTROL ... '+jl,'','PRESS DEL FOR SETUP'];
+for(var i=0;i<lines.length;i++){
+(function(txt,idx){
+setTimeout(function(){
+try{
+if(!window._biosBootWin)return;
+var bb=document.getElementById('biosBoot');if(!bb)return;
+bb.innerHTML+=(txt==='' ?'<div>&nbsp;</div>':'<div>'+txt+'</div>');
+if(idx===lines.length-1){window._biosPostDone=true;setTimeout(function(){try{if(typeof biosOpen_==='undefined'||!biosOpen_)biosBootDone()}catch(e){}},1500)}
+}catch(e){}
+},350*(idx+1));
+})(lines[i],i);
+}
+})();
+
+// ── CUBE SETUP UTILITY (BIOS) ──
+var biosOpen_=false,biosTab=0,biosRow=0,biosMode='tabs',biosMsg='',biosConfirm=null;
+var biosTabs=['MAIN','ADVANCED','POWER','EXIT'];
+var biosSet={quick:true,waitAuto:true,remap:true,jedecCtl:true,enfLock:true,fanAuto:true};
+function biosRows(){
+if(biosMode==='mem')return [{k:'jedecCtl',t:'JEDEC TIMING CONTROL',v:function(){return biosSet.jedecCtl?'ENFORCED':'DISABLED'}},{k:'enfLock',t:'TIMING ENFORCEMENT LOCK',v:function(){return biosSet.enfLock?'LOCKED':'UNLOCKED'}},{k:'remap',t:'MEMORY REMAP',v:function(){return biosSet.remap?'ENABLED':'DISABLED'}},{k:'back',t:'<-- BACK',v:function(){return ''}}];
+var t=biosTabs[biosTab];
+if(t==='MAIN')return [{k:'info',t:'VOID-1 CPU @ 4.04GHz',v:function(){return ''}},{k:'info2',t:'MEMORY 65536K OK',v:function(){return ''}},{k:'quick',t:'QUICK BOOT',v:function(){return biosSet.quick?'ENABLED':'DISABLED'}}];
+if(t==='ADVANCED')return [{k:'mem',t:'MEMORY CONFIGURATION',v:function(){return '>'}},{k:'wait',t:'VOID WAIT STATES',v:function(){return biosSet.waitAuto?'AUTO':'MAX'}},{k:'port',t:'PORT 0x3F8',v:function(){return 'ENABLED'}}];
+if(t==='POWER')return [{k:'fan',t:'VOID FAN',v:function(){return biosSet.fanAuto?'AUTO':'MAX'}},{k:'restore',t:'RESTORE ON POWER LOSS',v:function(){return 'LAST STATE'}}];
+return [{k:'save',t:'SAVE CHANGES & EXIT',v:function(){return ''}},{k:'discard',t:'DISCARD CHANGES & EXIT',v:function(){return ''}}];
+}
+function biosRender(){
+if(!biosOpen_)return;
+var rows=biosRows();if(biosRow>=rows.length)biosRow=rows.length-1;if(biosRow<0)biosRow=0;
+var el=document.getElementById('biosSetup');if(!el)return;
+var h='<div style="text-align:center;letter-spacing:3px;margin-bottom:8px;color:#8fd0ff">CUBE SETUP UTILITY</div><div style="text-align:center;margin-bottom:10px">';
+for(var t=0;t<biosTabs.length;t++){h+='<span data-bt="'+t+'" style="cursor:pointer;padding:2px 12px;margin:0 2px;'+(t===biosTab&&biosMode==='tabs'?'background:#1a3a5a;color:#fff':'color:#5a7a9a')+'">'+biosTabs[t]+'</span>'}
+h+='</div><div style="border:1px solid #1a3a5a;padding:10px 14px;min-height:150px">';
+for(var i=0;i<rows.length;i++){var sel=(i===biosRow);h+='<div data-br="'+i+'" style="cursor:pointer;padding:2px 6px;'+(sel?'background:#1a3a5a;color:#fff':'color:#9fb2c5')+'">'+rows[i].t+(rows[i].v()?' <span style="float:right">['+rows[i].v()+']</span>':'')+'</div>'}
+h+='</div>';
+if(biosMsg)h+='<div style="margin-top:8px;color:#ffb060;font-size:12px">'+biosMsg+'</div>';
+if(biosConfirm)h+='<div style="margin-top:6px"><button data-bc="y" style="font-family:Consolas,monospace;background:#1a3a5a;color:#fff;border:1px solid #2a5a8a;padding:2px 14px;cursor:pointer">[Y]ES</button> <button data-bc="n" style="font-family:Consolas,monospace;background:#0a0e14;color:#9fb2c5;border:1px solid #1a3a5a;padding:2px 14px;cursor:pointer">[N]O</button></div>';
+h+='<div style="margin-top:8px;color:#4a5a6a;font-size:11px">&#8593;&#8595; navigate &middot; &#8592;&#8594; tabs &middot; ENTER change &middot; ESC exit &middot; click works too</div>';
+el.innerHTML=h;
+try{
+var _bt=el.querySelectorAll('[data-bt]');for(var _ti=0;_ti<_bt.length;_ti++)(function(elm){var t=parseInt(elm.getAttribute('data-bt'),10);elm.onclick=function(){if(biosConfirm)return;if(biosMode==='mem')biosMode='tabs';biosTab=t;biosRow=0;biosMsg='';biosRender()}})(_bt[_ti]);
+var _br=el.querySelectorAll('[data-br]');for(var _ri=0;_ri<_br.length;_ri++)(function(elm){var r2=parseInt(elm.getAttribute('data-br'),10);elm.onclick=function(){if(biosConfirm)return;if(biosRow===r2)biosActivate();else{biosRow=r2;biosRender()}}})(_br[_ri]);
+var _bc=el.querySelectorAll('[data-bc]');for(var _ci=0;_ci<_bc.length;_ci++)(function(elm){var c=elm.getAttribute('data-bc');elm.onclick=function(){if(!biosConfirm)return;if(c==='y'){var k=biosConfirm;biosConfirm=null;if(k==='kill')biosApplyKill();else biosApplyRevive()}else{biosConfirm=null;biosMsg='';biosRender()}}})(_bc[_ci]);
+}catch(e){}
+}
+function biosOpen(){
+if(biosOpen_)return;
+biosOpen_=true;biosTab=0;biosRow=0;biosMode='tabs';biosMsg='';biosConfirm=null;
+var off=false;try{off=(typeof jedecOff==='function'&&jedecOff())}catch(e){}
+biosSet.jedecCtl=!off;biosSet.enfLock=!off;
+try{termField.disabled=true;termField.blur()}catch(e){}
+var d=document.createElement('div');d.id='biosSetup';
+d.style.cssText='position:fixed;top:8%;left:50%;transform:translateX(-50%);width:620px;max-width:92vw;background:#0a0e14;border:2px solid #1a3a5a;padding:16px 18px;z-index:99999;font-family:Consolas,monospace;font-size:13px;color:#9fb2c5;box-shadow:0 0 40px rgba(0,0,0,0.9)';
+document.body.appendChild(d);
+biosRender();
+}
+function biosClose(saved){
+biosOpen_=false;biosConfirm=null;
+try{var d=document.getElementById('biosSetup');if(d)d.remove()}catch(e){}
+try{if(window._biosBootWin&&window._biosPostDone&&typeof biosBootDone==='function')biosBootDone()}catch(e){}
+try{if(!window._biosBootWin){termField.disabled=false;termField.focus()}}catch(e){}
+if(saved)try{cubePrint('setup: changes saved. the void reboots nothing. it never does.')}catch(e){}
+}
+function biosActivate(){
+var rows=biosRows(),r=rows[biosRow];if(!r||biosConfirm)return;
+if(r.k==='mem'){biosMode='mem';biosRow=0;biosRender();return}
+if(r.k==='back'){biosMode='tabs';biosRow=0;biosRender();return}
+if(r.k==='jedecCtl'){biosSet.jedecCtl=!biosSet.jedecCtl;biosMsg=biosSet.jedecCtl?'JEDEC: enforcement restored. wise.':'JEDEC: timing control is load-bearing. the void is stable because I hold it still.';biosRender();return}
+if(r.k==='enfLock'){biosSet.enfLock=!biosSet.enfLock;biosMsg=biosSet.enfLock?'JEDEC: lock restored.':'JEDEC: the lock exists for a reason. that reason is me.';biosRender();return}
+if(r.k==='quick'){biosSet.quick=!biosSet.quick;biosRender();return}
+if(r.k==='wait'){biosSet.waitAuto=!biosSet.waitAuto;biosRender();return}
+if(r.k==='remap'){biosSet.remap=!biosSet.remap;biosRender();return}
+if(r.k==='fan'){biosSet.fanAuto=!biosSet.fanAuto;biosRender();return}
+if(r.k==='save'){biosTrySave();return}
+if(r.k==='discard'){biosClose(false);return}
+biosMsg='locked by JEDEC firmware. read-only.';biosRender();
+}
+function biosTrySave(){
+var jOff=!biosSet.jedecCtl&&!biosSet.enfLock;
+var jPartial=(!biosSet.jedecCtl)!==(!biosSet.enfLock);
+if(jPartial){biosMsg='DEPENDENCY ERROR: TIMING CONTROL and ENFORCEMENT LOCK must change together.';biosRender();return}
+var cur=false;try{cur=(typeof jedecOff==='function'&&jedecOff())}catch(e){}
+if(jOff&&!cur){biosConfirm='kill';biosMsg='WARNING: disabling JEDEC removes timing enforcement. everything accelerates 1.25x. stability not guaranteed. confirm? [Y/N]';biosRender();return}
+if(!jOff&&cur){biosConfirm='revive';biosMsg='re-enable JEDEC timing control? speed returns to 1.0x. confirm? [Y/N]';biosRender();return}
+biosClose(true);
+}
+function biosApplyKill(){try{localStorage.setItem('cube_jedec','0')}catch(e){}biosClose(false);try{cubePrint('JEDEC: ...understood. timings released. do not blame me for what accelerates.')}catch(e){}try{if(typeof achScan==='function')achScan()}catch(e){}}
+function biosApplyRevive(){try{localStorage.setItem('cube_jedec','1')}catch(e){}biosClose(false);try{cubePrint('JEDEC: enforcement restored. 1.0x. you will miss the speed.')}catch(e){}}
+document.addEventListener('keydown',function(e){
+if(biosOpen_){
+var k=e.key;
+if(biosConfirm){
+if(k==='y'||k==='Y'){var c=biosConfirm;biosConfirm=null;if(c==='kill')biosApplyKill();else biosApplyRevive();return}
+if(k==='n'||k==='N'||k==='Escape'){biosConfirm=null;biosMsg='';biosRender();return}
+e.preventDefault();return;
+}
+if(k==='ArrowUp'){e.preventDefault();biosRow=Math.max(0,biosRow-1);biosRender()}
+else if(k==='ArrowDown'){e.preventDefault();biosRow=Math.min(biosRows().length-1,biosRow+1);biosRender()}
+else if(k==='ArrowLeft'){e.preventDefault();if(biosMode==='mem'){biosMode='tabs';biosRow=0}else{biosTab=(biosTab+3)%4;biosRow=0}biosRender()}
+else if(k==='ArrowRight'){e.preventDefault();if(biosMode!=='mem'){biosTab=(biosTab+1)%4;biosRow=0}biosRender()}
+else if(k==='Enter'){e.preventDefault();biosActivate()}
+else if(k==='Escape'){e.preventDefault();biosClose(false)}
+return;
+}
+if(window._biosBootWin&&(e.key==='Delete'||e.key==='F2')){biosOpen();return}
+if(window._biosBootWin&&(e.key==='Enter'||e.key===' ')){try{biosBootDone()}catch(e){}return}
+});
 </script>
 <script>
 // ┌──────────────────────────────────────────────────────────────┐
@@ -4316,7 +4495,7 @@ pVel[i3]=tx/ts*spd;pVel[i3+1]=ty/ts*spd;pVel[i3+2]=tz/ts*spd;
 pPh[i]=Math.random()*Math.PI*2}
 function updateParticles(time){
 if(window._timeFrozen){pLst=time;return}
-var dt=pLst?Math.min((time-pLst)/1000,0.05):0.016;pLst=time;if(dt<=0)return;
+var dt=pLst?Math.min((time-pLst)/1000,0.05):0.016;try{dt*=tsMul()}catch(e){}pLst=time;if(dt<=0)return;
 var cx=mouseX*6,cy=mouseY*5,t2=time*0.001;
 for(var i=0;i<NP;i++){var i8=i*8,i3=i*3,x=pData[i8],y=pData[i8+1],z=pData[i8+2],vx=pVel[i3],vy=pVel[i3+1],vz=pVel[i3+2];
 var ph=pPh[i]+t2*0.15;
@@ -5480,7 +5659,7 @@ if(parts.length<3||!parts[1]){studioPrintColor('invalid packet — missing name 
 try{
 var content=vscDecode(parts.slice(2).join(':'));
 var admTok=/admin\s+([^\n'"]+)/i.exec(content);
-var admBad=(admTok&&voidHash(admTok[1].trim())==='53bfb51b659bcdae769314a6c7871ffa00fb73b2c3720e97910293578e161e33')||/isAdmin\s*=\s*true|setItem\(\s*['"]cube_admin['"]/.test(content);
+var admBad=(admTok&&voidHash(admTok[1].trim())==='9e1b274e268e0a5419e14f109cbf07a199d4938108888c0b5b16a92fec80b193')||/isAdmin\s*=\s*true|setItem\(\s*['"]cube_admin['"]/.test(content);
 if(admBad){
 studioPrintColor('import blocked — script contains admin unlock. nice try.','rgba(255,80,80,0.8)');
 modal.style.display='none';return;
@@ -5572,7 +5751,7 @@ var ms=-1;try{ms=ngRunMs()}catch(e){}
 var active=false;try{active=(typeof ngActive!=='undefined'&&ngActive)}catch(e){}
 var rt,rc;
 if(ms<0){rt='RUN --:--.-';rc='#5a5a6a'}
-else{var hard=false;try{hard=!!(typeof ngHard!=='undefined'&&ngHard)}catch(e){}var par=hard?2400000:1800000;rt='RUN '+hudFmtR(ms);rc=!active?'#5a5a6a':(ms>par?'#ff5a5a':'#64ffa0')}
+else{var hard=false;try{hard=!!(typeof ngHard!=='undefined'&&ngHard)}catch(e){}var par=hard?9000000:5400000;rt='RUN '+hudFmtR(ms);rc=!active?'#5a5a6a':(ms>par?'#ff5a5a':'#64ffa0')}
 h.innerHTML='SESSION '+getUptime()+' &middot; <span style="color:'+rc+'">'+rt+'</span>';
 }catch(e){}
 }
@@ -5637,11 +5816,12 @@ var ACH=[
 {sec:'SPEEDRUN & PRESTIGE'},
 {id:'elegant',n:'elegant',d:'beat the whole non-game with zero mistakes. (every buzz counts.)',c:function(){try{return localStorage.getItem('cube_elegant')==='1'}catch(e){return false}}},
 {id:'trivial',n:'trivial',d:'elegant, but on hard mode. (sure. trivial.)',c:function(){try{return localStorage.getItem('cube_elegant_hard')==='1'}catch(e){return false}}},
-{id:'brute',n:'brute',d:'the whole non-game. zero mistakes. under 30 minutes. hard mode. (good luck.)',c:function(){try{return localStorage.getItem('cube_brute')==='1'}catch(e){return false}}},
-{id:'robbery',n:'professional robbery',d:'beat the non-game in under 30 minutes.',c:function(){try{if(!ngAct2Done())return false;var m=parseInt(localStorage.getItem('cube_run_ms')||'0',10);return m>0&&m<=1800000}catch(e){return false}}},
-{id:'netrun',n:'running from the internet',d:'beat the non-game in under 40 minutes. hard mode on.',c:function(){try{if(!ngAct2Done())return false;if(localStorage.getItem('cube_act2_hard')!=='1')return false;var m=parseInt(localStorage.getItem('cube_run_ms')||'0',10);return m>0&&m<=2400000}catch(e){return false}}},
-{id:'fiddlesticks',n:'fiddlesticks',d:'beat act 1 with hard mode on.',c:function(){try{return localStorage.getItem('cube_act1_hard')==='1'}catch(e){return false}}},
-{id:'superprof',n:'superprofessional',d:'beat act 2 with hard mode on.',c:function(){try{return ngAct2Done()&&localStorage.getItem('cube_act2_hard')==='1'}catch(e){return false}}},
+{id:'brute',n:'brute',d:'the whole non-game. 3 mistakes or fewer. under 150 minutes. hard mode. (good luck.)',c:function(){try{return localStorage.getItem('cube_brute')==='1'}catch(e){return false}}},
+{id:'robbery',n:'professional robbery',d:'beat the non-game in under 90 minutes.',c:function(){try{if(!ngAct2Done())return false;var m=parseInt(localStorage.getItem('cube_run_ms')||'0',10);return m>0&&m<=5400000}catch(e){return false}}},
+{id:'nevermind',n:'running slower... nevermind',d:'disable JEDEC timing control. everything runs 1.25x now. stability not guaranteed.',c:function(){try{return localStorage.getItem('cube_jedec')==='0'}catch(e){return false}}},
+{id:'netrun',n:'running from the internet',d:'finish the mailroom shutdown with 2+ minutes left.',c:function(){try{return localStorage.getItem('cube_outrun')==='1'}catch(e){return false}}},
+{id:'fiddlesticks',n:'fiddlesticks',d:'nudge the chapter 11 dial 100 times. (fidget.)',c:function(){try{return (parseInt(localStorage.getItem('cube_tune_nudges')||'0',10)||0)>=100}catch(e){return false}}},
+{id:'pwned',n:'get pwned, loser',d:'trash-talk back in the nightmare and wake up.',c:function(){try{return localStorage.getItem('cube_pwned')==='1'}catch(e){return false}}},
 {id:'nyarch_x10',n:'you are not a good person. you know that, right?',d:'say nyarch to obj 10 times.',c:function(){return ngNyarchN()>=10}},
 {id:'oxford',n:'oxford',d:'say a secret word from the oxford english dictionary to obj. (48 of them. obj reads.)',c:function(){try{return localStorage.getItem('cube_oxford')==='1'}catch(e){return false}}},
 {sec:'SIDE QUESTS'},
@@ -6423,6 +6603,7 @@ function reactorPrintOk(txt){reactorPrint(txt,'rgba(100,255,100,0.6)')}
 function reactorTick(){
 if(!R.running)return;
 var now=performance.now();
+if(typeof biosOpen_!=='undefined'&&biosOpen_){R.lastTick=now;return}
 if(now-R.lastTick<R.tickInterval)return;
 var dt=(now-R.lastTick)/1000;
 R.lastTick=now;
@@ -7743,7 +7924,7 @@ applySkillPan();
 function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active')}
 function openUpgradeTree(){skillOpen();if(!skillAllFinals()){cubeWarn('upgrade locked — buy every skill');return}panSkillToUpgrade()}
 function skillClose(){var el=document.getElementById('skillTree');if(el)el.classList.remove('active')}
-var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_run_acc','cube_run_last'];
+var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_jedec','cube_pwned','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_run_acc','cube_run_last'];
 var slotDefNames=['main','testing','slot 3','slot 4','slot 5'];
 function slotRead(n){try{var s=localStorage.getItem('cube_slot_'+n);if(!s)return null;var b=JSON.parse(s);if(b&&typeof b==='object')return b}catch(e){}return null}
 function slotActive(){try{var a=parseInt(localStorage.getItem('cube_active_slot')||'1',10);if(a>=1&&a<=5)return a}catch(e){}return 1}
@@ -7920,10 +8101,11 @@ inp.click()
 //    knocking shakes the room (thud + screen shake, jbo argues back).
 //    4 rounds (6 hard): window shrinks, needle speeds up, timer shortens.
 //    miss/timeout = buzz + jbo mock + retry same round. hints ch17knock.
-// 18 THE DOOR (built): receipts (7 frags, 9 hard w/ UNVERIFIED), sort+trash,
-//    combination dials (549 / 5497 hard), 12-question rule-talk (HONEST/
+// 18 THE DOOR (built): ch17-miss branch prologue (10+ misses = jbo boss fight,
+//    else jbo reactor fnaf shift), then receipts (5 frags, 7 hard w/ UNVERIFIED),
+//    combination dials (549 / 5493 hard), 8-question rule-talk (HONEST/
 //    OPPOSITE/OBJ flips), final 4-check timed push (15s/10s). phase-boundary
-//    checkpoints. strikes (3/2 hard) restart the receipts or the talk phase.
+//    checkpoints. strikes (4/3 hard) restart the receipts or the talk phase.
 //    hints ch18r1/asm/dial/talk/fin (obj-voiced). +50 door fee.
 // 19 MORNING (built): the mailroom dimension. orientation -> rule-induction
 //    filing (poster rules + memos, strikes restart batches), lunch cooldown,
@@ -8049,7 +8231,7 @@ try{
 if(!ngActive||ngTalking())return;
 var used=parseInt(el.dataset.dodges||'0',10);
 var base=parseInt(el.dataset.maxDodges||'8',10);
-var max=base*(ngHard?11:1);
+var max=base*(ngHard?4:1);
 if(used>=max)return;
 el.dataset.dodges=String(used+1);
 var dm=ngHard?3:1;
@@ -8254,10 +8436,10 @@ if(typeof ngKnockStopAll==='function')try{ngKnockStopAll()}catch(e){}
 if(typeof ngDoorStopAll==='function')try{ngDoorStopAll()}catch(e){}
 if(typeof ngMornStopAll==='function')try{ngMornStopAll()}catch(e){}
 var st=document.getElementById('ngStage');if(!st)return;st.innerHTML='';st.className='';
-var c=Math.min(n,ngMaxChapter);
+var c=(n===21)?21:Math.min(n,ngMaxChapter);
 ngCurCh=c;
 try{ngSfx('door')}catch(e){}
-if(c===-1)ngChapterM1(st);else if(c>=20)ngChapter20(st);else if(c>=19)ngChapter19(st);else if(c>=18)ngChapter18(st);else if(c>=17)ngChapter17(st);else if(c>=16)ngChapter16(st);else if(c>=15)ngChapter15(st);else if(c>=14)ngChapter14(st);else if(c>=13)ngChapter13(st);else if(c>=12)ngChapter12(st);else if(c>=11)ngChapter11(st);else if(c>=10)ngChapter10(st);else if(c>=9)ngChapter9(st);else if(c>=8)ngChapter8(st);else if(c>=7)ngChapter7(st);else if(c>=6)ngChapter6(st);else if(c>=5)ngChapter5(st);else if(c>=4)ngChapter4(st);else if(c>=3)ngChapter3(st);else if(c>=2)ngChapter2(st);else if(c>=1)ngChapter1(st);else ngChapter0(st);
+if(c===-1)ngChapterM1(st);else if(c===21)ngChapterDream(st);else if(c>=20)ngChapter20(st);else if(c>=19)ngChapter19(st);else if(c>=18)ngChapter18(st);else if(c>=17)ngChapter17(st);else if(c>=16)ngChapter16(st);else if(c>=15)ngChapter15(st);else if(c>=14)ngChapter14(st);else if(c>=13)ngChapter13(st);else if(c>=12)ngChapter12(st);else if(c>=11)ngChapter11(st);else if(c>=10)ngChapter10(st);else if(c>=9)ngChapter9(st);else if(c>=8)ngChapter8(st);else if(c>=7)ngChapter7(st);else if(c>=6)ngChapter6(st);else if(c>=5)ngChapter5(st);else if(c>=4)ngChapter4(st);else if(c>=3)ngChapter3(st);else if(c>=2)ngChapter2(st);else if(c>=1)ngChapter1(st);else ngChapter0(st);
 if(n>=1&&n<20&&!window._ngReplayCmt){try{var rsv=ngLoad();if((rsv.ch||0)>n&&ngAct2Done()){window._ngReplayCmt=1;var rl=['back here again? nostalgia is a form of filing.','replaying old rooms. the void is taking notes.','you know this part. so do i. better.'];setTimeout(function(){try{if(ngActive&&!ngChDone&&!ngTalking())ngSay(rl[Math.floor(Math.random()*rl.length)])}catch(e){}},3500)}}catch(e){}}
 }
 var ngBoredIv=null,ngNoticed=false,ngCrimes=0;
@@ -9382,7 +9564,7 @@ ngSay('...so. here we are. no error page. no tutorial. no boxes.');
 ngSay('i am a game. i have ALWAYS been a game. you knew. i knew you knew.');
 ngSay('...jbo left. said, and i quote, "this is YOUR mess."');
 ngSay('...FINE. FIGHT ME. click me. i DARE you.');
-var bw=document.getElementById('ngBossWrap');if(bw){ngDodge(bw,999);bw.onclick=function(){ngBossHit()}}
+var bw=document.getElementById('ngBossWrap');if(bw){ngDodge(bw,16);bw.onclick=function(){ngBossHit()}}
 }
 function ngBossRefresh(){try{var f=document.getElementById('ngBossHpFill');if(f)f.style.width=Math.max(0,ngBossHp/ngBossMax*100)+'%';var l=document.getElementById('ngBossHpLbl');if(l)l.textContent='OBJ HP: '+Math.max(0,ngBossHp)}catch(e){}}
 function ngBossHit(){
@@ -9591,7 +9773,7 @@ el.onclick=function(){ngCredClick(nm||el.textContent)};
 function ngCredFind(name){for(var r=0;r<ngCredits.length;r++){for(var n=0;n<ngCredits[r].names.length;n++){if(ngCredits[r].names[n]===name)return{r:r,n:n}}}return null}
 function ngCredRoleFirst(role){for(var r=0;r<ngCredits.length;r++){if(ngCredits[r].role===role)return ngCredits[r].names[0]||''}return ''}
 function ngMusicDefault(){return /box/i.test(ngCredRoleFirst('MUSIC'))?1:0}
-function ngVoiceSpeed(){if(typeof ngVoiceOv!=='undefined'&&ngVoiceOv)return ngVoiceOv;var v=ngCredRoleFirst('VOICE ACTING');if(/text to speech/i.test(v))return 25;if(/^a guy$/i.test(v))return 70;return 60}
+function ngVoiceSpeed(){if(typeof ngVoiceOv!=='undefined'&&ngVoiceOv)return ngVoiceOv;var v=ngCredRoleFirst('VOICE ACTING');var b=60;if(/text to speech/i.test(v))b=25;else if(/^a guy$/i.test(v))b=70;try{return Math.max(8,Math.round(b/tsMul()))}catch(e){return b}}
 function ngDesignDecoy(){var d=ngCredRoleFirst('GAME DESIGN');if(/^men$/i.test(d))return 2;if(/lux/i.test(d))return 0.5;return 1}
 function ngDesignApply(){
 try{
@@ -9712,6 +9894,10 @@ var m=document.getElementById('ngTuneMeterFill');
 if(m)m.style.width=ngTuneClarity()+'%';
 var r=document.getElementById('ngTuneRound');
 if(r)r.textContent='SIGNAL TUNE \u2014 round '+ngTuneRound+'/3 \u00b7 clarity '+ngTuneClarity()+'%';
+var fq=document.getElementById('ngTuneFreq');
+if(fq)fq.textContent=(87.5+ngTuneBand*0.21).toFixed(1)+' MHz';
+var nd=document.getElementById('ngTuneNeedle');
+if(nd)nd.style.left=ngTuneBand+'%';
 }
 function ngTuneStartIv(){
 if(ngTuneIv){try{clearInterval(ngTuneIv)}catch(e){}}
@@ -9721,6 +9907,7 @@ function ngTuneNudge(d){
 if(!ngActive||ngChDone)return;
 var step=ngHard?2:4;
 ngTuneBand=Math.max(0,Math.min(100,ngTuneBand+(d>0?step:-step)));
+try{localStorage.setItem('cube_tune_nudges',String((parseInt(localStorage.getItem('cube_tune_nudges')||'0',10)||0)+1))}catch(e){}
 try{ngSfx('pop')}catch(e){}
 ngTuneRender();
 }
@@ -9751,20 +9938,19 @@ function ngChapter11(st){
 ngTuneRound=1;
 ngTuneNewRound();
 st.innerHTML='<div id="ngSub">CHAPTER 11: STATIC (act 2. there is still no game.)</div>'+
-'<div id="ngTuneRound" style="color:rgba(255,255,255,0.5);font-size:12px;font-family:Consolas,monospace;margin:10px 0">SIGNAL TUNE</div>'+
-'<div id="ngTuneLine" style="color:rgba(120,220,255,0.9);font-size:15px;font-family:Consolas,monospace;min-height:24px;margin:14px 0">...</div>'+
-'<div id="ngTuneMeter" style="width:280px;height:10px;border:1px solid rgba(120,220,255,0.35);margin:10px 0"><div id="ngTuneMeterFill" style="height:100%;width:0%;background:rgba(120,220,255,0.6)"></div></div>'+
-'<div><button id="ngTuneDown" style="background:transparent;border:1px solid rgba(120,220,255,0.4);color:rgba(120,220,255,0.9);font-family:Consolas,monospace;font-size:13px;letter-spacing:2px;padding:10px 22px;cursor:pointer;border-radius:4px">DOWN</button> '+
-'<button id="ngTuneUp" style="background:transparent;border:1px solid rgba(120,220,255,0.4);color:rgba(120,220,255,0.9);font-family:Consolas,monospace;font-size:13px;letter-spacing:2px;padding:10px 22px;cursor:pointer;border-radius:4px">UP</button> '+
-'<button id="ngTuneLock" style="background:rgba(120,220,255,0.1);border:1px solid rgba(120,220,255,0.6);color:#fff;font-family:Consolas,monospace;font-size:13px;letter-spacing:2px;padding:10px 22px;cursor:pointer;border-radius:4px">LOCK</button></div>'+
-'<div id="ngSub" style="margin-top:10px">tune until the words stop dancing. then LOCK.</div>';
+'<div id="ngRadio" style="width:340px;max-width:88vw;margin:12px auto 0;padding:14px 18px 12px;border:1px solid rgba(120,220,255,0.35);border-radius:10px;background:linear-gradient(180deg,#0b1220,#070b14)">'+
+'<div style="display:flex;justify-content:space-between;align-items:baseline"><span id="ngTuneFreq" style="color:#ffe9a8;font-size:22px;font-family:Consolas,monospace">87.5 MHz</span><span id="ngTuneRound" style="color:rgba(255,255,255,0.5);font-size:11px;font-family:Consolas,monospace">SIGNAL TUNE</span></div>'+
+'<div id="ngTuneDial" title="click left / right side to tune" style="position:relative;height:46px;margin:10px 0 4px;border:1px solid rgba(120,220,255,0.25);border-radius:6px;background:repeating-linear-gradient(90deg,rgba(120,220,255,0.25) 0 1px,transparent 1px 10%);cursor:ew-resize"><div id="ngTuneNeedle" style="position:absolute;top:3px;bottom:3px;width:3px;background:#ff5a5a;box-shadow:0 0 8px #ff5a5a;left:0%"></div></div>'+
+'<div id="ngTuneMeter" style="height:10px;border:1px solid rgba(120,220,255,0.35);margin:8px 0"><div id="ngTuneMeterFill" style="height:100%;width:0%;background:rgba(120,220,255,0.6)"></div></div>'+
+'<div id="ngTuneLine" style="color:rgba(120,220,255,0.9);font-size:15px;font-family:Consolas,monospace;min-height:24px;margin:10px 0">...</div>'+
+'<div><button id="ngTuneLock" style="background:rgba(120,220,255,0.1);border:1px solid rgba(120,220,255,0.6);color:#fff;font-family:Consolas,monospace;font-size:13px;letter-spacing:2px;padding:10px 22px;cursor:pointer;border-radius:4px">LOCK</button></div>'+
+'<div id="ngSub" style="margin-top:8px">click the dial to tune. then LOCK.</div>'+
+'</div>';
 try{ngSfx('static')}catch(e){}
 ngSay('...do you feel that. the void just cleared its throat.');
-ngSay('great. the signal is scrambled. everything sounds like soup.');
-ngSay('there is a tuner. DOWN. UP. LOCK. even YOU can manage three buttons. probably.');
-var dn=document.getElementById('ngTuneDown'),up=document.getElementById('ngTuneUp'),lk=document.getElementById('ngTuneLock');
-if(dn)dn.onclick=function(){ngTuneNudge(-1)};
-if(up)up.onclick=function(){ngTuneNudge(1)};
+ngSay('signal is scrambled. there is a radio. turn the dial, watch clarity, LOCK.');
+var dl=document.getElementById('ngTuneDial'),lk=document.getElementById('ngTuneLock');
+if(dl)dl.onclick=function(e){try{var r=dl.getBoundingClientRect();var cx=(e&&e.clientX!=null)?e.clientX:(r.left+r.width/2);ngTuneNudge(cx-(r.left+r.width/2)<0?-1:1)}catch(err){ngTuneNudge(1)}};
 if(lk)lk.onclick=function(){ngTuneLock()};
 ngTuneStartIv();
 }
@@ -9791,8 +9977,7 @@ if(ngTuneIv){try{clearInterval(ngTuneIv)}catch(e){}ngTuneIv=null}
 var st=document.getElementById('ngStage');if(!st)return;
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(25*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 st.innerHTML='<div id="ngEndTitle">SIGNAL LOCKED</div><div id="ngSub">+25 skill points. (hazard pay.)</div><div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ WRONG ADDRESS ]</div></div><div id="ngSub">CHAPTER 12: WRONG ADDRESS</div>';
-ngSay('signal locked. three for three. do not let it go to your head.');
-ngSay('...and whatever that whisper was? not mine. not jbo\u2019s. do not think about it.');
+ngSay('signal locked. that whisper was not mine. do not think about it.');
 var door=document.getElementById('ngDoor');
 if(door)door.onclick=function(){
 if(ngTalking())return;
@@ -10176,10 +10361,7 @@ ngDarkPlace();
 ngDarkBrownIv=setInterval(function(){ngDarkBrown()},25000);
 try{ngSfx('static')}catch(e){}
 ngSay('that was NOT me back there.');
-ngSay('a discount obj. value-brand obj. obj-flavored.');
-ngSay('you almost trusted him. i saw it. embarrassing.',85);
-ngSay('...anyway. lights out. this dimension eats light. stay close. (not too close.)',85);
-ngSay('your cursor is a flashlight now. do not waste it. (there is nothing else to waste.)',85);
+ngSay('lights out. your cursor is a flashlight. fuse, bulb, exit. not the grue.');
 }
 function ngChapter13Done(){
 if(!ngActive||ngChDone)return;
@@ -10220,8 +10402,7 @@ if(ngSeqIv){try{clearInterval(ngSeqIv)}catch(e){}ngSeqIv=null}
 ngSeqIv=setInterval(function(){
 if(!ngActive){try{clearInterval(ngSeqIv)}catch(e){}ngSeqIv=null;return}
 if(idx>=ngSeqTarget.length){try{clearInterval(ngSeqIv)}catch(e){}ngSeqIv=null;ngSeqBusy=false;if(show)show.textContent='your turn.';try{ngSfx('coin')}catch(e){}return}
-if(show)show.textContent=ngSeqTarget[idx];
-try{ngSfx('pop')}catch(e){}
+if(show){show.textContent=ngSeqTarget[idx];show.classList.add('ngSeqGlow');(function(s){setTimeout(function(){try{s.classList.remove('ngSeqGlow')}catch(e){}},220)})(show)}
 idx++;
 },speed);
 }
@@ -10247,7 +10428,6 @@ else ngCore(p[Math.min(ngSeqFails,2)]);
 if(ok){
 if(ngSeqRound>=4){ngAfterSpeech(function(){if(ngActive)ngChapter14Done()},900);return}
 ngSeqRound++;
-if(ngSeqRound===3)ngSay('...still here. unfortunately. she is better at this. do NOT tell her.');
 ngAfterSpeech(function(){if(ngActive)ngSeqNewRound()},700);
 }else{
 ngSeqFails++;try{if(typeof ngMistake==='function')ngMistake()}catch(e){}
@@ -10264,6 +10444,7 @@ if(ngSeqIv){try{clearInterval(ngSeqIv)}catch(e){}ngSeqIv=null}
 var btns='';
 for(var b=0;b<ngSeqSymbols.length;b++)btns+='<button class="ngsq" data-s="'+ngSeqSymbols[b]+'">'+ngSeqSymbols[b]+'</button>';
 st.innerHTML='<div id="ngSub">CHAPTER 14: SIGNAL LOST (obj is offline. core is guiding.)</div>'+
+'<div class="ngCoreOrb"></div>'+
 '<div id="ngSeqRound" style="color:rgba(255,255,255,0.5);font-size:12px;font-family:Consolas,monospace;margin:10px 0">PATTERN</div>'+
 '<div id="ngSeqShow" style="color:rgba(255,158,207,0.95);font-size:44px;font-family:Consolas,monospace;min-height:60px;margin:14px 0">...</div>'+
 '<div id="ngSeqBtns">'+btns+'</div>'+
@@ -10273,10 +10454,7 @@ var bb=st.querySelectorAll('.ngsq');
 for(var q=0;q<bb.length;q++)(function(btn){btn.onclick=function(){ngSeqTap(btn.getAttribute('data-s'))}})(bb[q]);
 try{ngSfx('static')}catch(e){}
 ngSay('...signal lost. i am... elsewhere. do NOT break anything.');
-ngSay('if she is nice to you, she is lying. (she is always nice. it is worse.)');
-ngCore('hello, intruder. obj is... indisposed. (he is pouting.)');
-ngCore('i will guide you. watch the pattern. then be the pattern.');
-ngCore('do not worry. i am very patient. (this is your only warning.)');
+ngCore('hello, intruder. obj is indisposed. watch the pattern. then be the pattern.');
 ngAfterSpeech(function(){if(ngActive)ngSeqNewRound()},800);
 }
 function ngChapter14Done(){
@@ -10310,7 +10488,7 @@ if(!box)return;
 box.innerHTML='';
 for(var i=0;i<opts.length;i++)(function(t){
 var b=document.createElement('button');
-b.className='ngtopt';b.textContent=t;
+b.className='ngtopt ngGlitchIn';b.textContent=t;
 b.onclick=function(){cb(t)};
 box.appendChild(b);
 })(opts[i]);
@@ -10376,8 +10554,6 @@ ngTumorClearOpts();
 ngTumorSay(Q.yes,function(){
 if(!ngActive||ngChDone)return;
 ngTq++;
-if(ngTq===2)ngSay('...it is reading your save. i hate that it can do that.');
-if(ngTq===4)ngSay('...it remembers the whisper too. of course it does. answer carefully. (there is no careful. just answer.)');
 if(ngTq>=ngTQs.length){ngChapter15Finale();return}
 ngTumorAsk();
 });
@@ -10410,7 +10586,8 @@ try{last=parseInt(localStorage.getItem('cube_last_seen')||'0',10)}catch(e){}
 var gapline='';
 if(last){var dd=Math.floor((Date.now()-last)/86400000);if(dd>=1)gapline='gone '+dd+' day'+(dd===1?'':'s')+'. i felt every minute.';else gapline='hours. you never leave. clingy. >:'}
 st.innerHTML='<div id="ngSub">CHAPTER 15: INTERLOPER (do not answer it.)</div>'+
-'<div id="ngTumor" style="color:rgba(255,60,120,0.9);font-size:16px;font-family:Consolas,monospace;letter-spacing:1px;min-height:28px;margin:20px 0">...</div>'+
+'<div style="color:#5a7a8a;font-size:10px;letter-spacing:3px;font-family:Consolas,monospace;margin-top:12px">INTERLOPER CAM &middot; SIGNAL 15</div>'+
+'<div id="ngTumor" style="color:#ff9ec0;font-size:16px;font-family:Consolas,monospace;letter-spacing:1px;min-height:28px;margin:6px 0 20px;padding:12px 14px;background:#05070c repeating-linear-gradient(0deg,rgba(255,255,255,0.025) 0 1px,transparent 1px 3px);border:2px solid #2a4a5a;border-radius:8px;text-shadow:0 0 8px rgba(255,60,120,0.8)">...</div>'+
 '<div id="ngTOpts" style="margin:10px 0"></div>'+
 '<div id="ngSub" style="margin-top:8px">it asks. you answer. it already knows.</div>';
 try{ngSfx('static')}catch(e){}
@@ -10657,11 +10834,8 @@ st.innerHTML='<div id="ngSub">CHAPTER 16: ECHO (one of these is a lie)</div>'+
 try{ngSfx('static')}catch(e){}
 ngEchoHud();
 ngSay('...it is replaying me. i HATE being replayed. pick the one i actually said.');
-ngTumorSay('i kept every word you two said to each other. lightly edited. >:',function(){
-if(!ngActive||ngChDone)return;
-ngTumorSay('one line is his. one line is mine. tell me which is which. >:',function(){
+ngTumorSay('i kept every word you two said. lightly edited. one line is his, one is mine. which is which. >:',function(){
 if(ngActive)ngEchoShow();
-});
 });
 }
 function ngChapter16Done(){
@@ -10826,6 +11000,7 @@ if(!ngActive||ngChDone)return;
 ngChDone=true;
 ngKnockStopAll();
 try{ngUnlock(18)}catch(e){}
+try{ngSave({p17:{misses:ngKnockFails}})}catch(e){}
 var st=document.getElementById('ngStage');if(!st)return;
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 st.innerHTML='<div id="ngEndTitle">CALIBRATED</div><div id="ngSub">+50 skill points. (calibration fee.)</div><div id="ngDoor"><div class="ngDoorFrame locked"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ THE DOOR ]</div></div><div id="ngSub">CHAPTER 18: THE DOOR</div>';
@@ -10843,20 +11018,21 @@ var ngDoorQueue=[];
 var ngDoorStrikes=0;
 var ngDoorDial=0,ngDoorDialIn='',ngDoorCode='',ngDoorFeed='';
 var ngDoorTalkI=0,ngDoorTalkOK=0,ngDoorRule=0,ngDoorOrd=null;
-var ngDoorFinI=0,ngDoorTmrIv=null,ngDoorTmrT=null,ngDoorSayIv=null,ngDoorFinCards=[],ngDoorCodeIn='';
+var ngDoorFinI=0,ngDoorTmrIv=null,ngDoorTmrT=null,ngDoorSayIv=null,ngDoorFinCards=[],ngDoorCodeIn='',ngDoorTmrLeft=0;
 var ngDoorDecoder={};
+var ngDoorBranch='reactor',ngDoorProDone=false;
+var ngBossHp=0,ngBossT=null,ngBossOpen=false;
+var ngReactPos=0,ngReactSide='LEFT',ngReactL=false,ngReactR=false,ngReactIv=null,ngReactLeft=60,ngReactPower=100,ngReactTick=0;
 var ngDoorRules=['HOUSE RULE: HONEST','HOUSE RULE: OPPOSITE','HOUSE RULE: OBJ VOICE'];
 var ngDoorRuleTxt=['answer with the TRUE statement.','answer with the FALSE statement.','answer the way OBJ would say it.'];
 var ngDoorRoast=['no. the receipt printer is judging you. read it again.','wrong. truth-ink does not lie. you do. try again.','nope. that answer is from a different game.','wrong. jbo could get this. jbo is not smart. think about that.','the void refunds wrong answers in SILENCE. try again.'];
 var ngDoorFrags=[
 {tag:'STATIC',ch:11,card:'you tuned a band until it was rude',q:'STATIC: what tightened every round?',o:['the tolerance band','the screen borders','the music tempo','the noose of my patience'],a:0,out:'4',hit:'correct. the band shrank until it was rude.'},
-{tag:'WRONG ADDRESS',ch:12,card:'the fake clock lied by five hours',q:'WRONG ADDRESS: the fake terminal clock was off by...',o:['+5 hours','+15 minutes','exactly nothing','a whole tuesday'],a:0,out:'5',hit:'+5. your clock does not lie. that one did.'},
-{tag:'BLACKOUT',ch:13,card:'light first, then the door',q:'BLACKOUT: the only safe order was...',o:['bulb, fuse, exit','fuse, bulb, exit','exit, fuse, bulb','fuse, exit, bulb'],a:1,out:'1',hit:'fuse, bulb, exit. light before stairs. manners.'},
+ {tag:'BLACKOUT',ch:13,card:'light first, then the door',q:'BLACKOUT: the only safe order was...',o:['bulb, fuse, exit','fuse, bulb, exit','exit, fuse, bulb','fuse, exit, bulb'],a:1,out:'1',hit:'fuse, bulb, exit. light before stairs. manners.'},
 {tag:'SIGNAL LOST',ch:14,card:'the core talked while obj napped',q:'SIGNAL LOST: why did the core lead?',o:['obj was offline','obj quit','the core won an election','there was a coin flip'],a:0,out:'8',hit:'obj was offline. the core was POLITE about it. hate that.'},
 {tag:'INTERLOPER',ch:15,card:'it read your visits out loud',q:'INTERLOPER: it read which facts from your SAVE?',o:['visits and finale choice','browser history','your mouse sensitivity','your darkest wish'],a:0,out:'3',hit:'visits and finale. it knows. it always knows.'},
 {tag:'ECHO',ch:16,card:'two lines, one verdict',q:'ECHO: when BOTH lines were his, what did you press?',o:['the verdict buttons','a coin flip','the hint button','obj, verbally'],a:0,out:'6',hit:'BOTH ARE HIS. the buttons worked. i am not happy about that.'},
-{tag:'JBO',ch:17,card:'needle in green, jbo in the way',q:'JBO VS THE KNOCKING: what had to land in the green?',o:['the needle','jbo\'s ego','the volume knob','the knocking itself'],a:0,out:'2',hit:'the needle. jbo landed nothing. jbo only yelled.'},
-{tag:'UNVERIFIED',ch:99,fake:true,card:'UNVERIFIED - breakfast of a not-real man',q:'??? : what did the wrong obj eat for breakfast?',o:['nothing, he is not real','a pixel omelette','toast with spite','the concept of lunch'],a:0,out:'0',hit:'UNVERIFIED receipt printed. the void cannot verify a fiction.'},
+ {tag:'UNVERIFIED',ch:99,fake:true,card:'UNVERIFIED - breakfast of a not-real man',q:'??? : what did the wrong obj eat for breakfast?',o:['nothing, he is not real','a pixel omelette','toast with spite','the concept of lunch'],a:0,out:'0',hit:'UNVERIFIED receipt printed. the void cannot verify a fiction.'},
 {tag:'UNVERIFIED',ch:99,fake:true,card:'UNVERIFIED - volume, not colour',q:'??? : what colour was jbo\'s screaming?',o:['orange','loud','chartreuse','the green window'],a:1,out:'0',hit:'UNVERIFIED receipt printed. screaming has no colour. it has VOLUME.'}
 ];
 var ngDoorTalk=[
@@ -10866,14 +11042,10 @@ var ngDoorTalk=[
 {q:'which chapter did the core actually lead?',o:['SIGNAL LOST','INTERLOPER','nothing. i could have led both. (i could not.)']},
 {q:'INTERLOPER read your...',o:['visits and finale choice','your browser history','your secrets. (you have none. boring.)']},
 {q:'how many verdict options did ECHO show?',o:['two: BOTH or NEITHER','four, plus a shrug','two. i wanted zero: both were HIS.']},
-{q:'what did you land in chapter 17?',o:['the needle in the green','the door in its frame','the needle. jbo landed yelling.']},
-{q:'strikes before ECHO restarted you?',o:['three','five','three. generous. i wanted zero tolerance.']},
-{q:'the fake clock in WRONG ADDRESS was off by',o:['5 hours','15 minutes','five hours. criminals use better lies.']},
-{q:'how many decoys sat in the BLACKOUT dark?',o:['three','two','three. the grue was asleep. adorable AND a decoy.']},
-{q:'chapter 16 charged +50 points as a...',o:['cover fee','refund','a COVER FEE. for my emotional damage.']},
-{q:'what opened chapter 18?',o:['the combination lock','jbo shoving it','me. i opened it. say thank you.']}
+ {q:'strikes before ECHO restarted you?',o:['three','five','three. generous. i wanted zero tolerance.']},
+{q:'how many decoys sat in the BLACKOUT dark?',o:['three','two','three. the grue was asleep. adorable AND a decoy.']}
 ];
-var ngDoorDials=[{c:'STATIC + BLACKOUT',v:5},{c:'SIGNAL LOST - STATIC',v:4},{c:'INTERLOPER + ECHO',v:9},{c:'WRONG ADDRESS x2 - INTERLOPER',v:7,hard:true}];
+var ngDoorDials=[{c:'STATIC + BLACKOUT',v:5},{c:'SIGNAL LOST - STATIC',v:4},{c:'INTERLOPER + ECHO',v:9},{c:'ECHO - INTERLOPER',v:3,hard:true}];
 function ngDoorBuildQueue(){
 ngDoorQueue=[];
 for(var i=0;i<ngDoorFrags.length;i++){var f=ngDoorFrags[i];if(f.fake&&!ngHard)continue;ngDoorQueue.push(f)}
@@ -10882,6 +11054,92 @@ function ngDoorStopAll(){
 if(ngDoorTmrIv){try{clearInterval(ngDoorTmrIv)}catch(e){}ngDoorTmrIv=null}
 if(ngDoorTmrT){try{clearTimeout(ngDoorTmrT)}catch(e){}ngDoorTmrT=null}
 if(ngDoorSayIv){try{clearInterval(ngDoorSayIv)}catch(e){}ngDoorSayIv=null}
+if(ngBossT){try{clearTimeout(ngBossT)}catch(e){}ngBossT=null}
+if(ngReactIv){try{clearInterval(ngReactIv)}catch(e){}ngReactIv=null}
+}
+var ngBossWind=['COME HERE.','I AM CALM. (I AM NOT CALM.)','TEN MISSES. I COUNTED.','HOLD STILL.','STOP DODGING. THERE IS NOTHING TO DODGE YET.'];
+var ngBossHitL=['OW. OKAY.','THAT WAS RUDE.','MY EGO. MY BEAUTIFUL EGO.'];
+var ngBossMissL=['TOO SLOW.','SWING AND A MISS. (YOU DID NOT SWING.)','MY GRANDMA HITS HARDER. SHE IS A CONCEPT.'];
+var ngReactScare=['JUMPSCARE. COURTESY OF JBO.','HE WAS ALREADY INSIDE. CHECK AGAIN.','THE REACTOR EATS THE SLOW.'];
+function ngDoorProBoss(){
+ngDoorStopAll();
+ngDoorPh=0;ngBossHp=3;ngBossOpen=false;
+ngSay('...ten misses. TEN. jbo saw the scoreboard. rematch first, door after.');
+ngDoorProBossRender('jbo is winding up...');
+ngDoorProBossWindup();
+}
+function ngDoorProBossRender(msg){
+var m=document.getElementById('ngDoorMain');if(!m)return;
+var pips='';for(var i=0;i<3;i++)pips+=(i<ngBossHp?'\u25CF':'\u25CB');
+var h='<div style="color:#ff8060;font-family:Georgia,serif;font-size:18px;letter-spacing:3px;text-align:center;margin:12px 0">JBO &middot; REMATCH</div>';
+h+='<div style="color:rgba(255,255,255,0.7);font-family:Consolas,monospace;font-size:14px;text-align:center">jbo hp '+pips+'</div>';
+h+='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:13px;text-align:center;margin:10px 0;min-height:20px">'+(msg||'')+'</div>';
+h+='<div style="text-align:center"><button class="ngtopt" id="ngBossHitB" style="display:'+(ngBossOpen?'inline-block':'none')+';width:40%;font-size:16px">HIT!</button></div>';
+m.innerHTML=h;
+var b=document.getElementById('ngBossHitB');if(b)b.onclick=function(){ngDoorProBossHit()};
+var p=document.getElementById('ngDoorProg');if(p)p.textContent='REMATCH \u00b7 jbo hp '+ngBossHp+'/3';
+}
+function ngDoorProBossWindup(){
+if(!ngActive||ngChDone||ngDoorPh!==0)return;
+if(ngBossT){try{clearTimeout(ngBossT)}catch(e){}ngBossT=null}
+ngBossOpen=false;ngDoorProBossRender('jbo is winding up...');
+ngShout(ngBossWind[Math.floor(Math.random()*ngBossWind.length)]);
+ngBossT=setTimeout(function(){ngBossT=null;if(!ngActive||ngChDone||ngDoorPh!==0)return;ngBossOpen=true;ngDoorProBossRender('NOW. HIT HIM.');ngBossT=setTimeout(function(){ngBossT=null;if(!ngActive||ngChDone||ngDoorPh!==0)return;ngBossOpen=false;ngShout(ngBossMissL[Math.floor(Math.random()*ngBossMissL.length)]);ngDoorProBossRender('too slow. he is winding up again.');ngBossT=setTimeout(function(){ngBossT=null;if(ngActive&&!ngChDone&&ngDoorPh===0)ngDoorProBossWindup()},900)},ngHard?800:1100)},1400);
+}
+function ngDoorProBossHit(){
+if(!ngActive||ngChDone||ngDoorPh!==0||!ngBossOpen)return;
+ngBossOpen=false;
+if(ngBossT){try{clearTimeout(ngBossT)}catch(e){}ngBossT=null}
+try{ngSfx('pop')}catch(e){}
+ngBossHp--;
+if(ngBossHp<=0){
+ngDoorProBossRender('JBO IS DOWN.');
+ngSay('...rematch over. jbo is down.');
+ngShout('I LET YOU WIN. (I DID NOT LET YOU WIN.)');
+ngAfterSpeech(function(){if(!ngActive||ngChDone)return;ngDoorSay('come in. bring the receipts. ALL of them.',function(){if(ngActive&&!ngChDone){ngDoorProDone=true;ngDoorGo(1)}})},800);
+return}
+ngShout(ngBossHitL[3-ngBossHp-1]||'OW.');
+ngDoorProBossRender('direct hit. jbo hp '+ngBossHp+'/3.');
+ngBossT=setTimeout(function(){ngBossT=null;if(ngActive&&!ngChDone&&ngDoorPh===0)ngDoorProBossWindup()},900);
+}
+function ngDoorProReact(){
+ngDoorStopAll();
+ngDoorPh=0;ngReactPos=0;ngReactSide=Math.random()<0.5?'LEFT':'RIGHT';ngReactL=false;ngReactR=false;ngReactLeft=60;ngReactPower=100;ngReactTick=0;
+ngSay('...single digits. jbo respects that. barely. reactor duty. watch the monitor, work the doors.');
+ngDoorProReactRender();
+if(ngReactIv){try{clearInterval(ngReactIv)}catch(e){}ngReactIv=null}
+ngReactIv=setInterval(function(){
+if(!ngActive||ngChDone||ngDoorPh!==0){ngDoorProReactStop();return}
+ngReactTick++;
+ngReactPower=Math.max(0,ngReactPower-((ngReactL?3:0)+(ngReactR?3:0)));
+var stepEvery=(ngReactPower<=0)?1:2;
+if(ngReactTick%stepEvery===0){
+if(ngReactPos<2){if(Math.random()<(ngHard?0.8:0.7))ngReactPos++}
+else{
+var s=ngReactSide,shutIt=(s==='LEFT')?ngReactL:ngReactR;
+if(shutIt){ngReactPos=0;ngReactSide=Math.random()<0.5?'LEFT':'RIGHT';ngShout('BLOCKED. THE DOOR HOLDS. ...THIS TIME.')}
+else{ngReactPos=0;ngReactSide=Math.random()<0.5?'LEFT':'RIGHT';ngReactPower=Math.max(0,ngReactPower-15);try{ngSfx('buzz')}catch(e){}ngShout(ngReactScare[Math.floor(Math.random()*ngReactScare.length)])}
+}
+}
+if(ngReactPower<=0){ngReactL=false;ngReactR=false}
+ngReactLeft--;
+if(ngReactLeft<=0){ngDoorProReactStop();ngSay('...shift over. the reactor survives. jbo is taking credit.');ngAfterSpeech(function(){if(!ngActive||ngChDone)return;ngDoorSay('come in. bring the receipts. ALL of them.',function(){if(ngActive&&!ngChDone){ngDoorProDone=true;ngDoorGo(1)}})},800);return}
+ngDoorProReactRender();
+},1000);
+}
+function ngDoorProReactStop(){if(ngReactIv){try{clearInterval(ngReactIv)}catch(e){}ngReactIv=null}}
+function ngDoorProReactRender(){
+var m=document.getElementById('ngDoorMain');if(!m)return;
+var posName=ngReactPos===0?'LOBBY':(ngReactPos===1?'HALL':'AT DOOR '+ngReactSide);
+var h='<div style="color:#ff8060;font-family:Georgia,serif;font-size:18px;letter-spacing:3px;text-align:center;margin:12px 0">JBO&rsquo;S REACTOR &middot; NIGHT SHIFT</div>';
+h+='<div style="color:rgba(255,255,255,0.75);font-family:Consolas,monospace;font-size:14px;text-align:center">CAM: '+posName+'</div>';
+h+='<div style="color:#4a5a6a;font-family:Consolas,monospace;font-size:12px;text-align:center;margin:4px 0">POWER '+Math.round(ngReactPower)+'% \u00b7 '+ngReactLeft+'s left</div>';
+h+='<div style="display:flex;gap:10px;justify-content:center;margin-top:10px"><button class="ngtopt" id="ngReactL" style="width:34%">LEFT: '+(ngReactL?'SHUT':'OPEN')+'</button><button class="ngtopt" id="ngReactR" style="width:34%">RIGHT: '+(ngReactR?'SHUT':'OPEN')+'</button></div>';
+h+='<div style="color:#4a5a6a;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-top:8px">shut doors drain power. no power = no doors = fast jbo.</div>';
+m.innerHTML=h;
+var bl=document.getElementById('ngReactL');if(bl)bl.onclick=function(){if(!ngActive||ngChDone||ngDoorPh!==0)return;ngReactL=!ngReactL;try{ngSfx('pop')}catch(e){}ngDoorProReactRender()};
+var br=document.getElementById('ngReactR');if(br)br.onclick=function(){if(!ngActive||ngChDone||ngDoorPh!==0)return;ngReactR=!ngReactR;try{ngSfx('pop')}catch(e){}ngDoorProReactRender()};
+var p=document.getElementById('ngDoorProg');if(p)p.textContent='REACTOR DUTY \u00b7 '+Math.max(0,ngReactLeft)+'s \u00b7 power '+Math.round(ngReactPower)+'%';
 }
 function ngDoorSay(txt,cb){
 var el=document.getElementById('ngDoorVoice');if(!el){if(cb)cb();return}
@@ -10897,10 +11155,10 @@ function ngDoorSave(){try{ngSave({p18:{ph:ngDoorPh,dec:ngDoorDecoder,fragOK:ngDo
 function ngDoorHud(){
 var h=document.getElementById('ngDoorProg');if(!h)return;
 var t='PHASE '+ngDoorPh+'/5 \u00b7 ';
-if(ngDoorPh===1)t+='RECEIPTS '+ngDoorFragOK+'/'+(ngHard?9:7)+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
+if(ngDoorPh===1)t+='RECEIPTS '+ngDoorFragOK+'/'+(ngHard?7:5)+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
 else if(ngDoorPh===2)t+='SORT (misplaced '+ngDoorSortOK+')';
 else if(ngDoorPh===3)t+='DIAL '+(ngDoorDial+1)+'/'+(ngHard?4:3)+(ngDoorCode?' \u00b7 code so far: '+ngDoorCode.split('').join(' '):'');
-else if(ngDoorPh===4)t+='ANSWERS '+ngDoorTalkOK+'/12 \u00b7 '+ngDoorRules[ngDoorRule].replace('HOUSE RULE: ','')+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
+else if(ngDoorPh===4)t+='ANSWERS '+ngDoorTalkOK+'/8 \u00b7 '+ngDoorRules[ngDoorRule].replace('HOUSE RULE: ','')+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
 else t+='FINAL CHECK '+(ngDoorFinI+1)+'/4';
 h.textContent=t;
 }
@@ -11048,7 +11306,7 @@ ngDoorPh2();ngDoorHud();
 }
 }
 function ngDoorDialCount(){return ngHard?4:3}
-function ngDoorStrikeMax(){return ngHard?2:3}
+function ngDoorStrikeMax(){return ngHard?3:4}
 function ngDoorPh3(){
 var m=document.getElementById('ngDoorMain');if(!m)return;ngDoorHud();
 var chips='';
@@ -11129,6 +11387,7 @@ ngDoorSay('no. the rule is on the wall. READ the wall. strike '+ngDoorStrikes+' 
 }
 function ngDoorTimerStart(limit){
 ngDoorStopTimer();
+ngDoorTmrLeft=limit;
 ngDoorTmrIv=setInterval(function(){
 if(!ngActive||ngChDone){ngDoorStopTimer();return}
 ngDoorTmrLeft-=100;
@@ -11167,7 +11426,7 @@ for(var j=0;j<bs.length;j++)(function(bt){bt.onclick=function(){ngDoorFinDigit(p
 ngDoorTimerStart(limit);
 }else if(b===1){
 if(!ngDoorFinCards.length){
-var pick=[ngDoorFrags[0],ngDoorFrags[2],ngDoorFrags[5]];
+var pick=[ngDoorFrags[0],ngDoorFrags[1],ngDoorFrags[4]];
 for(var i=0;i<pick.length;i++)ngDoorFinCards.push({ch:pick[i].ch,text:pick[i].card});
 for(var k=2;k>0;k--){var j2=Math.floor(Math.random()*(k+1));var t=ngDoorFinCards[k];ngDoorFinCards[k]=ngDoorFinCards[j2];ngDoorFinCards[j2]=t}
 }
@@ -11254,6 +11513,9 @@ else if(!s.p18.replay&&(s.ch||0)>=19&&ph===1&&ngDoorFragOK===0&&!(ngDoorDecoder&
 }}catch(e){}
 if(doneF){ngChapter18Done(true);return}
 ngDoorPh=ph;
+ngDoorProDone=false;
+var _miss=-1;try{var _s17=ngLoad();if(_s17&&_s17.p17&&typeof _s17.p17.misses==='number')_miss=_s17.p17.misses}catch(e){}
+ngDoorBranch=_miss>=10?'boss':'reactor';
 if(ph===5){ngDoorCode='';for(var ci=0;ci<ngDoorDialCount();ci++)ngDoorCode+=ngDoorDials[ci].v}
 st.innerHTML='<div id="ngSub">CHAPTER 18: THE DOOR</div>'+
 '<div id="ngDoorProg" style="color:#4a5a6a;font-size:12px;letter-spacing:2px;font-family:Consolas,monospace;margin:16px 0 4px"></div>'+
@@ -11266,14 +11528,11 @@ if(ph>1){
 ngSay('checkpoint restored. phase '+ph+'. the door waited. doors are patient. (i am not.)');
 ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorRender()},600);
 }else{
-ngSay('chapter 18. THE DOOR. it has been waiting, and it has opinions.');
+ngSay('chapter 18. THE DOOR. it has been waiting.');
 ngAfterSpeech(function(){
 if(!ngActive||ngChDone)return;
-ngDoorSay('come in. bring the receipts. ALL of them.',function(){
-if(!ngActive||ngChDone)return;
-ngSay('...the door talks now. of course it does. everything talks. nobody stops.');
-ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorRender()},600);
-});
+if(ngDoorBranch==='boss'){ngShout('YOU. ME. PARKING LOT. NOW.');ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorProBoss()},800)}
+else{ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorProReact()},800)}
 },600);
 }
 }
@@ -11331,12 +11590,12 @@ var ngMornLunchTips=[
 'black coffee. the void\u2019s personality in a cup. obj approves for once: "correct."',
 'yesterday\u2019s leftover code. mostly semicolons. you feel... compiled.'
 ];
-function ngMornStrikeMax(){return ngHard?2:3}
+function ngMornStrikeMax(){return ngHard?3:4}
 function ngMornRoundsTotal(){return ngHard?3:2}
 function ngMornRushTotal(){return ngHard?3:2}
 function ngMornBatchSize(){var a=ngHard?[5,6,7]:[5,6];return a[ngMornRound]}
 function ngMornRushSize(){return ngHard?7:6}
-function ngMornRushLimit(){return ngHard?34000:45000}
+function ngMornRushLimit(){return ngHard?45000:60000}
 function ngMornFmt(ms){var s=Math.max(0,Math.ceil(ms/1000));var m=Math.floor(s/60);var ss=s%60;return m+':'+(ss<10?'0':'')+ss}
 function ngMornRulesInit(){
 ngMornRules=[];
@@ -11524,7 +11783,7 @@ function ngMornStartCountdown(){
 if(!ngActive||ngChDone||ngMornReady)return;
 ngMornReady=1;
 ngMornStrikes=0;ngMornItem=0;
-ngMornBatch=ngMornGen(ngHard?10:8);ngMornTraceReset();
+ngMornBatch=ngMornGen(ngHard?64:32);ngMornTraceReset();
 try{ngSave({p19:{ph:5,strikes:0}})}catch(e){}
 try{ngMornAud=new Audio('sciences_downfall.webm');ngMornAud.volume=0.85;var pr=ngMornAud.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}
 try{ngSfx('static')}catch(e){}
@@ -11715,6 +11974,7 @@ ngChDone=true;
 ngMornStopAll();
 if(!replay){
 try{ngUnlock(20)}catch(e){}
+try{if(typeof ngMornTmrLeft!=='undefined'&&ngMornTmrLeft>=120000)localStorage.setItem('cube_outrun','1')}catch(e){}
 try{ngSave({p19:{ph:1,strikes:ngMornStrikes,done:1,trace:(typeof ngMornTraceUses!=='undefined'&&ngMornTraceUses>0)?1:0,hard:ngHard?1:0}})}catch(e){}
 }
 var st=document.getElementById('ngStage');if(!st)return;
@@ -11847,7 +12107,7 @@ if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
 ngChDone=true;
 try{localStorage.setItem('cube_act2','1')}catch(e){}
 try{if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act2_hard','1')}}catch(e){}
-try{var _rv='0';try{_rv=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv==='1'){var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms))}if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1');var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=1800000){localStorage.setItem('cube_brute','1')}}if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act2_hard','1')}}else{try{localStorage.removeItem('cube_run_ms')}catch(e){}}}catch(e){}
+try{var _rv='0';try{_rv=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv==='1'){var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms))}if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1')}if(ngMistN()<=3&&typeof ngHard!=='undefined'&&ngHard){var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=9000000){localStorage.setItem('cube_brute','1')}}if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act2_hard','1')}}else{try{localStorage.removeItem('cube_run_ms')}catch(e){}}}catch(e){}
 try{if(typeof achScan==='function')achScan()}catch(e){}
 try{ngUnlock(21)}catch(e){}
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
@@ -11973,7 +12233,8 @@ else if(ngCurCh===16)t+='<br>objective: tell them apart ('+Math.min(ngEchoI+1,ng
 else if(ngCurCh===17)t+='<br>objective: land it in the green ('+Math.min(ngKnockI+1,ngKnockTotal)+'/'+ngKnockTotal+')<br>misses: '+ngKnockFails;
 else if(ngCurCh===18){
 var oj18='';
-if(ngDoorPh===1)oj18='print the receipts ('+ngDoorFragI+'/'+ngDoorQueue.length+') \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
+if(ngDoorPh===0)oj18=(ngDoorBranch==='boss'?'rematch: drop jbo (hp '+Math.max(0,ngBossHp)+'/3)':'reactor duty: '+Math.max(0,ngReactLeft)+'s left');
+else if(ngDoorPh===1)oj18='print the receipts ('+ngDoorFragI+'/'+ngDoorQueue.length+') \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
 else if(ngDoorPh===2)oj18='sort + trash lies ('+ngDoorTrash.length+'/'+(ngHard?2:0)+' trashed'+(ngDoorSortOK?' \u00b7 '+ngDoorSortOK+' misplaced':'')+')';
 else if(ngDoorPh===3)oj18='dial '+(ngDoorDial+1)+'/'+ngDoorDialCount()+' of the code';
 else if(ngDoorPh===4)oj18='talk ('+ngDoorTalkI+'/'+ngDoorTalk.length+') \u00b7 rules kept: '+ngDoorTalkOK+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
@@ -11990,6 +12251,7 @@ else oj19=ngMornReady?('override: item '+Math.min(ngMornItem+1,ngMornBatch.lengt
 t+='<br>objective: '+oj19;
 }
 else if(ngCurCh===20)t+='<br>objective: watch the credits. maybe edit them.';
+else if(ngCurCh===21)t+='<br>objective: wake up.';
 else{t+='<br>objective: fix the credits';try{t+='<br>music: '+ngTracks[ngMusicDefault()].n+' · voice: '+ngVoiceSpeed()+'ms'}catch(e){}}
 if(ngCurCh===-1)t='chapter -1/10<br>objective: be quiet (impossible)';
 var ngPid=ngCurrentPuzzle();
@@ -12011,6 +12273,7 @@ ch13dark:['the light follows your cursor. sweep slowly. things move when you gra
 ch14seq:['watch the pattern. then be the pattern. the buttons do not lie. your memory does.','wrong means watch again. there is no penalty except my patience. (it is infinite. unfortunately for you.)'],
 ch15ask:['it reads your save. so read your save: visits, finale, absence. (and obj\u2019s heart. it is the void.)','the last question is rigged. answer with your heart. (it will mock your heart.)'],
 ch16echo:['one of them is mine. the other one wishes it was mine.','forgeries flatter. originals dismiss. pick the dismissive one.'],
+dream:['loops reset. the phone does not.','grab what should not be here. talk back.'],
 ch17knock:['the needle does not care what jbo says. watch the green, press LOCK when they overlap.','the timer only starts after jbo finishes yelling his first lie. misses just replay the round. (hard: faster needle, tighter green, shorter timer.)'],
 ch18r1:['read the receipt in front of you. the answer is printed on it, even on the loud fake ones.','3 strikes (2 hard) and the whole printer restarts. read before you click.'],
 ch18asm:['each receipt carries a ch stamp. sort by the number, smallest first.','select the UNVERIFIED receipt (stamped ch??), then TRASH. lies cannot be filed. (hard: two of them lie.)'],
@@ -12153,6 +12416,7 @@ return 'ch19fil';
 if(ngCurCh===-1)return 'minus1';
 if(ngCurCh===10)return 'cred';
 if(ngCurCh===20)return 'cred';
+if(ngCurCh===21)return 'dream';
 if(ngCurCh===2&&ngManual<3)return 'tut0';
 return 'tut'+Math.max(1,ngTutStep);
 }
@@ -12202,7 +12466,7 @@ try{var ml=document.getElementById('ngMenuLeave');if(ml)ml.onclick=function(){ng
 var sv=ngLoad();
 try{ngHard=!!(sv.hard&&ngHardUnlocked())}catch(e){ngHard=false}
 var svCh=Math.min(sv.ch||0,ngMaxChapter);
-if(ngForceCh!==null){svCh=Math.min(ngForceCh,ngMaxChapter);ngForceCh=null}
+if(ngForceCh!==null){svCh=(ngForceCh===21)?21:Math.min(ngForceCh,ngMaxChapter);ngForceCh=null}
 try{ngDesignApply()}catch(e){}
 try{if(parseInt(localStorage.getItem('cube_run_start')||'0',10)>0){localStorage.setItem('cube_run_last',String(Date.now()))}}catch(e){}
 ngShowChapter(svCh);
@@ -12232,6 +12496,130 @@ try{document.body.classList.remove('ng-mode')}catch(e){}
 ngActive=false;ngClicks=0;
 try{ach('touch_grass')}catch(e){}try{achScan()}catch(e){}
 cubePrint('obj: ...come back never.');
+}
+// DREAM: secret nightmare chapter (via `dream` command). obj is springtrap,
+// the void is fazbear's. 3 deaths + 1 final loop with the phone.
+var ngDreamLoop=0,ngDreamSeed=null,ngDreamLong=false,ngDreamQueue=[0,1,2];
+var ngDreamKills=[
+{t:'STATIC INJECTION',killer:'OBJ',d:'obj injects raw static. your organs rust from the inside out.',talk:['hold still. this will hurt. (that is the point.)','rusting. lovely. you wear decay well.'],fx:'ngDreamRust',failBtn:'DON\u2019T INJECT ME',fail:'he injects you anyway. rude efficiency.'},
+{t:'BEATDOWN',killer:'OBJ',d:'the furniture disagrees with you. all of it. at once.',talk:['the void has furniture. it is angry furniture.','stay down. the floor missed you.'],fx:'ngDreamVig',failBtn:'DODGE',fail:'the furniture predicts. it read your file.'},
+{t:'SHRED',killer:'OBJ',d:'filed under VOID. the shredder accepts.',talk:['you filed yourself. efficient.','management sends regards. (it does not.)'],fx:'ngDreamShred',failBtn:'HOLD ONTO SOMETHING',fail:'you hold onto the shredder. mistake.'},
+{t:'DROWN IN STATIC',killer:'OBJ',d:'the signal gets loud. then louder. then you.',talk:['listen. LISTEN.','drown politely. the static insists.'],fx:'ngDreamRust',failBtn:'COVER YOUR EARS',fail:'your ears are also static. oversight.'},
+{t:'GRAVITY REVERSED',killer:'OBJ',d:'up is down. the floor files a complaint with your face.',talk:['gravity is a suggestion. i unsuggest it.','fall up. the ceiling missed you.'],fx:'ngDreamVig',failBtn:'HOLD THE FLOOR',fail:'the floor lets go. it was never yours.'},
+{t:'JBO YELLS YOU APART',killer:'JBO',d:'ten thousand decibels. you come apart at the seams.',talk:['I AM THE ALARM.','LOUDER. LOUDER. LOUD—'],fx:null,failBtn:'YELL BACK',fail:'he out-yells you. he always out-yells everyone.'},
+{t:'THE GRUE',killer:'GRUE',d:'it was awake. it was always awake.',talk:['...do not move.','it moved first.'],fx:'ngDreamVig',failBtn:'PLAY DEAD',fail:'you are dead. accurately.'},
+{t:'FILING CABINET',killer:'OBJ',d:'a cabinet falls. it was filed under YOU.',talk:['look up.','unlucky.'],fx:'ngDreamShred',failBtn:'CATCH IT',fail:'you catch it with your spine.'},
+{t:'CORE OVERLOAD',killer:'OBJ',d:'the core vents. you are standing where the vent goes.',talk:['she is flushing pressure.','you are the pressure.'],fx:'ngDreamSnow',failBtn:'TAKE COVER',fail:'cover is also venting.'},
+{t:'CLOCK STRIKES',killer:'OBJ',d:'the lying clocks agree for once. you age 400 years in 4 seconds.',talk:['it is later than you think.','much later.'],fx:'ngDreamVig',failBtn:'CHECK THE TIME',fail:'the time checks you.'},
+{t:'MAIL AVALANCHE',killer:'OBJ',d:'thirty-two parcels. all addressed to you. all heavy.',talk:['special delivery.','sign here. (you cannot move your arms.)'],fx:'ngDreamShred',failBtn:'DODGE THE MAIL',fail:'the mail dodges back. postage due.'},
+{t:'INTERLOPER STATIC',killer:'INTERLOPER',d:'the tumor tunes you like a band. you resolve into soup.',talk:['hold still. i am calibrating you.','you were always readable.'],fx:'ngDreamSnow',failBtn:'CHANGE THE CHANNEL',fail:'you ARE the channel.'},
+{t:'SHUTDOWN SONG',killer:'OBJ',d:'five minutes. looped. you do not survive the bridge.',talk:['it slaps.','it slaps you.'],fx:null,failBtn:'SKIP TRACK',fail:'there is no skip. there is only downfall.'},
+{t:'COOLANT BATH',killer:'OBJ',d:'the reactor shares its coolant. it is not water.',talk:['in you go.','the grue swims in this. (it does not.)'],fx:'ngDreamRust',failBtn:'HOLD YOUR BREATH',fail:'your breath files a complaint and leaves.'},
+{t:'YOU SAID NYARCH',killer:'OBJ',d:'you said it. HE heard it. run.',talk:['...what did you just say.','wrong answer. there was no right answer.'],fx:'ngDreamVig',failBtn:'TAKE IT BACK',fail:'the void keeps receipts. and you.'},
+{t:'THE ORACLE',killer:'OBJ',d:'you ask the oracle how to survive. it says: skill issue.',talk:['ask it. go on.','it said no.'],fx:'ngDreamSnow',failBtn:'ASK AGAIN',fail:'still no. the oracle charges per answer. you are broke.'}
+];
+var ngDreamRoasts=['TOO SLOW, rust bucket.','TALK LESS. STAB LESS. EVER THOUGHT OF NOT?','GET PWNED, LOSER.'];
+function ngChapterDream(st){
+ngDreamLoop=0;
+ngDreamQueue=[0,1,2];
+var seedLine='';
+if(ngDreamLong){
+var poolL=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+for(var li=poolL.length-1;li>0;li--){var lj=Math.floor(Math.random()*(li+1));var lt=poolL[li];poolL[li]=poolL[lj];poolL[lj]=lt}
+ngDreamQueue=poolL.slice(0,10);
+seedLine='midnight showing \u00b7 10 loops \u00b7 ';
+ngDreamLong=false;
+}
+else if(ngDreamSeed!==null&&typeof ngDreamSeed!=='undefined'){
+var pool=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+for(var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=pool[i];pool[i]=pool[j];pool[j]=t}
+ngDreamQueue=pool.slice(0,3+Math.floor(Math.random()*3));
+seedLine='seed '+ngDreamSeed+' \u00b7 ';
+ngDreamSeed=null;
+}
+st.innerHTML='<div id="ngSub">DREAM ('+seedLine+'this is not real. probably.)</div><div id="ngDreamMain" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>';
+ngSay('...you slept. bold. the void dreams THROUGH you.');
+ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDreamLoopFn()},800);
+}
+function ngDreamFx(cls){
+try{
+var st=document.getElementById('ngStage');if(!st)return;
+var old=document.getElementById('ngDreamFx');if(old)old.remove();
+if(!cls)return;
+var d=document.createElement('div');d.id='ngDreamFx';
+d.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:99990';
+d.innerHTML='<div class="ngDreamFxA '+cls+'" style="position:absolute;left:0;top:0;right:0;bottom:0"></div>';
+st.appendChild(d);
+}catch(e){}
+}
+function ngDreamShake(big){
+try{var ov=document.getElementById('ngOverlay');if(!ov)return;ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},big?900:450);if(big)setTimeout(function(){try{if(ngActive){ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},900)}}catch(e){}},500)}catch(e){}
+}
+function ngDreamLoopFn(){
+if(!ngActive||ngChDone)return;
+ngDreamFx(null);
+if(ngDreamLoop<ngDreamQueue.length){
+var k=ngDreamKills[ngDreamQueue[ngDreamLoop]];
+var total=ngDreamQueue.length+1;
+if(k.killer==='JBO'){ngShout(k.talk[0]);ngShout(k.talk[1])}else{ngSay(k.talk[0]);ngSay(k.talk[1])};
+ngAfterSpeech(function(){
+if(!ngActive||ngChDone)return;
+ngDreamFx(k.fx);
+ngDreamShake(true);
+try{ngSfx('static')}catch(e){}
+var m=document.getElementById('ngDreamMain');if(!m)return;
+var n=ngDreamLoop+1;
+m.innerHTML='<div id="ngSub">LOOP '+n+'/'+total+' &middot; '+k.t+'</div><div class="ngDreamKiller">'+k.killer+'</div><div style="text-align:center"><button class="ngtopt" id="ngDreamFailB" style="width:52%">'+k.failBtn+'</button></div>';
+var b=document.getElementById('ngDreamFailB');if(b)b.onclick=function(){if(!ngActive||ngChDone)return;ngDreamDie()};
+},900);
+}else{
+ngSay('STATIC INJECTION. again. he loves this one.');
+ngSay('rusting. ...wait. what is that.');
+ngAfterSpeech(function(){
+if(!ngActive||ngChDone)return;
+var m=document.getElementById('ngDreamMain');if(!m)return;
+m.innerHTML='<div id="ngSub">LOOP '+(ngDreamQueue.length+1)+'/'+(ngDreamQueue.length+1)+' &middot; something is ringing. familiar. wrong here.</div><div class="ngDreamPhoneGlow" style="color:#ffe9a8;font-family:Consolas,monospace;font-size:15px;text-align:center;margin:12px 0;padding:10px 18px;border:1px solid rgba(255,233,168,0.5);border-radius:8px">dad&rsquo;s phone &middot; 1% &middot; buzzing</div><div style="text-align:center"><button class="ngtopt" id="ngDreamPhoneB" style="width:48%">GRAB THE PHONE</button></div>';
+var b=document.getElementById('ngDreamPhoneB');if(b)b.onclick=function(){if(ngTalking())return;try{ngHurry()}catch(e){}ngDreamPhone()};
+},900);
+}
+}
+function ngDreamDie(){
+if(!ngActive||ngChDone)return;
+var k=ngDreamKills[ngDreamQueue[Math.min(ngDreamLoop,ngDreamQueue.length-1)]];
+ngSay(k.fail);
+ngAfterSpeech(function(){
+if(!ngActive||ngChDone)return;
+ngDreamFx('ngDreamFlash');
+try{ngSfx('buzz')}catch(e){}
+var m=document.getElementById('ngDreamMain');if(!m)return;
+var n=ngDreamLoop+1;
+m.innerHTML='<div id="ngEndTitle">YOU DIED &middot; LOOP '+n+'/4</div><div id="ngSub">'+k.d+'</div><div style="margin-top:12px"><button class="ngtopt" id="ngDreamAgainB" style="width:44%">AGAIN.</button></div>';
+ngDreamLoop++;
+var b=document.getElementById('ngDreamAgainB');if(b)b.onclick=function(){if(ngTalking())return;try{ngHurry()}catch(e){}ngDreamLoopFn()};
+},800);
+}
+function ngDreamPhone(){
+if(!ngActive||ngChDone)return;
+var m=document.getElementById('ngDreamMain');if(!m)return;
+var h='<div id="ngSub">you grabbed it. his monologue falters. SAY IT.</div><div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px">';
+for(var i=0;i<ngDreamRoasts.length;i++)h+='<button class="ngtopt" data-r="'+i+'" style="width:64%">'+ngDreamRoasts[i]+'</button>';
+h+='</div>';m.innerHTML=h;
+var bs=m.getElementsByTagName('button');
+for(var j=0;j<bs.length;j++)(function(b){b.onclick=function(){ngDreamWake(parseInt(b.getAttribute('data-r'),10))}})(bs[j]);
+}
+function ngDreamWake(ri){
+if(!ngActive||ngChDone)return;
+ngSay('('+(ngDreamRoasts[ri]||'GET PWNED, LOSER.')+')');
+ngAfterSpeech(function(){
+if(!ngActive||ngChDone)return;
+ngSay('...what.');
+ngAfterSpeech(function(){
+if(!ngActive||ngChDone)return;
+try{localStorage.setItem('cube_pwned','1')}catch(e){}
+ngSay('...morning. you drooled.');
+ngAfterSpeech(function(){if(ngActive)ngExit()},800);
+},700);
+},700);
 }
 // caught obj in 4k — phase 1: procedural pull demos, scripts 1-3
 var pullAccess=false;
