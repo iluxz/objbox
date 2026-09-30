@@ -4037,7 +4037,6 @@ try{ngIsAdmin=(typeof isAdmin!=='undefined'&&isAdmin)}catch(e){}
 if(fnum>maxAllowed&&!ngIsAdmin){cubeError('play: chapter '+fnum+' is locked. complete chapter '+(fnum-1)+' first.');return}
 ngForceCh=Math.min(fnum,ngMaxChapter);
 try{localStorage.setItem('cube_run_valid','0');localStorage.removeItem('cube_run_ms')}catch(e){}
-if(fnum===18&&typeof ngDoorReplayReset==='function'){ngDoorReplayReset()}
 if(fnum===19&&typeof ngMornReplayReset==='function'){ngMornReplayReset()}
 }
 cubePrint('obj: there is no game.');
@@ -8433,7 +8432,6 @@ if(typeof ngDarkBrownIv!=='undefined'&&ngDarkBrownIv){try{clearInterval(ngDarkBr
 if(typeof ngSeqIv!=='undefined'&&ngSeqIv){try{clearInterval(ngSeqIv)}catch(e){}ngSeqIv=null}
 if(typeof ngEchoTimerIv!=='undefined'&&ngEchoTimerIv){try{clearInterval(ngEchoTimerIv)}catch(e){}ngEchoTimerIv=null}
 if(typeof ngKnockStopAll==='function')try{ngKnockStopAll()}catch(e){}
-if(typeof ngDoorStopAll==='function')try{ngDoorStopAll()}catch(e){}
 if(typeof ngMornStopAll==='function')try{ngMornStopAll()}catch(e){}
 var st=document.getElementById('ngStage');if(!st)return;st.innerHTML='';st.className='';
 var c=(n===21)?21:Math.min(n,ngMaxChapter);
@@ -11013,555 +11011,32 @@ ngSay('it has been waiting. doors wait. go.');
 ngAfterSpeech(function(){if(ngActive)ngShowChapter(18)},800);
 };
 }
-var ngDoorPh=1,ngDoorFragI=0,ngDoorFragOK=0,ngDoorWrong=0,ngDoorCards=[],ngDoorSel=-1,ngDoorTrash=[],ngDoorSortOK=0;
-var ngDoorQueue=[];
-var ngDoorStrikes=0;
-var ngDoorDial=0,ngDoorDialIn='',ngDoorCode='',ngDoorFeed='';
-var ngDoorTalkI=0,ngDoorTalkOK=0,ngDoorRule=0,ngDoorOrd=null;
-var ngDoorFinI=0,ngDoorTmrIv=null,ngDoorTmrT=null,ngDoorSayIv=null,ngDoorFinCards=[],ngDoorCodeIn='',ngDoorTmrLeft=0;
-var ngDoorDecoder={};
-var ngDoorBranch='reactor',ngDoorProDone=false;
-var ngBossHp=0,ngBossT=null,ngBossOpen=false;
-var ngReactPos=0,ngReactSide='LEFT',ngReactL=false,ngReactR=false,ngReactIv=null,ngReactLeft=60,ngReactPower=100,ngReactTick=0;
-var ngDoorRules=['HOUSE RULE: HONEST','HOUSE RULE: OPPOSITE','HOUSE RULE: OBJ VOICE'];
-var ngDoorRuleTxt=['answer with the TRUE statement.','answer with the FALSE statement.','answer the way OBJ would say it.'];
-var ngDoorRoast=['no. the receipt printer is judging you. read it again.','wrong. truth-ink does not lie. you do. try again.','nope. that answer is from a different game.','wrong. jbo could get this. jbo is not smart. think about that.','the void refunds wrong answers in SILENCE. try again.'];
-var ngDoorFrags=[
-{tag:'STATIC',ch:11,card:'you tuned a band until it was rude',q:'STATIC: what tightened every round?',o:['the tolerance band','the screen borders','the music tempo','the noose of my patience'],a:0,out:'4',hit:'correct. the band shrank until it was rude.'},
- {tag:'BLACKOUT',ch:13,card:'light first, then the door',q:'BLACKOUT: the only safe order was...',o:['bulb, fuse, exit','fuse, bulb, exit','exit, fuse, bulb','fuse, exit, bulb'],a:1,out:'1',hit:'fuse, bulb, exit. light before stairs. manners.'},
-{tag:'SIGNAL LOST',ch:14,card:'the core talked while obj napped',q:'SIGNAL LOST: why did the core lead?',o:['obj was offline','obj quit','the core won an election','there was a coin flip'],a:0,out:'8',hit:'obj was offline. the core was POLITE about it. hate that.'},
-{tag:'INTERLOPER',ch:15,card:'it read your visits out loud',q:'INTERLOPER: it read which facts from your SAVE?',o:['visits and finale choice','browser history','your mouse sensitivity','your darkest wish'],a:0,out:'3',hit:'visits and finale. it knows. it always knows.'},
-{tag:'ECHO',ch:16,card:'two lines, one verdict',q:'ECHO: when BOTH lines were his, what did you press?',o:['the verdict buttons','a coin flip','the hint button','obj, verbally'],a:0,out:'6',hit:'BOTH ARE HIS. the buttons worked. i am not happy about that.'},
- {tag:'UNVERIFIED',ch:99,fake:true,card:'UNVERIFIED - breakfast of a not-real man',q:'??? : what did the wrong obj eat for breakfast?',o:['nothing, he is not real','a pixel omelette','toast with spite','the concept of lunch'],a:0,out:'0',hit:'UNVERIFIED receipt printed. the void cannot verify a fiction.'},
-{tag:'UNVERIFIED',ch:99,fake:true,card:'UNVERIFIED - volume, not colour',q:'??? : what colour was jbo\'s screaming?',o:['orange','loud','chartreuse','the green window'],a:1,out:'0',hit:'UNVERIFIED receipt printed. screaming has no colour. it has VOLUME.'}
-];
-var ngDoorTalk=[
-{q:'ECHO had how many rounds on normal?',o:['10 rounds','6 rounds','ten too many. i counted in sighs.']},
-{q:'what tightened every round in STATIC?',o:['the tolerance band','the music tempo','the tolerance. and my blood pressure.']},
-{q:'BLACKOUT required which order?',o:['fuse, bulb, exit','bulb, fuse, exit','light first. i would have left FIRST.']},
-{q:'which chapter did the core actually lead?',o:['SIGNAL LOST','INTERLOPER','nothing. i could have led both. (i could not.)']},
-{q:'INTERLOPER read your...',o:['visits and finale choice','your browser history','your secrets. (you have none. boring.)']},
-{q:'how many verdict options did ECHO show?',o:['two: BOTH or NEITHER','four, plus a shrug','two. i wanted zero: both were HIS.']},
- {q:'strikes before ECHO restarted you?',o:['three','five','three. generous. i wanted zero tolerance.']},
-{q:'how many decoys sat in the BLACKOUT dark?',o:['three','two','three. the grue was asleep. adorable AND a decoy.']}
-];
-var ngDoorDials=[{c:'STATIC + BLACKOUT',v:5},{c:'SIGNAL LOST - STATIC',v:4},{c:'INTERLOPER + ECHO',v:9},{c:'ECHO - INTERLOPER',v:3,hard:true}];
-function ngDoorBuildQueue(){
-ngDoorQueue=[];
-for(var i=0;i<ngDoorFrags.length;i++){var f=ngDoorFrags[i];if(f.fake&&!ngHard)continue;ngDoorQueue.push(f)}
-}
-function ngDoorStopAll(){
-if(ngDoorTmrIv){try{clearInterval(ngDoorTmrIv)}catch(e){}ngDoorTmrIv=null}
-if(ngDoorTmrT){try{clearTimeout(ngDoorTmrT)}catch(e){}ngDoorTmrT=null}
-if(ngDoorSayIv){try{clearInterval(ngDoorSayIv)}catch(e){}ngDoorSayIv=null}
-if(ngBossT){try{clearTimeout(ngBossT)}catch(e){}ngBossT=null}
-if(ngReactIv){try{clearInterval(ngReactIv)}catch(e){}ngReactIv=null}
-}
-var ngBossWind=['COME HERE.','I AM CALM. (I AM NOT CALM.)','TEN MISSES. I COUNTED.','HOLD STILL.','STOP DODGING. THERE IS NOTHING TO DODGE YET.'];
-var ngBossHitL=['OW. OKAY.','THAT WAS RUDE.','MY EGO. MY BEAUTIFUL EGO.'];
-var ngBossMissL=['TOO SLOW.','SWING AND A MISS. (YOU DID NOT SWING.)','MY GRANDMA HITS HARDER. SHE IS A CONCEPT.'];
-var ngReactScare=['JUMPSCARE. COURTESY OF JBO.','HE WAS ALREADY INSIDE. CHECK AGAIN.','THE REACTOR EATS THE SLOW.'];
-function ngDoorProBoss(){
-ngDoorStopAll();
-ngDoorPh=0;ngBossHp=3;ngBossOpen=false;
-ngSay('...ten misses. TEN. jbo saw the scoreboard. rematch first, door after.');
-ngDoorProBossRender('jbo is winding up...');
-ngDoorProBossWindup();
-}
-function ngDoorProBossRender(msg){
-var m=document.getElementById('ngDoorMain');if(!m)return;
-var pips='';for(var i=0;i<3;i++)pips+=(i<ngBossHp?'\u25CF':'\u25CB');
-var h='<div style="color:#ff8060;font-family:Georgia,serif;font-size:18px;letter-spacing:3px;text-align:center;margin:12px 0">JBO &middot; REMATCH</div>';
-h+='<div style="color:rgba(255,255,255,0.7);font-family:Consolas,monospace;font-size:14px;text-align:center">jbo hp '+pips+'</div>';
-h+='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:13px;text-align:center;margin:10px 0;min-height:20px">'+(msg||'')+'</div>';
-h+='<div style="text-align:center"><button class="ngtopt" id="ngBossHitB" style="display:'+(ngBossOpen?'inline-block':'none')+';width:40%;font-size:16px">HIT!</button></div>';
-m.innerHTML=h;
-var b=document.getElementById('ngBossHitB');if(b)b.onclick=function(){ngDoorProBossHit()};
-var p=document.getElementById('ngDoorProg');if(p)p.textContent='REMATCH \u00b7 jbo hp '+ngBossHp+'/3';
-}
-function ngDoorProBossWindup(){
-if(!ngActive||ngChDone||ngDoorPh!==0)return;
-if(ngBossT){try{clearTimeout(ngBossT)}catch(e){}ngBossT=null}
-ngBossOpen=false;ngDoorProBossRender('jbo is winding up...');
-ngShout(ngBossWind[Math.floor(Math.random()*ngBossWind.length)]);
-ngBossT=setTimeout(function(){ngBossT=null;if(!ngActive||ngChDone||ngDoorPh!==0)return;ngBossOpen=true;ngDoorProBossRender('NOW. HIT HIM.');ngBossT=setTimeout(function(){ngBossT=null;if(!ngActive||ngChDone||ngDoorPh!==0)return;ngBossOpen=false;ngShout(ngBossMissL[Math.floor(Math.random()*ngBossMissL.length)]);ngDoorProBossRender('too slow. he is winding up again.');ngBossT=setTimeout(function(){ngBossT=null;if(ngActive&&!ngChDone&&ngDoorPh===0)ngDoorProBossWindup()},900)},ngHard?800:1100)},1400);
-}
-function ngDoorProBossHit(){
-if(!ngActive||ngChDone||ngDoorPh!==0||!ngBossOpen)return;
-ngBossOpen=false;
-if(ngBossT){try{clearTimeout(ngBossT)}catch(e){}ngBossT=null}
-try{ngSfx('pop')}catch(e){}
-ngBossHp--;
-if(ngBossHp<=0){
-ngDoorProBossRender('JBO IS DOWN.');
-ngSay('...rematch over. jbo is down.');
-ngShout('I LET YOU WIN. (I DID NOT LET YOU WIN.)');
-ngAfterSpeech(function(){if(!ngActive||ngChDone)return;ngDoorSay('come in. bring the receipts. ALL of them.',function(){if(ngActive&&!ngChDone){ngDoorProDone=true;ngDoorGo(1)}})},800);
-return}
-ngShout(ngBossHitL[3-ngBossHp-1]||'OW.');
-ngDoorProBossRender('direct hit. jbo hp '+ngBossHp+'/3.');
-ngBossT=setTimeout(function(){ngBossT=null;if(ngActive&&!ngChDone&&ngDoorPh===0)ngDoorProBossWindup()},900);
-}
-function ngDoorProReact(){
-ngDoorStopAll();
-ngDoorPh=0;ngReactPos=0;ngReactSide=Math.random()<0.5?'LEFT':'RIGHT';ngReactL=false;ngReactR=false;ngReactLeft=60;ngReactPower=100;ngReactTick=0;
-ngSay('...single digits. jbo respects that. barely. reactor duty. watch the monitor, work the doors.');
-ngDoorProReactRender();
-if(ngReactIv){try{clearInterval(ngReactIv)}catch(e){}ngReactIv=null}
-ngReactIv=setInterval(function(){
-if(!ngActive||ngChDone||ngDoorPh!==0){ngDoorProReactStop();return}
-ngReactTick++;
-ngReactPower=Math.max(0,ngReactPower-((ngReactL?3:0)+(ngReactR?3:0)));
-var stepEvery=(ngReactPower<=0)?1:2;
-if(ngReactTick%stepEvery===0){
-if(ngReactPos<2){if(Math.random()<(ngHard?0.8:0.7))ngReactPos++}
-else{
-var s=ngReactSide,shutIt=(s==='LEFT')?ngReactL:ngReactR;
-if(shutIt){ngReactPos=0;ngReactSide=Math.random()<0.5?'LEFT':'RIGHT';ngShout('BLOCKED. THE DOOR HOLDS. ...THIS TIME.')}
-else{ngReactPos=0;ngReactSide=Math.random()<0.5?'LEFT':'RIGHT';ngReactPower=Math.max(0,ngReactPower-15);try{ngSfx('buzz')}catch(e){}ngShout(ngReactScare[Math.floor(Math.random()*ngReactScare.length)])}
-}
-}
-if(ngReactPower<=0){ngReactL=false;ngReactR=false}
-ngReactLeft--;
-if(ngReactLeft<=0){ngDoorProReactStop();ngSay('...shift over. the reactor survives. jbo is taking credit.');ngAfterSpeech(function(){if(!ngActive||ngChDone)return;ngDoorSay('come in. bring the receipts. ALL of them.',function(){if(ngActive&&!ngChDone){ngDoorProDone=true;ngDoorGo(1)}})},800);return}
-ngDoorProReactRender();
-},1000);
-}
-function ngDoorProReactStop(){if(ngReactIv){try{clearInterval(ngReactIv)}catch(e){}ngReactIv=null}}
-function ngDoorProReactRender(){
-var m=document.getElementById('ngDoorMain');if(!m)return;
-var posName=ngReactPos===0?'LOBBY':(ngReactPos===1?'HALL':'AT DOOR '+ngReactSide);
-var h='<div style="color:#ff8060;font-family:Georgia,serif;font-size:18px;letter-spacing:3px;text-align:center;margin:12px 0">JBO&rsquo;S REACTOR &middot; NIGHT SHIFT</div>';
-h+='<div style="color:rgba(255,255,255,0.75);font-family:Consolas,monospace;font-size:14px;text-align:center">CAM: '+posName+'</div>';
-h+='<div style="color:#4a5a6a;font-family:Consolas,monospace;font-size:12px;text-align:center;margin:4px 0">POWER '+Math.round(ngReactPower)+'% \u00b7 '+ngReactLeft+'s left</div>';
-h+='<div style="display:flex;gap:10px;justify-content:center;margin-top:10px"><button class="ngtopt" id="ngReactL" style="width:34%">LEFT: '+(ngReactL?'SHUT':'OPEN')+'</button><button class="ngtopt" id="ngReactR" style="width:34%">RIGHT: '+(ngReactR?'SHUT':'OPEN')+'</button></div>';
-h+='<div style="color:#4a5a6a;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-top:8px">shut doors drain power. no power = no doors = fast jbo.</div>';
-m.innerHTML=h;
-var bl=document.getElementById('ngReactL');if(bl)bl.onclick=function(){if(!ngActive||ngChDone||ngDoorPh!==0)return;ngReactL=!ngReactL;try{ngSfx('pop')}catch(e){}ngDoorProReactRender()};
-var br=document.getElementById('ngReactR');if(br)br.onclick=function(){if(!ngActive||ngChDone||ngDoorPh!==0)return;ngReactR=!ngReactR;try{ngSfx('pop')}catch(e){}ngDoorProReactRender()};
-var p=document.getElementById('ngDoorProg');if(p)p.textContent='REACTOR DUTY \u00b7 '+Math.max(0,ngReactLeft)+'s \u00b7 power '+Math.round(ngReactPower)+'%';
-}
-function ngDoorSay(txt,cb){
-var el=document.getElementById('ngDoorVoice');if(!el){if(cb)cb();return}
-el.textContent='';var i=0;
-if(ngDoorSayIv){try{clearInterval(ngDoorSayIv)}catch(e){}ngDoorSayIv=null}
-ngDoorSayIv=setInterval(function(){
-if(!ngActive||ngChDone){clearInterval(ngDoorSayIv);ngDoorSayIv=null;return}
-i++;el.textContent=String(txt).slice(0,i);
-if(i>=String(txt).length){clearInterval(ngDoorSayIv);ngDoorSayIv=null;if(cb)cb()}
-},26);
-}
-function ngDoorSave(){try{ngSave({p18:{ph:ngDoorPh,dec:ngDoorDecoder,fragOK:ngDoorFragOK,wrong:ngDoorWrong,talkOK:ngDoorTalkOK}})}catch(e){}}
-function ngDoorHud(){
-var h=document.getElementById('ngDoorProg');if(!h)return;
-var t='PHASE '+ngDoorPh+'/5 \u00b7 ';
-if(ngDoorPh===1)t+='RECEIPTS '+ngDoorFragOK+'/'+(ngHard?7:5)+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
-else if(ngDoorPh===2)t+='SORT (misplaced '+ngDoorSortOK+')';
-else if(ngDoorPh===3)t+='DIAL '+(ngDoorDial+1)+'/'+(ngHard?4:3)+(ngDoorCode?' \u00b7 code so far: '+ngDoorCode.split('').join(' '):'');
-else if(ngDoorPh===4)t+='ANSWERS '+ngDoorTalkOK+'/8 \u00b7 '+ngDoorRules[ngDoorRule].replace('HOUSE RULE: ','')+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
-else t+='FINAL CHECK '+(ngDoorFinI+1)+'/4';
-h.textContent=t;
-}
-function ngDoorBridge(objLine,doorLine,ph){
-if(objLine)ngSay(objLine);
-ngAfterSpeech(function(){
-if(!ngActive||ngChDone)return;
-ngDoorSay(doorLine||'',function(){if(ngActive&&!ngChDone&&ph)ngDoorGo(ph)});
-},600);
-}
-function ngDoorGo(ph){
-ngDoorStopAll();
-ngDoorPh=ph;ngDoorSel=-1;ngDoorFeed='';ngDoorDialIn='';ngDoorOrd=null;ngDoorCodeIn='';
-if(ph===2){
-if(!ngDoorCards.length){
-if(!ngDoorQueue.length)ngDoorBuildQueue();
-ngDoorCards=[];
-for(var i=0;i<ngDoorQueue.length;i++){var f=ngDoorQueue[i];ngDoorCards.push({tag:f.tag,ch:f.ch,unv:!!f.fake,text:f.card})}
-for(var k=ngDoorCards.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=ngDoorCards[k];ngDoorCards[k]=ngDoorCards[j];ngDoorCards[j]=t}
-}
-}
-if(ph===3){ngDoorDial=0;ngDoorCode=''}
-if(ph===4){ngDoorTalkI=0;ngDoorTalkOK=0;ngDoorRule=0}
-if(ph===5){ngDoorFinI=0;ngDoorCode='';for(var i=0;i<ngDoorDialCount();i++)ngDoorCode+=ngDoorDials[i].v}
-ngDoorSave();
-ngDoorRender();
-}
-function ngDoorRender(){
-ngDoorHud();
-if(ngDoorPh===1)ngDoorPh1();
-else if(ngDoorPh===2)ngDoorPh2();
-else if(ngDoorPh===3)ngDoorPh3();
-else if(ngDoorPh===4)ngDoorPh4();
-else if(ngDoorPh===5)ngDoorPh5();
-}
-function ngDoorPh1(){
-var m=document.getElementById('ngDoorMain');if(!m)return;ngDoorHud();
-if(!ngDoorQueue.length)ngDoorBuildQueue();
-if(ngDoorFragI>=ngDoorQueue.length){ngDoorBridge(ngDoorQueue.length>7?'all receipts printed. some of them smell fake.':'all receipts printed. suspiciously honest today.','receipts. now SORT them. chronologically. i will watch.',2);return}
-var f=ngDoorQueue[ngDoorFragI];
-var h='<div style="color:#c8a0d0;font-family:Georgia,serif;font-size:14px;letter-spacing:2px;margin:12px 0 6px;text-align:center">RECEIPT '+(ngDoorFragI+1)+'/'+ngDoorFrags.length+' \u00b7 '+f.tag+'</div>';
-h+='<div style="color:#d8a05a;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-bottom:2px">'+f.card+'</div>';
-h+='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:13px;text-align:center;margin:8px 0 14px">'+f.q+'</div>';
-for(var i=0;i<f.o.length;i++)h+='<button class="ngtopt" data-i="'+i+'" style="display:block;width:74%;margin:6px auto">'+f.o[i]+'</button>';
-m.innerHTML=h;
-var bs=m.getElementsByTagName('button');
-for(var j=0;j<bs.length;j++)(function(b){b.onclick=function(){ngDoorPick(parseInt(b.getAttribute('data-i'),10))}})(bs[j]);
-}
-function ngDoorPick(i){
-if(!ngActive||ngChDone)return;
-var f=ngDoorQueue[ngDoorFragI];
-if(i===f.a){
-try{ngSfx('coin')}catch(e){}
-ngDoorDecoder[f.tag]=f.out;
-if(!f.fake)ngDoorFragOK++;
-ngSay(f.hit);
-ngDoorFragI++;
-setTimeout(function(){if(ngActive&&!ngChDone)ngDoorPh1()},900);
-}else{
-try{ngSfx('buzz')}catch(e){}
-ngDoorWrong++;
-ngDoorStrikes++;
-ngDoorHud();
-if(ngDoorStrikes>=ngDoorStrikeMax()){
-ngDoorStrikes=0;ngDoorFragI=0;ngDoorFragOK=0;ngDoorDecoder={};
-try{var ov1=document.getElementById('ngOverlay');if(ov1){ov1.classList.add('ngShake');setTimeout(function(){ov1.classList.remove('ngShake')},450)}}catch(e){}
-ngDoorSay('strike limit. the printer jams. every receipt reprints. from the top.');
-ngDoorPh1();ngDoorHud();
-}else{
-ngSay(ngDoorRoast[ngDoorWrong%ngDoorRoast.length]);
-ngDoorSay('strike '+ngDoorStrikes+' of '+ngDoorStrikeMax()+'. guess again — see what happens.');
-}
-}
-}
-function ngDoorMisplaced(){
-var real=[];
-for(var i=0;i<ngDoorCards.length;i++)if(!ngDoorCards[i].unv)real.push(ngDoorCards[i]);
-var s=real.slice().sort(function(a,b){return a.ch-b.ch});
-var bad=0;
-for(var i=0;i<ngDoorCards.length;i++){
-if(ngDoorCards[i].unv)continue;
-var pos=0;for(var r=0;r<real.length;r++)if(real[r]===ngDoorCards[i]){pos=r;break}
-if(ngDoorCards[i]!==s[pos])bad++;
-}
-return bad;
-}
-function ngDoorPh2(){
-var m=document.getElementById('ngDoorMain');if(!m)return;ngDoorHud();
-if(!ngDoorCards.length){
-if(!ngDoorQueue.length)ngDoorBuildQueue();
-for(var q=0;q<ngDoorQueue.length;q++){var fq=ngDoorQueue[q];ngDoorCards.push({tag:fq.tag,ch:fq.ch,unv:!!fq.fake,text:fq.card})}
-for(var k2=ngDoorCards.length-1;k2>0;k2--){var j2=Math.floor(Math.random()*(k2+1));var t2=ngDoorCards[k2];ngDoorCards[k2]=ngDoorCards[j2];ngDoorCards[j2]=t2}
-}
-var h='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:12px;text-align:center;margin:10px 0">put the receipts in the order it all happened (the ch stamp helps). trash anything UNVERIFIED.</div>';
-h+='<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:78%;margin:8px auto">';
-for(var i=0;i<ngDoorCards.length;i++){
-var c=ngDoorCards[i];
-var stamp=c.unv?'ch??':'ch'+c.ch;
-h+='<button class="ngtopt" data-i="'+i+'" style="width:46%;font-size:11px;margin:0;'+(ngDoorSel===i?'border-color:rgba(255,210,120,0.8);color:#ffe8c0;':'')+(c.unv?'color:#7a6a5a;':'')+'"><span style="opacity:.5;font-size:10px">'+stamp+'</span> \u00b7 '+(c.unv?c.text:(ngDoorSortOK===0&&c.revealed?c.tag+' \u00b7 ':'')+c.text)+'</button>';
-}
-h+='</div>';
-h+='<div style="display:flex;gap:10px;justify-content:center"><button class="ngtopt" id="ngDoorTrash" style="width:34%">'+(ngDoorTrash.length?'TRASHED: '+ngDoorTrash.length:'TRASH SELECTED')+'</button><button class="ngtopt" id="ngDoorSortB" style="width:34%">SORT IT</button></div>';
-m.innerHTML=h;
-var bs=m.getElementsByTagName('button');
-for(var j=0;j<bs.length;j++)(function(b){
-var attr=b.getAttribute('data-i');
-if(attr===null)return;
-b.onclick=function(){ngDoorCardClick(parseInt(attr,10))};
-})(bs[j]);
-var tb=document.getElementById('ngDoorTrash');if(tb)tb.onclick=ngDoorTrashSel;
-var sb=document.getElementById('ngDoorSortB');if(sb)sb.onclick=ngDoorSort;
-}
-function ngDoorCardClick(i){
-if(!ngActive||ngChDone)return;
-if(ngDoorSel===-1){ngDoorSel=i}
-else if(ngDoorSel===i)ngDoorSel=-1;
-else{var t=ngDoorCards[ngDoorSel];ngDoorCards[ngDoorSel]=ngDoorCards[i];ngDoorCards[i]=t;ngDoorSel=-1}
-ngDoorPh2();ngDoorHud();
-}
-function ngDoorTrashSel(){
-if(!ngActive||ngChDone)return;
-if(ngDoorSel===-1){ngSay('select a receipt first. the trash has standards.');return}
-if(!ngDoorCards[ngDoorSel].unv){try{ngSfx('buzz')}catch(e){}ngShout('DO NOT TRASH A REAL RECEIPT. i can READ.');return}
-ngDoorTrash.push(ngDoorCards[ngDoorSel].text);
-ngDoorCards.splice(ngDoorSel,1);ngDoorSel=-1;
-try{ngSfx('pop')}catch(e){}
-ngDoorPh2();
-}
-function ngDoorSort(){
-if(!ngActive||ngChDone)return;
-for(var i=0;i<ngDoorCards.length;i++){
-if(ngDoorCards[i].unv){ngSay('trash the UNVERIFIED receipts first. lies cannot be filed.');return}
-}
-var bad=ngDoorMisplaced();
-ngDoorSortOK=bad;
-if(bad===0){
-try{ngSfx('coin')}catch(e){}
-for(var i=0;i<ngDoorCards.length;i++)ngDoorCards[i].revealed=true;
-ngDoorBridge('sorted. i saw you hesitate on two of them.','acceptable. now the COMBINATION. it is arithmetic. do not make me explain arithmetic.',3);
-}else{
-try{ngSfx('buzz')}catch(e){}
-try{var ov=document.getElementById('ngOverlay');if(ov){ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},450)}}catch(e){}
-ngSay(bad+' out of place. the void reorders nothing. you do the work.');
-ngDoorPh2();ngDoorHud();
-}
-}
-function ngDoorDialCount(){return ngHard?4:3}
-function ngDoorStrikeMax(){return ngHard?3:4}
-function ngDoorPh3(){
-var m=document.getElementById('ngDoorMain');if(!m)return;ngDoorHud();
-var chips='';
-for(var tag in ngDoorDecoder){if(tag==='UNVERIFIED')continue;chips+='<span style="display:inline-block;border:1px solid #3a2a3a;border-radius:3px;padding:2px 7px;margin:2px;font-family:Consolas,monospace;font-size:11px;color:#9fb2c5">'+tag+'='+ngDoorDecoder[tag]+'</span>'}
-var d=ngDoorDials[ngDoorDial];
-var h='<div style="text-align:center;margin:8px 0 4px">'+chips+'</div>';
-h+='<div style="color:#c8a0d0;font-family:Georgia,serif;font-size:13px;letter-spacing:1px;text-align:center;margin:10px 0 2px">DIAL '+(ngDoorDial+1)+'/'+ngDoorDialCount()+'</div>';
-h+='<div style="color:#d8a05a;font-family:Consolas,monospace;font-size:16px;text-align:center;margin-bottom:6px">'+(d?d.c:'')+'</div>';
-h+='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-bottom:8px">result digit:</div>';
-h+='<div id="ngDoorFeed" style="color:'+(ngDoorFeed===''?'#4a5a6a':'#ff6070')+';font-family:Consolas,monospace;font-size:12px;text-align:center;min-height:16px;margin-bottom:6px">'+(ngDoorFeed||'use the chips. do the arithmetic.')+'</div>';
-h+='<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:60%;margin:0 auto">';
-for(var n=0;n<10;n++)h+='<button class="ngtopt" data-n="'+n+'" style="width:44px;margin:0;font-family:Consolas,monospace">'+n+'</button>';
-h+='</div>';
-m.innerHTML=h;
-var bs=m.getElementsByTagName('button');
-for(var j=0;j<bs.length;j++)(function(b){b.onclick=function(){ngDoorDigit(parseInt(b.getAttribute('data-n'),10))}})(bs[j]);
-}
-function ngDoorDigit(n){
-if(!ngActive||ngChDone)return;
-var d=ngDoorDials[ngDoorDial];if(!d)return;
-if(n===d.v){
-try{ngSfx('coin')}catch(e){}
-ngDoorCode+=String(n);
-ngDoorFeed='';
-ngDoorDial++;
-if(ngDoorDial>=ngDoorDialCount()){
-ngDoorBridge('three locks. one code. you are tedious but effective.','correct. the full code is '+ngDoorCode.split('').join(' ')+'. memorize it — phase 4 erases the board.',4);
-}else{ngSay('click. dial '+(ngDoorDial+1)+' of '+ngDoorDialCount()+'.');ngDoorPh3()}
-}else{
-try{ngSfx('buzz')}catch(e){}
-try{var ov=document.getElementById('ngOverlay');if(ov){ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},450)}}catch(e){}
-ngDoorFeed='REJECTED. '+String(n)+' is not the answer.';
-ngSay(ngDoorRoast[(ngDoorWrong++)%ngDoorRoast.length]);
-ngDoorPh3();
-}
-}
-function ngDoorShuffleOrd(){
-ngDoorOrd=[0,1,2];
-for(var k=2;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=ngDoorOrd[k];ngDoorOrd[k]=ngDoorOrd[j];ngDoorOrd[j]=t}
-}
-function ngDoorPh4(){
-var m=document.getElementById('ngDoorMain');if(!m)return;ngDoorHud();
-if(ngDoorTalkI>=ngDoorTalk.length){ngDoorBridge('you answered everything. boring.','last check. one short timer. do not bore me.',5);return}
-if(!ngDoorOrd)ngDoorShuffleOrd();
-var q=ngDoorTalk[ngDoorTalkI];
-var h='<div style="color:#d8a05a;font-family:Georgia,serif;font-size:13px;letter-spacing:2px;text-align:center;margin:10px 0 2px">'+ngDoorRules[ngDoorRule]+'</div>';
-h+='<div style="color:#4a5a6a;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-bottom:10px">'+ngDoorRuleTxt[ngDoorRule]+'</div>';
-h+='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:14px;text-align:center;margin:6px 0 14px">'+q.q+'</div>';
-for(var p=0;p<3;p++)h+='<button class="ngtopt" data-p="'+p+'" style="display:block;width:74%;margin:6px auto">'+q.o[ngDoorOrd[p]]+'</button>';
-m.innerHTML=h;
-var bs=m.getElementsByTagName('button');
-for(var j=0;j<bs.length;j++)(function(b){b.onclick=function(){ngDoorAnswer(parseInt(b.getAttribute('data-p'),10))}})(bs[j]);
-}
-function ngDoorAnswer(p){
-if(!ngActive||ngChDone)return;
-var role=ngDoorOrd[p];
-if(role===ngDoorRule){
-try{ngSfx('coin')}catch(e){}
-ngDoorTalkOK++;ngDoorTalkI++;
-var per=ngHard?2:3;
-ngDoorRule=Math.floor(ngDoorTalkOK/per)%3;
-ngDoorOrd=null;
-ngSay(ngDoorTalkOK%4===0?'...correct. i hate that you are good at this.':'correct.');
-ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorPh4()},500);
-}else{
-try{ngSfx('buzz')}catch(e){}
-try{var ov=document.getElementById('ngOverlay');if(ov){ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},450)}}catch(e){}
-ngDoorStrikes++;
-ngDoorHud();
-if(ngDoorStrikes>=ngDoorStrikeMax()){
-ngDoorStrikes=0;ngDoorTalkI=0;ngDoorTalkOK=0;ngDoorRule=0;ngDoorOrd=null;
-ngDoorSay('strike limit. the wall RESETS. all twelve, from the top. read it this time.');
-ngDoorHud();ngDoorPh4();
-}else{
-ngDoorSay('no. the rule is on the wall. READ the wall. strike '+ngDoorStrikes+' of '+ngDoorStrikeMax()+'.');
-}
-}
-}
-function ngDoorTimerStart(limit){
-ngDoorStopTimer();
-ngDoorTmrLeft=limit;
-ngDoorTmrIv=setInterval(function(){
-if(!ngActive||ngChDone){ngDoorStopTimer();return}
-ngDoorTmrLeft-=100;
-var b=document.getElementById('ngDoorBar');
-if(b)b.style.width=Math.max(0,ngDoorTmrLeft/limit*100)+'%';
-if(ngDoorTmrLeft<=0){ngDoorStopTimer();ngDoorTimeout()}
-},100);
-}
-function ngDoorStopTimer(){
-if(ngDoorTmrIv){try{clearInterval(ngDoorTmrIv)}catch(e){}ngDoorTmrIv=null}
-if(ngDoorTmrT){try{clearTimeout(ngDoorTmrT)}catch(e){}ngDoorTmrT=null}
-}
-function ngDoorTimeout(){
-if(!ngActive||ngChDone)return;
-try{ngSfx('buzz')}catch(e){}
-ngDoorSel=-1;
-try{var ov=document.getElementById('ngOverlay');if(ov){ov.classList.add('ngShake');setTimeout(function(){ov.classList.remove('ngShake')},450)}}catch(e){}
-ngDoorSay('slow. the door does not wait. again.',function(){if(ngActive&&!ngChDone)ngDoorPh5()});
-}
-function ngDoorPh5(){
-var m=document.getElementById('ngDoorMain');if(!m)return;ngDoorHud();
-ngDoorStopTimer();
-var limit=ngHard?10000:15000;
-var h='<div style="display:flex;justify-content:center;margin:8px 0 4px"><div style="width:60%;height:6px;background:#16121c;border:1px solid #3a1a1a;border-radius:3px;overflow:hidden"><div id="ngDoorBar" style="height:100%;width:100%;background:rgba(255,120,60,0.85);transition:width .1s linear"></div></div></div>';
-h+='<div id="ngDoorFinBody"></div>';
-m.innerHTML=h;
-var body=document.getElementById('ngDoorFinBody');if(!body)return;
-if(ngDoorFinI>=4){ngDoorFinish();return}
-var b=ngDoorFinI;
-if(b===0){
-body.innerHTML='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:13px;text-align:center;margin:10px 0">CHECK 1/4 \u00b7 which digit did ECHO print?</div><div style="display:flex;gap:6px;justify-content:center">';
-for(var n=0;n<10;n++)body.innerHTML+='<button class="ngtopt" data-n="'+n+'" style="width:44px;margin:2px;font-family:Consolas,monospace">'+n+'</button>';
-body.innerHTML+='</div>';
-var bs=body.getElementsByTagName('button');
-for(var j=0;j<bs.length;j++)(function(bt){bt.onclick=function(){ngDoorFinDigit(parseInt(bt.getAttribute('data-n'),10))}})(bs[j]);
-ngDoorTimerStart(limit);
-}else if(b===1){
-if(!ngDoorFinCards.length){
-var pick=[ngDoorFrags[0],ngDoorFrags[1],ngDoorFrags[4]];
-for(var i=0;i<pick.length;i++)ngDoorFinCards.push({ch:pick[i].ch,text:pick[i].card});
-for(var k=2;k>0;k--){var j2=Math.floor(Math.random()*(k+1));var t=ngDoorFinCards[k];ngDoorFinCards[k]=ngDoorFinCards[j2];ngDoorFinCards[j2]=t}
-}
-body.innerHTML='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:13px;text-align:center;margin:10px 0">CHECK 2/4 \u00b7 order these three. (click two to swap)</div><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
-for(var i=0;i<ngDoorFinCards.length;i++)body.innerHTML+='<button class="ngtopt" data-i="'+i+'" style="width:46%;font-size:11px;margin:0">'+ngDoorFinCards[i].text+'</button>';
-body.innerHTML+='</div><button class="ngtopt" id="ngDoorFinCheck" style="margin-top:12px">CHECK</button>';
-var bs2=body.getElementsByTagName('button');
-for(var j3=0;j3<bs2.length;j3++)(function(bt){var at=bt.getAttribute('data-i');if(at===null)return;bt.onclick=function(){
-if(ngDoorSel===-1)ngDoorSel=parseInt(at,10);
-else if(ngDoorSel===parseInt(at,10))ngDoorSel=-1;
-else{var t=ngDoorFinCards[ngDoorSel];ngDoorFinCards[ngDoorSel]=ngDoorFinCards[parseInt(at,10)];ngDoorFinCards[parseInt(at,10)]=t;ngDoorSel=-1}
-for(var q=0;q<bs2.length;q++){var qi=parseInt(bs2[q].getAttribute('data-i'),10);bs2[q].textContent=ngDoorFinCards[qi].text;bs2[q].style.borderColor=(ngDoorSel===qi)?'rgba(255,210,120,0.8)':'';bs2[q].style.color=(ngDoorSel===qi)?'#ffe8c0':''}
-}})(bs2[j3]);
-var cb=document.getElementById('ngDoorFinCheck');if(cb)cb.onclick=function(){
-if(ngDoorFinCards[0].ch<ngDoorFinCards[1].ch&&ngDoorFinCards[1].ch<ngDoorFinCards[2].ch)ngDoorFinPass();
-else{try{ngSfx('buzz')}catch(e){}ngSay('wrong order. i can wait. (the timer cannot.)')}
-};
-ngDoorTimerStart(limit);
-}else if(b===2){
-if(!ngDoorCodeIn)ngDoorCodeIn='';
-body.innerHTML='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:13px;text-align:center;margin:10px 0">CHECK 3/4 \u00b7 enter the full code ('+ngDoorCode.length+' digits, from memory)</div><div id="ngDoorFinView" style="color:#d8a05a;font-family:Consolas,monospace;font-size:20px;letter-spacing:6px;text-align:center;min-height:26px;margin-bottom:8px">'+(ngDoorCodeIn.split('').join(' ')||'\u2014')+'</div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:60%;margin:0 auto">';
-for(var n=0;n<10;n++)body.innerHTML+='<button class="ngtopt" data-n="'+n+'" style="width:44px;margin:2px;font-family:Consolas,monospace">'+n+'</button>';
-body.innerHTML+='</div>';
-var bs3=body.getElementsByTagName('button');
-for(var j4=0;j4<bs3.length;j4++)(function(bt){bt.onclick=function(){ngDoorFinCode(parseInt(bt.getAttribute('data-n'),10))}})(bs3[j4]);
-ngDoorTimerStart(limit);
-}else{
-if(!ngDoorOrd)ngDoorShuffleOrd();
-var q=ngDoorTalk[3];
-body.innerHTML='<div style="color:#d8a05a;font-family:Georgia,serif;font-size:12px;letter-spacing:2px;text-align:center;margin:8px 0">'+ngDoorRules[ngDoorRule]+'</div><div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:13px;text-align:center;margin:6px 0 12px">'+q.q+'</div>';
-for(var p=0;p<3;p++)body.innerHTML+='<button class="ngtopt" data-p="'+p+'" style="display:block;width:74%;margin:6px auto">'+q.o[ngDoorOrd[p]]+'</button>';
-var bs4=body.getElementsByTagName('button');
-for(var j5=0;j5<bs4.length;j5++)(function(bt){bt.onclick=function(){
-var role=ngDoorOrd[parseInt(bt.getAttribute('data-p'),10)];
-if(role===ngDoorRule)ngDoorFinPass();
-else{try{ngSfx('buzz')}catch(e){}ngDoorSay('wrong rule. read the wall.')}
-}})(bs4[j5]);
-ngDoorTimerStart(limit);
-}
-}
-function ngDoorFinDigit(n){
-var want=parseInt(ngDoorDecoder['ECHO']||'6',10);
-if(n===want)ngDoorFinPass();
-else{try{ngSfx('buzz')}catch(e){}ngSay('ECHO printed six. check your chips.')}
-}
-function ngDoorFinCode(n){
-ngDoorCodeIn+=String(n);
-var v=document.getElementById('ngDoorFinView');
-if(v)v.textContent=ngDoorCodeIn.split('').join(' ');
-if(ngDoorCodeIn.length>=ngDoorCode.length){
-if(ngDoorCodeIn===ngDoorCode)ngDoorFinPass();
-else{try{ngSfx('buzz')}catch(e){}ngDoorCodeIn='';if(v)v.textContent='\u2014';ngSay('wrong code. you SET it earlier. use your memory.')}
-}
-}
-function ngDoorFinPass(){
-if(!ngActive||ngChDone)return;
-ngDoorStopTimer();
-try{ngSfx('coin')}catch(e){}
-ngDoorFinI++;ngDoorSel=-1;ngDoorFinCards=[];ngDoorCodeIn='';
-ngDoorHud();
-setTimeout(function(){if(ngActive&&!ngChDone)ngDoorPh5()},600);
-}
-function ngDoorFinish(){
-if(!ngActive||ngChDone)return;
-ngDoorStopTimer();
-ngShout('HE OPENED IT. HE OPENED IT AND DID NOT SCREAM.');
-ngSay('...it is open. the door is open. everybody act natural.');
-ngAfterSpeech(function(){
-if(!ngActive||ngChDone)return;
-ngDoorSay('thank you for your custom. come again. (do not.)',function(){
-if(ngActive&&!ngChDone)ngChapter18Done();
-});
-},700);
-}
 function ngChapter18(st){
-ngDoorStopAll();
-ngDoorFragOK=0;ngDoorQueue=[];ngDoorBuildQueue();ngDoorStrikes=0;
-ngDoorFragI=0;ngDoorWrong=0;ngDoorCards=[];ngDoorTrash=[];ngDoorSortOK=0;ngDoorDial=0;ngDoorCode='';ngDoorTalkI=0;ngDoorTalkOK=0;ngDoorRule=0;ngDoorOrd=null;ngDoorFinI=0;ngDoorFinCards=[];ngDoorCodeIn='';ngDoorDecoder={};ngDoorFeed='';ngDoorSel=-1;
-var ph=1;
-var doneF=false;
-try{var s=ngLoad();if(s.p18&&typeof s.p18==='object'){ph=Math.min(Math.max(1,s.p18.ph||1),5);if(s.p18.dec)ngDoorDecoder=s.p18.dec;ngDoorFragOK=s.p18.fragOK||0;ngDoorWrong=s.p18.wrong||0;ngDoorTalkOK=s.p18.talkOK||0;ngDoorFragI=(ph>1)?ngDoorQueue.length:0;
-if(s.p18.done)doneF=true;
-else if(!s.p18.replay&&(s.ch||0)>=19&&ph===1&&ngDoorFragOK===0&&!(ngDoorDecoder&&Object.keys(ngDoorDecoder).length))doneF=true;
-}}catch(e){}
-if(doneF){ngChapter18Done(true);return}
-ngDoorPh=ph;
-ngDoorProDone=false;
-var _miss=-1;try{var _s17=ngLoad();if(_s17&&_s17.p17&&typeof _s17.p17.misses==='number')_miss=_s17.p17.misses}catch(e){}
-ngDoorBranch=_miss>=10?'boss':'reactor';
-if(ph===5){ngDoorCode='';for(var ci=0;ci<ngDoorDialCount();ci++)ngDoorCode+=ngDoorDials[ci].v}
-st.innerHTML='<div id="ngSub">CHAPTER 18: THE DOOR</div>'+
-'<div id="ngDoorProg" style="color:#4a5a6a;font-size:12px;letter-spacing:2px;font-family:Consolas,monospace;margin:16px 0 4px"></div>'+
-'<div id="ngDoorVoice" style="color:#d8a05a;font-size:15px;font-family:Georgia,serif;letter-spacing:1px;min-height:26px;margin:8px 0;text-align:center;padding:0 10%"></div>'+
-'<div id="ngDoorMain" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>'+
-'<div id="ngDoorCtx" style="margin-top:8px"></div>';
-ngDoorHud();
-try{ngSfx('door')}catch(e){}
-if(ph>1){
-ngSay('checkpoint restored. phase '+ph+'. the door waited. doors are patient. (i am not.)');
-ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorRender()},600);
-}else{
-ngSay('chapter 18. THE DOOR. it has been waiting.');
+var first=false;
+try{var prev=achP18();first=!prev||!prev.done}catch(e){first=true}
+try{ngUnlock(19)}catch(e){}
+try{ngSave({p18:{done:1,condemned:1,ph:1,fragOK:0,wrong:0}})}catch(e){}
+if(first){try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}}
+st.innerHTML='<div id="ngEndTitle">CONDEMNED</div><div id="ngSub">CHAPTER 18: THE DOOR (closed by order of the void)</div><div id="ngDoor"><div class="ngDoorFrame locked"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ CONDEMNED ]</div></div>';
+try{ngSfx('buzz')}catch(e){}
+ngSay('chapter 18. THE DOOR. ...is condemned.');
 ngAfterSpeech(function(){
 if(!ngActive||ngChDone)return;
-if(ngDoorBranch==='boss'){ngShout('YOU. ME. PARKING LOT. NOW.');ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorProBoss()},800)}
-else{ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDoorProReact()},800)}
-},600);
-}
-}
-function ngChapter18Done(replay){
+ngSay('red tape on the frame. structural notice. the receipts bent the hinges.');
+ngAfterSpeech(function(){
 if(!ngActive||ngChDone)return;
-ngChDone=true;
-ngDoorStopAll();
-if(!replay){
-try{ngUnlock(19)}catch(e){}
-try{ngSave({p18:{ph:1,dec:{},fragOK:0,wrong:ngDoorWrong,talkOK:0,done:1,v:1}})}catch(e){}
-}
-var st=document.getElementById('ngStage');if(!st)return;
-if(!replay){try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}}
-st.innerHTML='<div id="ngEndTitle">THE DOOR IS OPEN</div><div id="ngSub">+50 skill points. (door fee.)</div><div id="ngDoor"><div class="ngDoorFrame locked"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ THE MORNING ]</div></div><div id="ngSub">CHAPTER 19: MORNING (still rendering)</div>';
-ngSay('...act 2 is nearly done. one quiet chapter left. it will NOT be quiet.');
-var door=document.getElementById('ngDoor');
-if(door)door.onclick=function(){
-if(ngTalking())return;
-try{ngHurry()}catch(e){}
-ngSay('chapter 19. the mailroom. come on, the mail is not going to file itself. (it might, actually.)');
-ngAfterSpeech(function(){if(ngActive)ngShowChapter(19)},800);
-};
-}
-function ngDoorReplayReset(){
-try{var s=ngLoad();
-if(s.p18&&(s.p18.done||((s.ch||0)>=19&&s.p18.ph<=1&&!s.p18.fragOK&&!(s.p18.dec&&Object.keys(s.p18.dec).length)))){
-ngSave({p18:{ph:1,dec:{},fragOK:0,wrong:0,talkOK:0,replay:1}});
-}
-}catch(e){}
+ngSay('the inspector came. i am the inspector. i condemned it myself. no appeals. (there is no appeals dept.)');
+ngAfterSpeech(function(){
+if(!ngActive||ngChDone)return;
+ngSay('you do not get to open it. you get to walk past it. everybody walk past it.');
+ngAfterSpeech(function(){
+if(!ngActive||ngChDone)return;
+ngSay('chapter 19 is next. the mailroom. strictly fewer load-bearing doors.');
+ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngShowChapter(19)},900);
+},700);
+},700);
+},700);
+},700);
 }
 var ngMornPh=1,ngMornStrikes=0,ngMornRound=0,ngMornBatchI=0,ngMornItem=0;
 var ngMornBatch=[],ngMornMemo=0,ngMornReady=0,ngMornLunchDone=0,ngMornLunchResp='',ngMornFailSt=0;
@@ -12186,14 +11661,12 @@ function ngSkipPhase(){
 try{
 if(typeof isAdmin==='undefined'||!isAdmin)return;
 if(!ngActive||ngChDone)return;
-var _mid=(ngCurCh===18)?'ngDoorMain':((ngCurCh===19)?'ngMornMain':null);
+if(ngCurCh===18){ngShowChapter(19);return}
+var _mid=(ngCurCh===19)?'ngMornMain':null;
 if(!_mid)return;
 var _m=document.getElementById(_mid);
 if(!_m||!(_m.innerHTML||'').replace(/\s/g,''))return;
-if(ngCurCh===18){
-if(ngDoorPh>=5){ngChapter18Done()}
-else ngDoorGo(ngDoorPh+1);
-}else if(ngCurCh===19){
+if(ngCurCh===19){
 if(ngMornPh>=5){
 ngMornTimerStop();
 try{if(ngMornAud)ngMornAud.pause()}catch(e){}
@@ -12231,16 +11704,7 @@ else if(ngCurCh===14)t+='<br>objective: be the pattern (round '+Math.max(1,ngSeq
 else if(ngCurCh===15)t+='<br>objective: answer it ('+Math.min(ngTq+1,6)+'/6)';
 else if(ngCurCh===16)t+='<br>objective: tell them apart ('+Math.min(ngEchoI+1,ngEchoRounds.length)+'/'+ngEchoRounds.length+')<br>strikes: '+ngEchoStrikes+'/3';
 else if(ngCurCh===17)t+='<br>objective: land it in the green ('+Math.min(ngKnockI+1,ngKnockTotal)+'/'+ngKnockTotal+')<br>misses: '+ngKnockFails;
-else if(ngCurCh===18){
-var oj18='';
-if(ngDoorPh===0)oj18=(ngDoorBranch==='boss'?'rematch: drop jbo (hp '+Math.max(0,ngBossHp)+'/3)':'reactor duty: '+Math.max(0,ngReactLeft)+'s left');
-else if(ngDoorPh===1)oj18='print the receipts ('+ngDoorFragI+'/'+ngDoorQueue.length+') \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
-else if(ngDoorPh===2)oj18='sort + trash lies ('+ngDoorTrash.length+'/'+(ngHard?2:0)+' trashed'+(ngDoorSortOK?' \u00b7 '+ngDoorSortOK+' misplaced':'')+')';
-else if(ngDoorPh===3)oj18='dial '+(ngDoorDial+1)+'/'+ngDoorDialCount()+' of the code';
-else if(ngDoorPh===4)oj18='talk ('+ngDoorTalkI+'/'+ngDoorTalk.length+') \u00b7 rules kept: '+ngDoorTalkOK+' \u00b7 strikes '+ngDoorStrikes+'/'+ngDoorStrikeMax();
-else oj18='final check '+(ngDoorFinI+1)+'/4';
-t+='<br>objective: '+oj18;
-}
+else if(ngCurCh===18)t+='<br>objective: leave. the door is condemned.';
 else if(ngCurCh===19){
 var oj19='';
 if(ngMornPh===1)oj19='orient: item '+Math.min(ngMornItem+1,ngMornBatch.length||3)+'/'+(ngMornBatch.length||3);
@@ -12400,13 +11864,7 @@ if(ngCurCh===14)return 'ch14seq';
 if(ngCurCh===15)return 'ch15ask';
 if(ngCurCh===16)return 'ch16echo';
 if(ngCurCh===17)return 'ch17knock';
-if(ngCurCh===18){
-if(ngDoorPh===1)return 'ch18r1';
-if(ngDoorPh===2)return 'ch18asm';
-if(ngDoorPh===3)return 'ch18dial';
-if(ngDoorPh===4)return 'ch18talk';
-return 'ch18fin';
-}
+if(ngCurCh===18)return 'ch18condemned';
 if(ngCurCh===19){
 if(ngMornPh===3)return 'ch19lunch';
 if(ngMornPh===4)return 'ch19rush';
