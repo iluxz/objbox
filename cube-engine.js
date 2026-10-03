@@ -329,7 +329,91 @@ loadDayBgm();if(!bgm.paused||track==='auto')bgm.play().catch(function(){});
 }
 }
 var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4'};
-var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)'};
+var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall"};
+function bgmDownfallUnlocked(){try{return localStorage.getItem('cube_downfall_unlocked')==='1'}catch(e){return false}}
+function showBgmHelp(){
+cubePrint('bgm [track] — play a track, no arg toggles music on/off. bgm -h = this list.');
+var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['off','silence']];
+if(bgmDownfallUnlocked())rows.push(['downfall','science\'s downfall']);
+for(var i=0;i<rows.length;i++)cubePrint('  bgm '+String(rows[i][0]).padEnd(22)+rows[i][1]);
+if(!bgmDownfallUnlocked())cubePrint('  bgm downfall         [LOCKED — leave during the shutdown countdown]');
+  cubePrint('  (no arg)             toggle current track on/off');
+}
+var extHelp={
+'help':'help [topic] — command index. topics: voidscript, premium, tech, void',
+'whoami':'whoami — root or intruder? the void knows.',
+'id':'id — uid/gid. root here is cosmetic.',
+'lorebook':'lorebook — read the collected lore, page by page.',
+'voidscript':'voidscript — the full voidscript language reference',
+'get':'get <name> — read a variable. (one particular value opens the pull ritual.)',
+'cube':'cube <sub> — the cube, from the inside:\n  cube.get          count the inner cubes\n  cube.morph <0-8>  change inner shape\n  cube.theme <1-7>  switch color theme\n  cube.glitch       trigger a glitch\n  cube.bgm [track]  music (cube.bgm -h for the list)\n  cube.fps          fps readout\n  cube.particles    particle count\n  cube.time         void clock\n  cube.self         ask the cube\n  cube.where        ask where you are',
+'cube.get':'cube.get — count the inner cubes',
+'cube.morph':'cube.morph <0-8> — cube, tetra, sphere, cyl, torus, knot, icosa, octa, tesseract',
+'cube.theme':'cube.theme <1-7> — switch color theme (6 and 7 need unlocks)',
+'cube.glitch':'cube.glitch — trigger a glitch',
+'cube.bgm':'cube.bgm [track] — play music, no arg toggles. cube.bgm -h lists tracks',
+'cube.fps':'cube.fps — print fps and the fps cap',
+'cube.particles':'cube.particles — print the particle count',
+'cube.time':'cube.time — the void clock',
+'cube.self':'cube.self — ask the cube who it is',
+'cube.where':'cube.where — ask where you are',
+'os':'os <sub> — cube-os bridge (needs cube-os serving this page):\n  os.status         bridge status\n  os.ls <path>      list a directory\n  os.cat <path>     print a file\n  os.write <p> <c>  write a file\n  os.sh <cmd>       run a shell command\n  os.mount          mount state',
+'os.status':'os.status — is the cube-os bridge connected',
+'os.ls':'os.ls <path> — list a directory through the bridge',
+'os.cat':'os.cat <path> — print a file through the bridge',
+'os.write':'os.write <path> <content> — write a file through the bridge',
+'os.sh':'os.sh <command> — run a shell command through the bridge',
+'os.mount':'os.mount — mount state through the bridge',
+'void':'void <sub> — the void, with paperwork:\n  void.intrude          intrude the void\n  void.install <pkg>    install a package\n  void.remove <pkg>     remove a package\n  void.uninstall <pkg>  alias of remove\n  void.list             installed packages\n  void.ls               alias of list\n  void.search <q>       search packages\n  void.forge <name>     forge a package\n  void.run <pkg>        run a package\n  void.export <pkg>     export a package\n  void.import <pkg>     import a package\n  void.help             void help',
+'void.intrude':'void.intrude — intrude the void',
+'void.install':'void.install <pkg> — install a package',
+'void.remove':'void.remove <pkg> — remove a package',
+'void.uninstall':'void.uninstall <pkg> — alias of void.remove',
+'void.list':'void.list — list installed packages',
+'void.ls':'void.ls — alias of void.list',
+'void.search':'void.search <query> — search packages',
+'void.forge':'void.forge <name> — forge a package',
+'void.run':'void.run <pkg> — run a package',
+'void.export':'void.export <pkg> — export a package',
+'void.import':'void.import <pkg> — import a package',
+'void.help':'void.help — what you are reading, but in the void\'s voice',
+'ping':'ping <host> — ping the void (try: ping cube.sb)',
+'obj':'obj — caught obj in 4k. take the gift.',
+'pull':'pull [box.objbox.pull:51072|1-9] — the pull ritual (procedural void demo)',
+'demos':'demos — list saved void demos',
+'replay':'replay <demo file> — replay a saved void demo',
+'void-mute':'void-mute — silence incoming transmissions',
+'void-unmute':'void-unmute — bring transmissions back',
+'rmvar':'rmvar <name> — delete a variable',
+'vars':'vars — list all variables',
+'transmit':'transmit "obj" "message" — send a transmission to the outside',
+'updates':'updates — changelog / patch notes (aliases: changelog, patchnotes)',
+'changelog':'changelog — alias of updates',
+'patchnotes':'patchnotes — alias of updates',
+'studio':'studio — open the voidscript studio (write, run and save .vsc scripts)',
+'datawipe':'datawipe [confirm] — wipe every cube_ key from localStorage',
+'exit':'exit — the void does not let you leave.',
+'display':'display [mode] — display / render modes',
+'math':'math <expr> — evaluate a math expression',
+'loop':'loop <count> <command> — run a command N times (example: loop 5 glitch)',
+'inject':'inject <hex6> — inject a color into the void (needs: root)',
+'observe':'observe — observe the inner cubes (needs: root)',
+'unrender':'unrender — ask not to be rendered (needs: root)',
+'backdoor':'backdoor — knock (needs: root)',
+'winget':'winget <install|list|search> — the windows joke package manager',
+'play':'play [chapter] — there is no game. (chapters 0-20, resumes where you left)',
+'gui':'gui <sub> — window manager: window, close, set, max, label, button, input, check, list, destroy (gui help for full list)',
+'ps':'ps — peek at the processes',
+'clear':'clear — clear the terminal output',
+'echo':'echo <text> — print text back',
+'pwd':'pwd — print the virtual working directory'
+};
+function printExtHelp(name){
+var h=extHelp[name];if(h===undefined)return false;
+var ls=String(h).split('\n');
+for(var i=0;i<ls.length;i++)cubePrint('  '+ls[i]);
+return true
+}
 function bgmTrackName(){try{var s=bgm.src;for(var k in bgmNames){if(s.includes(k))return bgmNames[k]}}catch(e){}return activeTrack==='moon1857'?'moon_rot_1857':'void drone'}
 function stopGameMusic(){try{ngMusicMode=ngTracks.length;if(typeof ngMusic!=='undefined'&&ngMusic)ngMusic.pause();var _mb=document.getElementById('ngMenuMusic');if(_mb)_mb.textContent=ngMusicLabel()}catch(e){}}
 function playBgm(arg,say){
@@ -339,6 +423,16 @@ if(a==='moon'||a==='moon1857'||a==='moonrot1857'||a==='overdose'||a==='od'){swit
 if(a==='stanley'||a==='wakeup'||a==='wakeupstanley'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=0;ngMusicApply()}catch(e){}say('music: Wakeupstanley');return true}
 if(a==='box'||a==='bro'||a==='boxlmao'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=1;ngMusicApply()}catch(e){}say('music: bro is in a box lmao imagine');return true}
 if(a==='off'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}stopGameMusic();say('music: off');return true}
+if(a==='downfall'||a==='shutdown'||a==='sciencesdownfall'){
+if(!bgmDownfallUnlocked()){say('bgm: downfall is locked. (it plays during the shutdown — stay in the room, or leave it.)');return true}
+if(!audioCtx)initAudio();
+activeTrack='bgm';
+try{moonEl.pause()}catch(e){}
+stopGameMusic();
+if(odActive)hideOdWarn(false);
+if(!bgm.src.includes('sciences_downfall.webm')){bgm.src='sciences_downfall.webm';try{bgm.load()}catch(e){}}
+bgm.play().catch(function(){});
+say('music: '+bgmNames['sciences_downfall.webm']);return true}
 var f=bgmTracks[a];
 if(f){
 if(!audioCtx)initAudio();
@@ -487,6 +581,7 @@ if(g==='rootHelp')return !!window._skillRootHelp;
 if(g==='rootEval')return !!window._skillRootEval;
 if(g==='core')return !!(window._skillCore||isAdmin);
 if(g==='octa')return !!(window._skillOcta||isAdmin);
+if(g==='tesseract')return !!(window._skillTess||isAdmin||(typeof skillHas==='function'&&skillHas('anom5')));
 if(g==='prism')return !!(window._skillPrism||isAdmin);
 if(g==='eclipse')return !!(window._skillEclipse||isAdmin);
 if(g==='bonusPkgs')return !!window._skillBonusPkgs;
@@ -669,11 +764,12 @@ cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'get':{help:'get <name> — recall from voidspace',fn:function(a){
 cubePrint(a[0]+': '+(cubeVars[a[0]]!==undefined?cubeVars[a[0]]:'undefined'));return true}},
 'theme':{help:'theme <1-7> — change cube color',fn:function(a){var t=parseInt(a[0],10);if(t>=1&&t<=7){applyTheme(String(t))}else{cubeWarn('theme: out of range 1-7')};return true}},
-'morph':{help:'morph <n> — change inner shape (0-7)',fn:function(a){
-var shapeKeys=['cube','tetra','sphere','cyl','torus','knot','icosa','octa'];
+'morph':{help:'morph <n> — change inner shape (0-8)',fn:function(a){
+var shapeKeys=['cube','tetra','sphere','cyl','torus','knot','icosa','octa','tesseract'];
 var m=parseInt(a[0],10);
-if(isNaN(m)||m<0||m>=shapeKeys.length){cubeWarn('morph: out of range 0-7');return true}
+if(isNaN(m)||m<0||m>=shapeKeys.length){cubeWarn('morph: out of range 0-8');return true}
 if(shapeKeys[m]==='octa'&&!octaUnlocked()){cubeWarn('octa locked — unlock: octahedron (anomaly branch)');return true}
+if(shapeKeys[m]==='tesseract'&&!tessUnlocked()){cubeWarn('tesseract locked — unlock: tesseract (anomaly branch)');return true}
 curShape=shapeKeys[m];rebuild(curShape);return true}},
 'glitch':{help:'glitch — short circuit the renderer',fn:function(){triggerGlitch();return true}},
 'wait':{help:'wait <seconds> — sleep the void',fn:function(a){return {wait:Math.max(0,(parseFloat(a[0])||0)*1000)}}},
@@ -682,11 +778,10 @@ curShape=shapeKeys[m];rebuild(curShape);return true}},
 'time':{help:'time — void clock',fn:function(){var n=new Date();cubePrint(String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0'));return true}},
 'void':{help:'void — the void acknowledges',fn:function(){cubePrint('the void heard your script.');return true}},
 'ps':{help:'ps — peek at processes',fn:function(){cubePrint('8 inner cubes. 1 void. 0 mercy.');return true}},
-'gui':{help:'gui <window|taskbar|label|button|input|check|close|set|destroy|list>',fn:function(a){
-if(!a.length){cubePrint('gui: subcommand needed (window, taskbar, label, button, input, check, image, close, set, destroy, list)');return true}
+'gui':{help:'gui <window|label|button|input|check|image|close|set|max|destroy|list|clear>',fn:function(a){
+if(!a.length){cubePrint('gui: subcommand needed (window, label, button, input, check, image, close, set, max, destroy, list, clear)');return true}
 var gs=a[0].toLowerCase();
 if(gs==='window'){guiCreateWin(a[1]?a[1].replace(/"/g,''):'untitled',parseInt(a[2],10)||300,parseInt(a[3],10)||200,a[4]&&(a[4].toLowerCase()==='true'||a[4].toLowerCase()==='random'));return true}
-if(gs==='taskbar'){guiCreateTaskbar(a[1]?a[1].replace(/"/g,''):'voidbar',parseInt(a[2],10)||52);return true}
 if(gs==='label'){guiAddLabel(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0);return true}
 if(gs==='button'){guiAddButton(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
 if(gs==='input'){guiAddInput(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,a.slice(4).join(' '));return true}
@@ -694,6 +789,7 @@ if(gs==='check'){guiAddCheck(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,
 if(gs==='image'){guiAddImage(a[1]?a[1].replace(/"/g,''):'',parseInt(a[2],10)||0,parseInt(a[3],10)||0,parseInt(a[4],10)||0,parseInt(a[5],10)||0);return true}
 if(gs==='close'||gs==='destroy'){if(activeWin){guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null}return true}
 if(gs==='clear'){guiClearAll();return true}
+if(gs==='max'||gs==='fullscreen'){if(a[1]&&(a[1].toLowerCase()==='off'||a[1].toLowerCase()==='restore')){guiMax(false)}else{guiMax(true)}return true}
 if(gs==='set'){if(a.length>=3)guiSetWindow(a[1],a.slice(2).join(' '));return true}
 if(gs==='list'){var k=Object.keys(guiWins);for(var i=0;i<k.length;i++)cubePrint(k[i]);return true}
 return true}},
@@ -706,9 +802,10 @@ travelTo(resolved);
 return true}},
 'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
-'bgm':{help:'bgm [void|furnace|friday|faith|cat|oneshot|moon|stanley|box|off] - play a track or toggle music',fn:function(a){
+'bgm':{help:'bgm [void|furnace|friday|faith|cat|oneshot|moon|stanley|box|downfall|off] — play a track or toggle music. bgm -h = track list',fn:function(a){
+if(a[0]==='-h'||a[0]==='--help'){showBgmHelp();return true}
 if(playBgm(a[0]||'',function(t){cubePrint(t)}))return true;
-cubeError('bgm: pick void, furnace, friday, faith, cat, oneshot, moon, stanley, box, off (or nothing to toggle)');return true}},
+cubeError('bgm: pick void, furnace, friday, faith, cat, oneshot, moon, stanley, box, downfall, off (or nothing to toggle) — bgm -h for the list');return true}},
 'odkill':{help:'odkill - antidote: end overdose, clear screen filters, restore normal music',fn:function(){odKill();cubeOk('overdose cleared. the room stops ringing.');return true}},
 'skill':{help:'skill - open the skill tree',fn:function(){skillOpen();return true}},
 'slots':{help:'slots - open the floppy shelf (5 save disks, backup/restore to move browsers)',fn:function(){slotsOpen();return true}},
@@ -716,10 +813,11 @@ cubeError('bgm: pick void, furnace, friday, faith, cat, oneshot, moon, stanley, 
 'nothingcore':{help:'nothingcore - gaze through the nothing core (needs: ∅)',fn:function(){toggleNothingCore();return true}},
 'coreview':{help:'coreview - alias of nothingcore',fn:function(){toggleNothingCore();return true}},
 'upgrade':{help:'upgrade - open upgrade tree (needs every skill)',fn:function(){openUpgradeTree();return true}},
-'shape':{help:'shape <name> - change shape (cube/sphere/tetra/cyl/torus/knot/icosa/octa)',fn:function(a){
+'shape':{help:'shape <name> - change shape (cube/sphere/tetra/cyl/torus/knot/icosa/octa/tesseract)',fn:function(a){
 if(a[0]){
 var name=a[0].toLowerCase();
 if(name==='octa'&&!octaUnlocked()){cubeWarn('octa locked — unlock: octahedron (anomaly branch)');return true}
+if(name==='tesseract'&&!tessUnlocked()){cubeWarn('tesseract locked — unlock: tesseract (anomaly branch)');return true}
 if(!shapeGens[name]){cubeWarn('unknown shape: '+name);return true}
 curShape=name;rebuild(name)
 }
@@ -745,7 +843,7 @@ if(isAdmin){cubePrint('admin: already authenticated.');return true}
 if(!a.length){cubeError('admin: usage admin <passphrase>');return true}
 var attempt=a.join(' ');
 cubePrint('authenticating...');
-setTimeout(function(){if(voidHash(attempt)==='9e1b274e268e0a5419e14f109cbf07a199d4938108888c0b5b16a92fec80b193'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
+setTimeout(function(){if(voidHash(attempt)==='d3593e2306de778ed4db49ea1b802bcdec28a2b8b8f7fe56ccec4f1851b65546'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
 return true}},
 'alwaysontop':{help:'alwaysontop <on|off> — make active window stay on top',fn:function(a){
 if(!activeWin||!guiWins[activeWin]){cubeError('alwaysontop: no active window');return true}
@@ -1262,7 +1360,7 @@ var guiWins={};
 var activeWin=null;
 function guiMakeDraggable(el,handle){
 var ox,oy,sx,sy,dragging=false;
-handle.onmousedown=function(e){dragging=true;sx=e.clientX;sy=e.clientY;ox=el.offsetLeft;oy=el.offsetTop;e.preventDefault()};
+handle.onmousedown=function(e){if(el._max)return;dragging=true;sx=e.clientX;sy=e.clientY;ox=el.offsetLeft;oy=el.offsetTop;e.preventDefault()};
 document.addEventListener('mousemove',function(e){if(!dragging)return;el.style.left=ox+(e.clientX-sx)+'px';el.style.top=oy+(e.clientY-sy)+'px'});
 document.addEventListener('mouseup',function(){dragging=false});
 }
@@ -1298,9 +1396,13 @@ wy=60+Math.random()*100;
 win.style.cssText='width:'+w+'px;height:'+(parseInt(h)+30)+'px;left:'+wx+'px;top:'+wy+'px;display:flex;flex-direction:column';
 var tb=document.createElement('div');tb.className='gui-title';
 var tl=document.createElement('span');tl.textContent=formatGuiText(title);
+var btns=document.createElement('span');btns.style.cssText='display:flex;gap:8px;align-items:center';
+var mb=document.createElement('div');mb.className='gui-max-btn';mb.textContent='\u25a2';mb.title='maximize';
+mb.onclick=function(ev){ev.stopPropagation();guiMax(!win._max)};
 var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
 cb.onclick=function(){win.remove();delete guiWins[id];if(activeWin===id)activeWin=null};
-tb.appendChild(tl);tb.appendChild(cb);
+btns.appendChild(mb);btns.appendChild(cb);
+tb.appendChild(tl);tb.appendChild(btns);
 var ct=document.createElement('div');ct.className='gui-content';ct.style.height=h+'px';
 win.appendChild(tb);win.appendChild(ct);
 document.body.appendChild(win);
@@ -1311,17 +1413,30 @@ return id;
 }
 function guiCreateTaskbar(title,h){
 if(Object.keys(guiWins).length>=MAX_GUI_WINDOWS&&!isAdmin){cubeWarn('gui: window limit reached ('+MAX_GUI_WINDOWS+'). use admin to bypass.');return null}
-var id='tb_'+Date.now()+'_'+Math.floor(Math.random()*999);
-var win=document.createElement('div');win.className='gui-window';win.id=id;
-win.style.cssText='position:fixed;left:0;bottom:0;top:auto;width:100vw;height:'+(parseInt(h)+30)+'px;display:flex;flex-direction:column;border-radius:8px 8px 0 0;z-index:70';
-var tb=document.createElement('div');tb.className='gui-title';
-var tl=document.createElement('span');tl.textContent=formatGuiText(title);
-var cb=document.createElement('div');cb.className='gui-close';cb.textContent='\u00d7';
-cb.onclick=function(){win.remove();delete guiWins[id];if(activeWin===id)activeWin=null};
-tb.appendChild(tl);tb.appendChild(cb);
-var ct=document.createElement('div');ct.className='gui-content';ct.style.height=h+'px';
-win.appendChild(tb);win.appendChild(ct);document.body.appendChild(win);
-guiWins[id]={el:win,content:ct,title:tb};activeWin=id;return id;
+cubeError('gui: taskbar has been removed — use gui window instead');
+return null;
+}
+function guiMax(on){
+var w=guiGetActive();if(!w)return;
+var el=w.el;
+if(el.parentNode!==document.body){cubeWarn('gui: only real windows can maximize (preview panes stay put)');return}
+if(on){
+if(el._max)return;
+el._restore={left:el.style.left,top:el.style.top,width:el.style.width,height:el.style.height,ctH:w.content.style.height,docH:el.style.height};
+el.style.left='0px';el.style.top='0px';
+el.style.width='100vw';el.style.height='100vh';
+w.content.style.height='calc(100vh - 30px)';
+el._max=true;
+var mb=el.querySelector('.gui-max-btn');if(mb)mb.textContent='\u25a1';
+}else{
+if(!el._max)return;
+var r=el._restore||{};
+el.style.left=r.left||'60px';el.style.top=r.top||'60px';
+el.style.width=r.width||'400px';el.style.height=r.height||'230px';
+w.content.style.height=r.ctH||'200px';
+el._max=false;
+var mb2=el.querySelector('.gui-max-btn');if(mb2)mb2.textContent='\u25a2';
+}
 }
 function guiGetActive(){if(typeof studioOpen!=='undefined'&&studioOpen&&!studioPreviewEnabled)return null;if(!activeWin||!guiWins[activeWin]){cubeError('no active gui window — create one with: gui window "title" 400 300');return null}return guiWins[activeWin]}
 function guiClearAll(){
@@ -1621,6 +1736,20 @@ parts=[cmd,sub].concat(parts);
 // pull ritual: full get command, matched early and quote-tolerant
 if(cmd==='get'){var _gt=String(parts[1]||'').replace(/['"]/g,'').trim().toLowerCase();if(_gt==='box.objbox.pull:51072'){pullRequest('box.objbox.pull:51072');return}}
 
+// extended help: <cmd> [sub] -h / --help — works for every command
+var _hIdx=-1;
+for(var _hi=1;_hi<parts.length;_hi++){if(parts[_hi]==='-h'||parts[_hi]==='--help'){_hIdx=_hi;break}}
+if(_hIdx>0){
+var _hn=parts.slice(0,_hIdx).join('.');
+if(_hn==='bgm'||_hn==='cube.bgm'){showBgmHelp();return}
+if(_hn==='voidscript'){showVoidScriptHelp();return}
+if(typeof extHelp!=='undefined'&&printExtHelp(_hn))return;
+if(typeof voidScriptLang!=='undefined'&&voidScriptLang[_hn]&&voidScriptLang[_hn].help){cubePrint('  '+voidScriptLang[_hn].help);return}
+if(_hn.indexOf('.')!==-1){var _bt=_hn.split('.').pop();
+if(typeof extHelp!=='undefined'&&printExtHelp(_bt))return;
+if(typeof voidScriptLang!=='undefined'&&voidScriptLang[_bt]&&voidScriptLang[_bt].help){cubePrint('  '+voidScriptLang[_bt].help);return}}
+cubePrint(_hn+': no extended help. try: help');return}
+
 // help
 if(cmd==='help'){
 if(parts[1]&&parts[1].toLowerCase()==='voidscript'){
@@ -1650,10 +1779,13 @@ cubePrint('  ┌─────────────────────�
 cubePrint('  │         CUBE# COMMAND REFERENCE      │');
 cubePrint('  └──────────────────────────────────────┘');
 cubePrint('');
+cubePrint('  tip: <command> -h shows extended help for that command.');
+cubePrint('       e.g.  bgm -h   cube -h   void -h   play -h');
+cubePrint('');
 cubePrint('  ── cube ──────────────────────────────');
 cubePrint('');
 cubePrint('  cube.get            show inner cube count');
-cubePrint('  cube.morph <n>      change shape (0-7: cube/tri/sphere/cyl/torus/knot/icosa/octa)');
+cubePrint('  cube.morph <n>      change shape (0-8: cube/tri/sphere/cyl/torus/knot/icosa/octa/tesseract)');
 cubePrint('  cube.theme <n>      switch color theme (1-7)');
 cubePrint('  cube.glitch         trigger glitch effect');
 cubePrint('  cube.bgm [track]    play void|furnace|friday|faith|cat|oneshot|moon|stanley|box|off, or toggle');
@@ -1739,7 +1871,7 @@ cubePrint('');
 cubePrint('  ── gui ───────────────────────────────');
 cubePrint('');
 cubePrint('  gui window "t" <w> <h> [random]  create a window');
-cubePrint('  gui taskbar "t" [h]              create bottom taskbar');
+cubePrint('  gui max [off]                    maximize / restore window');
 cubePrint('  gui label "txt" <x> <y>          add label');
 cubePrint('  gui button "txt" <x> <y> "cmd"   add button');
 cubePrint('  gui input "ph" <x> <y>           add text input');
@@ -1800,6 +1932,8 @@ cubePrint('  eval <code>                   run raw javascript');
 cubePrint('  skillpoints [n]               set skill + upgrade points (99999)');
 cubePrint('  pull <1-9>                     force a demo script');
 cubePrint('  danger list/run <name>        danger zone scripts');
+cubePrint('');
+cubePrint('  running low? add -h to any command above for its extended help.');
 return}
 if(cmd==='voidscript'){showVoidScriptHelp();return}
 function showVoidScriptHelp(){
@@ -1855,9 +1989,10 @@ cubePrint('');
 cubePrint('  ── cube control ───────────────────────');
 cubePrint('');
 cubePrint('  theme <1-7>       cube color');
-cubePrint('  morph <0-7>       inner shape');
-cubePrint('  shape <name>      change shape (cube/sphere/tetra/cyl/torus/knot/icosa/octa)');
+cubePrint('  morph <0-8>       inner shape');
+cubePrint('  shape <name>      change shape (cube/sphere/tetra/cyl/torus/knot/icosa/octa/tesseract)');
 if(!(window._skillOcta||isAdmin))cubeDim('  (octa is locked — anomaly skill)');
+if(!(window._skillTess||isAdmin))cubeDim('  (tesseract is locked — anomaly skill)');
 cubePrint('  glitch            short circuit');
 cubePrint('  vglitch           deeper corruption');
 cubePrint('  bgm               toggle music (wed: the furnace)');
@@ -2084,9 +2219,10 @@ var sub=parts[1]?parts[1].toLowerCase():'';
 if(sub==='get'){cubePrint('inner cubes: '+innerC.length);return}
 if(sub==='morph'){
 var idx=parseInt(parts[2]);
-var shapeKeys=['cube','tetra','sphere','cyl','torus','knot','icosa','octa'];
-if(isNaN(idx)||idx<0||idx>=shapeKeys.length){cubeError('usage: cube.morph <0-7>');return}
+var shapeKeys=['cube','tetra','sphere','cyl','torus','knot','icosa','octa','tesseract'];
+if(isNaN(idx)||idx<0||idx>=shapeKeys.length){cubeError('usage: cube.morph <0-8>');return}
 if(shapeKeys[idx]==='octa'&&!octaUnlocked()){cubeError('octa locked — unlock: octahedron (anomaly branch)');return}
+if(shapeKeys[idx]==='tesseract'&&!tessUnlocked()){cubeError('tesseract locked — unlock: tesseract (anomaly branch)');return}
 rebuild(shapeKeys[idx]);
 cubeOk('morphed to '+shapeKeys[idx]);return}
 if(sub==='theme'){
@@ -2097,8 +2233,9 @@ if(idx==='7'&&!window._skillEclipse&&!isAdmin){cubeError('theme 7 locked — unl
 applyTheme(idx);cubeOk('theme: '+themes[idx].name);return}
 if(sub==='glitch'){triggerGlitch();cubeOk('glitch triggered');return}
 if(sub==='bgm'){
+if(parts[2]==='-h'||parts[2]==='--help'){showBgmHelp();return}
 if(playBgm(parts[2]||'',function(t){cubeOk(t)}))return;
-cubeError('bgm: pick void, furnace, friday, faith, cat, moon, stanley, box, off (or nothing to toggle)');return}
+cubeError('bgm: pick void, furnace, friday, faith, cat, moon, stanley, box, downfall, off (or nothing to toggle) — bgm -h for the list');return}
 if(sub==='fps'){cubePrint('fps: '+fps+' | max: '+maxFps);return}
 if(sub==='particles'){cubePrint('particles: '+NP);return}
 if(sub==='time'){
@@ -2848,7 +2985,7 @@ var patchLog=[
 ]},
 {date:'2026-10-01',tier:'RELEASE',title:'the backlog is dead',notes:[
 'nine features, one audit sweep, nothing skipped. everything you complained about (and everything you were about to) is in here.',
-'achievement audit: all 64 reachable. 13 locked stubs wired to real triggers, morning_clean + winged_it persist across reloads now, superprof orphan deleted, nevermind + pwned finally pay out.',
+'achievement audit: all 65 reachable. 13 locked stubs wired to real triggers, morning_clean + winged_it persist across reloads now, superprof orphan deleted, nevermind + pwned finally pay out.',
 'earn one and it toasts. bottom-left, stacks, 4 seconds. the void keeps score out loud.',
 'dialogue speed: dial 1|1.5|2|3|4, plus a SPEED button in the non-game menu. obj keeps up now.',
 'speedrun HUD: CH x/21 + PACE vs par next to session and run. green = ahead of par. red = you know what you did.',
@@ -2860,6 +2997,23 @@ var patchLog=[
 ]},
 {date:'2026-10-01',tier:'patch',title:'under the hood',notes:[
 'cube.html split into cube-engine.js + cube-game.js. nothing you can see changed - same game, same saves, same url, just not one 12.5k-line file anymore.',
+'door_clean retired with the door (it was free after the condemnation). replacement: regular customer - crack the daily void code 10 times.',
+]},
+{date:'2026-10-03',tier:'full on rework basically',title:'dinner date with the void',notes:[
+'you showed up dressed. so did we. terminal, gui windows, shape palette, void windows, chapter hall, core, reactor, nav arrows - all rewrapped in glass and glow. same names, same keys.',
+'cube shader: sharper specular, fresnel rim, glowing wireframe cage over the outer cube.',
+'9th shape: tesseract. a real 4D hypercube projected from the outer cube - 16 vertices, XW/ZW rotation, 32 glowing edges. locked behind the anomaly branch (eclipse); palette, cube.morph, morphall and the demo scripts all respect the lock.',
+'the reactor is a room now. walk in: 3D hall, rod heat you can read by color, coordinate grid, live gauges.',
+'the core got the redesign it deserved: 3D orb synced to a heartbeat you can poke, orbit rings, dust, live EKG. the glow was rebuilt from scratch - soft bloom that breathes with the beat.',
+'the void got dressed too: drifting debris, dust clouds, parallax stars between zones.',
+'nothingcore, redesigned: the nothing core is a real 3D nothing now. it changes the room, not just the dialogue.',
+'obj and the core have new private conversations for when the eye is open.',
+'extended help: every single command answers to -h now. one flag, full story. the help screen will tell you twice.',
+'bgm grew. some of it is behind a door we are not describing.',
+'two achievements are hiding in this update. no hints. we do not do hints.',
+'canon, quietly: obj is a he, core is a she, the void is whatever it feels like today. it slips into dialogue now instead of getting announced.',
+'studio: name your .vsc before you save or share it - it stops being untitled forever. gui windows grew a maximize button (and gui max). the bottom taskbar retired.',
+'fixes: terminal no longer hides under the nav arrows, and boot checks run quiet again.'
 ]},
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144','RELEASE':'#4ad8ff'};
@@ -3150,11 +3304,13 @@ if(!gs||gs==='help'){
 cubePrint('gui commands:');
 cubePrint('  gui window "title" <w> <h> — create a window');
 cubePrint('  gui close                   — close active window');
+cubePrint('  gui max [off]               — maximize / restore active window');
 cubePrint('  gui label "text" <x> <y>    — add a label');
 cubePrint('  gui button "text" <x> <y> "action" — add a button');
 cubePrint('  gui input "placeholder" <x> <y> — add a text input');
 cubePrint('  gui check "label" <x> <y>   — add a checkbox');
 cubePrint('  gui set <prop> <value>      — set window property');
+cubePrint('  gui clear                   — close every generated window');
 cubePrint('  gui destroy                 — destroy active window');
 cubePrint('  gui list                    — list open windows');
 return}
@@ -3167,13 +3323,8 @@ if(isNaN(w)||isNaN(h)){cubeError('gui window: width and height must be numbers')
 var wid=guiCreateWin(t,w,h,rndPos==='true'||rndPos==='random');
 cubeOk('window "'+t+'" opened ('+w+'x'+h+') id:'+wid);
 return}
-if(gs==='taskbar'){
-if(parts.length<3){cubeError('usage: gui taskbar "title" [height]');return}
-var taskbarTitle=parts[2].replace(/"/g,'');
-var taskbarHeight=parseInt(parts[3],10)||52;
-var taskbarId=guiCreateTaskbar(taskbarTitle,taskbarHeight);
-cubeOk('taskbar "'+taskbarTitle+'" opened id:'+taskbarId);
-return}
+if(gs==='taskbar'){cubeError('gui: taskbar has been removed — use gui window instead');return}
+if(gs==='max'||gs==='fullscreen'){if(parts[2]&&(parts[2].toLowerCase()==='off'||parts[2].toLowerCase()==='restore')){guiMax(false);cubeOk('window restored')}else{guiMax(true);cubeOk('window maximized')}return}
 if(gs==='close'){
 if(!activeWin){cubeError('no active window to close');return}
 guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null;
@@ -3212,6 +3363,7 @@ if(gs==='destroy'){
 if(!activeWin){cubeError('no active window to destroy');return}
 guiWins[activeWin].el.remove();delete guiWins[activeWin];activeWin=null;
 cubeOk('window destroyed');return}
+if(gs==='clear'){guiClearAll();cubeOk('all gui windows closed');return}
 if(gs==='list'){
 var keys=Object.keys(guiWins);
 if(!keys.length){cubePrint('no windows open');return}
