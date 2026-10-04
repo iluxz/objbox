@@ -437,6 +437,7 @@ if(studioOpen)return;
 if(wasDrag)return;
 if(typeof demoPlaying!=='undefined'&&demoPlaying)return;
 if(typeof ngActive!=='undefined'&&ngActive)return;
+try{if(typeof starTryClick==='function'&&starTryClick(e.clientX,e.clientY))return}catch(err){}
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var dx=ndcX,dy=ndcY,dd=Math.sqrt(dx*dx+dy*dy);
@@ -898,6 +899,11 @@ gl.uniformMatrix4fv(ppVW,false,mMul(view,mRotZ(t*0.01)));
 vdAttribs(vdStars[1]);gl.drawArrays(gl.POINTS,0,200);
 gl.uniformMatrix4fv(ppVW,false,view);
 vdAttribs(vdStars[0]);gl.drawArrays(gl.POINTS,0,200);
+try{
+if(!starBuf)starBuild();
+if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,12)}
+if(starLineBuf&&starLineN>1){vdAttribs(starLineBuf);gl.drawArrays(gl.LINES,0,starLineN)}
+}catch(e){}
 vdAttribs(vdDust);gl.drawArrays(gl.POINTS,0,120);
 gl.depthMask(true);gl.disable(gl.BLEND);
 gl.useProgram(prog);gl.uniform3f(uCam,0,0,-zZ);gl.uniform1f(uInv,0);gl.uniform1f(uFr,1);
@@ -979,6 +985,7 @@ Math.max(0,Math.min(1,th.bg[2]+bgPulse*0.12-hueShift)),
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 var asp=canvas.width/canvas.height,proj=mPersp(Math.PI/4,asp,.1,100);
 var view=mMul(mTrans(0,0,zZ),mMul(mRotY(rY),mRotX(rX)));
+try{window._pvProj=proj;window._pvView=view}catch(e){}
 if(travelling){
 var travelT=travelProgress/travelDuration;
 var travelZ=-travelT*8;
@@ -2173,67 +2180,81 @@ var t=(a[0]||'').toLowerCase();
 if(t==='auto'){weatherType='off';weatherDrops=[];weatherManual=false;autoWeather();return true}
 if(t!=='rain'&&t!=='snow'&&t!=='off'){cubeError('weather: use rain, snow, off, or auto');return true}
 initWeather(t);weatherManual=true;return true}};
-voidScriptLang['stargaze']={help:'stargaze - chart the 12 stars',fn:function(){stargazeOpen();return true}};
-var STAR_POS=[[12,20],[25,55],[38,30],[50,65],[63,35],[74,60],[85,25],[18,78],[42,82],[58,12],[78,80],[90,55]];
+voidScriptLang['stargaze']={help:'stargaze - chart the 12 bright stars',fn:function(){try{cubePrint('look up. pan the camera. click the bright stars. ('+starCharted.length+'/12 charted)')}catch(e){}return true}};
+var STAR3D=[3,19,37,53,71,89,107,129,151,167,183,197];
 var starCharted=[];
-function starDraw(){
+var starBuf=null,starLineBuf=null,starLineN=0;
+function starFrac(v){return v-Math.floor(v)}
+function starPos3(i){
+var q1=starFrac(Math.sin(i*12.9898)*43758.5453);
+var q2=starFrac(Math.sin(i*78.233)*12578.1459);
+var q3=starFrac(Math.sin(i*39.425)*65428.3912);
+return [(q1-0.5)*46,(q2-0.5)*30,-16-q3*14];
+}
+function starBuild(){
 try{
-var cv=document.getElementById('starCv');if(!cv)return;
-var ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
-ctx.strokeStyle='rgba(216,169,64,0.7)';ctx.lineWidth=1.5;ctx.beginPath();
-for(var i=0;i<starCharted.length;i++){var p=STAR_POS[starCharted[i]];var x=p[0]/100*cv.width,y=p[1]/100*cv.height;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
-ctx.stroke();
-for(var s=0;s<STAR_POS.length;s++){var q=STAR_POS[s];var qx=q[0]/100*cv.width,qy=q[1]/100*cv.height;var done=starCharted.indexOf(s)!==-1;
-ctx.fillStyle=done?'#ffd83a':'rgba(255,255,255,0.75)';
-ctx.beginPath();ctx.arc(qx,qy,done?5:3,0,Math.PI*2);ctx.fill();
-if(done){ctx.strokeStyle='rgba(255,216,58,0.4)';ctx.beginPath();ctx.arc(qx,qy,9,0,Math.PI*2);ctx.stroke()}}
-var hint=document.getElementById('starHint');if(hint)hint.textContent='chart all 12 stars ('+starCharted.length+'/12)';
+var B=new Float32Array(12*8);
+for(var k=0;k<12;k++){var p=starPos3(STAR3D[k]);var o=k*8;var done=starCharted.indexOf(k)!==-1;
+B[o]=p[0];B[o+1]=p[1];B[o+2]=p[2];B[o+3]=done?0.055:0.032;
+if(done){B[o+4]=1;B[o+5]=0.85;B[o+6]=0.25;B[o+7]=1}
+else{B[o+4]=0.85;B[o+5]=0.9;B[o+6]=1;B[o+7]=0.85}}
+starBuf=upBuf(B);
+starLinesBuild();
 }catch(e){}
 }
-function stargazeOpen(){
+function starLinesBuild(){
 try{
-if(document.getElementById('starSky'))return;
-starCharted=[];
-var ov=document.createElement('div');ov.id='starSky';
-ov.style.cssText='position:fixed;inset:0;background:#020208;z-index:60000;cursor:crosshair';
-var cv=document.createElement('canvas');cv.id='starCv';cv.style.cssText='position:absolute;inset:0';ov.appendChild(cv);
-var hint=document.createElement('div');hint.id='starHint';hint.style.cssText='position:absolute;top:14px;width:100%;text-align:center;color:#8a8aa5;font:13px Consolas,monospace;letter-spacing:2px';ov.appendChild(hint);
-var xb=document.createElement('button');xb.className='ngtopt';xb.textContent='LEAVE THE SKY';xb.style.cssText='position:absolute;bottom:18px;left:50%;transform:translateX(-50%)';xb.onclick=function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov)}catch(e){}};ov.appendChild(xb);
-document.body.appendChild(ov);
-cv.width=window.innerWidth;cv.height=window.innerHeight;starDraw();
-ov.addEventListener('click',function(e){
-if(e.target===xb||xb.contains(e.target))return;
+starLineN=0;
+if(starCharted.length<2){starLineBuf=null;return}
+var n=starCharted.length-1;
+var B=new Float32Array(n*2*8);var o=0;
+for(var i=0;i<n;i++){var a=starPos3(STAR3D[starCharted[i]]);var b=starPos3(STAR3D[starCharted[i+1]]);
+B[o]=a[0];B[o+1]=a[1];B[o+2]=a[2];B[o+3]=0.02;B[o+4]=1;B[o+5]=0.85;B[o+6]=0.25;B[o+7]=0.6;o+=8;
+B[o]=b[0];B[o+1]=b[1];B[o+2]=b[2];B[o+3]=0.02;B[o+4]=1;B[o+5]=0.85;B[o+6]=0.25;B[o+7]=0.6;o+=8}
+starLineBuf=upBuf(B);starLineN=n*2;
+}catch(e){}
+}
+function starProject(p){
 try{
-var x=e.clientX/window.innerWidth*100,y=e.clientY/window.innerHeight*100;
-var best=-1,bd=9;
-for(var i=0;i<STAR_POS.length;i++){var dx=STAR_POS[i][0]-x,dy=(STAR_POS[i][1]-y)*1.4;var d=Math.sqrt(dx*dx+dy*dy);if(d<bd){bd=d;best=i}}
-if(best>=0&&starCharted.indexOf(best)===-1){starCharted.push(best);try{ngSfx('coin')}catch(err){}starDraw();
-if(starCharted.length>=STAR_POS.length){
+var P=window._pvProj,V=window._pvView;if(!P||!V)return null;
+var x=p[0],y=p[1],z=p[2];
+var vx=V[0]*x+V[4]*y+V[8]*z+V[12],vy=V[1]*x+V[5]*y+V[9]*z+V[13],vz=V[2]*x+V[6]*y+V[10]*z+V[14],vw=V[3]*x+V[7]*y+V[11]*z+V[15];
+var cx=P[0]*vx+P[4]*vy+P[8]*vz+P[12]*vw,cy=P[1]*vx+P[5]*vy+P[9]*vz+P[13]*vw,cz=P[2]*vx+P[6]*vy+P[10]*vz+P[14]*vw,cw=P[3]*vx+P[7]*vy+P[11]*vz+P[15]*vw;
+if(cw<=0.01)return null;
+return [cx/cw,cy/cw,cz/cw];
+}catch(e){return null}
+}
+function starTryClick(px,py){
+try{
+if(starCharted.length>=STAR3D.length)return false;
+var r=canvas.getBoundingClientRect();
+var best=-1,bd=30;
+for(var k=0;k<STAR3D.length;k++){
+if(starCharted.indexOf(k)!==-1)continue;
+var pr=starProject(starPos3(STAR3D[k]));
+if(!pr||pr[2]>1||pr[2]<-1)continue;
+var sx=(pr[0]*0.5+0.5)*r.width,sy=(-pr[1]*0.5+0.5)*r.height;
+var dx=sx-(px-r.left),dy=sy-(py-r.top);
+var d=Math.sqrt(dx*dx+dy*dy);if(d<bd){bd=d;best=k}
+}
+if(best>=0){starChart(best);return true}
+}catch(e){}
+return false;
+}
+function starChart(k){
+try{
+if(starCharted.indexOf(k)!==-1)return;
+starCharted.push(k);
+try{ngSfx('coin')}catch(err){}
+starBuild();
+if(starCharted.length>=STAR3D.length){
 try{localStorage.setItem('cube_stargazer','1')}catch(err){}
 try{if(typeof ach==='function')ach('stargazer')}catch(err){}
-try{cubePrint('the sky remembers you. (your constellation stays.)')}catch(err){}
-try{starfieldShow()}catch(err){}
-setTimeout(function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov)}catch(err){}},2500);
-}}
-}catch(err){}
-});
+try{cubePrint('all 12 charted. the sky remembers you.')}catch(err){}
+}
 }catch(e){}
 }
-function starfieldShow(){
-try{
-if(!localStorage.getItem('cube_stargazer'))return;
-if(document.getElementById('starField'))return;
-var d=document.createElement('div');d.id='starField';
-d.style.cssText='position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0.5';
-var h='<svg width="100%" height="100%">';
-for(var i=1;i<STAR_POS.length;i++){h+='<line x1="'+STAR_POS[i-1][0]+'%" y1="'+STAR_POS[i-1][1]+'%" x2="'+STAR_POS[i][0]+'%" y2="'+STAR_POS[i][1]+'%" stroke="rgba(216,169,64,0.5)" stroke-width="1"/>';}
-for(var s=0;s<STAR_POS.length;s++){h+='<circle cx="'+STAR_POS[s][0]+'%" cy="'+STAR_POS[s][1]+'%" r="2" fill="rgba(255,216,58,0.7)"/>';}
-h+='</svg>';
-d.innerHTML=h;
-document.body.appendChild(d);
-}catch(e){}
-}
-try{starfieldShow()}catch(e){}
+try{var _sf=document.getElementById('starField');if(_sf&&_sf.parentNode)_sf.parentNode.removeChild(_sf)}catch(e){}
 voidScriptLang['core']={help:'core — enter/exit the core (needs threshold skill)',fn:function(){
 if(currentView==='core')exitCore();else enterCore();return true}};
 
