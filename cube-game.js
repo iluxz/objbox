@@ -1823,6 +1823,8 @@ var ACH=[
 {id:'fly_open',n:'the fly',d:'open the actual fruit fly brain. (139,255 neurons, fafb v783.)',c:function(){try{return localStorage.getItem('cube_fly_open')==='1'}catch(e){return false}}},
 {id:'fly_fed',n:'sweet on the tarsi',d:'feed the fly sugar and watch what moves.',c:function(){try{return localStorage.getItem('cube_fly_fed')==='1'}catch(e){return false}}},
 {id:'fly_seizure',n:'photosensitive',d:'push the fly past its flashing limit. (stop strobing it.)',c:function(){try{return localStorage.getItem('cube_fly_seizure')==='1'}catch(e){return false}}},
+{sec:'THE SKY'},
+{id:'stargazer',n:'stargazer',d:'chart all 12 stars. (stargaze)',c:function(){try{return localStorage.getItem('cube_stargazer')==='1'}catch(e){return false}}},
 {sec:'ENDINGS'},
 {id:'mercy',n:'mercy',d:'STOP. (the void pays its debts.)',c:function(){return achFinale()==='mercy'}},
 {id:'brat',n:'brat',d:'KEEP. (hush money.)',c:function(){return achFinale()==='brat'}},
@@ -1899,7 +1901,7 @@ function achFinale(){try{return localStorage.getItem('cube_finale')||''}catch(e)
 function achPkgs(){try{var v=JSON.parse(localStorage.getItem('cube_pkgs')||'[]');var out=[];for(var i=0;i<v.length;i++)if(v[i]!=='void-core')out.push(v[i]);return out}catch(e){return[]}}
 function achSet(){try{var v=JSON.parse(localStorage.getItem('cube_ach')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achSave(s){try{localStorage.setItem('cube_ach',JSON.stringify(s))}catch(e){}}
-var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15}};
+var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15}};
 function achPaid(){try{var v=JSON.parse(localStorage.getItem('cube_ach_paid')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achPaidSave(s){try{localStorage.setItem('cube_ach_paid',JSON.stringify(s))}catch(e){}}
 function achRwOf(id){try{if(typeof achRW!=='undefined'&&achRW[id])return achRW[id]}catch(e){}return{s:5}}
@@ -1911,7 +1913,7 @@ try{if(r.s&&typeof grantPts==='function'){grantPts(r.s*(typeof ptMult==='functio
 try{if(r.u&&typeof grantUp==='function'){grantUp(r.u);if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 p.push(def.id);achPaidSave(p);
 if(def.id==='witness'){cubeDim('reward: +25 upgrade points. the void respects your dedication. (it does not respect you.)')}
-else{var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' upgrade');if(b.length)cubeDim('reward: '+b.join(', ')+'.')}
+else{var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' upgrade');b.push('+2% points forever');if(b.length)cubeDim('reward: '+b.join(', ')+'.')}
 return true;
 }
 function achRwText(d){if(!d||d.sec||!d.id)return '';if(d.id==='witness')return ' (pays +25 upgrade)';var r=achRwOf(d.id);var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' upgrade');return b.length?' (pays '+b.join(', ')+')':''}
@@ -2171,6 +2173,67 @@ var t=(a[0]||'').toLowerCase();
 if(t==='auto'){weatherType='off';weatherDrops=[];weatherManual=false;autoWeather();return true}
 if(t!=='rain'&&t!=='snow'&&t!=='off'){cubeError('weather: use rain, snow, off, or auto');return true}
 initWeather(t);weatherManual=true;return true}};
+voidScriptLang['stargaze']={help:'stargaze - chart the 12 stars',fn:function(){stargazeOpen();return true}};
+var STAR_POS=[[12,20],[25,55],[38,30],[50,65],[63,35],[74,60],[85,25],[18,78],[42,82],[58,12],[78,80],[90,55]];
+var starCharted=[];
+function starDraw(){
+try{
+var cv=document.getElementById('starCv');if(!cv)return;
+var ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+ctx.strokeStyle='rgba(216,169,64,0.7)';ctx.lineWidth=1.5;ctx.beginPath();
+for(var i=0;i<starCharted.length;i++){var p=STAR_POS[starCharted[i]];var x=p[0]/100*cv.width,y=p[1]/100*cv.height;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}
+ctx.stroke();
+for(var s=0;s<STAR_POS.length;s++){var q=STAR_POS[s];var qx=q[0]/100*cv.width,qy=q[1]/100*cv.height;var done=starCharted.indexOf(s)!==-1;
+ctx.fillStyle=done?'#ffd83a':'rgba(255,255,255,0.75)';
+ctx.beginPath();ctx.arc(qx,qy,done?5:3,0,Math.PI*2);ctx.fill();
+if(done){ctx.strokeStyle='rgba(255,216,58,0.4)';ctx.beginPath();ctx.arc(qx,qy,9,0,Math.PI*2);ctx.stroke()}}
+var hint=document.getElementById('starHint');if(hint)hint.textContent='chart all 12 stars ('+starCharted.length+'/12)';
+}catch(e){}
+}
+function stargazeOpen(){
+try{
+if(document.getElementById('starSky'))return;
+starCharted=[];
+var ov=document.createElement('div');ov.id='starSky';
+ov.style.cssText='position:fixed;inset:0;background:#020208;z-index:60000;cursor:crosshair';
+var cv=document.createElement('canvas');cv.id='starCv';cv.style.cssText='position:absolute;inset:0';ov.appendChild(cv);
+var hint=document.createElement('div');hint.id='starHint';hint.style.cssText='position:absolute;top:14px;width:100%;text-align:center;color:#8a8aa5;font:13px Consolas,monospace;letter-spacing:2px';ov.appendChild(hint);
+var xb=document.createElement('button');xb.className='ngtopt';xb.textContent='LEAVE THE SKY';xb.style.cssText='position:absolute;bottom:18px;left:50%;transform:translateX(-50%)';xb.onclick=function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov)}catch(e){}};ov.appendChild(xb);
+document.body.appendChild(ov);
+cv.width=window.innerWidth;cv.height=window.innerHeight;starDraw();
+ov.addEventListener('click',function(e){
+if(e.target===xb||xb.contains(e.target))return;
+try{
+var x=e.clientX/window.innerWidth*100,y=e.clientY/window.innerHeight*100;
+var best=-1,bd=9;
+for(var i=0;i<STAR_POS.length;i++){var dx=STAR_POS[i][0]-x,dy=(STAR_POS[i][1]-y)*1.4;var d=Math.sqrt(dx*dx+dy*dy);if(d<bd){bd=d;best=i}}
+if(best>=0&&starCharted.indexOf(best)===-1){starCharted.push(best);try{ngSfx('coin')}catch(err){}starDraw();
+if(starCharted.length>=STAR_POS.length){
+try{localStorage.setItem('cube_stargazer','1')}catch(err){}
+try{if(typeof ach==='function')ach('stargazer')}catch(err){}
+try{cubePrint('the sky remembers you. (your constellation stays.)')}catch(err){}
+try{starfieldShow()}catch(err){}
+setTimeout(function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov)}catch(err){}},2500);
+}}
+}catch(err){}
+});
+}catch(e){}
+}
+function starfieldShow(){
+try{
+if(!localStorage.getItem('cube_stargazer'))return;
+if(document.getElementById('starField'))return;
+var d=document.createElement('div');d.id='starField';
+d.style.cssText='position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0.5';
+var h='<svg width="100%" height="100%">';
+for(var i=1;i<STAR_POS.length;i++){h+='<line x1="'+STAR_POS[i-1][0]+'%" y1="'+STAR_POS[i-1][1]+'%" x2="'+STAR_POS[i][0]+'%" y2="'+STAR_POS[i][1]+'%" stroke="rgba(216,169,64,0.5)" stroke-width="1"/>';}
+for(var s=0;s<STAR_POS.length;s++){h+='<circle cx="'+STAR_POS[s][0]+'%" cy="'+STAR_POS[s][1]+'%" r="2" fill="rgba(255,216,58,0.7)"/>';}
+h+='</svg>';
+d.innerHTML=h;
+document.body.appendChild(d);
+}catch(e){}
+}
+try{starfieldShow()}catch(e){}
 voidScriptLang['core']={help:'core — enter/exit the core (needs threshold skill)',fn:function(){
 if(currentView==='core')exitCore();else enterCore();return true}};
 
@@ -4125,7 +4188,7 @@ function upLv(key){if(typeof skillState==='undefined'||!skillState||!skillState.
 function upMaster(){return 1+0.25*upLv('skill_masterGain')}
 function goldMult(){if(typeof skillState==='undefined'||!skillState||!skillState.goldStud)return 1;return 1.5+0.25*upLv('skill_studFinder')}
 function tickDiv(){return 1/(1+0.1*upLv('skill_quickening'))}
-function ptMult(){var m=1+0.1*upLv('skill_prestMult');m*=goldMult();if(typeof skillState!=='undefined'&&skillState&&skillState.entropy)m*=1+0.05*skillState.entropy;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)m*=2;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore&&skillState.nothingCore.gaze)m*=1.25;return m}
+function ptMult(){var m=1+0.1*upLv('skill_prestMult');m*=goldMult();if(typeof skillState!=='undefined'&&skillState&&skillState.entropy)m*=1+0.05*skillState.entropy;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)m*=2;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore&&skillState.nothingCore.gaze)m*=1.25;try{m*=1+0.02*achSet().length}catch(e){}return m}
 function upMult(){var m=1+0.1*upLv('skill_prestMult')+0.25*upLv('skill_tempered');m*=goldMult();if(typeof skillState!=='undefined'&&skillState&&skillState.entropy)m*=1+0.05*skillState.entropy;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)m*=2;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore&&skillState.nothingCore.gaze)m*=1.25;return m}
 function grantPts(n){if(!(n>0))return 0;skillState.ptFrac=(skillState.ptFrac||0)+n;var w=Math.floor(skillState.ptFrac);if(w>0){skillState.ptFrac-=w;skillState.points+=w;skillSave()}return w}
 function grantUp(n){if(!(n>0))return 0;skillState.upFrac=(skillState.upFrac||0)+n;var w=Math.floor(skillState.upFrac);if(w>0){skillState.upFrac-=w;skillState.upPoints+=w;skillSave()}return w}
