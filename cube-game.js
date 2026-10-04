@@ -684,6 +684,7 @@ if(travelProgress>=travelDuration){
 travelling=false;
 currentZone=travelTo_zone;
 try{cbMenuArrive(travelTo_zone)}catch(e){}
+try{if(typeof starZoneLoad==='function')starZoneLoad()}catch(e){}
 applyZoneEffects(travelTo_zone);
 travelPhase='idle';
 travelFadeEl.style.opacity='0';
@@ -901,7 +902,7 @@ gl.uniformMatrix4fv(ppVW,false,view);
 vdAttribs(vdStars[0]);gl.drawArrays(gl.POINTS,0,200);
 try{
 if(!starBuf)starBuild();
-if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,12)}
+if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,starZoneCount())}
 if(starLineBuf&&starLineN>1){vdAttribs(starLineBuf);gl.drawArrays(gl.LINES,0,starLineN)}
 }catch(e){}
 vdAttribs(vdDust);gl.drawArrays(gl.POINTS,0,120);
@@ -1021,6 +1022,7 @@ gl.drawArrays(gl.POINTS,0,NP);
 
 gl.depthMask(true);gl.disable(gl.BLEND);
 if(!zr.renderOff&&zr.zone!=='geometry')drawVoidExtras(proj,view,t,zr);
+if(zr.renderOff)drawDarkStars(proj,view);
 
 // cubes
 if(!zr.renderOff){
@@ -1831,7 +1833,15 @@ var ACH=[
 {id:'fly_fed',n:'sweet on the tarsi',d:'feed the fly sugar and watch what moves.',c:function(){try{return localStorage.getItem('cube_fly_fed')==='1'}catch(e){return false}}},
 {id:'fly_seizure',n:'photosensitive',d:'push the fly past its flashing limit. (stop strobing it.)',c:function(){try{return localStorage.getItem('cube_fly_seizure')==='1'}catch(e){return false}}},
 {sec:'THE SKY'},
-{id:'stargazer',n:'stargazer',d:'chart all 12 stars. (stargaze)',c:function(){try{return localStorage.getItem('cube_stargazer')==='1'}catch(e){return false}}},
+{id:'stargazer',n:'stargazer',d:'chart all 12 void stars. (stargaze)',c:function(){try{return localStorage.getItem('cube_stargazer')==='1'}catch(e){return false}}},
+{id:'starchart_cb',n:'menu reader',d:'chart all 16 cb_menu stars.',c:function(){try{return localStorage.getItem('cube_starchart_cb')==='1'}catch(e){return false}}},
+{id:'starchart_far',n:'far out',d:'chart all 20 farlands stars.',c:function(){try{return localStorage.getItem('cube_starchart_far')==='1'}catch(e){return false}}},
+{id:'starchart_geo',n:'euclid approved',d:'chart all 24 geometry stars.',c:function(){try{return localStorage.getItem('cube_starchart_geo')==='1'}catch(e){return false}}},
+{id:'starchart_break',n:'held together',d:'chart all 32 breakdown stars.',c:function(){try{return localStorage.getItem('cube_starchart_break')==='1'}catch(e){return false}}},
+{id:'starchart_fringe',n:'fringe benefits',d:'chart all 48 fringenlands stars.',c:function(){try{return localStorage.getItem('cube_starchart_fringe')==='1'}catch(e){return false}}},
+{id:'starchart_end',n:'the last sky',d:'chart all 64 end stars.',c:function(){try{return localStorage.getItem('cube_starchart_end')==='1'}catch(e){return false}}},
+{id:'starchart_x',n:'x marks everything',d:'chart all 92 X stars.',c:function(){try{return localStorage.getItem('cube_starchart_x')==='1'}catch(e){return false}}},
+{id:'cartographer',n:'cartographer',d:'chart every sky. (all 8 zones.)',c:function(){try{var zs=['cube_stargazer','cube_starchart_cb','cube_starchart_far','cube_starchart_geo','cube_starchart_break','cube_starchart_fringe','cube_starchart_end','cube_starchart_x'];for(var zi=0;zi<zs.length;zi++){if(localStorage.getItem(zs[zi])!=='1')return false}return true}catch(e){return false}}},
 {sec:'ENDINGS'},
 {id:'mercy',n:'mercy',d:'STOP. (the void pays its debts.)',c:function(){return achFinale()==='mercy'}},
 {id:'brat',n:'brat',d:'KEEP. (hush money.)',c:function(){return achFinale()==='brat'}},
@@ -1908,7 +1918,7 @@ function achFinale(){try{return localStorage.getItem('cube_finale')||''}catch(e)
 function achPkgs(){try{var v=JSON.parse(localStorage.getItem('cube_pkgs')||'[]');var out=[];for(var i=0;i<v.length;i++)if(v[i]!=='void-core')out.push(v[i]);return out}catch(e){return[]}}
 function achSet(){try{var v=JSON.parse(localStorage.getItem('cube_ach')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achSave(s){try{localStorage.setItem('cube_ach',JSON.stringify(s))}catch(e){}}
-var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15}};
+var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10}};
 function achPaid(){try{var v=JSON.parse(localStorage.getItem('cube_ach_paid')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achPaidSave(s){try{localStorage.setItem('cube_ach_paid',JSON.stringify(s))}catch(e){}}
 function achRwOf(id){try{if(typeof achRW!=='undefined'&&achRW[id])return achRW[id]}catch(e){}return{s:5}}
@@ -2180,24 +2190,58 @@ var t=(a[0]||'').toLowerCase();
 if(t==='auto'){weatherType='off';weatherDrops=[];weatherManual=false;autoWeather();return true}
 if(t!=='rain'&&t!=='snow'&&t!=='off'){cubeError('weather: use rain, snow, off, or auto');return true}
 initWeather(t);weatherManual=true;return true}};
-voidScriptLang['stargaze']={help:'stargaze - chart the 12 bright stars',fn:function(){try{cubePrint('look up. pan the camera. click the bright stars. ('+starCharted.length+'/12 charted)')}catch(e){}return true}};
+voidScriptLang['stargaze']={help:'stargaze - chart the bright stars',fn:function(){try{var n=starZoneCount();cubePrint(n>0?('look up. pan the camera. click the bright stars. '+currentZone+': '+starCharted.length+'/'+n+' charted'):('no stars here. (travel somewhere with a sky.)'))}catch(e){}return true}};
+var starGridBuf=null;
+function drawDarkStars(proj,view){
+try{
+gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
+gl.uniformMatrix4fv(ppPJ,false,proj);gl.uniformMatrix4fv(ppVW,false,view);
+if(currentZone==='x'){
+if(!starGridBuf){
+var GB=new Float32Array(22*2*8);var go=0;
+for(var gx=-40;gx<=40;gx+=8){GB[go]=gx;GB[go+1]=-8;GB[go+2]=-8;GB[go+3]=0.02;GB[go+4]=0.5;GB[go+5]=0.08;GB[go+6]=0.08;GB[go+7]=0.35;go+=8;GB[go]=gx;GB[go+1]=-8;GB[go+2]=-46;GB[go+3]=0.02;GB[go+4]=0.5;GB[go+5]=0.08;GB[go+6]=0.08;GB[go+7]=0.35;go+=8}
+for(var gz=-8;gz>=-46;gz-=3.8){GB[go]=-40;GB[go+1]=-8;GB[go+2]=gz;GB[go+3]=0.02;GB[go+4]=0.5;GB[go+5]=0.08;GB[go+6]=0.08;GB[go+7]=0.35;go+=8;GB[go]=40;GB[go+1]=-8;GB[go+2]=gz;GB[go+3]=0.02;GB[go+4]=0.5;GB[go+5]=0.08;GB[go+6]=0.08;GB[go+7]=0.35;go+=8}
+starGridBuf=upBuf(GB);
+}
+vdAttribs(starGridBuf);gl.drawArrays(gl.LINES,0,44);
+}
+if(!starBuf)starBuild();
+if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,starZoneCount())}
+if(starLineBuf&&starLineN>1){vdAttribs(starLineBuf);gl.drawArrays(gl.LINES,0,starLineN)}
+gl.depthMask(true);gl.disable(gl.BLEND);
+}catch(e){}
+}
+var STAR_ZONES={void:{n:12,seed:0,fix:[3,19,37,53,71,89,107,129,151,167,183,197]},cb_menu:{n:16,seed:1},farlands:{n:20,seed:2},geometry:{n:24,seed:3},breakdown:{n:32,seed:4},fringenlands:{n:48,seed:5},end:{n:64,seed:6},x:{n:92,seed:7}};
 var STAR3D=[3,19,37,53,71,89,107,129,151,167,183,197];
 var starCharted=[];
+var starCharts={};
+try{starCharts=JSON.parse(localStorage.getItem('cube_starcharts')||'{}')}catch(e){starCharts={}}
+try{if(localStorage.getItem('cube_stargazer')==='1'&&!starCharts.void){starCharts.void=[0,1,2,3,4,5,6,7,8,9,10,11];try{localStorage.setItem('cube_starcharts',JSON.stringify(starCharts))}catch(e){}}}catch(e){}
+try{starCharted=starCharts[currentZone]||[]}catch(e){}
+function starSave(){try{localStorage.setItem('cube_starcharts',JSON.stringify(starCharts))}catch(e){}}
+function starZone(){try{return STAR_ZONES[currentZone]||null}catch(e){return null}}
+function starZoneCount(){var z=starZone();return z?z.n:0}
+function starZoneLoad(){try{if(!starCharts[currentZone])starCharts[currentZone]=[];starCharted=starCharts[currentZone];starSave();starBuf=null;starLineBuf=null;starLineN=0}catch(e){}}
+function starZoneTint(){try{if(currentZone==='x')return [1,0.32,0.32];if(currentZone==='end')return [0.7,0.7,0.78]}catch(e){}return [0.85,0.9,1]}
 var starBuf=null,starLineBuf=null,starLineN=0;
 function starFrac(v){return v-Math.floor(v)}
 function starPos3(i){
-var q1=starFrac(Math.sin(i*12.9898)*43758.5453);
-var q2=starFrac(Math.sin(i*78.233)*12578.1459);
-var q3=starFrac(Math.sin(i*39.425)*65428.3912);
+var seed=0;try{var z=starZone();seed=z?z.seed:0;if(z&&z.fix)i=z.fix[i]}catch(e){}
+var s=i+seed*1000;
+var q1=starFrac(Math.sin(s*12.9898)*43758.5453);
+var q2=starFrac(Math.sin(s*78.233)*12578.1459);
+var q3=starFrac(Math.sin(s*39.425)*65428.3912);
 return [(q1-0.5)*46,(q2-0.5)*30,-16-q3*14];
 }
 function starBuild(){
 try{
-var B=new Float32Array(12*8);
-for(var k=0;k<12;k++){var p=starPos3(STAR3D[k]);var o=k*8;var done=starCharted.indexOf(k)!==-1;
+var n=starZoneCount();if(n<1){starBuf=null;return}
+var tint=starZoneTint();
+var B=new Float32Array(n*8);
+for(var k=0;k<n;k++){var p=starPos3(k);var o=k*8;var done=starCharted.indexOf(k)!==-1;
 B[o]=p[0];B[o+1]=p[1];B[o+2]=p[2];B[o+3]=done?0.055:0.032;
 if(done){B[o+4]=1;B[o+5]=0.85;B[o+6]=0.25;B[o+7]=1}
-else{B[o+4]=0.85;B[o+5]=0.9;B[o+6]=1;B[o+7]=0.85}}
+else{B[o+4]=tint[0];B[o+5]=tint[1];B[o+6]=tint[2];B[o+7]=0.85}}
 starBuf=upBuf(B);
 starLinesBuild();
 }catch(e){}
@@ -2208,7 +2252,7 @@ starLineN=0;
 if(starCharted.length<2){starLineBuf=null;return}
 var n=starCharted.length-1;
 var B=new Float32Array(n*2*8);var o=0;
-for(var i=0;i<n;i++){var a=starPos3(STAR3D[starCharted[i]]);var b=starPos3(STAR3D[starCharted[i+1]]);
+for(var i=0;i<n;i++){var a=starPos3(starCharted[i]);var b=starPos3(starCharted[i+1]);
 B[o]=a[0];B[o+1]=a[1];B[o+2]=a[2];B[o+3]=0.02;B[o+4]=1;B[o+5]=0.85;B[o+6]=0.25;B[o+7]=0.6;o+=8;
 B[o]=b[0];B[o+1]=b[1];B[o+2]=b[2];B[o+3]=0.02;B[o+4]=1;B[o+5]=0.85;B[o+6]=0.25;B[o+7]=0.6;o+=8}
 starLineBuf=upBuf(B);starLineN=n*2;
@@ -2226,12 +2270,13 @@ return [cx/cw,cy/cw,cz/cw];
 }
 function starTryClick(px,py){
 try{
-if(starCharted.length>=STAR3D.length)return false;
+if(starZoneCount()<1)return false;
+if(starCharted.length>=starZoneCount())return false;
 var r=canvas.getBoundingClientRect();
 var best=-1,bd=30;
-for(var k=0;k<STAR3D.length;k++){
+for(var k=0;k<starZoneCount();k++){
 if(starCharted.indexOf(k)!==-1)continue;
-var pr=starProject(starPos3(STAR3D[k]));
+var pr=starProject(starPos3(k));
 if(!pr||pr[2]>1||pr[2]<-1)continue;
 var sx=(pr[0]*0.5+0.5)*r.width,sy=(-pr[1]*0.5+0.5)*r.height;
 var dx=sx-(px-r.left),dy=sy-(py-r.top);
@@ -2244,13 +2289,30 @@ return false;
 function starChart(k){
 try{
 if(starCharted.indexOf(k)!==-1)return;
-starCharted.push(k);
+starCharted.push(k);starSave();
 try{ngSfx('coin')}catch(err){}
 starBuild();
-if(starCharted.length>=STAR3D.length){
-try{localStorage.setItem('cube_stargazer','1')}catch(err){}
-try{if(typeof ach==='function')ach('stargazer')}catch(err){}
-try{cubePrint('all 12 charted. the sky remembers you.')}catch(err){}
+if(starCharted.length>=starZoneCount()&&starZoneCount()>0){
+var zid='stargazer';
+try{
+if(currentZone==='cb_menu')zid='starchart_cb';
+else if(currentZone==='farlands')zid='starchart_far';
+else if(currentZone==='geometry')zid='starchart_geo';
+else if(currentZone==='breakdown')zid='starchart_break';
+else if(currentZone==='fringenlands')zid='starchart_fringe';
+else if(currentZone==='end')zid='starchart_end';
+else if(currentZone==='x')zid='starchart_x';
+if(zid==='stargazer'){try{localStorage.setItem('cube_stargazer','1')}catch(err){}}
+else{try{localStorage.setItem('cube_'+zid,'1')}catch(err){}}
+if(typeof ach==='function')ach(zid);
+try{
+var allz=['stargazer','starchart_cb','starchart_far','starchart_geo','starchart_break','starchart_fringe','starchart_end','starchart_x'];
+var allok=true;
+for(var ai=0;ai<allz.length;ai++){var ak=allz[ai];var kk=(ak==='stargazer')?'cube_stargazer':'cube_'+ak;try{if(localStorage.getItem(kk)!=='1')allok=false}catch(err){allok=false}}
+if(allok&&typeof ach==='function')ach('cartographer');
+}catch(err){}
+}catch(err){}
+try{cubePrint('all '+starZoneCount()+' charted. the sky remembers you.')}catch(err){}
 }
 }catch(e){}
 }
