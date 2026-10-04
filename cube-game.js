@@ -2222,7 +2222,7 @@ function starSave(){try{localStorage.setItem('cube_starcharts',JSON.stringify(st
 function starZone(){try{return STAR_ZONES[currentZone]||null}catch(e){return null}}
 function starZoneCount(){var z=starZone();return z?z.n:0}
 function starZoneLoad(){try{if(!starCharts[currentZone])starCharts[currentZone]=[];starCharted=starCharts[currentZone];starSave();starBuf=null;starLineBuf=null;starLineN=0}catch(e){}}
-function starZoneTint(){try{if(currentZone==='x')return [1,0.32,0.32];if(currentZone==='end')return [0.7,0.7,0.78]}catch(e){}return [0.85,0.9,1]}
+function starZoneTint(){try{if(currentZone==='x')return [1,0.32,0.32];if(currentZone==='end')return [0.7,0.7,0.78];if(currentZone==='geometry')return [0.06,0.06,0.1]}catch(e){}return [0.85,0.9,1]}
 var starBuf=null,starLineBuf=null,starLineN=0;
 function starFrac(v){return v-Math.floor(v)}
 function starPos3(i){
