@@ -2277,6 +2277,17 @@ return true;
 }catch(e){return false}
 }
 function bnName(){try{var t=titleWorn();if(t)return t}catch(e){}return 'intruder'}
+function bnPingURL(){try{var s=localStorage.getItem('cube_bn_url');if(s&&s!=='off')return s.replace(/\/+$/,'')}catch(e){}return BN_DEFAULT}
+function bnPing(){try{fetch(bnPingURL()+'/ping',{method:'POST',headers:{'content-type':'application/json'},body:'{}'}).catch(function(){})}catch(e){}}
+try{if(typeof biosBootDone==='function'){var _bbd0=biosBootDone;biosBootDone=function(){try{_bbd0()}catch(e){}try{setTimeout(bnPing,2000);setTimeout(bnPing,15000);setInterval(bnPing,300000)}catch(e){}}}else{try{setTimeout(bnPing,4000);setTimeout(bnPing,15000)}catch(e){}}}catch(e){}
+voidScriptLang['census']={help:'census - count the souls in the void',fn:function(){
+try{
+fetch(bnPingURL()+'/census').then(function(r){return r.json()}).then(function(j){
+if(j&&typeof j.today!=='undefined')cubePrint('souls in the void today: '+j.today+' ('+j.total+' total, all time.)');
+else cubePrint('the census taker is asleep. (offline?)');
+}).catch(function(){cubePrint('the census taker is asleep. (offline?)')});
+}catch(e){cubePrint('the census taker is asleep. (offline?)')}
+return true}};
 voidScriptLang['bottlenet']={help:'bottlenet [url|off] - link the shared void',fn:function(a){
 var u=String((a&&a[0])||'').replace(/^["']+|["']+$/g,'').trim();
 if(!u){var cur=bnURL();cubePrint(cur?('linked: '+cur):'unlinked. the void is a singleplayer experience now. (bottlenet <url> to re-link)');return true}
