@@ -2082,7 +2082,10 @@ size:type==='snow'?2+Math.random()*4:1
 }
 cubePrint('weather: '+type);
 }
+var weatherDay=new Date().getDate();
+var weatherManual=false;
 function updateWeather(){
+try{var _nd=new Date().getDate();if(_nd!==weatherDay){weatherDay=_nd;if(!weatherManual){weatherType='off';weatherDrops=[];autoWeather()}}}catch(e){}
 if(weatherType==='off')return;
 weatherCtx.clearRect(0,0,weatherCanvas.width,weatherCanvas.height);
 for(var i=0;i<weatherDrops.length;i++){
@@ -2158,9 +2161,9 @@ cubeDim('all paid. the void respects your adminhood. (it does not respect you.)'
 return true}};
 voidScriptLang['weather']={help:'weather <rain|snow|off|auto> — change weather',fn:function(a){
 var t=(a[0]||'').toLowerCase();
-if(t==='auto'){weatherType='off';weatherDrops=[];autoWeather();return true}
+if(t==='auto'){weatherType='off';weatherDrops=[];weatherManual=false;autoWeather();return true}
 if(t!=='rain'&&t!=='snow'&&t!=='off'){cubeError('weather: use rain, snow, off, or auto');return true}
-initWeather(t);return true}};
+initWeather(t);weatherManual=true;return true}};
 voidScriptLang['core']={help:'core — enter/exit the core (needs threshold skill)',fn:function(){
 if(currentView==='core')exitCore();else enterCore();return true}};
 
