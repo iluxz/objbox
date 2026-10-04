@@ -958,7 +958,7 @@ var wedBeat=_party||isMoon?audioLevel:(_peaceful?audioHot*0.5:0);
 
 // audio visualizer background pulse
 var th=themes[curTheme]||themes['1'];
-var bgPulse=audioHot*(_party?0.2:0.4);
+var bgPulse=audioHot*(_party?0.2:0.25);
 var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
 if(_mon){
@@ -970,9 +970,9 @@ gl.clearColor(0.05+_softPulse*0.03,0.06+_softPulse*0.04,0.12+_softPulse*0.06,1);
 gl.clearColor(zr.bgOverride[0],zr.bgOverride[1],zr.bgOverride[2],zr.bgOverride[3]);
 }else{
 gl.clearColor(
-Math.max(0,Math.min(1,th.bg[0]+bgPulse*1.6+hueShift)),
-Math.max(0,Math.min(1,th.bg[1]+bgPulse*0.3)),
-Math.max(0,Math.min(1,th.bg[2]+bgPulse*1.0-hueShift)),
+Math.max(0,Math.min(1,th.bg[0]+bgPulse*0.55+hueShift)),
+Math.max(0,Math.min(1,th.bg[1]+bgPulse*0.6)),
+Math.max(0,Math.min(1,th.bg[2]+bgPulse*0.12-hueShift)),
 1);
 }
 
