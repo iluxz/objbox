@@ -9628,7 +9628,7 @@ var ngMusicSrc=null;
 var ngWasBgmPlaying=false;
 function ngMusicStart(){ngMusicApply()}
 function ngMusicStop(){try{if(ngMusic){ngMusic.pause();ngMusic.currentTime=0}}catch(e){}}
-var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'},{f:'oneshot_trap.mp4',n:'ONESHOT'},{f:'sciences_downfall.webm',n:'downfall'},{f:'noli.webm',n:'NOLI'},{f:'lordverity.webm',n:'VERITY'},{f:'vestige.mp3',n:'VESTIGE'},{f:'artisticswimming.webm',n:'SWIM'}];
+var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'},{f:'oneshot_trap.mp4',n:'ONESHOT'},{f:'sciences_downfall.webm',n:'downfall'},{f:'noli.webm',n:'NOLI'},{f:'lordverity.webm',n:'VERITY'},{f:'vestige.mp3',n:'VESTIGE'},{f:'artisticswimming.webm',n:'SWIM'},{f:'coffee.mp3',n:'COFFEE'}];
 var ngMusicMode=0;
 function ngMusicLabel(){return ngMusicMode>=ngTracks.length?'MUSIC: OFF':'MUSIC: '+ngTracks[ngMusicMode].n}
 function ngMusicApply(){
@@ -10510,7 +10510,7 @@ function noliLyricStart(audio){noliStart(document.body,audio||null)}
 function noliLyricStop(){noliStop()}
 function noliUnlocked(){try{return localStorage.getItem('cube_noli_full')==='1'}catch(e){return false}}var shift={ch:1,slips:0};
 var shRoot=null,$shStage=null,$shDlg=null,$shSpk=null,$shTxt=null,$shSub=null,$shHud=null,shSkipB=null;
-var shMode='menu',shTimers=[],shDlgS=null,shBeatPress=null,shCur=0,shBgm=null,shBgmMuted=false,shWasBgm=false,shBgmPlayIdx=0,shBgmPlayList=['vestige.mp3'],shBgmSrc=null;
+var shMode='menu',shTimers=[],shDlgS=null,shBeatPress=null,shCur=0,shBgm=null,shBgmMuted=false,shWasBgm=false,shBgmPlayIdx=0,shBgmPlayList=['vestige.mp3','coffee.mp3'],shBgmSrc=null;
 function shT(fn,ms){var t=setTimeout(fn,ms);shTimers.push(t);return t}
 function shI(fn,ms){var t=setInterval(fn,ms);shTimers.push(t);return t}
 function shClearTimers(){for(var i=0;i<shTimers.length;i++){clearTimeout(shTimers[i]);clearInterval(shTimers[i])}shTimers=[]}
@@ -10601,7 +10601,7 @@ document.body.appendChild(shRoot);
 $shStage=shRoot.querySelector('#shStage');$shDlg=shRoot.querySelector('#shDlg');$shSpk=shRoot.querySelector('#shSpk');$shTxt=shRoot.querySelector('#shTxt');$shSub=shRoot.querySelector('#shSub');$shHud=shRoot.querySelector('#shHud');
 shRoot.querySelector('#shX').onclick=shClose;
 try{shBgmMuted=localStorage.getItem('cube_shift_mute')==='1'}catch(e){}
-try{shBgm=new Audio('vestige.mp3');shBgm.loop=false;shBgm.volume=0.4;shBgmPlayIdx=0;shBgmPlayList=['vestige.mp3'];shBgm.onended=function(){try{shNoliStop();shBgmPlayIdx=(shBgmPlayIdx+1)%shBgmPlayList.length;shBgm.src=shBgmPlayList[shBgmPlayIdx];function shBgmGo(){try{if(shBgm&&String(shBgm.src).indexOf('noli.webm')!==-1)shNoliStart();else shNoliStop()}catch(e){}if(!shBgmMuted&&shRoot.classList.contains('on'))shBgm.play().catch(function(){})}shBgmGo()}catch(e){}}}catch(e){shBgm=null}
+try{shBgm=new Audio('vestige.mp3');shBgm.loop=false;shBgm.volume=0.4;shBgmPlayIdx=0;shBgmPlayList=['vestige.mp3','coffee.mp3'];shBgm.onended=function(){try{shNoliStop();shBgmPlayIdx=(shBgmPlayIdx+1)%shBgmPlayList.length;shBgm.src=shBgmPlayList[shBgmPlayIdx];function shBgmGo(){try{if(shBgm&&String(shBgm.src).indexOf('noli.webm')!==-1)shNoliStart();else shNoliStop()}catch(e){}if(!shBgmMuted&&shRoot.classList.contains('on'))shBgm.play().catch(function(){})}shBgmGo()}catch(e){}}}catch(e){shBgm=null}
 var $mus=shRoot.querySelector('#shMus');
 function musUpd(){$mus.textContent=shBgmMuted?'\u266a\u0338':'\u266a';$mus.style.opacity=shBgmMuted?'.4':'1'}
 $mus.onclick=function(){shBgmMuted=!shBgmMuted;try{localStorage.setItem('cube_shift_mute',shBgmMuted?'1':'0')}catch(e){}musUpd();
