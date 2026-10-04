@@ -7973,7 +7973,7 @@ ngMornReady=1;
 ngMornStrikes=0;ngMornItem=0;
 ngMornBatch=ngMornGen(ngHard?64:32);ngMornTraceReset();
 try{ngSave({p19:{ph:5,strikes:0}})}catch(e){}
-try{ngMornAud=new Audio('sciences_downfall.webm');ngMornAud.volume=0.85;var pr=ngMornAud.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}
+try{ngMornAud=new Audio('sciences_downfall.webm');ngMornAud.volume=0.85;try{if(!audioCtx)initAudio();if(audioCtx&&audioAnalyser){if(ngMornAudSrc){try{ngMornAudSrc.disconnect()}catch(e){}}ngMornAudSrc=audioCtx.createMediaElementSource(ngMornAud);ngMornAudSrc.connect(audioAnalyser)}}catch(e){}var pr=ngMornAud.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}
 try{ngSfx('static')}catch(e){}
 ngSay('the song is playing. five minutes. file everything before the last note.');
 ngMornTimerStart(300000,ngMornShutdown);
@@ -9628,6 +9628,9 @@ ngAfterSpeech(function(){if(ngActive)ngShowChapter(100)},800);
 }
 var ngMusic=null;
 var ngMusicSrc=null;
+var shBgmSrc=null;
+var ngMornAud=null;
+var ngMornAudSrc=null;
 var ngWasBgmPlaying=false;
 function ngMusicStart(){ngMusicApply()}
 function ngMusicStop(){try{if(ngMusic){ngMusic.pause();ngMusic.currentTime=0}}catch(e){}}
@@ -10604,7 +10607,7 @@ document.body.appendChild(shRoot);
 $shStage=shRoot.querySelector('#shStage');$shDlg=shRoot.querySelector('#shDlg');$shSpk=shRoot.querySelector('#shSpk');$shTxt=shRoot.querySelector('#shTxt');$shSub=shRoot.querySelector('#shSub');$shHud=shRoot.querySelector('#shHud');
 shRoot.querySelector('#shX').onclick=shClose;
 try{shBgmMuted=localStorage.getItem('cube_shift_mute')==='1'}catch(e){}
-try{shBgm=new Audio('vestige.mp3');shBgm.loop=false;shBgm.volume=0.4;shBgmPlayIdx=0;shBgmPlayList=['vestige.mp3','coffee.mp3'];shBgm.onended=function(){try{shNoliStop();shBgmPlayIdx=(shBgmPlayIdx+1)%shBgmPlayList.length;shBgm.src=shBgmPlayList[shBgmPlayIdx];function shBgmGo(){try{if(shBgm&&String(shBgm.src).indexOf('noli.webm')!==-1)shNoliStart();else shNoliStop()}catch(e){}if(!shBgmMuted&&shRoot.classList.contains('on'))shBgm.play().catch(function(){})}shBgmGo()}catch(e){}}}catch(e){shBgm=null}
+try{shBgm=new Audio('vestige.mp3');shBgm.loop=false;shBgm.volume=0.4;shBgmPlayIdx=0;shBgmPlayList=['vestige.mp3','coffee.mp3'];try{if(!audioCtx)initAudio();if(audioCtx&&audioAnalyser){if(shBgmSrc){try{shBgmSrc.disconnect()}catch(e){}}shBgmSrc=audioCtx.createMediaElementSource(shBgm);shBgmSrc.connect(audioAnalyser)}}catch(e){}shBgm.onended=function(){try{shNoliStop();shBgmPlayIdx=(shBgmPlayIdx+1)%shBgmPlayList.length;shBgm.src=shBgmPlayList[shBgmPlayIdx];function shBgmGo(){try{if(shBgm&&String(shBgm.src).indexOf('noli.webm')!==-1)shNoliStart();else shNoliStop()}catch(e){}if(!shBgmMuted&&shRoot.classList.contains('on'))shBgm.play().catch(function(){})}shBgmGo()}catch(e){}}}catch(e){shBgm=null}
 var $mus=shRoot.querySelector('#shMus');
 function musUpd(){$mus.textContent=shBgmMuted?'\u266a\u0338':'\u266a';$mus.style.opacity=shBgmMuted?'.4':'1'}
 $mus.onclick=function(){shBgmMuted=!shBgmMuted;try{localStorage.setItem('cube_shift_mute',shBgmMuted?'1':'0')}catch(e){}musUpd();
