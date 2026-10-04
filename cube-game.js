@@ -927,8 +927,8 @@ if(!drag&&!isFrozen){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if
 var _mon=window._cubeDay===1;
 var isMoon=activeTrack==='moon1857'&&odActive;
 var audioLevel=_mon&&!isMoon?0:getAudioLevel();
-try{window._audioBase=((typeof window._audioBase==='number')?window._audioBase:audioLevel)+((audioLevel-(((typeof window._audioBase==='number')?window._audioBase:audioLevel)))*0.03)}catch(e){window._audioBase=audioLevel}
-var audioHot=0;try{audioHot=Math.min(1,Math.max(0,(audioLevel-window._audioBase)*4))}catch(e){}
+try{window._audioBase=((typeof window._audioBase==='number')?window._audioBase:audioLevel)+((audioLevel-(((typeof window._audioBase==='number')?window._audioBase:audioLevel)))*0.015)}catch(e){window._audioBase=audioLevel}
+var audioHot=0;try{audioHot=Math.min(1,Math.max(0,(audioLevel-window._audioBase)*10))}catch(e){}
 var bands=isMoon?getAudioBands():{bass:audioLevel,mid:audioLevel*0.5,high:audioLevel*0.3};
 if(isMoon){
 audioLevel=bands.mid*0.6+bands.bass*0.4;
@@ -970,9 +970,9 @@ gl.clearColor(0.05+_softPulse*0.03,0.06+_softPulse*0.04,0.12+_softPulse*0.06,1);
 gl.clearColor(zr.bgOverride[0],zr.bgOverride[1],zr.bgOverride[2],zr.bgOverride[3]);
 }else{
 gl.clearColor(
-Math.max(0,Math.min(1,th.bg[0]+bgPulse+hueShift)),
-Math.max(0,Math.min(1,th.bg[1]+bgPulse*0.5)),
-Math.max(0,Math.min(1,th.bg[2]+bgPulse-hueShift)),
+Math.max(0,Math.min(1,th.bg[0]+bgPulse*1.6+hueShift)),
+Math.max(0,Math.min(1,th.bg[1]+bgPulse*0.3)),
+Math.max(0,Math.min(1,th.bg[2]+bgPulse*1.0-hueShift)),
 1);
 }
 
