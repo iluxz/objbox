@@ -1918,6 +1918,18 @@ cubePrint('  replay <file>       replay a saved void demo');
 cubePrint('  void-mute           silence void transmissions');
 cubePrint('  void-unmute         let the void talk again');
 cubePrint('  weather <type>      rain, snow, off, or auto');
+cubePrint('  pet                 pet the cube');
+cubePrint('  forecast            tomorrow weather, plus bribes');
+cubePrint('  title               wear an achievement title');
+cubePrint('  stargaze            chart the bright stars');
+cubePrint('  fish                cast into nothing');
+cubePrint('  hook                yank it');
+cubePrint('  tacklebox           admire the catch');
+cubePrint('  bottlenet           link the shared void');
+cubePrint('  board               read the leaders');
+cubePrint('  bottle              throw a message in');
+cubePrint('  bottleimg           throw a picture in');
+cubePrint('  bottles             read what washed up');
 cubePrint('  sort <algo> [n] [s] sorting visualizer');
 cubePrint('  sortstop            stop sort');
   cubePrint('  travel <zone>       travel through the void');
@@ -2045,6 +2057,18 @@ cubePrint('  void-unmute       let the void talk again');
 if(skillAllFinals())cubePrint('  upgrade           open upgrade tree');
 else cubeDim('  upgrade           upgrade tree (locked — buy every skill)');
 cubePrint('  weather <type>    rain, snow, off, auto');
+cubePrint('  pet               pet the cube');
+cubePrint('  forecast          tomorrow weather, plus bribes');
+cubePrint('  title             wear an achievement title');
+cubePrint('  stargaze          chart the bright stars');
+cubePrint('  fish              cast into nothing');
+cubePrint('  hook              yank it');
+cubePrint('  tacklebox         admire the catch');
+cubePrint('  bottlenet         link the shared void');
+cubePrint('  board             read the leaders');
+cubePrint('  bottle            throw a message in');
+cubePrint('  bottleimg         throw a picture in');
+cubePrint('  bottles           read what washed up');
 if(window._skillCore||isAdmin)cubePrint('  core              enter/exit the core');
 else cubeDim('  core              enter/exit the core (locked — threshold)');
 cubePrint('  ◀▶ / arrows       switch views: void → reactor → core');
@@ -3046,6 +3070,13 @@ var patchLog=[
 'the O-B-J achievement has a new home. listening is still the hard part.',
 'fixes: the shape selector follows obj now, the hud cleans up after the non-game, core is pink again (sorry core)',
 'play goes to 30. the dream moved house. knock twice.'
+]},
+{date:'2026-10-04',tier:'update',title:'cartographer of the void',notes:[
+'stargaze grew up: every zone has its own sky chart now. find them all, click them all, chart the whole void.',
+'new achievements hiding in the dark. one of them is for finishing every single chart. cartographers get paid.',
+'the dark zones got company: red grids, fixed stars, and decoys that are not stars. trust issues, but make it astronomy.',
+'stars are round now. the full sphere, not just the front. look behind you.',
+'fixes: geometry blends like it should, and the shape selector keeps up with obj again.',
 ]},
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144','RELEASE':'#4ad8ff'};

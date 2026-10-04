@@ -902,8 +902,11 @@ gl.uniformMatrix4fv(ppVW,false,view);
 vdAttribs(vdStars[0]);gl.drawArrays(gl.POINTS,0,200);
 try{
 if(!starBuf)starBuild();
-if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,starZoneCount())}
+var _geoBlend=false;
+try{if(currentZone==='geometry'){_geoBlend=true;gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA)}}catch(e){}
+if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,(typeof starDrawN==='number'&&starDrawN>0)?starDrawN:starZoneCount())}
 if(starLineBuf&&starLineN>1){vdAttribs(starLineBuf);gl.drawArrays(gl.LINES,0,starLineN)}
+try{if(_geoBlend)gl.blendFunc(gl.SRC_ALPHA,gl.ONE)}catch(e){}
 }catch(e){}
 vdAttribs(vdDust);gl.drawArrays(gl.POINTS,0,120);
 gl.depthMask(true);gl.disable(gl.BLEND);
@@ -1784,6 +1787,7 @@ var l2='';
 try{if(typeof currentZone!=='undefined'&&currentZone)l2+='<span class="hudZone">ZONE '+String(currentZone).toUpperCase()+'</span>'}catch(e){}
 if(hard)l2+='<span class="hudSep">&middot;</span><span style="color:#ff8a5a">HARD</span>';
 l2+='<span class="hudSep">&middot;</span><span>'+(active?'non-game':'idle')+'</span>';
+try{var _tw=titleWorn();if(_tw)l2+='<span class="hudSep">&middot;</span><span style="color:#c878ff">['+_tw+']</span>'}catch(e){}
 h.innerHTML='<div class="hudLine"><span>SESSION '+getUptime()+'</span><span class="hudSep">&middot;</span><span style="color:'+rc+'">'+rt+'</span>'+extra+'<span class="hudToggle" title="collapse hud">\u25be</span></div><div class="hudLine hudLine2">'+l2+'</div>';
 }catch(e){}
 }
@@ -1898,6 +1902,10 @@ var ACH=[
 {id:'sorted',n:'sorted',d:'complete a sort visualization.',c:function(){return false}},
 {id:'under_pressure',n:'under pressure',d:'push the reactor past pressure limits.',c:function(){return false}},
 {id:'pen_pal',n:'pen pal',d:'transmit 50 times.',c:function(){return achTxN()>=50}},
+{id:'pet100',n:'soft hands',d:'pet the cube 100 times. (pet)',c:function(){try{return (parseInt(localStorage.getItem('cube_pets')||'0',10)||0)>=100}catch(e){return false}}},
+{id:'gone_fishing',n:'gone fishing',d:'catch anything. (fish)',c:function(){try{var c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');return Object.keys(c).length>=1}catch(e){return false}}},
+{id:'the_big_one',n:'the big one',d:'catch one (1) exit, preheated.',c:function(){try{var c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');return (c['one (1) exit, preheated']||0)>=1}catch(e){return false}}},
+{id:'full_box',n:'full tacklebox',d:'catch every kind of nothing.',c:function(){try{var c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');return Object.keys(c).length>=10}catch(e){return false}}},
 {id:'daily_10',n:'regular customer',d:'crack the daily void code 10 times.',c:function(){try{var n=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('cube_daily_done_')===0&&localStorage.getItem(k)==='1')n++}return n>=10}catch(e){return false}}},
 {sec:'ACT 2 CASE FILES'},
 {id:'morning_clean',n:'filed perfectly',d:'finish MORNING with zero strikes.',c:function(){var p=achP19();return !!(p&&p.done&&p.trace!==undefined&&p.strikes===0)}},
@@ -1918,7 +1926,7 @@ function achFinale(){try{return localStorage.getItem('cube_finale')||''}catch(e)
 function achPkgs(){try{var v=JSON.parse(localStorage.getItem('cube_pkgs')||'[]');var out=[];for(var i=0;i<v.length;i++)if(v[i]!=='void-core')out.push(v[i]);return out}catch(e){return[]}}
 function achSet(){try{var v=JSON.parse(localStorage.getItem('cube_ach')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achSave(s){try{localStorage.setItem('cube_ach',JSON.stringify(s))}catch(e){}}
-var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10}};
+var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10},pet100:{s:10},gone_fishing:{s:10},the_big_one:{s:15},full_box:{s:20}};
 function achPaid(){try{var v=JSON.parse(localStorage.getItem('cube_ach_paid')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achPaidSave(s){try{localStorage.setItem('cube_ach_paid',JSON.stringify(s))}catch(e){}}
 function achRwOf(id){try{if(typeof achRW!=='undefined'&&achRW[id])return achRW[id]}catch(e){}return{s:5}}
@@ -2190,6 +2198,177 @@ var t=(a[0]||'').toLowerCase();
 if(t==='auto'){weatherType='off';weatherDrops=[];weatherManual=false;autoWeather();return true}
 if(t!=='rain'&&t!=='snow'&&t!=='off'){cubeError('weather: use rain, snow, off, or auto');return true}
 initWeather(t);weatherManual=true;return true}};
+var TITLE_MAP={intruder:null,stargazer:'stargazer',cartographer:'cartographer',elegant:'elegant',brute:'brute',tenant:'act3_done',listener:'noli_full',employee:'shift_all',soft:'pet100',merciless:'mercy',spoiled:'brat'};
+function titleUnlocked(t){try{if(t==='intruder')return true;var id=TITLE_MAP[t];if(!id)return false;var s=achSet();return s.indexOf(id)!==-1}catch(e){return false}}
+function titleWorn(){try{return localStorage.getItem('cube_title')||''}catch(e){return ''}}
+var FISH_TABLE=[
+{n:'old boot',w:22,f:'smells like 1998. the void accepts it. (it does not want it.)'},
+{n:'static clump',w:20,f:'it hums. do not lick it.'},
+{n:'landlords invoice',w:12,f:'past due. everything is past due.'},
+{n:'a smaller door',w:10,f:'it opens to an even smaller door. doors all the way down.'},
+{n:'jbos patience',w:8,f:'near-mint condition. never been used.'},
+{n:'grue tooth',w:8,f:'the grue denies everything. keep it anyway.'},
+{n:'bottled thunder',w:6,f:'do not shake it. (you shook it.)'},
+{n:'moon fragment',w:5,f:'still warm. still judging.'},
+{n:'the concept of tuesday',w:4,f:'slippery. hard to hold. smells like meetings.'},
+{n:'one (1) exit, preheated',w:2,f:'THE BIG ONE. frame it. do NOT cook it again.'}
+];
+var fishState=null;
+function fishRarity(n){try{var c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');return c[n]||0}catch(e){return 0}}
+function fishAdd(n){try{var c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');c[n]=(c[n]||0)+1;localStorage.setItem('cube_fishbox',JSON.stringify(c))}catch(e){}}
+voidScriptLang['fish']={help:'fish - cast into nothing',fn:function(){
+if(fishState){cubePrint('line already out. (patience.)');return true}
+fishState={phase:'wait'};
+var wait=4000+Math.random()*5000;
+cubePrint('cast. the line sinks into nothing. wait for it...');
+fishState.timer=setTimeout(function(){
+if(!fishState)return;
+fishState.phase='bite';
+cubePrint('BITE! type "hook" - NOW!');
+fishState.timer=setTimeout(function(){
+if(!fishState)return;
+fishState=null;
+cubePrint('...gone. it took the bait. it took the concept of bait.');
+},3000);
+},wait);
+return true}};
+voidScriptLang['hook']={help:'hook - yank it',fn:function(){
+if(!fishState||fishState.phase!=='bite'){cubePrint('nothing biting. (the void judges your timing.)');return true}
+try{clearTimeout(fishState.timer)}catch(e){}
+fishState=null;
+var tot=0;for(var i=0;i<FISH_TABLE.length;i++)tot+=FISH_TABLE[i].w;
+var roll=Math.random()*tot,acc=0,pick=FISH_TABLE[0];
+for(var j=0;j<FISH_TABLE.length;j++){acc+=FISH_TABLE[j].w;if(roll<=acc){pick=FISH_TABLE[j];break}}
+fishAdd(pick.n);
+var _wt=Math.round((0.1+Math.random()*9.9)*10)/10;
+cubePrint('caught: '+pick.n+' ('+_wt+'kg). '+pick.f);
+try{
+var _best=parseFloat(localStorage.getItem('cube_fishbest')||'0')||0;
+if(_wt>_best){localStorage.setItem('cube_fishbest',String(_wt));cubePrint('personal best. the board hears about this.');bnPost('/board',{board:'fish_big',name:bnName(),value:_wt},function(){})}
+}catch(e){}
+try{
+if(typeof ach==='function'){
+var c=0;try{var box=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');for(var k in box)c++}catch(e){}
+if(c>=1)ach('gone_fishing');
+if(pick.n==='one (1) exit, preheated')ach('the_big_one');
+if(c>=FISH_TABLE.length)ach('full_box');
+}
+}catch(e){}
+return true}};
+var BN_DEFAULT='https://bottleneck.cnnecare.workers.dev';
+function bnLive(){try{var h=String(location.hostname||'').toLowerCase();var p=String(location.port||'');if((h==='localhost'||h==='127.0.0.1')&&p==='8080')return true}catch(e){}return false}
+function bnURL(){try{var s=localStorage.getItem('cube_bn_url');if(s)return s==='off'?'':s}catch(e){}return BN_DEFAULT}
+function bnPost(path,body,cb){
+try{
+if(!bnLive())return false;
+var u=bnURL();if(!u)return false;
+var ctl=null;try{ctl=new AbortController();setTimeout(function(){try{ctl.abort()}catch(e){}},6000)}catch(e){}
+fetch(u+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){if(cb)cb(j)}).catch(function(){if(cb)cb(null)});
+return true;
+}catch(e){return false}
+}
+function bnGet(path,cb){
+try{
+if(!bnLive())return false;
+var u=bnURL();if(!u)return false;
+var ctl=null;try{ctl=new AbortController();setTimeout(function(){try{ctl.abort()}catch(e){}},6000)}catch(e){}
+fetch(u+path,{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){if(cb)cb(j)}).catch(function(){if(cb)cb(null)});
+return true;
+}catch(e){return false}
+}
+function bnName(){try{var t=titleWorn();if(t)return t}catch(e){}return 'intruder'}
+voidScriptLang['bottlenet']={help:'bottlenet [url|off] - link the shared void',fn:function(a){
+var u=String((a&&a[0])||'').replace(/^["']+|["']+$/g,'').trim();
+if(!u){var cur=bnURL();cubePrint(cur?('linked: '+cur):'unlinked. the void is a singleplayer experience now. (bottlenet <url> to re-link)');return true}
+if(u==='off'){try{localStorage.setItem('cube_bn_url','off')}catch(e){}cubePrint('unlinked. bottles now float alone.');return true}
+if(u==='default'){try{localStorage.removeItem('cube_bn_url')}catch(e){}cubePrint('linked: '+BN_DEFAULT);return true}
+if(u.indexOf('https://')!==0){cubeError('https only. the void has standards. (low ones, but they exist.)');return true}
+u=u.replace(/\/+$/,'');
+try{localStorage.setItem('cube_bn_url',u)}catch(e){}
+cubePrint('linked. be nice. everything is moderated.');
+return true}};
+voidScriptLang['board']={help:'board [name] - read the leaders',fn:function(a){
+if(!bnLive()){cubePrint('multiplayer sleeps until release. (the bottles dream of the sea.)');return true}
+var b=String((a&&a[0])||'elegant_ms');
+if(['elegant_ms','brute_ms','fish_big','stars'].indexOf(b)===-1){cubeError('boards: elegant_ms | brute_ms | fish_big | stars');return true}
+if(!bnGet('/board?name='+b,function(j){
+if(!j||!j.top){cubePrint('the board is unreachable. (solo board: you. rank 1.)');return}
+if(!j.top.length){cubePrint(b+': empty. history starts with you.');return}
+for(var i=0;i<j.top.length;i++)cubePrint('  '+(i+1)+'. '+j.top[i].name+' - '+j.top[i].value);
+})){cubePrint('not linked. (bottlenet <worker-url>)')}
+return true}};
+voidScriptLang['bottle']={help:'bottle <text> - throw a message in',fn:function(a){
+if(!bnLive()){cubePrint('multiplayer sleeps until release. (the bottles dream of the sea.)');return true}
+var t=(a||[]).join(' ');
+if(!t){cubeError('bottle <text>. (140 chars of longing.)');return true}
+var z='void';try{if(typeof currentZone!=='undefined'&&currentZone)z=currentZone}catch(e){}
+if(!bnPost('/wall',{kind:'bottle',zone:z,text:t},function(j){if(j&&j.ok)cubePrint('thrown. moderators godspeed.');else cubePrint('lost at sea. (the void offline?)')}) )cubePrint('unlinked. (bottlenet <url> to re-link)');
+return true}};
+voidScriptLang['bottleimg']={help:'bottleimg <url> - throw a picture in',fn:function(a){
+if(!bnLive()){cubePrint('multiplayer sleeps until release. (the bottles dream of the sea.)');return true}
+var u=String((a&&a[0])||'');
+if(!/^https:\/\/.+\.(png|jpg|jpeg|gif|webp)(\?.*)?$/i.test(u)){cubeError('https image url only. (png/jpg/gif/webp.)');return true}
+var z='void';try{if(typeof currentZone!=='undefined'&&currentZone)z=currentZone}catch(e){}
+if(!bnPost('/wall',{kind:'bottle-img',zone:z,text:'a picture',url:u},function(j){if(j&&j.ok)cubePrint('thrown. moderators godspeed.');else cubePrint('lost at sea. (the void offline?)')}) )cubePrint('unlinked. (bottlenet <url> to re-link)');
+return true}};
+voidScriptLang['bottles']={help:'bottles - read what washed up',fn:function(){
+if(!bnLive()){cubePrint('multiplayer sleeps until release. (the bottles dream of the sea.)');return true}
+var z='void';try{if(typeof currentZone!=='undefined'&&currentZone)z=currentZone}catch(e){}
+if(!bnGet('/wall?zone='+z+'&kind=bottle',function(j){
+if(!j||!j.items){cubePrint('the shore is silent. (offline?)');return}
+if(!j.items.length){cubePrint('nothing washed up in '+z+'. yet.');return}
+for(var i=0;i<j.items.length;i++)cubePrint('  ~ '+j.items[i].text);
+bnGet('/wall?zone='+z+'&kind=bottle-img',function(k){
+if(k&&k.items)for(var m=0;m<k.items.length;m++){cubePrint('  ~ [pic] '+k.items[m].text);try{termPrintHTML('<img src="'+k.items[m].url+'" style="max-width:280px;border-radius:6px">')}catch(e){}}
+});
+})){cubePrint('not linked. (bottlenet <worker-url>)')}
+return true}};
+voidScriptLang['tacklebox']={help:'tacklebox - admire the catch',fn:function(){
+var c={};try{c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}')}catch(e){}
+var keys=Object.keys(c);
+if(!keys.length){cubePrint('tacklebox: empty. the void provides. (eventually.)');return true}
+for(var i=0;i<keys.length;i++)cubePrint('  '+keys[i]+' x'+c[keys[i]]);
+return true}};
+voidScriptLang['title']={help:'title - wear an achievement title',fn:function(a){
+var want=String((a&&a[0])||'').toLowerCase();
+if(!want){var un=[];for(var t in TITLE_MAP){if(titleUnlocked(t))un.push(t)}cubePrint('titles: '+un.join(', ')+'. (title <name> to wear.)');return true}
+if(!TITLE_MAP.hasOwnProperty(want)){cubeError('no such title. (title with no args lists yours.)');return true}
+if(!titleUnlocked(want)){cubeError('locked. earn it first.');return true}
+try{localStorage.setItem('cube_title',want)}catch(e){}
+cubePrint('title worn: ['+want+']. looking sharp. (objectively.)');
+return true}};
+voidScriptLang['pet']={help:'pet - pet the cube',fn:function(){
+var n=0;try{n=parseInt(localStorage.getItem('cube_pets')||'0',10)||0;n++;localStorage.setItem('cube_pets',String(n))}catch(e){}
+var lines=['...purring detected. disgusting. (do not stop.)','the cube leans into it. the cube has no lean. it leans.','static rises 4 percent. scientists are baffled. (there are no scientists.)','core: noted. the cube likes you. do not let it go to your head.'];
+cubePrint(lines[(n-1)%lines.length]+(n>=100?' (100. soft hands.)':' ('+n+'/100)'));
+if(n>=100){try{if(typeof ach==='function')ach('pet100')}catch(e){}}
+return true}};
+voidScriptLang['forecast']={help:'forecast - tomorrow weather, plus bribes',fn:function(a){
+function wtype(dt){
+try{
+var s=currentDayData.seasonIdx;
+var seed=dt.getFullYear()*10000+(dt.getMonth()+1)*100+dt.getDate();
+var r=(Math.imul(seed,2654435761)>>>0)/4294967296;
+if(s===0)return r<0.55?'snow':(r<0.8?'off':'rain');
+if(s===1)return r<0.4?'rain':(r<0.75?'off':'snow');
+if(s===2)return r<0.8?'off':'rain';
+return r<0.45?'rain':(r<0.85?'off':'snow');
+}catch(e){return 'rain'}
+}
+var tm=new Date();tm.setDate(tm.getDate()+1);
+cubePrint('meteo: tomorrow: '+wtype(tm)+'. (the meteorologist accepts no responsibility.)');
+var want=String((a&&a[0])||'').toLowerCase();
+if(want==='buy'){
+var w2=String((a&&a[1])||'').toLowerCase();
+if(w2!=='rain'&&w2!=='snow'&&w2!=='off'){cubeError('meteo: buy rain, snow, or off. 50 skill. no refunds.');return true}
+var bal=0;try{bal=skillState.points||0}catch(e){}
+if(bal<50){cubeError('meteo: 50 skill. you have '+bal+'. the sky is priceless. (it is 50.)');return true}
+try{skillState.points-=50;skillSave()}catch(e){}
+initWeather(w2);weatherManual=true;
+cubePrint('meteo: sold. '+w2+', no refunds. (there are no refunds.)');
+return true}
+cubePrint('meteo: want it different? "forecast buy <rain|snow|off>" - 50 skill.');
+return true}};
 voidScriptLang['stargaze']={help:'stargaze - chart the bright stars',fn:function(){try{var n=starZoneCount();cubePrint(n>0?('look up. pan the camera. click the bright stars. '+currentZone+': '+starCharted.length+'/'+n+' charted'):('no stars here. (travel somewhere with a sky.)'))}catch(e){}return true}};
 var starGridBuf=null;
 function drawDarkStars(proj,view){
@@ -2206,14 +2385,18 @@ starGridBuf=upBuf(GB);
 vdAttribs(starGridBuf);gl.drawArrays(gl.LINES,0,44);
 }
 if(!starBuf)starBuild();
-if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,starZoneCount())}
+var _geoBlend2=false;
+try{if(currentZone==='geometry'){_geoBlend2=true;gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA)}}catch(e){}
+if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,(typeof starDrawN==='number'&&starDrawN>0)?starDrawN:starZoneCount())}
 if(starLineBuf&&starLineN>1){vdAttribs(starLineBuf);gl.drawArrays(gl.LINES,0,starLineN)}
+try{if(_geoBlend2)gl.blendFunc(gl.SRC_ALPHA,gl.ONE)}catch(e){}
 gl.depthMask(true);gl.disable(gl.BLEND);
 }catch(e){}
 }
-var STAR_ZONES={void:{n:12,seed:0,fix:[3,19,37,53,71,89,107,129,151,167,183,197]},cb_menu:{n:16,seed:1},farlands:{n:20,seed:2},geometry:{n:24,seed:3},breakdown:{n:32,seed:4},fringenlands:{n:48,seed:5},end:{n:64,seed:6},x:{n:92,seed:7}};
+var STAR_ZONES={void:{n:12,seed:0,fix:[3,19,37,53,71,89,107,129,151,167,183,197]},cb_menu:{n:16,seed:14},farlands:{n:20,seed:20},geometry:{n:24,seed:3},breakdown:{n:32,seed:4},fringenlands:{n:48,seed:51},end:{n:64,seed:61},x:{n:92,seed:71}};
 var STAR3D=[3,19,37,53,71,89,107,129,151,167,183,197];
 var starCharted=[];
+var starDrawN=0;
 var starCharts={};
 try{starCharts=JSON.parse(localStorage.getItem('cube_starcharts')||'{}')}catch(e){starCharts={}}
 try{if(localStorage.getItem('cube_stargazer')==='1'&&!starCharts.void){starCharts.void=[0,1,2,3,4,5,6,7,8,9,10,11];try{localStorage.setItem('cube_starcharts',JSON.stringify(starCharts))}catch(e){}}}catch(e){}
@@ -2226,23 +2409,39 @@ function starZoneTint(){try{if(currentZone==='x')return [1,0.32,0.32];if(current
 var starBuf=null,starLineBuf=null,starLineN=0;
 function starFrac(v){return v-Math.floor(v)}
 function starPos3(i){
-var seed=0;try{var z=starZone();seed=z?z.seed:0;if(z&&z.fix)i=z.fix[i]}catch(e){}
-var s=i+seed*1000;
+var seed=0,fix=null;try{var z=starZone();seed=z?z.seed:0;if(z&&z.fix)fix=z.fix}catch(e){}
+if(fix){var s=fix[i];return starBoxPos(s)}
+return starSpherePos(i+seed*1000);
+}
+function starBoxPos(s){
 var q1=starFrac(Math.sin(s*12.9898)*43758.5453);
 var q2=starFrac(Math.sin(s*78.233)*12578.1459);
 var q3=starFrac(Math.sin(s*39.425)*65428.3912);
 return [(q1-0.5)*46,(q2-0.5)*30,-16-q3*14];
 }
+function starSpherePos(s){
+var q1=starFrac(Math.sin(s*12.9898)*43758.5453);
+var q2=starFrac(Math.sin(s*78.233)*12578.1459);
+var q3=starFrac(Math.sin(s*39.425)*65428.3912);
+var a=q1*Math.PI*2,cb=2*q2-1,sb=Math.sqrt(Math.max(0,1-cb*cb)),r=20+q3*12;
+return [r*sb*Math.cos(a),r*cb*0.8,r*sb*Math.sin(a)];
+}
 function starBuild(){
 try{
 var n=starZoneCount();if(n<1){starBuf=null;return}
 var tint=starZoneTint();
-var B=new Float32Array(n*8);
+var decoys=0;try{if(currentZone==='end'||currentZone==='x')decoys=n}catch(e){}
+var B=new Float32Array((n+decoys)*8);
 for(var k=0;k<n;k++){var p=starPos3(k);var o=k*8;var done=starCharted.indexOf(k)!==-1;
 B[o]=p[0];B[o+1]=p[1];B[o+2]=p[2];B[o+3]=done?0.055:0.032;
 if(done){B[o+4]=1;B[o+5]=0.85;B[o+6]=0.25;B[o+7]=1}
 else{B[o+4]=tint[0];B[o+5]=tint[1];B[o+6]=tint[2];B[o+7]=0.85}}
+for(var dk=0;dk<decoys;dk++){var seed=0;try{var zz=starZone();seed=zz?zz.seed:0}catch(e){}var dp=starSpherePos(100000+dk+seed*7777);
+var do2=(n+dk)*8;
+B[do2]=dp[0];B[do2+1]=dp[1];B[do2+2]=dp[2];B[do2+3]=0.032;
+B[do2+4]=tint[0];B[do2+5]=tint[1];B[do2+6]=tint[2];B[do2+7]=0.85}
 starBuf=upBuf(B);
+try{starDrawN=n+decoys}catch(e){}
 starLinesBuild();
 }catch(e){}
 }
@@ -2313,6 +2512,7 @@ if(allok&&typeof ach==='function')ach('cartographer');
 }catch(err){}
 }catch(err){}
 try{cubePrint('all '+starZoneCount()+' charted. the sky remembers you.')}catch(err){}
+try{var _st=0;for(var _zk in starCharts){try{_st+=starCharts[_zk].length}catch(err){}}bnPost('/board',{board:'stars',name:bnName(),value:_st},function(){})}catch(err){}
 }
 }catch(e){}
 }
@@ -9757,7 +9957,7 @@ if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
 ngChDone=true;
 try{localStorage.setItem('cube_act3','1')}catch(e){}
 try{if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act3_hard','1')}}catch(e){}
-try{var _rv='0';try{_rv=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv==='1'){var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms))}if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1')}if(ngMistN()<=3&&typeof ngHard!=='undefined'&&ngHard){var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=300000){localStorage.setItem('cube_brute','1')}}}else{try{localStorage.removeItem('cube_run_ms')}catch(e){}}}catch(e){}
+try{var _rv='0';try{_rv=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv==='1'){var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms));try{bnPost('/board',{board:'elegant_ms',name:bnName(),value:_rms},function(){})}catch(e){}}if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1')}if(ngMistN()<=3&&typeof ngHard!=='undefined'&&ngHard){var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=300000){localStorage.setItem('cube_brute','1');try{bnPost('/board',{board:'brute_ms',name:bnName(),value:_rmsB},function(){})}catch(e){}}}}else{try{localStorage.removeItem('cube_run_ms')}catch(e){}}}catch(e){}
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 try{if(typeof achScan==='function')achScan()}catch(e){}
 try{ngUnlock(100)}catch(e){}
