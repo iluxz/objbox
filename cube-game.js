@@ -1031,8 +1031,9 @@ oMod[0]*=_breathe;oMod[5]*=_breathe;oMod[10]*=_breathe;
 oMod[12]+=(Math.random()-0.5)*wedBeat*0.3;
 oMod[13]+=(Math.random()-0.5)*wedBeat*0.3;
 }else if(!_mon){
-var _np=1.0+(audioPulse-1.0)*1.6;
+var _np=1.0+(audioPulse-1.0)*2.2;
 oMod[0]*=_np;oMod[5]*=_np;oMod[10]*=_np;
+if(audioLevel>0.02){var _jit=audioLevel*0.014;rX+=(Math.random()-0.5)*_jit;rY+=(Math.random()-0.5)*_jit}
 }
 if(zr.cubeJitter){
 var jt=zr.cubeJitter;
