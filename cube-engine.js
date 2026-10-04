@@ -307,7 +307,7 @@ audioAnalyser.connect(audioCtx.destination);
 audioData=new Uint8Array(audioAnalyser.frequencyBinCount);
 }catch(e){}}
 document.addEventListener('click',function(){if(!audioCtx)initAudio();else if(audioCtx.state==='suspended')audioCtx.resume().catch(function(){})});
-function getAudioLevel(){if(!audioAnalyser)return 0;audioAnalyser.getByteFrequencyData(audioData);var sum=0;for(var i=0;i<64;i++)sum+=audioData[i];return sum/64/255}
+function getAudioLevel(){if(!audioAnalyser)return 0;audioAnalyser.getByteFrequencyData(audioData);var b=0,m=0,h=0;for(var i=0;i<10;i++)b+=audioData[i];for(var j=10;j<40;j++)m+=audioData[j];for(var k=40;k<64;k++)h+=audioData[k];b/=10*255;m/=30*255;h/=24*255;var lv=b*0.6+m*0.3+h*0.1;return Math.min(1,Math.max(0,lv))}
 function getAudioBands(){
 if(!audioAnalyser)return{bass:0,mid:0,high:0};
 audioAnalyser.getByteFrequencyData(audioData);
@@ -332,11 +332,11 @@ loadDayBgm();if(!bgm.paused||track==='auto')bgm.play().catch(function(){});
 }
 }
 var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4',noli:'noli.webm',quiet:'lordverity.webm',verity:'lordverity.webm',vestige:'vestige.mp3',coffee:'coffee.mp3',swim:'artisticswimming.webm',artistic:'artisticswimming.webm'};
-var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee','artisticswimming.webm':'artistic swimming'};
+var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee corner (napcast)','artisticswimming.webm':'artistic swimming'};
 function bgmDownfallUnlocked(){try{return localStorage.getItem('cube_downfall_unlocked')==='1'}catch(e){return false}}
 function showBgmHelp(){
 cubePrint('bgm [track] — play a track, no arg toggles music on/off. bgm -h = this list.');
-var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['noli','noli'],['quiet | verity','i miss the quiet (lordverity cover)'],['vestige','vestige'],['coffee','coffee'],['swim | artistic','artistic swimming'],['off','silence']];
+var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['noli','noli'],['quiet | verity','i miss the quiet (lordverity cover)'],['vestige','vestige'],['coffee','coffee corner (napcast)'],['swim | artistic','artistic swimming'],['off','silence']];
 if(bgmDownfallUnlocked())rows.push(['downfall','science\'s downfall']);
 for(var i=0;i<rows.length;i++)cubePrint('  bgm '+String(rows[i][0]).padEnd(22)+rows[i][1]);
 if(!bgmDownfallUnlocked())cubePrint('  bgm downfall         [LOCKED — leave during the shutdown countdown]');
