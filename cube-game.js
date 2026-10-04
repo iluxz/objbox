@@ -956,7 +956,7 @@ var wedBeat=_party||isMoon?audioLevel:(_peaceful?audioLevel*0.5:0);
 
 // audio visualizer background pulse
 var th=themes[curTheme]||themes['1'];
-var bgPulse=audioLevel*(_party?0.2:0.25);
+var bgPulse=audioLevel*(_party?0.2:0.4);
 var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
 if(_mon){
@@ -1031,11 +1031,10 @@ oMod[0]*=_breathe;oMod[5]*=_breathe;oMod[10]*=_breathe;
 oMod[12]+=(Math.random()-0.5)*wedBeat*0.3;
 oMod[13]+=(Math.random()-0.5)*wedBeat*0.3;
 }else if(!_mon){
-var _np=1.0+(audioPulse-1.0)*2.2;
+var _np=1.0+(audioPulse-1.0)*3.5;
 oMod[0]*=_np;
-oMod[5]*=1.0+(audioPulse-1.0)*1.4;
-oMod[10]*=1.0+(audioPulse-1.0)*2.8;
-if(audioLevel>0.02){var _jit=audioLevel*0.014;rX+=(Math.random()-0.5)*_jit;rY+=(Math.random()-0.5)*_jit}
+oMod[5]*=1.0+(audioPulse-1.0)*2.2;
+oMod[10]*=1.0+(audioPulse-1.0)*4.5;
 }
 if(zr.cubeJitter){
 var jt=zr.cubeJitter;
@@ -1047,7 +1046,7 @@ if(_fire){
 var _fe=(0.5+wedBeat*1.5+Math.sin(t*15)*0.2)*audioPulse;
 gl.uniform1f(uEm,_fe);gl.uniform1f(uAl,.4+wedBeat*0.3);
 }else{
-gl.uniform1f(uEm,_mon?0.02:audioLevel*0.11*wedBoost);gl.uniform1f(uAl,_mon?0.15:(.25+audioLevel*0.09*wedBoost));
+gl.uniform1f(uEm,_mon?0.02:audioLevel*0.18*wedBoost);gl.uniform1f(uAl,_mon?0.15:(.25+audioLevel*0.14*wedBoost));
 }
 gl.uniform1f(uInv,window._premInvert?1:(themes[curTheme]&&themes[curTheme].invert?1:0));
 gl.uniform1f(uFr,(window._skillFresnel||1)+(window._skillFresnelBoost||0));
