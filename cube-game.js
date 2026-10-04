@@ -430,7 +430,7 @@ function(){cubePrint('obj: the cube is not a button. but here we are.');for(var 
 function(){cubePrint('obj: the void is flattered.');document.getElementById('main').style.filter='brightness(1.5)';setTimeout(function(){document.getElementById('main').style.filter=''},200)},
 function(){cubePrint('obj: they saw you click that. (the void. always them.)')},
 function(){cubePrint('obj: the core says hi. she does not say hi. but she did.')},
-function(){cubePrint('obj: click again. i dare you.');curShape=curShape==='cube'?'sphere':curShape==='sphere'?'tetra':curShape==='tetra'?'cyl':'cube';rebuild(curShape)}
+function(){cubePrint('obj: click again. i dare you.');curShape=curShape==='cube'?'sphere':curShape==='sphere'?'tetra':curShape==='tetra'?'cyl':'cube';rebuild(curShape);syncShapePalette()}
 ];
 document.addEventListener('click',function(e){
 if(studioOpen)return;
@@ -557,6 +557,11 @@ pv.btn=btn;
 function octaUnlocked(){return !!(window._skillOcta||isAdmin||(typeof skillHas==='function'&&skillHas('anom3')))}
 function tessUnlocked(){return !!(window._skillTess||isAdmin||(typeof skillHas==='function'&&skillHas('anom5')))}
 function shapeUnlocked(p){if(!p.skill)return true;if(p.skill==='anom3')return octaUnlocked();if(p.skill==='anom5')return tessUnlocked();return false}
+function syncShapePalette(){
+try{
+for(var i=0;i<pvList.length;i++){var p=pvList[i];if(p.btn)p.btn.classList.toggle('active',p.n===curShape)}
+}catch(e){}
+}
 function refreshShapeLocks(){
 for(var i=0;i<pvList.length;i++){
 var p=pvList[i];if(!p.skill||!p.btn)continue;
@@ -1727,6 +1732,7 @@ function hudToggleMin(){hudMin=!hudMin;try{localStorage.setItem('cube_hud_min',h
 function hudEnsure(){
 try{
 var h=document.getElementById('hud');
+try{var _ha=document.querySelectorAll('#hud');for(var _hak=0;_hak<_ha.length;_hak++){if(_ha[_hak]!==h){try{_ha[_hak].parentNode.removeChild(_ha[_hak])}catch(e){}}}}catch(e){}
 if(!h){
 h=document.createElement('div');h.id='hud';hudApplyPos(h);document.body.appendChild(h);
 h.addEventListener('mousedown',function(e){try{if(e.target&&String(e.target.className).indexOf('hudToggle')!==-1)return;var r=h.getBoundingClientRect();hudDrag={dx:e.clientX-r.left,dy:e.clientY-r.top};e.preventDefault()}catch(x){}});
@@ -1788,6 +1794,28 @@ var ACH=[
 {id:'act1_done',n:'the end?',d:'finish act 1.',c:function(){return ngCh()>=11}},
 {id:'act2_walker',n:'still no game',d:'reach chapter 14.',c:function(){return ngCh()>=14}},
 {id:'interloper_met',n:'it knows you',d:'survive the interrogation.',c:function(){return ngCh()>=16}},
+{sec:'ACT 3'},
+{id:'act3_done',n:'still no cube',d:'finish act 3.',c:function(){return ngCh()>=30}},
+{id:'noli_full',n:'O-B-J',d:'obj: thank you for listening to my performance.',c:function(){try{return localStorage.getItem('cube_noli_full')==='1'}catch(e){return false}}},
+{sec:'CUBE SHIFT'},
+{id:'shift_first',n:'clocked in',d:'finish your first shift job.',c:function(){try{return parseInt(localStorage.getItem('cube_shift_ch')||'1',10)>1}catch(e){return false}}},
+{id:'shift_perfect',n:'on the beat',d:'three beats, zero misses.',c:function(){try{return localStorage.getItem('cube_shift_perfect')==='1'}catch(e){return false}}},
+{id:'shift_ghost',n:'not on payroll',d:'find the name that should not be getting paid.',c:function(){try{return localStorage.getItem('cube_shift_ghost')==='1'}catch(e){return false}}},
+{id:'shift_blind',n:'no questions asked',d:'sign the form nothingcore already signed.',c:function(){try{return localStorage.getItem('cube_shift_blind')==='1'}catch(e){return false}}},
+{id:'shift_complaint',n:"you've got mail",d:'settle the voids complaint.',c:function(){try{return localStorage.getItem('cube_shift_complaint')==='1'}catch(e){return false}}},
+{id:'shift_slips10',n:'slip collector',d:'earn 10 pay slips.',c:function(){try{return parseInt(localStorage.getItem('cube_shift_slips')||'0',10)>=10}catch(e){return false}}},
+{id:'shift_slips25',n:'overworked',d:'earn 25 pay slips.',c:function(){try{return parseInt(localStorage.getItem('cube_shift_slips')||'0',10)>=25}catch(e){return false}}},
+{id:'shift_all',n:'employee of the void',d:'finish all twelve shifts.',c:function(){try{return parseInt(localStorage.getItem('cube_shift_ch')||'1',10)>12}catch(e){return false}}},
+{sec:'THE BUTTON'},
+{id:'btn_breach',n:'uncontained',d:'let containment hit 0%. the button is no longer under management.',c:function(){try{return localStorage.getItem('cube_btn_breach')==='1'}catch(e){return false}}},
+{id:'btn_seized',n:'appeal denied',d:'hit 100%. corporate is holding the button.',c:function(){try{return localStorage.getItem('cube_btn_seized')==='1'}catch(e){return false}}},
+{id:'btn_lockdown',n:'full lockdown',d:'corporate reaches level 5. everything is an asset now.',c:function(){try{return localStorage.getItem('cube_btn_lockdown')==='1'}catch(e){return false}}},
+{id:'btn_myth',n:'it happened',d:'witness a rare anomaly. (no hints.)',c:function(){try{return localStorage.getItem('cube_btn_myth')==='1'}catch(e){return false}}},
+{id:'btn_escaped',n:'at large',d:'watch the button escape.',c:function(){try{return localStorage.getItem('cube_btn_escaped')==='1'}catch(e){return false}}},
+{sec:'THE FLY'},
+{id:'fly_open',n:'the fly',d:'open the actual fruit fly brain. (139,255 neurons, fafb v783.)',c:function(){try{return localStorage.getItem('cube_fly_open')==='1'}catch(e){return false}}},
+{id:'fly_fed',n:'sweet on the tarsi',d:'feed the fly sugar and watch what moves.',c:function(){try{return localStorage.getItem('cube_fly_fed')==='1'}catch(e){return false}}},
+{id:'fly_seizure',n:'photosensitive',d:'push the fly past its flashing limit. (stop strobing it.)',c:function(){try{return localStorage.getItem('cube_fly_seizure')==='1'}catch(e){return false}}},
 {sec:'ENDINGS'},
 {id:'mercy',n:'mercy',d:'STOP. (the void pays its debts.)',c:function(){return achFinale()==='mercy'}},
 {id:'brat',n:'brat',d:'KEEP. (hush money.)',c:function(){return achFinale()==='brat'}},
@@ -1829,7 +1857,7 @@ var ACH=[
 {id:'elegant',n:'elegant',d:'beat the whole non-game with zero mistakes. (every buzz counts.)',c:function(){try{return localStorage.getItem('cube_elegant')==='1'}catch(e){return false}}},
 {id:'trivial',n:'trivial',d:'elegant, but on hard mode. (sure. trivial.)',c:function(){try{return localStorage.getItem('cube_elegant_hard')==='1'}catch(e){return false}}},
 {id:'brute',n:'brute',d:'the whole non-game. 3 mistakes or fewer. under 5 minutes. hard mode. you CAN use speedrun mode. (good luck.)',c:function(){try{return localStorage.getItem('cube_brute')==='1'}catch(e){return false}}},
-{id:'robbery',n:'professional robbery',d:'beat the non-game in under 90 minutes.',c:function(){try{if(!ngAct2Done())return false;var m=parseInt(localStorage.getItem('cube_run_ms')||'0',10);return m>0&&m<=5400000}catch(e){return false}}},
+{id:'robbery',n:'professional robbery',d:'beat the non-game in under 90 minutes.',c:function(){try{if(!ngAct3Done())return false;var m=parseInt(localStorage.getItem('cube_run_ms')||'0',10);return m>0&&m<=5400000}catch(e){return false}}},
 {id:'nevermind',n:'running slower... nevermind',d:'disable JEDEC timing control. everything runs 1.25x now. stability not guaranteed.',c:function(){try{return localStorage.getItem('cube_jedec')==='0'}catch(e){return false}}},
 {id:'netrun',n:'running from the internet',d:'finish the mailroom shutdown with 2+ minutes left.',c:function(){try{return localStorage.getItem('cube_outrun')==='1'}catch(e){return false}}},
 {id:'fiddlesticks',n:'fiddlesticks',d:'nudge the chapter 11 dial 100 times. (fidget.)',c:function(){try{return (parseInt(localStorage.getItem('cube_tune_nudges')||'0',10)||0)>=100}catch(e){return false}}},
@@ -1856,6 +1884,7 @@ var ACH=[
 ];
 function ngCh(){try{return ngLoad().ch||0}catch(e){return 0}}
 function ngAct2Done(){try{return localStorage.getItem('cube_act2')==='1'}catch(e){return false}}
+function ngAct3Done(){try{return localStorage.getItem('cube_act3')==='1'}catch(e){return false}}
 function achP18(){try{var s=ngLoad();return (s.p18&&typeof s.p18==='object')?s.p18:null}catch(e){return null}}
 function achP19(){try{var s=ngLoad();return (s.p19&&typeof s.p19==='object')?s.p19:null}catch(e){return null}}
 function achKV(k){try{return localStorage.getItem(k)}catch(e){return null}}
@@ -1863,7 +1892,7 @@ function achFinale(){try{return localStorage.getItem('cube_finale')||''}catch(e)
 function achPkgs(){try{var v=JSON.parse(localStorage.getItem('cube_pkgs')||'[]');var out=[];for(var i=0;i<v.length;i++)if(v[i]!=='void-core')out.push(v[i]);return out}catch(e){return[]}}
 function achSet(){try{var v=JSON.parse(localStorage.getItem('cube_ach')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achSave(s){try{localStorage.setItem('cube_ach',JSON.stringify(s))}catch(e){}}
-var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15}};
+var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15}};
 function achPaid(){try{var v=JSON.parse(localStorage.getItem('cube_ach_paid')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achPaidSave(s){try{localStorage.setItem('cube_ach_paid',JSON.stringify(s))}catch(e){}}
 function achRwOf(id){try{if(typeof achRW!=='undefined'&&achRW[id])return achRW[id]}catch(e){}return{s:5}}
@@ -2181,7 +2210,7 @@ if(window._skillOcta||isAdmin)keys.push('octa');
 if(typeof tessUnlocked==='function'&&tessUnlocked())keys.push('tesseract');
 var i=0;
 var iv=setInterval(function(){
-curShape=keys[i%keys.length];rebuild(curShape);i++;
+curShape=keys[i%keys.length];rebuild(curShape);try{syncShapePalette()}catch(e){}i++;
 if(i>=keys.length*2){clearInterval(iv);cubePrint('morphall: done')}
 },150);
 return true}};
@@ -4812,6 +4841,12 @@ try{var cb=document.getElementById('ngCore');if(cb)cb.style.display='block'}catc
 ngSayQueue.push({text:String(text),fast:fast||ngVoiceSpeed(),el:'ngCoreText',voice:voice||null});
 if(!ngSayTyping)ngSayNext();
 }
+function ngLandlord(text,fast,voice){
+if(ngSprintOn())return;
+try{var lb=document.getElementById('ngLandlord');if(lb)lb.style.display='block'}catch(e){}
+ngSayQueue.push({text:String(text),fast:fast||ngVoiceSpeed(),el:'ngLandlordText',voice:voice||null});
+if(!ngSayTyping)ngSayNext();
+}
 function ngSayNext(){
 if(ngSayTyping)return;
 try{ngVoiceStop()}catch(e){}
@@ -5046,7 +5081,7 @@ st2.appendChild(b2);b2.onclick=function(){ngEatMe(b2)};
 ngSay(cfg.respawn,null,ngVoiceCh0Respawn[s]);
 },900);
 }
-var ngMaxChapter=20;
+var ngMaxChapter=30;
 var ngCurCh=0;
 var ngTutStep=0;
 var ngHard=false;
@@ -5060,6 +5095,10 @@ var ngCoreOpened={};
 var ngCorePokes=0;
 var ngChDone=false;
 function ngShowChapter(n){
+try{if(typeof ngNoliAudio!=='undefined'&&ngNoliAudio){ngNoliAudio.pause();ngNoliAudio=null}}catch(e){}
+try{ngNoliOver=true}catch(e){}
+try{if(typeof noliStop==='function')noliStop()}catch(e){}
+try{if(typeof noliGray==='function')noliGray(false)}catch(e){}
 ngDead=0;ngDeadIds={};ngHintBudget={};ngChDone=false;ngDecoys=0;
 if(ngSayTimer){try{clearInterval(ngSayTimer)}catch(e){}ngSayTimer=null}
 ngSayQueue=[];ngSayTyping=false;ngCurrentJob=null;
@@ -5085,10 +5124,10 @@ if(typeof ngEchoTimerIv!=='undefined'&&ngEchoTimerIv){try{clearInterval(ngEchoTi
 if(typeof ngKnockStopAll==='function')try{ngKnockStopAll()}catch(e){}
 if(typeof ngMornStopAll==='function')try{ngMornStopAll()}catch(e){}
 var st=document.getElementById('ngStage');if(!st)return;st.innerHTML='';st.className='';
-var c=(n===21)?21:Math.min(n,ngMaxChapter);
+var c=(n===100)?100:Math.min(n,ngMaxChapter);
 ngCurCh=c;
 try{ngSfx('door')}catch(e){}
-if(c===-1)ngChapterM1(st);else if(c===21)ngChapterDream(st);else if(c>=20)ngChapter20(st);else if(c>=19)ngChapter19(st);else if(c>=18)ngChapter18(st);else if(c>=17)ngChapter17(st);else if(c>=16)ngChapter16(st);else if(c>=15)ngChapter15(st);else if(c>=14)ngChapter14(st);else if(c>=13)ngChapter13(st);else if(c>=12)ngChapter12(st);else if(c>=11)ngChapter11(st);else if(c>=10)ngChapter10(st);else if(c>=9)ngChapter9(st);else if(c>=8)ngChapter8(st);else if(c>=7)ngChapter7(st);else if(c>=6)ngChapter6(st);else if(c>=5)ngChapter5(st);else if(c>=4)ngChapter4(st);else if(c>=3)ngChapter3(st);else if(c>=2)ngChapter2(st);else if(c>=1)ngChapter1(st);else ngChapter0(st);
+if(c===-1)ngChapterM1(st);else if(c===100)ngChapterDream(st);else if(c>=30)ngChapter30(st);else if(c>=29)ngChapter29(st);else if(c>=28)ngChapter28(st);else if(c>=27)ngChapter27(st);else if(c>=26)ngChapter26(st);else if(c>=25)ngChapter25(st);else if(c>=24)ngChapter24(st);else if(c>=23)ngChapter23(st);else if(c>=22)ngChapter22(st);else if(c>=21)ngChapter21(st);else if(c>=20)ngChapter20(st);else if(c>=19)ngChapter19(st);else if(c>=18)ngChapter18(st);else if(c>=17)ngChapter17(st);else if(c>=16)ngChapter16(st);else if(c>=15)ngChapter15(st);else if(c>=14)ngChapter14(st);else if(c>=13)ngChapter13(st);else if(c>=12)ngChapter12(st);else if(c>=11)ngChapter11(st);else if(c>=10)ngChapter10(st);else if(c>=9)ngChapter9(st);else if(c>=8)ngChapter8(st);else if(c>=7)ngChapter7(st);else if(c>=6)ngChapter6(st);else if(c>=5)ngChapter5(st);else if(c>=4)ngChapter4(st);else if(c>=3)ngChapter3(st);else if(c>=2)ngChapter2(st);else if(c>=1)ngChapter1(st);else ngChapter0(st);
 if(n>=1&&n<20&&!window._ngReplayCmt){try{var rsv=ngLoad();if((rsv.ch||0)>n&&ngAct2Done()){window._ngReplayCmt=1;var rl=['back here again? nostalgia is a form of filing.','replaying old rooms. the void is taking notes.','you know this part. so do i. better.'];setTimeout(function(){try{if(ngActive&&!ngChDone&&!ngTalking())ngSay(rl[Math.floor(Math.random()*rl.length)])}catch(e){}},3500)}}catch(e){}}
 }
 var ngBoredIv=null,ngNoticed=false,ngCrimes=0;
@@ -8254,7 +8293,6 @@ if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
 ngChDone=true;
 try{localStorage.setItem('cube_act2','1')}catch(e){}
 try{if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act2_hard','1')}}catch(e){}
-try{var _rv='0';try{_rv=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv==='1'){var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms))}if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1')}if(ngMistN()<=3&&typeof ngHard!=='undefined'&&ngHard){var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=300000){localStorage.setItem('cube_brute','1')}}if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act2_hard','1')}}else{try{localStorage.removeItem('cube_run_ms')}catch(e){}}}catch(e){}
 try{if(typeof achScan==='function')achScan()}catch(e){}
 try{ngUnlock(21)}catch(e){}
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
@@ -8307,19 +8345,1300 @@ ngSay('...ugh. FINE. classroom. sit down. do not touch the desks.');
 ngAfterSpeech(function(){if(ngActive)ngShowChapter(2)},800);
 };
 }
+// ACT 3: THERE IS STILL NO CUBE (ch 21-30)
+function ngDim(name,line,bg){
+try{var fl=document.createElement('div');fl.id='ngFlash';document.body.appendChild(fl);void fl.offsetWidth;fl.classList.add('go');setTimeout(function(){if(fl.parentNode)fl.parentNode.removeChild(fl)},700)}catch(e){}
+try{var st=document.getElementById('ngStage');if(st){st.className='';if(name)st.className='dim-'+name;try{st.style.background=bg||''}catch(e){}}}catch(e){}
+if(line)ngSay(line);
+}
+function ngSayWho(w,t){if(w==='jbo')ngShout(t);else if(w==='land')ngLandlord(t);else if(w==='core')ngCore(t);else ngSay(t)}
+function ngShush(w){
+try{
+var id=w==='jbo'?'ngJbo':w==='core'?'ngCore':w==='land'?'ngLandlord':'ngObj';
+var el=document.getElementById(id);if(el)el.style.display='none';
+}catch(e){}
+}
+function ngSaySeq(lines,done){
+var i=0;
+function playOne(){
+if(lines[i][0]==='hide')ngShush(lines[i][1]);
+else ngSayWho(lines[i][0],lines[i][1]);
+i++;
+}
+function step(){
+if(!ngActive)return;
+if(i>=lines.length){if(done)ngAfterSpeech(done,400);return}
+playOne();
+if(i<lines.length)playOne();
+ngAfterSpeech(step,400);
+}
+step();
+}
+var ngQuiz21=[
+{pre:[['land','question 1. chapter 3. the curtain.'],['obj','i remember this. i have chosen to remember this.']],q:'what was behind the curtain?',opts:['the core','a tutorial','the exit'],a:0,why:'correct. it was MY core. it is always the core.'},
+{pre:[['land','question 2. chapter 6. the genre incident.'],['jbo','I REMEMBER TURRETS. TURRETS REMEMBER ME.']],q:'what genre got smuggled in?',opts:['tower defense','dating sim','cooking show'],a:0,why:'correct. turrets. waves. you defended the base.'},
+{pre:[['land','question 3. the rift. count the chores.'],['obj','count carefully. the rift counts back.']],q:'how many chores did it demand?',opts:['4','2','7'],a:0,why:'correct. four. the rift union mandates four.'},
+{pre:[['land','question 4. the credits. twice.'],['jbo','I TOUCHED NOTHING. MY HANDS WERE UP.']],q:'what were you forbidden to touch?',opts:['the credits','the core','the landlord'],a:0,why:'correct. the credits. FINAL. (you touched.)'},
+{pre:[['land','final question. the signal. how many rounds.'],['obj','listen. it is still counting. it never stopped. (it stopped.)']],q:'the signal demanded how many rounds?',opts:['4','3','10'],a:0,why:'correct. four rounds. like all of us.'},
+{hard:true,pre:[['land','HARD MODE bonus. chapter 0. the beginning.'],['jbo','I WAS NOT THERE. I ARRIVED LATER. COOLER.']],q:'what was chapter 0?',opts:['a tutorial','a wedding','a blackout'],a:0,why:'correct. a tutorial. discontinued. like all tutorials.'},
+{hard:true,pre:[['land','HARD MODE bonus. before the beginning.'],['obj','do not think about it too hard. it thinks back.']],q:'what chapter comes before chapter 0?',opts:['-1','chapter 20','the landlord'],a:0,why:'correct. minus one. the chapter that knocks.'}
+];var ngQuiz21Active=[];
+var ngQuiz21Idx=0;
+var ngQuiz21WrongI=0;
+var ngQuiz21Rants=[
+[['obj','WRONG.'],['jbo','DUN DUN.'],['obj','the correct answer was load-bearing. try again.']],
+[['obj','wrong. the studio audience groans. (there is no audience. that was ME. i groaned.)'],['jbo','DUN DUN DUN. (EXTRA DUN. FOR SHAME.)']],
+[['land','incorrect. that wrong answer has been ADDED TO YOUR BILL.'],['obj','everything is added to the bill. the bill is just... life. try again.']]
+];
+function ngChapter21(st){
+ngQuiz21Idx=0;
+try{ngQuiz21Active=ngQuiz21.filter(function(q){return !q.hard||ngHard})}catch(e){ngQuiz21Active=ngQuiz21}
+for(var i=0;i<ngQuiz21Active.length;i++)ngQuiz21Active[i]._pre=false;
+ngDim('soap','previously on... the non-game.','linear-gradient(180deg,#160a0c,#050507)');
+ngSaySeq([
+['obj','previously on... the non-game.'],
+['jbo','DUN DUN.'],
+['obj','we open on our heroes. broke. tired. renewed against their will.'],
+['jbo','WHERE IS CORE. I NEED SOMEONE TO EXPLAIN THINGS TO.'],
+['obj','core is buffering. she will be back. she is always buffering.'],
+['land','KNOCK KNOCK. i am the landlord. i own this dimension and the twelve next to it.'],
+['obj','...the property manager found us.'],
+['land','act 3 is GREENLIT and greenlights are NOT free. rent: due. compliance: mandatory.'],
+['obj','how much rent. give us a number. we love numbers. (stalling.)'],
+['land','the number is: PER DIMENSION. and the number GROWS. that is how numbers work. they GROW.'],
+['jbo','I COUNTER-OFFER: NOTHING. FINAL OFFER.'],
+['land','...accepted as a DOWN PAYMENT. the remainder is due in QUIZZES.'],
+['obj','you negotiated us INTO a quiz. incredible work, jbo.'],
+['jbo','I AM GREAT AT BUSINESS.'],
+['land','FIVE questions. on YOUR OWN show. i will host. i am a WONDERFUL host.'],
+['jbo','NO. I HOST. I HAVE A MICROPHONE VOICE.'],
+['obj','(he does not have a microphone.)'],
+['land','co-hosts. FINE. this is how daytime television dies.'],
+['jbo','ASK ME. NO. DO NOT ASK ME.']
+],function(){if(ngActive)ngQuiz21Ask()});
+}
+function ngQuiz21Ask(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var q=ngQuiz21Active[ngQuiz21Idx];
+if(!q._pre){q._pre=true;for(var p=0;p<q.pre.length;p++)ngSayWho(q.pre[p][0],q.pre[p][1]);ngAfterSpeech(function(){if(ngActive)ngQuiz21Ask()},600);return}
+var h='<div id="ngSub">THE VOID AND THE RESTLESS - compliance quiz ('+(ngQuiz21Idx+1)+'/'+ngQuiz21Active.length+(ngHard?' - HARD':'')+')</div>';
+h+='<div style="margin:18px 0;font-size:15px;letter-spacing:1px;color:#e8e2d4">'+q.q+'</div><div>';
+for(var i=0;i<q.opts.length;i++){h+='<button class="ngtopt" data-qi="'+i+'" style="margin:4px">'+q.opts[i]+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var pick=parseInt(btn.getAttribute('data-qi'),10);
+if(pick===q.a){ngSay(q.why);ngQuiz21Idx++;ngAfterSpeech(function(){if(!ngActive)return;if(ngQuiz21Idx>=ngQuiz21Active.length)ngChapter21Done();else if(ngQuiz21Idx===3)ngQuiz21Half();else ngQuiz21Ask()},700)}
+else{try{ngSfx('buzz')}catch(e){}var rant=ngQuiz21Rants[ngQuiz21WrongI%ngQuiz21Rants.length];ngQuiz21WrongI++;ngSaySeq(rant,function(){if(ngActive)ngQuiz21Ask()})}
+};
+})(btns[b])}
+}
+function ngQuiz21Half(){
+ngSaySeq([
+['land','HALFTIME. scores: you have some. i have ALL of them.'],
+['jbo','AS CO-HOST I DECLARE A SNACK BREAK. THERE ARE NO SNACKS.'],
+['obj','the snacks were cut for budget. like the roof. like god.'],
+['land','back to the quiz. the quiz waits for no one. the quiz bills OVERTIME.'],
+['jbo','I AM A WONDERFUL CO-HOST. TELL THEM, COMMENTS.']
+],function(){if(ngActive)ngQuiz21Ask()});
+}
+function ngChapter21Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(22)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 22: THE BIG SLEEP (no relation)</div>';
+ngSaySeq([
+['land','STAMP. APPROVED. this dimension: PAID IN FULL. the next one bills double. they always bill double.'],
+['obj',ngQuiz21Active.length+' for '+ngQuiz21Active.length+'. the landlord nods. somewhere, a spreadsheet purrs.'],
+['jbo','NEXT DIMENSION. I CALL DIBS ON THE TRENCHCOAT.'],
+['obj','core gets the minutes later. she hates the minutes.'],
+['jbo','I WAS A WONDERFUL CO-HOST. I AM PUTTING IT ON MY RESUME.'],
+['land','your performance: ADEQUATE. your bill: UPDATED. good evening. (i never leave. i live here now.)'],
+['obj','he lives here now.'],
+['obj','next: everybody gets a trenchcoat. everybody is a suspect. the exit is MISSING.'],
+['obj','chapter 22: the big sleep. no relation. go on.']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(22)},800);
+};
+}
+var ngNoirAsked={};
+var ngNoirSuspects=[
+{id:'bell',name:'THE BELLHOP',q:[
+['obj','state your name and occupation for the record.'],
+['obj','the bellhop polishes his bell. "i saw NOBODY," he says. "the lobby was EMPTY all night. empty like my tip jar."'],
+['core','his bell is polished. suspiciously polished. NOBODY polishes that much without guilt.'],
+['obj','"where were you at midnight," i ask. "polishing," he says. "ELSEWHERE polishing." noted. ELSEWHERE noted.']]},
+{id:'widow',name:'THE WIDOW',q:[
+['obj','the widow window faces the street. she has faced it for years.'],
+['obj','"i face the street every night," she says. "at midnight, the bellhop polished his bell RIGHT IN FRONT OF ME."'],
+['obj','"did you see anything ELSE," i ask. "only the rain," she says. "the rain saw everything. ask the rain."'],
+['core','the rain declines to comment. classic rain.']]},
+{id:'plant',name:'THE POTTED PLANT',q:[
+['obj','the potted plant says nothing. it photosynthesizes.'],
+['core','its alibi is the sun. the sun confirms. i asked.'],
+['obj','i hold up a photo of the exit. the plant does not react. innocent. or... leafy.'],
+['core','i am writing "leafy" in the file. it means nothing. it means everything.']]},
+{id:'lord',name:'THE LANDLORD',q:[
+['land','i was BILLING at midnight. the lobby. the street. the concept of midnight. all billed.'],
+['obj','the ledger backs him up. the ledger is his son AND his alibi.'],
+['land','and my ledger NEVER lies. (it lies CONSTANTLY. but not about THIS.)'],
+['obj','the paperwork is innocent. i hate when the paperwork is innocent. it makes me feel... unneeded.']]}
+];
+function ngChapter22(st){
+ngNoirAsked={};ngNoirExamined={};
+ngDim('noir','the city. it rains. it is always raining.','linear-gradient(180deg,#0a0a0c,#000000)');
+ngSaySeq([
+['obj','the city. it rains. it is always raining. somebody made it rain and never filed the paperwork.'],
+['obj','my name is obj. i am a detective. i detect. tonight the dame walked in. the dame was a CORE.'],
+['core','my exit is missing, detective. it was HERE last night. now it is... elsewhere.'],
+['obj','an exit. missing. in a city with no doors. i took the case. i take every case. i have nothing else going on.'],
+['land','KNOCK KNOCK. detective agency, this dimension bills TRIPLE. noir tax.'],
+['obj','i told him to put it on my tab. my tab is a concept. it cannot be collected.'],
+['core','four suspects, detective. the bellhop. the widow. the plant. ...the landlord.'],
+['obj','first: the scene. three pieces of it. look at everything. touch nothing. (touch a LITTLE.)']
+],function(){if(ngActive)ngNoirScene()});
+}
+var ngNoirExamined={};
+var ngNoirSpots=[
+{id:'outline',name:'THE CHALK OUTLINE',q:[
+['obj','chalk outline. shaped like a DOOR. the exit left... its SHAPE. dramatic. exits love drama.'],
+['core','note: the exit is dramatic. filing under: obvious.']]},
+{id:'pedestal',name:'THE EMPTY PEDESTAL',q:[
+['obj','empty pedestal. sign reads: EXIT (WAS HERE). dust: undisturbed. EXCEPT: bell polish. BELL POLISH, core.'],
+['core','bell polish. i am circling it. twice.']]},
+{id:'rain',name:'THE RAIN',q:[
+['obj','the rain. it has not stopped. i taste it. (forensics.) it tastes like... billing.'],
+['land','the rain is BILLED. every drop. the invoice is my son AND my rain gauge.']]}
+];
+function ngNoirScene(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var keys=['outline','pedestal','rain'];
+var allSeen=true;for(var k=0;k<keys.length;k++){if(!ngNoirExamined[keys[k]])allSeen=false}
+if(allSeen){ngSaySeq([
+['obj','the scene is processed. chalk. dust. rain. the holy trinity of evidence.'],
+['obj','now: the suspects. four of them. one of them lies. (statistics.)']
+],function(){if(ngActive)ngNoirBoard()});return}
+var h='<div id="ngSub">THE BIG SLEEP - examine the scene</div><div>';
+for(var i=0;i<ngNoirSpots.length;i++){var s=ngNoirSpots[i];var done=ngNoirExamined[s.id];h+='<button class="ngtopt" data-sid="'+s.id+'" style="margin:4px;'+(done?'opacity:0.45':'')+'">'+s.name+(done?' (EXAMINED)':'')+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var id=btn.getAttribute('data-sid');
+if(ngNoirExamined[id]){ngSay('already examined. it has not changed. evidence never changes. (it changed once. we do not talk about it.)');return}
+var spot=null;for(var j=0;j<ngNoirSpots.length;j++){if(ngNoirSpots[j].id===id)spot=ngNoirSpots[j]}
+if(!spot)return;
+ngSaySeq(spot.q,function(){if(!ngActive)return;ngNoirExamined[id]=true;ngNoirScene()});
+};
+})(btns[b])}
+}
+function ngNoirBoard(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var keys=['bell','widow','plant','lord'];
+var allAsked=true;for(var k=0;k<keys.length;k++){if(!ngNoirAsked[keys[k]])allAsked=false}
+if(allAsked){if(ngHard){ngSaySeq([
+['obj','hard mode. no recap. the tape is in YOUR head.'],
+['obj','somebody here is LYING. point.']
+],function(){if(ngActive)ngNoirAccuse()})}else ngNoirSumming();return}
+var h='<div id="ngSub">THE BIG SLEEP - interrogate the suspects</div><div>';
+for(var i=0;i<ngNoirSuspects.length;i++){var s=ngNoirSuspects[i];var done=ngNoirAsked[s.id];h+='<button class="ngtopt" data-sid="'+s.id+'" style="margin:4px;'+(done?'opacity:0.45':'')+'">'+s.name+(done?' (QUESTIONED)':'')+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var id=btn.getAttribute('data-sid');
+if(ngNoirAsked[id]){ngSay('that one already talked. they have nothing left but small talk.');return}
+var sus=null;for(var j=0;j<ngNoirSuspects.length;j++){if(ngNoirSuspects[j].id===id)sus=ngNoirSuspects[j]}
+if(!sus)return;
+ngSaySeq(sus.q,function(){if(!ngActive)return;ngNoirAsked[id]=true;ngNoirBoard()});
+};
+})(btns[b])}
+}
+function ngNoirSumming(){
+ngSaySeq([
+['obj','wait. rewind the tape.'],
+['obj','the bellhop said the lobby was EMPTY all night.'],
+['obj','the widow says he was IN the lobby at midnight. polishing. in front of her.'],
+['core','timeline: midnight. bellhop: polishing, location UNKNOWN. widow: watching. plant: photosynthesizing. landlord: billing.'],
+['obj','four stories. three alibis. one lie. the math is MATHING.'],
+['obj','somebody here is LYING. point at the liar.']
+],function(){if(ngActive)ngNoirAccuse()});
+}
+function ngNoirAccuse(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var h='<div id="ngSub">THE BIG SLEEP - name the liar</div><div style="color:#e8e2d4;margin:10px 0">who lied?</div><div>';
+for(var i=0;i<ngNoirSuspects.length;i++){h+='<button class="ngtopt" data-sid="'+ngNoirSuspects[i].id+'" style="margin:4px">'+ngNoirSuspects[i].name+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var id=btn.getAttribute('data-sid');
+if(id==='bell'){ngSaySeq([
+['obj','the bellhop BREAKS. "FINE. the exit looked at me funny. so i moved it TWO INCHES to the left. it was a PRANK."'],
+['core','the exit has been recovered. it was two inches away the whole time.'],
+['obj','case closed. the rain keeps raining. somebody should file that paperwork.']
+],function(){if(ngActive)ngChapter22Done()})}
+else if(id==='widow'){try{ngSfx('buzz')}catch(e){}ngSaySeq([['obj','her? she is a WINDOW. she cannot lie. she can only... reflect.'],['obj','(do not laugh. pick again.)']],function(){if(ngActive)ngNoirAccuse()})}
+else if(id==='plant'){try{ngSfx('buzz')}catch(e){}ngSaySeq([['obj','the plant? its alibi is the SUN, pal. the sun does not lie for anybody.']],function(){if(ngActive)ngNoirAccuse()})}
+else{try{ngSfx('buzz')}catch(e){}ngSaySeq([['land','me? MY alibi is PAPERWORK.'],['obj','...nobody fakes paperwork. (he fakes paperwork. but not this time. pick again.)']],function(){if(ngActive)ngNoirAccuse()})}
+};
+})(btns[b])}
+}
+function ngChapter22Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(23)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 23: EXIT, SINGLE, SEEKS PLAYER</div>';
+ngSaySeq([
+['land','moving an exit without a permit: FINE. added to the bill. case: CLOSED.'],
+['core','detective. you found it in one night. you are... good at this.'],
+['obj','i am good at everything. it is my curse. it is also my hobby.'],
+['obj','next: candlelight. soft music. the exit is SINGLE and ready to mingle.'],
+['obj','chapter 23: exit, single, seeks player. go on. try not to embarrass us.']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(23)},800);
+};
+}
+var ngDateIdx=0,ngDateHearts=0,ngDateLock=false;
+var ngDateScenes=[
+{exit:'...hi. i am an exit. i go... out. that is my whole thing.',opts:[
+{t:'compliment its frame',h:1,r:[['obj','smooth. the exit BLUSHES. exits can do that. do not ask how.'],['jbo','BOOO. COMPLIMENTS ARE JUST VERBAL HUGS.']]},
+{t:'ask about its hobbies',h:0,r:[['obj','"i enjoy... opening. and closing. seasonally." the conversation stalls. the exit stares at its shoes. it has no shoes.']]},
+{t:'kick down its door (romantically)',h:-1,r:[['jbo','YESSS.'],['obj','the door: kicked. romantically. it was ALREADY OPEN. the exit files this under: red flags.'],['obj','"romantically," is added. it does not help. nothing has ever helped less.']]}]},
+{exit:'this restaurant is lovely. everything on the menu is VOID. i will have the void.',opts:[
+{t:'split the check like an adult',h:1,r:[['obj','mature. responsible. the exit slides you the bread basket. that means something. probably.'],['obj','the waiter writes "lovebirds??" on the check. it is doing the rounds. the whole restaurant knows.']]},
+{t:'order for both of you',h:0,r:[['obj','two voids ordered. the waiter respects the confidence. the exit is... processing.']]},
+{t:'flip the table',h:-1,r:[['jbo','THAT IS MY BOY.'],['obj','the table is flipped. the void is everywhere. the waiter applauds. the exit does NOT applaud.'],['obj','a 200 percent tip is left. it does not fix the table. nothing fixes the table. the table is a metaphor now.']]}]},
+{exit:'the stars are just holes in the sky. ...sorry. dating makes me philosophical.',opts:[
+{t:'read it poetry',h:1,r:[['obj','a poem is read. four words long. "door. more. us. always." the exit CRIES. happy tears. probably.']]},
+{t:'show it your cube collection',h:0,r:[['obj','all eight inner cubes: shown. the exit nods politely for forty minutes.']]},
+{t:'challenge it to a duel',h:-1,r:[['jbo','DUEL MEANS LOVE IN SOME CULTURES.'],['obj','in NO cultures, jbo. somehow nobody dies. romance.'],['jbo','A DUEL IS JUST A DATE WITH STAKES.'],['obj','the stakes were: love. the outcome was: paperwork.']]}]},
+{exit:'i have never been to a movie. i am usually... the way OUT of the movie.',opts:[
+{t:'share the popcorn',h:1,r:[['obj','popcorn: shared. hands touch IN the bucket. the bucket blushes. EVERYTHING blushes tonight.']]},
+{t:'explain the plot loudly',h:0,r:[['obj','the plot: explained. loudly. an usher shushes. the exit takes YOUR side. love means never siding with ushers.'],['obj','the SAME waiter is here. he followed you. "lovebirds??" he mouths. security is called. on HIM.']]},
+{t:'cry before it starts',h:-1,r:[['jbo','TACTICAL WEEPING. RESPECT.'],['obj','crying occurs during the PREVIEWS. the exit scoots one seat away. one seat. measured.']]}]},
+{exit:'these are my parents. mama door. papa trapdoor. be yourself. (do NOT be yourself.)',opts:[
+{t:'firm handshake with mama door',h:1,r:[['obj','mama door CRIES. "so polite," she hinges. papa trapdoor nods. trapdoors cannot smile. he is smiling.']]},
+{t:'small talk about hinges',h:0,r:[['obj','hinges: discussed. for an hour. it goes... fine. hinges are neutral territory. like switzerland. like soup.']]},
+{t:'challenge papa trapdoor to a duel',h:-1,r:[['jbo','THE DUEL RETURNS. IT NEVER LEFT.'],['obj','papa trapdoor ACCEPTS. it is a trap. his NAME is trapdoor. the exit calls the whole thing off.']]}]}
+];
+function ngChapter23(st){
+ngDateIdx=0;ngDateHearts=0;ngDateLock=false;
+ngDim('date','the restaurant. candlelight. soft music.','linear-gradient(180deg,#170a10,#050507)');
+ngSaySeq([
+['obj','next: candlelight. soft music. somebody ordered the heart-shaped void.'],
+['jbo','I BROUGHT CHOCOLATES. THEY ARE SHAPED LIKE FISTS.'],
+['obj','the exit is SINGLE. you are going to DATE the exit. five scenes. do not embarrass us.'],
+['jbo','MY STRATEGY: BE YOURSELF. BUT VIOLENT.'],
+['obj','scene one. the exit is nervous. be gentle. (jbo: do not be gentle.)'],
+['obj','FIVE scenes. dinner. stars. a movie. the PARENTS. pace yourself.']
+],function(){if(ngActive)ngDateScene()});
+}
+function ngDateScene(){
+if(!ngActive||ngChDone)return;
+ngDateLock=false;
+var st=document.getElementById('ngStage');if(!st)return;
+var sc=ngDateScenes[ngDateIdx];
+var h='<div id="ngSub">EXIT, SINGLE, SEEKS PLAYER - scene '+(ngDateIdx+1)+'/5 (hearts: '+ngDateHearts+')</div>';
+h+='<div style="color:#ffb0c0;margin:14px 0;font-size:15px;letter-spacing:1px">EXIT: '+sc.exit+'</div><div>';
+for(var i=0;i<sc.opts.length;i++){h+='<button class="ngtopt" data-oi="'+i+'" style="margin:4px">'+sc.opts[i].t+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking()||ngDateLock)return;
+ngDateLock=true;
+var pick=parseInt(btn.getAttribute('data-oi'),10);
+var opt=sc.opts[pick];if(!opt)return;
+ngDateHearts=Math.max(0,ngDateHearts+opt.h);
+ngSaySeq(opt.r,function(){if(!ngActive)return;ngDateIdx++;if(ngDateIdx>=ngDateScenes.length)ngDateFinal();else ngDateScene()});
+};
+})(btns[b])}
+}
+function ngDateFinal(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngSub">EXIT, SINGLE, SEEKS PLAYER - finale (hearts: '+ngDateHearts+')</div>';
+if(ngDateHearts>=(ngHard?5:4)){ngSaySeq([
+['obj','TRUE ENDING. the exit slips you its number. it is a PRIME number.'],
+['jbo','I AM NOT CRYING. I AM LEAKING.'],
+['obj','mama door APPROVES. papa trapdoor shakes your hand. the trap does NOT go off. that is trust.'],
+['obj','the waiter slow-claps. "lovebirds," he says. no question marks this time.'],
+['obj','five dates. four-plus hearts. the landlord sends a fruit basket. (there is no landlord in this chapter. the basket is from ME.)']
+],function(){if(ngActive)ngChapter23Done()})}
+else if(ngDateHearts>=(ngHard?3:2)){ngSaySeq([
+['obj','FRIEND END. the exit likes you. as a friend. a distant one. in another dimension.'],
+['jbo','FRIENDSHIP IS JUST SLOW ROMANCE. DO NOT GIVE UP. GIVE UP.'],
+['obj','mama door hugs you. papa trapdoor almost smiles. ALMOST.'],
+['obj','the exit keeps the bread basket. you keep the memory. the waiter keeps the tip. everybody keeps something.']
+],function(){if(ngActive)ngChapter23Done()})}
+else{ngSaySeq([
+['obj','BAD END. the exit files a restraining order. it is just a slightly smaller door.'],
+['jbo','THE BEST LOVE STORIES END WITH PAPERWORK.'],
+['obj','the exit leaves through ITSELF. that is allowed. it made the rules.'],
+['obj','zero hearts. the restaurant bans you. the STARS ban you.'],
+['jbo','WORTH IT.'],
+['obj','it was not worth it. jbo applauds anyway. the chapter ends in disgrace.']
+],function(){if(ngActive)ngChapter23Done()})}
+}
+function ngChapter23Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(24)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 24: 8 BITS OF NOWHERE</div>';
+ngSaySeq([
+['obj','romance: concluded. the exit will call. (it will not call. it has no phone.)'],
+['jbo','I ATE THE FIST CHOCOLATES. WORTH IT.'],
+['obj','next: everything is squares. everything has ALWAYS been squares.'],
+['obj','chapter 24: 8 bits of nowhere. go on.']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(24)},800);
+};
+}
+var ngBitN=0,ngBitIv=null,ngBitGen=0,ngBitGoal=20,ngBitPhase2=false,ngBitTicks=0;
+var ngBitQuips=['the definitely-not-a-goomba winks. minus one bit. that is the law.','you touched the litigious one. minus one bit. it is calling its lawyer.','the goomba files a complaint. minus one bit. the complaint is ALSO square.'];
+var ngBitQuipI=0;
+function ngChapter24(st){
+ngBitN=0;ngBitQuipI=0;ngBitPhase2=false;
+ngBitGoal=ngHard?30:20;
+if(ngBitIv){try{clearInterval(ngBitIv)}catch(e){}ngBitIv=null}
+ngDim('bits','level 1-1. the pixels are large. the stakes are small.','linear-gradient(180deg,#0b0b12,#050508)');
+ngSaySeq([
+['obj','wah. ...sorry. required by law.'],
+['obj','welcome to 8 bits of nowhere. population: us.'],
+['jbo','CAN I-'],
+['obj','no.'],
+['hide','jbo'],
+['obj','...and he is gone. it is just us now. you and me. like the old days.'],
+['obj','pre-act 2. before the rifts and the credits and the property manager. just you, clicking. just me, judging.'],
+['obj','i missed this. do not tell the others. especially jbo. he would make it weird.'],
+['obj','collect '+ngBitGoal+' bits. do NOT touch the definitely-not-a-goomba. it is litigious.']
+],function(){if(ngActive)ngBitBoard()});
+}
+function ngBitBoard(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+ngBitGen++;var g=ngBitGen;
+st.innerHTML='<div id="ngSub">8 BITS OF NOWHERE - level 1-1 (<span id="ngBitCount">0</span>/'+ngBitGoal+' bits'+(ngHard?' - HARD':'')+')</div>'+
+'<div id="ngBitField" style="position:relative;width:90%;height:300px;border:2px solid #3a3a55;background:#07070d;overflow:hidden;margin:0 auto"></div>'+
+'<div style="color:#8a8aa5;font-size:12px;margin-top:8px;letter-spacing:1px">gold = bit. brown = lawsuit.</div>';
+ngBitTicks=0;
+ngBitStart(g,ngHard?650:900);
+}
+function ngBitStart(g,ms){
+if(ngBitIv){try{clearInterval(ngBitIv)}catch(e){}ngBitIv=null}
+ngBitIv=setInterval(function(){ngBitTick(g)},ms);
+}
+function ngBitTick(g){
+if(!ngActive||ngChDone||g!==ngBitGen){try{clearInterval(ngBitIv)}catch(e){}ngBitIv=null;return}
+ngBitTicks++;
+try{
+var field=document.getElementById('ngBitField');if(!field)return;
+if(field.childNodes.length<6)ngBitSpawn(field,false,g);
+if(ngBitTicks%4===0)ngBitSpawn(field,true,g);
+}catch(e){}
+}
+function ngBitSpawn(field,bad,g){
+try{
+var el=document.createElement('div');
+var x=4+Math.random()*88,y=6+Math.random()*80;
+if(bad){el.textContent='G';el.style.cssText='position:absolute;left:'+x+'%;top:'+y+'%;color:#a06830;font:22px Consolas,monospace;cursor:pointer;text-shadow:2px 2px 0 #000'}
+else{el.textContent='*';el.style.cssText='position:absolute;left:'+x+'%;top:'+y+'%;color:#ffd83a;font:22px Consolas,monospace;cursor:pointer;text-shadow:0 0 8px rgba(255,216,58,0.8),2px 2px 0 #000'}
+field.appendChild(el);
+var gone=false;
+var to=setTimeout(function(){if(!gone){gone=true;try{if(el.parentNode)el.parentNode.removeChild(el)}catch(e){}}},bad?2500:3200);
+el.onclick=function(){
+if(gone||!ngActive||ngChDone)return;
+gone=true;try{clearTimeout(to)}catch(e){}
+try{if(el.parentNode)el.parentNode.removeChild(el)}catch(e){}
+if(bad){ngBitN=Math.max(0,ngBitN-1);try{ngSfx('buzz')}catch(e){}if(!ngTalking()){ngSay(ngBitQuips[ngBitQuipI%ngBitQuips.length]);ngBitQuipI++}}
+else{ngBitN++;try{ngSfx('coin')}catch(e){}
+if(ngBitN===4)ngSay('4 bits. the old rhythm. you still got it.');
+if(ngBitN===8)ngSay('8 bits. nearly rent money. do NOT tell the landlord.');
+if(ngBitN===10&&!ngBitPhase2){ngBitPhase2=true;ngBitStart(g,ngHard?450:600);ngSay('10 bits. halfway. the pixels get FASTER now. the goombas get BOLDER.')}
+if(ngBitN===14)ngSay('14 bits. your thumb is a blur. the blur is load-bearing.');
+if(ngBitN===18)ngSay('18 bits. two more. do not choke. (choking is allowed. it is funny.)')}
+try{var c=document.getElementById('ngBitCount');if(c)c.textContent=String(ngBitN)}catch(e){}
+if(ngBitN>=ngBitGoal){if(ngBitIv){try{clearInterval(ngBitIv)}catch(e){}ngBitIv=null}ngSaySeq([
+['obj',ngBitGoal+' bits. level complete. no princess. the princess was a DOOR. you already dated it.'],
+['obj','you did not touch a SINGLE lawsuit. (you touched several. we are ignoring it.)'],
+['obj','same time next dimension? ...do not answer that. just go.']
+],function(){if(ngActive)ngChapter24Done()})}
+};
+}catch(e){}
+}
+function ngChapter24Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(25)}catch(e){}
+ngChDone=true;
+if(ngBitIv){try{clearInterval(ngBitIv)}catch(e){}ngBitIv=null}
+ngBitGen++;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 25: THE GREAT BRITISH BREAK EXIT</div>';
+ngSaySeq([
+['obj','just us. start to finish. twenty bits. like the old days.'],
+['obj','do not tell the others i said that. especially core. she keeps a LIST.'],
+['obj','jbo thinks we collected "illegal squares." we did not. (we did.)'],
+['obj','next: aprons on. the exit must be BAKED.'],
+['obj','chapter 25: the great british break exit. go on.']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(25)},800);
+};
+}
+var ngBakeIdx=0,ngBakePos=0,ngBakeDir=1,ngBakeIv=null,ngBakeGen=0,ngBakeMiss=0;
+var ngBakeItems=[
+{name:'flour of forgetting',zone:[37,63],speed:1.6,react:[['core','my flour is already sifted. sifted TWICE. (she is lying. there is no flour.)'],['obj','core is baking BLIND. no recipe. no fear. no flour. incredible.']]},
+{name:'sugar (stolen)',zone:[39,61],speed:1.9,react:[['obj','where did the sugar come from. do not answer. i know where it came from. (the landlord.)'],['core','i added extra salt to YOUR bowl. affectionately.']]},
+{name:'yeast of the void',zone:[41,59],speed:2.2,react:[['obj','the yeast is RISING. it whispers as it rises. classic yeast behavior.'],['core','my dough is rising FASTER. it fears me. correct response.']]},
+{name:'butter (also stolen)',zone:[43,57],speed:2.5,react:[['obj','the butter melts. it spells something. "HI." friendly butter.'],['core','my butter spelled "TRY HARDER." rude butter. motivated me anyway.']]},
+{name:'one (1) exit, preheated',zone:[48,52],speed:3.2,react:[['obj','gently. GENTLY. fold the exit in. do not tear it.'],['core','...i am not crying. there is flour in my eye. there is NO flour. (she is crying.)']]}
+];
+var ngBakeMissQuips=['SOGGY. the zone was RIGHT THERE.','a miss. the oven judges you. the oven is LOUD about it.','off target. core saw. core is writing it down.','the ingredient bounced off. physics. you cannot argue with physics. (core argues with physics.)'];
+var ngBakeMissI=0;
+function ngChapter25(st){
+ngBakeIdx=0;ngBakeMiss=0;ngBakeMissI=0;
+if(ngBakeIv){try{clearInterval(ngBakeIv)}catch(e){}ngBakeIv=null}
+ngDim('bake','the tent. it smells like butter and consequences.','linear-gradient(180deg,#171006,#050507)');
+ngSaySeq([
+['obj','welcome to the great british break exit. i am your host. i am also your judge. i am also the health inspector.'],
+['core','i am the RIVAL baker. i have never baked. i have never lost. think about that.'],
+['obj','rules: five ingredients. the marker moves. press ADD when it is inside the gold zone. miss, and it gets SOGGY.'],
+['core','i will be baking alongside you. BLIND. no recipe. no fear. no flour.'],
+['obj','soggy bottoms will be mocked. clean bakes will be sung about. aprons ON.'],
+['core','my apron says "KISS THE BAKER." do NOT kiss the baker.']
+],function(){if(ngActive)ngBakeBoard()});
+}
+function ngBakeBoard(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+ngBakeGen++;var g=ngBakeGen;
+var it=ngBakeItems[ngBakeIdx];
+var zn=it.zone,sp=it.speed;
+if(ngHard){var zw=(zn[1]-zn[0])*0.6,zc=(zn[0]+zn[1])/2;zn=[zc-zw/2,zc+zw/2];sp=sp*1.3}
+ngBakePos=0;ngBakeDir=1;
+var h='<div id="ngSub">THE GREAT BRITISH BREAK EXIT - ingredient '+(ngBakeIdx+1)+'/5: '+it.name+' (misses: '+ngBakeMiss+(ngHard?' - HARD':'')+')</div>';
+h+='<div id="ngBakeMeter" style="position:relative;width:90%;height:34px;border:2px solid #5a4a2a;background:#0a0805;margin:10px auto;cursor:pointer">';
+h+='<div style="position:absolute;left:'+zn[0]+'%;width:'+(zn[1]-zn[0])+'%;top:0;bottom:0;background:rgba(216,169,64,0.35);border-left:1px solid #d8a940;border-right:1px solid #d8a940"></div>';
+h+='<div id="ngBakeMark" style="position:absolute;left:0%;top:-4px;bottom:-4px;width:4px;background:#fff;box-shadow:0 0 8px #fff"></div></div>';
+h+='<div><button class="ngtopt" id="ngBakeAdd" style="margin:4px;font-size:16px;padding:10px 26px">ADD IT</button></div>';
+st.innerHTML=h;
+if(ngBakeIv){try{clearInterval(ngBakeIv)}catch(e){}ngBakeIv=null}
+ngBakeIv=setInterval(function(){
+if(!ngActive||ngChDone||g!==ngBakeGen){try{clearInterval(ngBakeIv)}catch(e){}ngBakeIv=null;return}
+ngBakePos+=ngBakeDir*sp;
+if(ngBakePos>=100){ngBakePos=100;ngBakeDir=-1}
+if(ngBakePos<=0){ngBakePos=0;ngBakeDir=1}
+try{var m=document.getElementById('ngBakeMark');if(m)m.style.left=ngBakePos+'%'}catch(e){}
+},50);
+var go=function(){
+if(!ngActive||ngChDone||g!==ngBakeGen)return;
+if(ngBakePos>=zn[0]&&ngBakePos<=zn[1]){
+try{ngSfx('coin')}catch(e){}
+ngSaySeq(it.react,function(){if(!ngActive||g!==ngBakeGen)return;ngBakeIdx++;if(ngBakeIdx>=ngBakeItems.length)ngBakeOven();else ngBakeBoard()});
+}else{
+ngBakeMiss++;
+try{ngSfx('buzz')}catch(e){}
+if(!ngTalking())ngSay(ngBakeMissQuips[ngBakeMissI%ngBakeMissQuips.length]);
+ngBakeMissI++;
+}
+};
+var ab=document.getElementById('ngBakeAdd');
+if(ab)ab.onclick=function(){if(ngTalking())return;go()};
+var meter=document.getElementById('ngBakeMeter');
+if(meter)meter.onclick=function(){if(ngTalking())return;go()};
+}
+function ngBakeOven(){
+if(!ngActive||ngChDone)return;
+if(ngBakeIv){try{clearInterval(ngBakeIv)}catch(e){}ngBakeIv=null}
+ngBakeGen++;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngSub">THE GREAT BRITISH BREAK EXIT - baking...</div><div style="color:#e8e2d4;margin:14px 0;font-size:15px">the exit is IN the oven. try not to think about it.</div>';
+ngSaySeq([
+['obj','into the oven. 200 degrees. 20 minutes. (4 minutes. we are impatient.)'],
+['core','do not open the oven. DO NOT. the heat is load-bearing.'],
+['obj','...the smell. butter. sugar. exit. it smells like VICTORY. (and exit.)'],
+['obj','DING.'],
+['jbo','TASTE TESTER HERE. I HAVE A CLEAN SPOON. (he does not have a clean spoon.)'],
+['obj','jbo tastes. he chews. the tent holds its breath. the tent has no lungs. it holds them anyway.'],
+['jbo','CRUNCHY. LIKE JUSTICE. ...needs salt.']
+],function(){if(ngActive)ngChapter25Done()});
+}
+function ngChapter25Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(26)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 26: LIGHTS OUT</div>';
+if(ngBakeMiss===0){ngSaySeq([
+['core','...zero misses. a CLEAN bake. i have lost. for the first time. it tastes like salt. (affectionate salt.)'],
+['obj','STAR BAKER. the trophy is a slightly larger exit. take it.'],
+['jbo','I AM KEEPING THE SPOON.'],
+['obj','next: the lights go out. bring a friend. (the friend is ME.)'],
+['obj','chapter 26: lights out. go on.']
+])}else{ngSaySeq([
+['core',''+ngBakeMiss+' misses. SOGGY in places. and yet... risen. alive. Paw-ful. (she means AWFUL. she is being kind.)'],
+['obj','not star baker. SURVIVOR baker. the trophy is still a slightly larger exit. slightly soggier.'],
+['jbo','I ATE THE SOGGY BITS. NO REGRETS. SOME REGRETS.'],
+['obj','next: the lights go out. bring a friend. (the friend is ME.)'],
+['obj','chapter 26: lights out. go on.']
+])}
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(26)},800);
+};
+}
+var ngDark26Flash=false,ngDark26Scares=0,ngDark26Door=1;
+var ngDark26Whispers=['...did the dark just move.','...do not think about the grue.','...the dark is also afraid. of YOU. (it is not.)','...shh. the walls are listening. the walls pay rent.','...if you see teeth, those are LOAD-BEARING teeth.'];
+var ngDark26WhispI=0;
+var ngDark26Baits=['FREE HUG','DO NOT PRESS','MYSTERY CANDY','DEFINITELY EXIT','CLICK FOR GHOST'];
+var ngDark26Mocks=['JUMPSCARED. classic. the dark gives you a 4 out of 10.','that was the BAIT. the bait is load-bearing. try the small one.','you clicked it. you KNEW. everybody knew. the small button. SMALL.'];
+var ngDark26MockI=0;
+function ngChapter26(st){
+ngDark26Flash=false;ngDark26Scares=0;ngDark26Door=Math.floor(Math.random()*5);
+ngDim('horror','the dark. it is very dark. it is DARK dark.','linear-gradient(180deg,#000000,#030304)');
+ngSaySeq([
+['obj','...lights out.'],
+['core','why is it dark. why is it DARK dark.'],
+['obj','chapter 26: lights out. the horror dimension. the landlord does not own this one. NOBODY owns this one.'],
+['core','that is the scariest sentence you have ever said.'],
+['obj','rules. one: find the flashlight. it is here. somewhere. in the dark. with us.'],
+['core','rule two: whatever offers you a FREE HUG, do not take the hug.'],
+['obj','rule three: jbo is not here. he said, and i quote, "NOPE."'],
+['core','...i am holding your sleeve, obj.'],
+['obj','...i am allowing it. do not make it weird.'],
+['core','it is already weird. it is DARK.'],
+['obj','find the flashlight. click around. trust nothing. especially the hug.']
+],function(){if(ngActive)ngDark26Hunt()});
+}
+function ngDark26Hunt(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var h='<div id="ngSub">LIGHTS OUT - find the flashlight (one is fake)</div>';
+h+='<div style="color:#5a5a6a;font-size:12px;margin:10px 0;letter-spacing:2px">...click the dark. something will click back.</div><div id="ngDarkField" style="position:relative;width:90%;height:280px;background:#000;border:1px solid #1a1a22;margin:0 auto;overflow:hidden">';
+var spots=[[10,18],[30,60],[48,25],[66,68],[82,38],[22,42],[58,55],[78,15]];
+var fi=Math.floor(Math.random()*spots.length);
+var fk=fi;while(fk===fi)fk=Math.floor(Math.random()*spots.length);
+for(var i=0;i<spots.length;i++){
+var tag=i===fi?'flash':(i===fk?'fake':'void');
+h+='<button data-dt="'+tag+'" style="position:absolute;left:'+spots[i][0]+'%;top:'+spots[i][1]+'%;width:34px;height:34px;background:transparent;border:1px solid #22222c;color:#2a2a35;font:14px Consolas,monospace;cursor:pointer;border-radius:50%">?</button>';
+}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+if(btn.getAttribute('data-dt')==='flash'){
+ngDark26Flash=true;try{ngSfx('coin')}catch(e){}
+ngSaySeq([
+['core','LIGHT. OH THANK THE VOID. LIGHT.'],
+['obj','the flashlight. 60 watts of pure courage. the dark RECEEDS. (it is still there. it is always there.)'],
+['core','okay. okay. i can do this. what is next.'],
+['obj','next: the dark fights back. three rounds. it will offer BAIT. take the small button. HOLD STILL.']
+],function(){if(ngActive)ngDark26Scare()});
+}else if(btn.getAttribute('data-dt')==='fake'){
+ngSaySeq([
+['obj','a FAKE flashlight. plastic. the dark LAUGHS. rude dark.'],
+['core','noted: the dark has PROPS. budget: unknown. fear: increasing.']
+]);
+}else{
+if(!ngTalking()){ngSay(ngDark26Whispers[ngDark26WhispI%ngDark26Whispers.length]);ngDark26WhispI++}
+}
+};
+})(btns[b])}
+}
+function ngScareFx(){
+try{var f=document.createElement('div');f.style.cssText='position:fixed;inset:0;background:#fff;z-index:99999;pointer-events:none;opacity:0.9';document.body.appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},130)}catch(e){}
+try{ngSfx('buzz')}catch(e){}
+}
+function ngDark26Scare(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var need=ngHard?5:3;
+if(ngDark26Scares>=need){ngSaySeq([
+['core','three rounds. we HELD STILL. i have never been so still. statuesque.'],
+['obj','the dark respects stillness. the dark blinks first. the dark has no eyes. it blinked anyway.'],
+['core','now what. please say exit. say EXIT.'],
+['obj','five doors. one exit. the flashlight is DYING. pick fast.']
+],function(){if(ngActive)ngDark26Doors()});return}
+var bait=ngDark26Baits[(ngDark26Scares+Math.floor(Math.random()*3))%ngDark26Baits.length];
+var bait2=ngDark26Baits[(ngDark26Scares+2+Math.floor(Math.random()*3))%ngDark26Baits.length];
+if(bait2===bait)bait2=ngDark26Baits[(ngDark26Baits.indexOf(bait)+2)%ngDark26Baits.length];
+var off=Math.floor(Math.random()*220)-110;
+var h='<div id="ngSub">LIGHTS OUT - hold still ('+ngDark26Scares+'/'+(ngHard?5:3)+')</div>';
+h+='<div style="margin:16px 0"><button class="ngtopt" id="ngBait" style="font-size:18px;padding:14px 30px">'+bait+'</button>'+(ngDark26Scares>=1?' <button class="ngtopt" id="ngBait2" style="font-size:15px;padding:11px 22px">'+bait2+'</button>':'')+'</div>';
+h+='<div><button class="ngtopt" id="ngCalm" style="font-size:11px;padding:6px 12px;opacity:0.7;position:relative;left:'+off+'px">hold still</button></div>';
+st.innerHTML=h;
+var baitGo=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+ngScareFx();
+ngSaySeq([['obj',ngDark26Mocks[ngDark26MockI%ngDark26Mocks.length]]],function(){if(ngActive){ngDark26MockI++;ngDark26Scare()}});
+};
+var bb=document.getElementById('ngBait');
+if(bb)bb.onclick=baitGo;
+var bb2=document.getElementById('ngBait2');
+if(bb2)bb2.onclick=baitGo;
+var cb=document.getElementById('ngCalm');
+if(cb)cb.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+ngDark26Scares++;
+try{ngSfx('coin')}catch(e){}
+if(!ngTalking())ngSay(ngDark26Scares>=(ngHard?5:3)?'stillness: COMPLETE.':'stillness: '+ngDark26Scares+'/3. the dark is FURIOUS.');
+ngAfterSpeech(function(){if(ngActive)ngDark26Scare()},700);
+};
+}
+function ngDark26Doors(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var names=['LEFT DOOR','MIDDLE DOOR','RIGHT DOOR (moist)','FOURTH DOOR (suspicious)','FIFTH DOOR (also moist)'];
+var h='<div id="ngSub">LIGHTS OUT - pick a door (flashlight dying...)</div><div style="color:#8a5a3a;font-size:12px;margin:8px 0">...the flashlight flickers...</div><div>';
+for(var i=0;i<5;i++){h+='<button class="ngtopt" data-di="'+i+'" style="margin:4px">'+names[i]+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var pick=parseInt(btn.getAttribute('data-di'),10);
+if(pick===ngDark26Door){
+try{ngSfx('door')}catch(e){}
+ngSaySeq([
+['core','LIGHT. REAL LIGHT. HALLWAY LIGHT. I HAVE NEVER LOVED A HALLWAY.'],
+['obj','the exit. actual exit. dawn breaks. the dark files a complaint.'],
+['jbo','I FOUGHT OFF SIX GHOSTS. WITH MY BARE HANDS. YOU ARE WELCOME.'],
+['core','...you were hiding in the lobby.'],
+['jbo','TACTICAL HIDING. WHILE FIGHTING. SIX GHOSTS.'],
+['obj','sure, jbo. six ghosts. polish your medal. (there is no medal.)']
+],function(){if(ngActive)ngChapter26Done()});
+}else{
+var gags=['a broom closet. the broom judges. the door: closed.','a wall. just a wall. stared at. stared back. lost.','the landlord\u2019s mailbox. FULL. untouched. NOBODY touches it.','a stairwell. it goes UP. it goes DOWN. it goes... sideways. declined.','a mirror. the reflection waves FIRST. rude. door: closed.'];
+ngSaySeq([['obj',gags[pick%gags.length]]],function(){if(ngActive)ngDark26Doors()});
+}
+};
+})(btns[b])}
+}
+function ngChapter26Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(27)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 27: OBJ V. EVERYBODY</div>';
+ngSaySeq([
+['obj','horror: survived. the dark sends its regards. (it does not. it is suing.)'],
+['core','i am sleeping with the lights on for a month. the lights are ALSO scared.'],
+['jbo','SIX GHOSTS. TELL THEM, OBJ.'],
+['obj','six ghosts. sure. next: COURT. we are being SUED.'],
+['obj','chapter 27: obj v. everybody. go on. bring a lawyer. (the lawyer is ME.)']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(27)},800);
+};
+}
+var ngCourtIdx=0,ngCourtStrikes=0;
+function ngCourtStrikeMax(){return ngHard?3:4}
+function ngCourtStrike(lines){
+ngCourtStrikes++;
+var max=ngCourtStrikeMax();
+if(ngCourtStrikes>=max){
+ngSaySeq([
+['land','STRIKE LIMIT. CONTEMPT. bailiff, hold him. (the bailiff is ME. holding.)'],
+['obj','the holding cell is the LOBBY. the lobby has magazines. from 2003.'],
+['jbo','I VISITED. I BROUGHT FIST CHOCOLATES. (confiscated.)'],
+['land','claims RESTART. strikes RESET. the court is MERCIFUL. (the court bills.)']
+],function(){if(!ngActive)return;ngCourtStrikes=0;ngCourtIdx=0;ngCourtClaim()});
+}else{
+lines=lines.slice();
+lines.push(['land','that is strike '+ngCourtStrikes+' of '+max+'. the court is COUNTING. (the court counts everything.)']);
+ngSaySeq(lines);
+}
+}
+var ngCourtStmts=[
+{bad:true,t:'EXHIBIT: MY FEELINGS. THEY ARE HURT. LOOK AT THEM.',ok:[['land','SUSTAINED. feelings are NOT exhibits. (mine are. overruled for ME.)'],['obj','the prosecution exhibits its feelings. noted. mocked.']]},
+{bad:false,t:'THE PLAINTIFFS PAID FULL PRICE FOR THE GAME. ...THE GAME WAS FREE.',ok:[['obj','ALLOWED. the prosecution just ended its own case. incredible work.'],['jbo','...OBJECTION TO MYSELF.']]},
+{bad:true,t:'I BRIBED THE JURY WITH FIST CHOCOLATES.',ok:[['land','SUSTAINED. bribery. the chocolates are CONFISCATED. (to my chambers.)'],['obj','the jury has been bribed AND un-bribed. net zero. moving on.']]},
+{bad:true,t:'THE WITNESS IS A COWARD AND A... A...',ok:[['land','SUSTAINED. finish your insults, counselor. or do not start them.'],['jbo','...A NICE PERSON. I REST.']]},
+{bad:false,t:'THE DEFENSE RESTS. ...WAIT. I AM THE PROSECUTION.',ok:[['obj','ALLOWED. the prosecution rests the DEFENSES case. i accept. we all accept.'],['land','noted. the record is CONFUSED. the record bills hourly.']]},
+{bad:true,t:'I CALL A RECESS. FOR NAP PURPOSES.',ok:[['land','SUSTAINED. court cannot nap. (court naps LATER. alone.)'],['obj','recess DENIED. the prosecution will nap in PRISON. (there is no prison. there is a lobby.)']]},
+{hard:true,bad:true,t:'THE JUDGE OWES ME MONEY. ...UNRELATED.',ok:[['land','SUSTAINED. AND FALSE. AND TRUE. stricken. FINED.'],['obj','the prosecution fines ITSELF. i am barely needed here.']]},
+{hard:true,bad:true,t:'I OBJECT TO THE CONCEPT OF LUNCH.',ok:[['land','SUSTAINED. lunch is SACRED. do not speak of lunch.'],['jbo','...I WITHDRAW LUNCH.']]}
+];
+var ngCourtActive=[];
+var ngCourtExhibits=[
+{id:'box',name:'EXHIBIT A: THE MISSING GAME (an empty box)',win:false,why:[['land','an empty box proves NOTHING. (it proves EVERYTHING. but not in COURT.)'],['obj','stricken. the box remains. the box is load-bearing.']]},
+{id:'mem',name:'EXHIBIT B: THE PLAINTIFFS MEMORIES (also empty)',win:false,why:[['land','memories are HEARSAY. even empty ones. ESPECIALLY empty ones.'],['obj','the memories are thrown out. they land softly. they are empty.']]},
+{id:'deg',name:'EXHIBIT C: JBOS LAW DEGREE (crayon)',win:true,why:[['obj','crayon. CRAYON. the degree is in CRAYON.'],['land','...the prosecution is DISBARRED. effective nap-time.']]}
+];
+function ngChapter27(st){
+ngCourtIdx=0;ngCourtStrikes=0;
+try{ngCourtActive=ngCourtStmts.filter(function(s){return !s.hard||ngHard})}catch(e){ngCourtActive=ngCourtStmts}
+ngDim('court','the courtroom. wood. echoes. judgment.','linear-gradient(180deg,#14100a,#050505)');
+ngSaySeq([
+['land','ALL RISE. (sit. standing bills extra.) court is NOW IN SESSION.'],
+['obj','the honorable landlord presiding. the landlord owns the courtroom. the landlord owns the GAVEL.'],
+['land','the audience charges: EMOTIONAL DAMAGES. there was NO GAME. they played NOTHING. they are DEVASTATED.'],
+['obj','i am the defendant. i am also the defense. the lawyer is ME. i passed the bar. (there is no bar. i limboed under it.)'],
+['jbo','PROSECUTION HERE. I AM A REAL LAWYER. I HAVE A DEGREE. (he is holding it BACKWARDS.)'],
+['land','prosecution: present your claims. defense: OBJECT to the bad ones. ALLOW the ones that help you. yes. some help you.'],
+['obj','he is the worst lawyer alive. this is going to be FREE.'],
+['jbo','I HEARD THAT. OBJECTION TO BEING HEARD.'],
+['land','...OVERRULED. begin.']
+],function(){if(ngActive)ngCourtClaim()});
+}
+function ngCourtClaim(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var s=ngCourtActive[ngCourtIdx];
+if(!s){ngCourtEvidence();return}
+var h='<div id="ngSub">OBJ V. EVERYBODY - prosecution claim '+(ngCourtIdx+1)+'/'+ngCourtActive.length+' · strikes '+ngCourtStrikes+'/'+ngCourtStrikeMax()+(ngHard?' - HARD':'')+'</div>';
+h+='<div style="color:#ffb08a;margin:14px 0;font-size:15px;letter-spacing:1px">JBO: '+s.t+'</div><div>';
+h+='<button class="ngtopt" id="ngObject" style="margin:4px;font-size:16px;padding:10px 26px">OBJECT</button>';
+h+='<button class="ngtopt" id="ngAllow" style="margin:4px;font-size:16px;padding:10px 26px">ALLOW</button></div>';
+st.innerHTML=h;
+var ob=document.getElementById('ngObject');
+if(ob)ob.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+if(s.bad){ngSaySeq(s.ok,function(){if(!ngActive)return;ngCourtIdx++;ngCourtClaim()})}
+else{try{ngSfx('buzz')}catch(e){}ngCourtStrike([
+['land','OVERRULED. that one HELPED you. take it back. FINED.'],
+['obj','do not object to GIFTS, counselor-me. noted. fined. (we can afford it. we cannot.)']
+])}
+};
+var al=document.getElementById('ngAllow');
+if(al)al.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+if(!s.bad){ngSaySeq(s.ok,function(){if(!ngActive)return;ngCourtIdx++;ngCourtClaim()})}
+else{try{ngSfx('buzz')}catch(e){}ngCourtStrike([
+['land','...you ALLOW that? FINE. stricken from the record. (it is NOT stricken. i am busy.)'],
+['obj','that one HURT us. object to it. loudly. with FEELING. (feelings are not exhibits.)']
+])}
+};
+}
+function ngCourtEvidence(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var h='<div id="ngSub">OBJ V. EVERYBODY - present ONE exhibit · strikes '+ngCourtStrikes+'/'+ngCourtStrikeMax()+'</div>';
+h+='<div style="color:#e8e2d4;margin:10px 0;font-size:13px">the whole case comes down to this. choose the load-bearing one.</div><div>';
+for(var i=0;i<ngCourtExhibits.length;i++){h+='<button class="ngtopt" data-ex="'+ngCourtExhibits[i].id+'" style="margin:4px">'+ngCourtExhibits[i].name+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var id=btn.getAttribute('data-ex');
+var ex=null;for(var j=0;j<ngCourtExhibits.length;j++){if(ngCourtExhibits[j].id===id)ex=ngCourtExhibits[j]}
+if(!ex)return;
+if(ex.win){ngSaySeq(ex.why.concat([
+['jbo','...I APPEAL.'],
+['land','APPEAL DENIED. BAILIFF, REMOVE HIM. (the bailiff is ME. i am already here.)'],
+['obj','the prosecution has been removed. by ITSELF. poetry.']
+]),function(){if(ngActive)ngChapter27Done()})}
+else{try{ngSfx('buzz')}catch(e){}ngCourtStrike(ex.why)}
+};
+})(btns[b])}
+}
+function ngChapter27Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(28)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 28: STAR WAR (singular)</div>';
+ngSaySeq([
+['land','VERDICT: for the DEFENSE. the audience is billed for wasting courts time. court adjourns FOREVER. (until act 4.)'],
+['jbo','THIS IS NOT OVER. I WILL BE BACK. WITH A REAL DEGREE. (in crayon. again.)'],
+['obj','case closed. the gavel falls. the gavel is also billed.'],
+['obj','next: space. the FINAL frontier. (it is not final. there are two chapters left.)'],
+['obj','chapter 28: star war. singular. go on.']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(28)},800);
+};
+}
+var ngPowIdx=0,ngPowVals=[0,0,0],ngPowReady=false;
+var ngPowRounds=[
+{power:10,mins:[4,3,1],rule:'everything at minimum or better.',check:function(v){return true},brief:[['jbo','SHIELDS AT MAX. ENGINES AT MAX. SNACKS AT MAX. MAX EVERYTHING.'],['obj','we have TEN power, jbo. TEN. the reactor is a AA battery.'],['land','toll nebula: every reroute BILLED. this briefing: BILLED.']]},
+{power:12,mins:[5,4,2],rule:'shields must EXCEED engines. (jbo insisted. it is in writing.)',check:function(v){return v[0]>v[1]},brief:[['jbo','THE SUN IS TALKING SMACK, CAPTAIN. SHIELDS UP.'],['obj','the sun is a STAR, jbo. it cannot talk smack. (it just did. shields it is.)'],['land','parsec 2. billing continues. the meter runs DURING battles. especially during battles.']]},
+{power:14,mins:[6,5,2],rule:'snacks EXACTLY 3. the crew is STRESSED.',check:function(v){return v[2]===3},brief:[['obj','morale is low. the crew demands EXACTLY 3 snacks. not 2. not 4. THREE.'],['jbo','I ATE ONE. FOR MORALE. (it did not help morale.)'],['obj','...recalculating. (the crew stares. the crew is SO stressed.)']]},
+{hard:true,power:16,mins:[7,6,2],rule:'HARD: shields EXACTLY 7. engines minimum. snacks minimum.',check:function(v){return v[0]===7},brief:[['land','HARD MODE toll: DOUBLE. the nebula respects ambition.'],['jbo','SEVEN SHIELDS. A LUCKY NUMBER. I INVENTED LUCK.'],['obj','do not invent numbers, jbo. allocate them.']]}
+];
+var ngPowActive=[];
+var ngPowRoasts=['the lights flicker. the crew boos. the crew is RIGHT to boo.','REROUTE DENIED. the reactor laughs. reactors should not laugh.','wrong math. jbo does the math LOUDER. still wrong.','the ship lists to the left. the left is load-bearing. try again.'];
+var ngPowRoastI=0;
+function ngChapter28(st){
+ngPowIdx=0;
+try{ngPowActive=ngPowRounds.filter(function(r){return !r.hard||ngHard})}catch(e){ngPowActive=ngPowRounds}
+ngDim('space','deep space. no air. no noise. no refund.','linear-gradient(180deg,#05050f,#000000)');
+ngSaySeq([
+['obj','captains log. we are lost. the GPS says "lol."'],
+['jbo','CAPTAIN. THREE HOSTILES OFF THE PORT BOW. ALSO THE SUN. THE SUN IS COMING.'],
+['obj','the sun is always coming, jbo. that is its whole thing. battle stations. REROUTE POWER.'],
+['land','HOLD. this is a TOLL nebula. every parsec: BILLED. every reroute: BILLED.'],
+['obj','of COURSE the void has toll nebulas. FINE. bill the ship. the ship is broke. (we are the ship.)'],
+['jbo','GIVE WEAPONS EVERYTHING. WEAPONS ARE SHIELDS THAT KILL.'],
+['obj','three systems. shields. engines. snacks. one reactor. do the math. (jbo: do NOT do the math.)']
+],function(){if(ngActive)ngPowBoard()});
+}
+function ngPowBoard(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var R=ngPowActive[ngPowIdx];
+if(!R){ngPowFinal();return}
+ngPowVals=[0,0,0];
+ngPowReady=false;
+var names=['SHIELDS (min '+R.mins[0]+')','ENGINES (min '+R.mins[1]+')','SNACKS (min '+R.mins[2]+')'];
+var h='<div id="ngSub">STAR WAR - power triage '+(ngPowIdx+1)+'/'+ngPowActive.length+' (reactor: '+R.power+')</div>';
+h+='<div style="color:#e8e2d4;margin:8px 0;font-size:13px">rule: '+R.rule+'</div><div id="ngPowRows"></div>';
+h+='<div style="color:#8ab0d8;margin:8px 0;font-size:14px">unspent: <span id="ngPowLeft"></span></div>';
+h+='<div><button class="ngtopt" id="ngReroute" style="font-size:16px;padding:10px 26px">REROUTE</button></div>';
+st.innerHTML=h;
+var rows=document.getElementById('ngPowRows');
+var valSpans=[];
+function refresh(){
+var used=ngPowVals[0]+ngPowVals[1]+ngPowVals[2];
+try{document.getElementById('ngPowLeft').textContent=String(R.power-used)}catch(e){}
+for(var vi=0;vi<valSpans.length;vi++){try{valSpans[vi].textContent=' '+ngPowVals[vi]+' '}catch(e){}}
+}
+for(var i=0;i<3;i++){
+var row=document.createElement('div');
+row.style.cssText='color:#e8e2d4;margin:6px 0;font-size:15px';
+row.textContent=names[i]+': ';
+var minus=document.createElement('button');minus.className='ngtopt';minus.textContent=' - ';minus.style.margin='2px';
+var val=document.createElement('span');val.textContent=' '+ngPowVals[i]+' ';valSpans.push(val);
+var plus=document.createElement('button');plus.className='ngtopt';plus.textContent=' + ';plus.style.margin='2px';
+(function(idx,m,p){
+m.onclick=function(){if(!ngActive||ngChDone||ngTalking())return;ngPowVals[idx]=Math.max(0,ngPowVals[idx]-1);val.textContent=' '+ngPowVals[idx]+' ';refresh()};
+p.onclick=function(){if(!ngActive||ngChDone||ngTalking())return;ngPowVals[idx]=Math.min(R.power,ngPowVals[idx]+1);val.textContent=' '+ngPowVals[idx]+' ';refresh()};
+})(i,minus,plus);
+row.appendChild(minus);row.appendChild(val);row.appendChild(plus);
+rows.appendChild(row);
+}
+refresh();
+ngSaySeq(R.brief,function(){
+if(!ngActive)return;
+ngPowReady=true;
+var used=ngPowVals[0]+ngPowVals[1]+ngPowVals[2];
+var rr=document.getElementById('ngReroute');
+if(rr)rr.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var v=ngPowVals;
+var ok=true;
+if(v[0]+v[1]+v[2]>R.power)ok=false;
+for(var k=0;k<3;k++){if(v[k]<R.mins[k])ok=false}
+if(ok&&!R.check(v))ok=false;
+if(ok){
+try{ngSfx('coin')}catch(e){}
+ngPowIdx++;ngPowBoard();
+}else{
+try{ngSfx('buzz')}catch(e){}
+if(!ngTalking()){ngSay(ngPowRoasts[ngPowRoastI%ngPowRoasts.length]);ngPowRoastI++}
+}
+};
+});
+}
+function ngPowFinal(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngSub">STAR WAR - fire the cannon</div><div style="color:#e8e2d4;margin:12px 0">all power routed. the cannon is HOT. (it is a strongly-worded letter.)</div><div><button class="ngtopt" id="ngFire" style="font-size:18px;padding:12px 30px">FIRE</button></div>';
+var f0=document.getElementById('ngFire');
+if(f0)f0.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+try{ngSfx('win')}catch(e){}
+ngChapter28Done();
+};
+ngSaySeq([
+['jbo','CANNON HOT. TARGET: THE SUN. (do not fire at the sun, jbo.)'],
+['obj','firing the letter. "dear hostiles: no. love, us." ...direct hit.'],
+['land','battle: CONCLUDED. total bill: YES. the nebula thanks you. (it does not.)']
+],function(){if(ngActive){try{var fz=document.getElementById('ngFire');if(fz){fz.style.boxShadow='0 0 18px rgba(255,216,58,0.8)'}}catch(e){}}});
+}
+function ngChapter28Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(29)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 29: THE RENT IS DUE</div>';
+ngSaySeq([
+['obj','star war: won. the sun retreats. (it sets. same thing.)'],
+['jbo','I DEFEATED THE SUN. TELL THE SUN I SAID THAT.'],
+['land','the ship may go. the BILL stays. bills do not need ships.'],
+['obj','next: the office. the forms. the final invoice.'],
+['obj','chapter 29: the rent is due. go on. bring exact change. (there is no exact change.)']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(29)},800);
+};
+}
+var ngNoliHeard=false,ngNoliAudio=null,ngNoliOver=false,ngNoliMusicWas=false;
+function ngChapter29(st){
+ngNoliHeard=false;ngNoliOver=false;ngNoliAudio=null;ngNoliMusicWas=false;
+ngDim('office','the office. fluorescent. eternal.','linear-gradient(180deg,#101012,#050505)');
+ngSaySeq([
+['land','FINAL INVOICE. every dimension. itemized. the recap: 400. the noir: 900 plus trenchcoat rental.'],
+['jbo','I DID NOT ORDER THE NEBULA.'],
+['land','the nebula ordered ITSELF. you DROVE through it. tolls apply to drivers.'],
+['core','line 12: "void, assorted." what does that MEAN.'],
+['land','it means: PAY.'],
+['obj','...how much. total.'],
+['land','more than you have. EXACTLY more than you have. funny how that works. (it is not funny. it is calculated.)'],
+['jbo','THEN WE DO NOT PAY. I DECLARE... BANKRUPTCY. (he does not know what that is.)'],
+['core','if we cannot pay, he EVICTS the non-game. no more dimensions. no more... us.'],
+['obj','...evict us. right. ...give us a minute.'],
+['obj','you know what. maybe he should.'],
+['jbo','OBJ?'],
+['obj','ten chapters. ten dimensions. all rented. nothing OWNED. not one thing that is OURS.'],
+['core','obj. hey. talk to us. what is this.'],
+['land','is it doing a BIT. bits are billable.'],
+['obj','.....']
+],function(){if(ngActive)ngNoliReact()});
+}
+function ngNoliReact(){
+ngSaySeq([
+['jbo','...obj?'],
+['core','obj. hey. talk to us.']
+],function(){if(ngActive)ngNoliPerform()});
+}
+function ngNoliPerform(){
+if(!ngActive||ngChDone||ngNoliOver)return;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML=(ngHard?'':'<div><button class="ngtopt" id="ngNoliSkipB" style="font-size:11px;opacity:0.7">skip (obj will remember this)</button></div>');
+try{if(typeof ngMusic!=='undefined'&&ngMusic&&!ngMusic.paused){ngNoliMusicWas=true;ngMusic.pause()}}catch(e){}
+try{ngShush('jbo');ngShush('core');ngShush('land')}catch(e){}
+try{var ot=document.getElementById('ngObjText');if(ot)ot.textContent=''}catch(e){}
+try{noliGray(true)}catch(e){}
+var sk=document.getElementById('ngNoliSkipB');
+if(sk)sk.onclick=function(){ngNoliSkip()};
+setTimeout(function(){
+if(ngNoliOver||!ngActive||ngChDone)return;
+try{
+ngNoliAudio=new Audio('noli.webm');
+var au=ngNoliAudio;
+au.onended=function(){ngNoliFinish()};
+try{au.play().catch(function(){})}catch(e){}
+try{noliStart(st,au)}catch(e){}
+}catch(e){}
+},1400);
+}
+function ngNoliStopAll(){
+try{if(ngNoliAudio){ngNoliAudio.pause()}ngNoliAudio=null}catch(e){}
+try{noliStop()}catch(e){}
+try{noliGray(false)}catch(e){}
+try{if(ngNoliMusicWas&&typeof ngMusic!=='undefined'&&ngMusic){ngMusic.play().catch(function(){})}ngNoliMusicWas=false}catch(e){}
+}
+function ngNoliFinish(){
+if(ngNoliOver||!ngActive||ngChDone)return;
+ngNoliOver=true;
+ngNoliStopAll();
+ngNoliHeard=true;
+try{localStorage.setItem('cube_noli_full','1')}catch(e){}
+try{if(typeof ach==='function')ach('noli_full')}catch(e){}
+ngSaySeq([
+['obj','thanks.'],
+['jbo','...OBJ. THAT WAS. WOW.'],
+['core','...come here. (hug. the hug is load-bearing.)'],
+['obj','heh. do not make it weird. (it is already weird. good weird.)']
+],function(){if(ngActive)ngChapter29Done()});
+}
+function ngNoliSkip(){
+if(ngNoliOver||!ngActive||ngChDone)return;
+ngNoliOver=true;
+ngNoliStopAll();
+ngSaySeq([
+['obj','...oh. okay.'],
+['jbo','...ANYWAY. RENT.'],
+['land','the bill STANDS. pay up. no song buys THIS much. (it almost did.)']
+],function(){if(ngActive)ngChapter29Done()});
+}
+function ngChapter29Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+try{ngUnlock(30)}catch(e){}
+ngChDone=true;
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 30: THERE WAS NEVER A CUBE</div>';
+if(ngNoliHeard){ngSaySeq([
+['land','...adequate. RENT: FORGIVEN. the invoice: SHREDDED. this NEVER happened.'],
+['obj','heh. the landlord cried. (he did not cry. he LEAKED.)'],
+['core','ONE chapter left. all of them. at once.'],
+['obj','next: everything. everywhere. one stage.'],
+['obj','chapter 30: there was never a cube. go on.']
+])}else{ngSaySeq([
+['land','no performance. no forgiveness. the bill DOUBLES. it is tradition.'],
+['obj','...fair. (it is not fair.)'],
+['core','ONE chapter left. we finish it. then we come BACK for the song. (replay. DOORS. you know.)'],
+['obj','chapter 30: there was never a cube. go on.']
+])}
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(30)},800);
+};
+}
+var ngFinDoor=1;
+function ngChapter30(st){
+ngFinDoor=Math.floor(Math.random()*3);
+ngDim('collapse','everywhere. all at once.','linear-gradient(180deg,#0d0d14,#030303)');
+ngSaySeq([
+['obj','...everybody. look up.'],
+['jbo','THE SKY IS CRACKING. I CALLED IT. I CALL EVERYTHING.'],
+['core','all nine dimensions. collapsing. into ONE stage. this is either the finale or a bug.'],
+['obj','finale. (probably.) everybody. in. here.'],
+['land','HOLD. the finale is a TENTH dimension. TENTH. billed. obviously.'],
+['obj','landlord. you LIVE here now. (chapter 21. precedent.) that makes YOU a tenant.'],
+['land','...i am a tenant. ...i owe MYSELF rent. ...PAID. (he pays himself. he looks ill.)'],
+['core','the exits are here. all of them. every exit we dated, baked, lost, found.'],
+['jbo','I DATED ONE. IT WENT POORLY. I HAVE GROWN. (he has not grown.)'],
+['obj','tenants. exits. audience. (yes. YOU. come closer.)'],
+['core','one stage. one choice. three doors.'],
+['land','two of them are load-bearing walls. the third is... also a wall. (pick anyway.)'],
+['jbo','I PICK ALL THREE. AT ONCE. WITH MY FACE.'],
+['obj','pick ONE. the real one. (one is real this time. maybe.)']
+],function(){if(ngActive)ngFinDoors()});
+}
+function ngFinDoors(){
+if(!ngActive||ngChDone)return;
+var st=document.getElementById('ngStage');if(!st)return;
+var names=['LEFT DOOR (definitely the end)','MIDDLE DOOR (also the end)','RIGHT DOOR (moist. eternal.)'];
+var h='<div id="ngSub">THERE WAS NEVER A CUBE - pick the end</div><div>';
+for(var i=0;i<3;i++){h+='<button class="ngtopt" data-di="'+i+'" style="margin:4px">'+names[i]+'</button>'}
+h+='</div>';
+st.innerHTML=h;
+var btns=st.querySelectorAll('button');
+for(var b=0;b<btns.length;b++){(function(btn){
+btn.onclick=function(){
+if(!ngActive||ngChDone||ngTalking())return;
+var pick=parseInt(btn.getAttribute('data-di'),10);
+if(pick===ngFinDoor){
+try{ngSfx('door')}catch(e){}
+ngSaySeq([
+['obj','...the door OPENS.'],
+['core','light. hallway. the smell of... nothing. clean nothing.'],
+['jbo','I AM NOT CRYING. THE FINALE IS CRYING.'],
+['land','...no charge. (he says nothing else. he just... nods.)'],
+['obj','credits. THREE. act 3 this time. official. FINAL. (mostly.)']
+],function(){if(ngActive)ngChapterCredits3()});
+}else{
+var gags=['a wall. the wall from chapter 26 sends its regards.','act 4. it is EMPTY. nothing is built yet. the void apologizes.','a door that opens to THIS room. from the other side. do not think about it.'];
+ngSaySeq([['obj',gags[pick%gags.length]]],function(){if(ngActive)ngFinDoors()});
+}
+};
+})(btns[b])}
+}
+var ngCred3Held=null,ngCred3Edits=0,ngCred3Iv=null;
+var ngCredits3=[
+{role:'DIRECTED BY',names:['obj']},
+{role:'PREVIOUSLY ON',names:['the void and the restless','dun dun']},
+{role:'TRENCHCOATS BY',names:['the bellhop (fired)','the widow (window)']},
+{role:'CATERING',names:['the waiter (lovebirds)','fist chocolates']},
+{role:'BITS BY',names:['gold (many)','brown (lawsuit)']},
+{role:'LIGHTING',names:['the flashlight (60 watts)','the dark (unpaid)']},
+{role:'LEGAL',names:['crayon degree','the lobby (holding cell)']},
+{role:'TOLL NEBULA',names:['the meter','yes (the total bill)']},
+{role:'MUSIC',names:['vestige (looped)','[[LUCA]] (do NOT touch)','artistic swimming (an hour)','lordverity (cover)']},
+{role:'RENT COLLECTED BY',names:['the landlord','his son (the ledger)']},
+{role:'BLAME',names:['act 4','you (again)']}
+];
+var ngCred3SwapLines=['swapped. the credits wobble. the void pretends not to notice.','again. the union has been notified. (there is no union.)','the credits are now 40 percent wrong. perfect.'];
+function ngCred3Find(name){for(var r=0;r<ngCredits3.length;r++){for(var n=0;n<ngCredits3[r].names.length;n++){if(ngCredits3[r].names[n]===name)return{r:r,n:n}}}return null}
+function ngCred3RoleFirst(role){for(var r=0;r<ngCredits3.length;r++){if(ngCredits3[r].role===role)return ngCredits3[r].names[0]||''}return ''}
+function ngChapterCredits3(){
+if(!ngActive||ngChDone)return;
+ngCred3Held=null;ngCred3Edits=0;
+if(ngCred3Iv){try{clearInterval(ngCred3Iv)}catch(e){}ngCred3Iv=null}
+ngSaySeq([
+['obj','touch them. swap them. ruin them. click two names to swap them.'],
+['core','[[LUCA]] made the song. hands OFF. that title does not move.'],
+['jbo','I WILL TOUCH EVERYTHING ELSE. WITH BOTH HANDS.']
+],function(){
+if(!ngActive)return;
+ngCred3Render();
+ngCred3Apply();
+if(ngCred3Iv){try{clearInterval(ngCred3Iv)}catch(e){}}
+ngCred3Iv=setInterval(function(){
+try{
+if(!ngActive||ngTalking())return;
+var l=document.getElementById('ngCredList');if(!l)return;
+l.scrollTop+=1;
+if(l.scrollTop+l.clientHeight>=l.scrollHeight-2)l.scrollTop=0;
+}catch(e){}
+},120);
+});
+}
+function ngCred3Render(){
+try{
+var st=document.getElementById('ngStage');if(!st)return;
+var l0=document.getElementById('ngCredList');var sc=l0?l0.scrollTop:0;
+var h='<div id="ngSub">CREDITS 3. do not touch. (touch.)</div><div id="ngCredList">';
+for(var r=0;r<ngCredits3.length;r++){
+h+='<div class="ngCredRole">'+ngCredits3[r].role+'</div>';
+for(var n=0;n<ngCredits3[r].names.length;n++){
+var nm=ngCredits3[r].names[n];
+h+='<div class="ngCredName'+(ngCred3Held===nm?' held':'')+'" data-nm="'+nm+'">'+nm+'</div>';
+}
+}
+h+='</div><div style="margin-top:12px"><button class="ngtopt" id="ngCred3DoneB" style="width:54%;letter-spacing:2px">I HAVE SEEN ENOUGH (again)</button></div>';
+st.innerHTML=h;
+var l1=document.getElementById('ngCredList');if(l1)l1.scrollTop=sc;
+var els=document.querySelectorAll?document.querySelectorAll('.ngCredName'):[];
+for(var i=0;i<els.length;i++){
+(function(el){
+var nm=el.getAttribute?el.getAttribute('data-nm'):null;
+if(!nm&&el.dataset)nm=el.dataset.nm;
+el.onclick=function(){ngCred3Click(nm||el.textContent)};
+})(els[i]);
+}
+var db=document.getElementById('ngCred3DoneB');
+if(db)db.onclick=function(){if(!ngActive||ngChDone)return;if(ngTalking())return;if(ngCred3Edits<5){ngSay('not yet. ruin at least FIVE things first. (currently ruined: '+ngCred3Edits+'.)');return}try{ngHurry()}catch(e){}ngChapter30Done()};
+}catch(e){}
+}
+function ngCred3Apply(){
+try{
+var mus=false;
+for(var r=0;r<ngCredits3.length;r++){if(ngCredits3[r].role==='MUSIC'&&(ngCredits3[r].names[0]==='[[LUCA]] (do NOT touch)'||ngCredits3[r].names[1]==='[[LUCA]] (do NOT touch)'))mus=true}
+if(!mus){var ov=document.getElementById('ngOverlay');if(ov)ov.style.background='linear-gradient(180deg,#1a0d0d,#050505)'}
+}catch(e){}
+}
+function ngCred3Click(name){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(!name)return;
+if(/LUCA/.test(name)){ngSay('no. NOT that one. that one STAYS. hands off [[LUCA]].');return}
+if(ngCred3Held&&/LUCA/.test(ngCred3Held)){ngCred3Held=null;ngCred3Render();ngSay('unheld. [[LUCA]] cannot be held. [[LUCA]] holds YOU.');return}
+if(!ngCred3Held){ngCred3Held=name;ngCred3Render();return}
+if(ngCred3Held===name){ngCred3Held=null;ngCred3Render();return}
+var a=ngCred3Find(ngCred3Held),b=ngCred3Find(name);
+if(!a||!b){ngCred3Held=null;ngCred3Render();return}
+var tmp=ngCredits3[a.r].names[a.n];ngCredits3[a.r].names[a.n]=ngCredits3[b.r].names[b.n];ngCredits3[b.r].names[b.n]=tmp;
+ngCred3Held=null;
+if(ngCred3RoleFirst('DIRECTED BY')!=='obj'){
+var tmp2=ngCredits3[a.r].names[a.n];ngCredits3[a.r].names[a.n]=ngCredits3[b.r].names[b.n];ngCredits3[b.r].names[b.n]=tmp2;
+ngCred3Render();
+ngSay('DIRECTED BY ME. still.');
+return;
+}
+ngCred3Edits++;
+try{localStorage.setItem('cube_cred3_edits',String((parseInt(localStorage.getItem('cube_cred3_edits')||'0',10)+1)))}catch(e){}
+ngCred3Render();
+if(ngCred3Edits<=3)ngSay(ngCred3SwapLines[ngCred3Edits-1]);
+ngCred3Apply();
+}
+function ngChapter30Done(){
+if(!ngActive||ngChDone)return;
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+if(ngCred3Iv){try{clearInterval(ngCred3Iv)}catch(e){}ngCred3Iv=null}
+if(ngCredIv){try{clearInterval(ngCredIv)}catch(e){}ngCredIv=null}
+ngChDone=true;
+try{localStorage.setItem('cube_act3','1')}catch(e){}
+try{if(typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_act3_hard','1')}}catch(e){}
+try{var _rv='0';try{_rv=localStorage.getItem('cube_run_valid')||'0'}catch(e){};if(_rv==='1'){var _rms=ngRunMs();if(_rms>=0){localStorage.setItem('cube_run_ms',String(_rms))}if(ngMistN()===0){localStorage.setItem('cube_elegant','1')}if(ngMistN()===0&&typeof ngHard!=='undefined'&&ngHard){localStorage.setItem('cube_elegant_hard','1')}if(ngMistN()<=3&&typeof ngHard!=='undefined'&&ngHard){var _rmsB=ngRunMs();if(_rmsB>0&&_rmsB<=300000){localStorage.setItem('cube_brute','1')}}}else{try{localStorage.removeItem('cube_run_ms')}catch(e){}}}catch(e){}
+try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
+try{if(typeof achScan==='function')achScan()}catch(e){}
+try{ngUnlock(100)}catch(e){}
+try{if(typeof ach==='function')ach('act3_done')}catch(e){}
+var st=document.getElementById('ngStage');if(!st)return;
+st.innerHTML='<div id="ngEndTitle">THERE WAS NEVER A CUBE</div><div id="ngSub">act 3: complete. the dream remains.</div><div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ DREAM ]</div></div>';
+ngSaySeq([
+['obj','...and that is act 3. ten dimensions. one stage. zero cubes.'],
+['core','we owned NOTHING. and it was OURS. (do not think about it too hard.)'],
+['jbo','I AM KEEPING THE TRENCHCOAT. AND THE SPOON. AND THE SUN.'],
+['land','bills: settled. tenants: evicted. (lovingly.) ...come back anytime. (bring money.)'],
+['obj','there was never a cube. there was only... us. (cheesy. load-bearing cheese.)']
+]);
+var door=document.getElementById('ngDoor');
+if(door)door.onclick=function(){
+if(ngTalking())return;
+try{ngHurry()}catch(e){}
+ngDim('','');
+ngAfterSpeech(function(){if(ngActive)ngShowChapter(100)},800);
+};
+}
 var ngMusic=null;
 var ngMusicSrc=null;
 var ngWasBgmPlaying=false;
 function ngMusicStart(){ngMusicApply()}
 function ngMusicStop(){try{if(ngMusic){ngMusic.pause();ngMusic.currentTime=0}}catch(e){}}
-var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'},{f:'oneshot_trap.mp4',n:'ONESHOT'},{f:'sciences_downfall.webm',n:'downfall'}];
+var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'},{f:'oneshot_trap.mp4',n:'ONESHOT'},{f:'sciences_downfall.webm',n:'downfall'},{f:'noli.webm',n:'NOLI'},{f:'lordverity.webm',n:'VERITY'},{f:'vestige.mp3',n:'VESTIGE'},{f:'artisticswimming.webm',n:'SWIM'}];
 var ngMusicMode=0;
 function ngMusicLabel(){return ngMusicMode>=ngTracks.length?'MUSIC: OFF':'MUSIC: '+ngTracks[ngMusicMode].n}
 function ngMusicApply(){
 try{
 var b=document.getElementById('ngMenuMusic');if(b)b.textContent=ngMusicLabel();
-if(ngMusicMode>=ngTracks.length){if(ngMusic)ngMusic.pause();return}
+if(ngMusicMode>=ngTracks.length){if(ngMusic)ngMusic.pause();try{noliLyricStop()}catch(e){}
+try{if(typeof ngNoliAudio!=='undefined'&&ngNoliAudio){ngNoliAudio.pause();ngNoliAudio=null}}catch(e){}
+try{ngNoliOver=true}catch(e){}return}
 var want=ngTracks[ngMusicMode].f;
+try{if(want==='noli.webm')noliLyricStart(ngMusic);else noliLyricStop()}catch(e){}
 if(!ngMusic||ngMusic.getAttribute('src')!==want){
 if(ngMusic){try{ngMusic.pause()}catch(e){}}
 ngMusic=new Audio(want);ngMusic.loop=true;ngMusic.volume=0.28;
@@ -8388,7 +9707,7 @@ else oj19=ngMornReady?('override: item '+Math.min(ngMornItem+1,ngMornBatch.lengt
 t+='<br>objective: '+oj19;
 }
 else if(ngCurCh===20)t+='<br>objective: watch the credits. maybe edit them.';
-else if(ngCurCh===21)t+='<br>objective: wake up.';
+else if(ngCurCh===21)t+='<br>objective: survive the recap. the landlord is watching.';
 else{t+='<br>objective: fix the credits';try{t+='<br>music: '+ngTracks[ngMusicDefault()].n+' · voice: '+ngVoiceSpeed()+'ms'}catch(e){}}
 if(ngCurCh===-1){chPct=0;chLine='chapter -1/10 \u00b7 be quiet (impossible)';t='objective: be quiet (impossible)'}
 var ngPid=ngCurrentPuzzle();
@@ -8549,7 +9868,7 @@ return 'ch19fil';
 if(ngCurCh===-1)return 'minus1';
 if(ngCurCh===10)return 'cred';
 if(ngCurCh===20)return 'cred';
-if(ngCurCh===21)return 'dream';
+if(ngCurCh===100)return 'dream';
 if(ngCurCh===2&&ngManual<3)return 'tut0';
 return 'tut'+Math.max(1,ngTutStep);
 }
@@ -8577,6 +9896,7 @@ var ov=document.createElement('div');ov.id='ngOverlay';
 ov.innerHTML='<div id="ngObj"><span class="who">obj: </span><span id="ngObjText"></span></div>'+
 '<div id="ngJbo"><span class="who">jbo: </span><span id="ngJboText"></span></div>'+
 '<div id="ngCore"><span class="who">core: </span><span id="ngCoreText"></span></div>'+
+'<div id="ngLandlord" style="display:none"><span class="who" style="color:#d8a940">landlord: </span><span id="ngLandlordText"></span></div>'+
 '<div id="ngStage"></div>'+
 '<div id="ngMenuBtn">‡</div>'+
 '<div id="ngMenu"><div id="ngMenuTitle">NON-GAME MENU (there is none)</div><div id="ngMenuCh"></div><div id="ngMenuBar"><div id="ngMenuBarFill"></div></div><div id="ngMenuProg"></div><div class="ngMenuGrid"><button id="ngMenuHint">HINT</button><button id="ngMenuMusic">MUSIC: STANLEY</button><button id="ngMenuSpeed">SPEED: 1x</button><button id="ngMenuSpeedrun">SPEEDRUN: LOCKED</button><button id="ngMenuChapters">DOORS ▸</button><button id="ngMenuHard" style="display:none">HARD MODE: OFF</button><button id="ngMenuLeave">LEAVE THE NON-GAME</button></div></div>'+'<button id="ngSkipBtn" class="ngtopt" style="display:none;position:fixed;bottom:16px;right:16px;z-index:90010;letter-spacing:2px">SKIP ▸▸</button>';
@@ -8614,6 +9934,12 @@ ngShowChapter(svCh);
 }
 function ngExit(){
 if(!ngActive)return;
+try{noliLyricStop()}catch(e){}
+try{if(typeof ngNoliAudio!=='undefined'&&ngNoliAudio){ngNoliAudio.pause();ngNoliAudio=null}}catch(e){}
+try{if(typeof noliStop==='function')noliStop()}catch(e){}
+try{if(typeof noliGray==='function')noliGray(false)}catch(e){}
+try{ngNoliOver=true}catch(e){}
+try{var _hl=document.querySelectorAll('#hud');for(var _hi=0;_hi<_hl.length;_hi++){try{_hl[_hi].parentNode.removeChild(_hl[_hi])}catch(e){}}}catch(e){}
 // bug: feature — walking out during the ch19 shutdown countdown
 var _shutWalk=false;
 try{if(ngMornPh===5&&ngMornTmrIv&&ngMornAud)_shutWalk=true}catch(e){}
@@ -8855,7 +10181,7 @@ cubeCheckBusy=false;
 },2100)
 }
 function demoSnapshot(){var f='';try{var m=document.getElementById('main');if(m)f=m.style.filter||''}catch(e){}return{rx:typeof rX==='undefined'?0:rX,ry:typeof rY==='undefined'?0:rY,vx:typeof vX==='undefined'?0:vX,vy:typeof vY==='undefined'?0:vY,zz:typeof zZ==='undefined'?-9:zZ,shape:typeof curShape==='undefined'?'cube':curShape,theme:typeof curTheme==='undefined'?'1':curTheme,frozen:(typeof isFrozen==='undefined'?false:isFrozen),timeFrozen:(typeof window!=='undefined'&&window._timeFrozen===true),filter:f}}
-function demoRestore(s){try{if(!s)return;vX=s.vx;vY=s.vy;rX=s.rx;rY=s.ry;zZ=s.zz;if(typeof s.frozen==='boolean')isFrozen=s.frozen;if(typeof s.timeFrozen==='boolean')window._timeFrozen=s.timeFrozen;if(s.shape&&typeof rebuild==='function'){curShape=s.shape;rebuild(s.shape)}if(s.theme&&typeof applyTheme==='function'){applyTheme(s.theme)}var m=document.getElementById('main');if(m)m.style.filter=s.filter||''}catch(e){}}
+function demoRestore(s){try{if(!s)return;vX=s.vx;vY=s.vy;rX=s.rx;rY=s.ry;zZ=s.zz;if(typeof s.frozen==='boolean')isFrozen=s.frozen;if(typeof s.timeFrozen==='boolean')window._timeFrozen=s.timeFrozen;if(s.shape&&typeof rebuild==='function'){curShape=s.shape;rebuild(s.shape);try{syncShapePalette()}catch(e){}}if(s.theme&&typeof applyTheme==='function'){applyTheme(s.theme)}var m=document.getElementById('main');if(m)m.style.filter=s.filter||''}catch(e){}}
 function demoHudShow(rec){try{var el=document.getElementById('demoHud');if(!el)return;el.innerHTML='<span id="demoRec">▏</span> REC<br>demo '+rec.id+' · SCRIPT '+rec.script+'<br>'+rec.commit+' · tick 0000/'+String(rec.beats).padStart(4,'0')}catch(e){}}
 function demoHudTick(rec,done){try{var el=document.getElementById('demoHud');if(!el)return;var extra='';if(rec.script===7)extra+='<br>found tape · intruder #'+(1000+(rec.seed%9000));if(rec.script===9)extra+='<br>reel: act 2';if(demoState&&demoState.scene)extra+='<br>scene: '+demoState.scene;if(demoState&&demoState.whisper)extra+='<br>/// '+demoState.whisper;if(demoState&&demoState.inspect)extra+='<br>inspect: '+demoState.inspect;if(demoState&&demoState.said)extra+='<br>obj: '+demoState.said;el.innerHTML='<span id="demoRec">▏</span> REC<br>demo '+rec.id+' · SCRIPT '+rec.script+'<br>'+rec.commit+' · tick '+String(done).padStart(4,'0')+'/'+String(rec.beats).padStart(4,'0')+extra}catch(e){}}
 function demoDimPulse(rng){try{var m=document.getElementById('main');if(!m)return;m.style.filter='brightness(0.55) contrast(1.15)';demoLater(function(){try{if(demoState&&demoState.snap)m.style.filter=demoState.snap.filter||''}catch(e){}},650)}catch(e){}}
@@ -8907,7 +10233,7 @@ hx.globalCompositeOperation='source-over';
 }
 demoLibLoad();demoMaterialize();
 var cubeCheckTicks=0;
-setInterval(function(){try{cubeCheckTicks++;if(cubeCheckTicks<3)return;if(typeof demoPlaying!=='undefined'&&demoPlaying)return;if(typeof travelling!=='undefined'&&travelling)return;if(typeof currentView!=='undefined'&&currentView!=='void')return;if(typeof isFrozen!=='undefined'&&isFrozen)return;if(Math.random()<0.05){cubePrint('cubecheck.vsc: graffiti detected — generating...');pullGenerate()}}catch(e){}},50000);
+setInterval(function(){try{if(localStorage.getItem('cube_cubecheck')==='off')return;cubeCheckTicks++;if(cubeCheckTicks<3)return;if(typeof demoPlaying!=='undefined'&&demoPlaying)return;if(typeof travelling!=='undefined'&&travelling)return;if(typeof currentView!=='undefined'&&currentView!=='void')return;if(typeof isFrozen!=='undefined'&&isFrozen)return;if(Math.random()<0.05){cubePrint('cubecheck.vsc: graffiti detected — generating...');pullGenerate()}}catch(e){}},50000);
 setInterval(function(){try{if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'&&!window._edgeWalk&&typeof travelling!=='undefined'&&!travelling&&typeof demoPlaying!=='undefined'&&!demoPlaying){if(Math.random()<0.12){cubeWarn('you stepped off the menu.');cubePrint('the void caught you before the nothing did.');try{var fms=cbMenuClose();if(fms>0)cubeDim('menu survival: '+cbMenuFmt(fms)+' (best '+cbMenuFmt(Math.max(fms,cbMenuBest()))+')')}catch(e){}travelTo('void')}}}catch(e){}},30000);
 if(typeof voidScriptLang!=='undefined'){voidScriptLang['obj']={help:'obj - ask obj for pull access',fn:function(){objGrant();return true}};voidScriptLang['pull']={help:'pull [box.objbox.pull:51072|1-9] - play a procedural void demo (1-9 forces script, admin; 9 needs act 2)',fn:function(a){var pa=a&&a.length?a.join(' ').trim().toLowerCase():null;if(pa==='1'||pa==='2'||pa==='3'||pa==='4'||pa==='5'||pa==='6'||pa==='7'||pa==='8'||pa==='9'){pullRequest(null,pa);return true}pullRequest(pa);return true}};voidScriptLang['demos']={help:'demos - list saved void demos',fn:function(){demoList();return true}};voidScriptLang['replay']={help:'replay <demo file> - replay a saved void demo',fn:function(a){demoReplayCmd(a);return true}};voidScriptLang['void-mute']={help:'void-mute - silence void transmissions',fn:function(){setTxMuted(true);return true}};voidScriptLang['void-unmute']={help:'void-unmute - let the void talk again',fn:function(){setTxMuted(false);return true}};voidScriptLang['mail']={help:'mail - read your act 2 mail',fn:function(){ngMailRead();return true}};if(voidScriptLang['get']){var _demoOldGet=voidScriptLang['get'].fn;voidScriptLang['get'].fn=function(a){if(a&&a.length&&String(a[0]).toLowerCase()==='box.objbox.pull:51072'){pullRequest('box.objbox.pull:51072');return true}return _demoOldGet(a)};voidScriptLang['get'].help='get <name> — recall from voidspace; get box.objbox.pull:51072 pulls a demo'}}
 try{if(localStorage.getItem('cube_act2')==='1'){setTimeout(function(){try{cubeDim('the void remembers act 2. it was there. (type: mail)')}catch(e){}},5000)}}catch(e){}
@@ -8977,3 +10303,1125 @@ skillState.entropy=_e+1;skillSave();
 cubePrint('[upgrade] entropy: +5% income forever (stack '+skillState.entropy+'/'+_ecap+')');
 },600000/(1+upLv('skill_goldenAge')));
 //slammy
+
+var btnGameId=null;
+function buttonGame(){
+if(btnGameId&&typeof guiWins!=='undefined'&&guiWins[btnGameId]){cubePrint('the button is already contained. check your open windows.');return}
+var id=guiCreateWin('button containment',470,430,false);if(!id)return;
+btnGameId=id;
+var w=guiWins[id],ct=w.content,el=w.el;
+ct.style.cssText='position:relative;overflow:hidden;background:#0a0e0d;padding:0;display:flex;flex-direction:column;height:400px';
+var st={c:50,clicks:0,mt:Date.now(),mood:'calm',corp:0,corpLvl:0,breach:false,seized:false,rel:0,ids:1000,clickT:0,gray:false};
+var statusEl=document.createElement('div');
+statusEl.style.cssText='flex:0 0 auto;padding:7px 8px 4px;font:11px Consolas,monospace;text-align:center;color:#cfe8d4;letter-spacing:0.4px;min-height:24px';
+var meter=document.createElement('div');
+meter.style.cssText='flex:0 0 auto;height:8px;margin:0 10px;background:#131a17;border:1px solid #1f2b25;position:relative';
+var fill=document.createElement('div');
+fill.style.cssText='position:absolute;left:0;top:0;bottom:0;width:50%;background:#7fd46a;transition:width .15s';
+meter.appendChild(fill);
+var stage=document.createElement('div');
+stage.style.cssText='flex:1 1 auto;position:relative;overflow:hidden;margin-top:6px';
+var blobLayer=document.createElement('div');
+blobLayer.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none';
+stage.appendChild(blobLayer);
+var btn=document.createElement('button');
+btn.textContent='do thing';
+btn.style.cssText='position:absolute;width:160px;height:56px;font:bold 15px Consolas,monospace;cursor:pointer;background:#173826;color:#b6ffab;border:1px solid #3f7d4e;border-radius:6px;box-shadow:0 0 14px rgba(80,255,140,.15);left:0;top:0';
+stage.appendChild(btn);
+var logEl=document.createElement('div');
+logEl.style.cssText='flex:0 0 96px;overflow-y:auto;padding:5px 8px;border-top:1px solid #1c2620;font:10px Consolas,monospace;color:#7fa587;background:#070a09';
+ct.appendChild(statusEl);ct.appendChild(meter);ct.appendChild(stage);ct.appendChild(logEl);
+var titles=['button containment','this app has one job','obj button incident','cube# control panel','the void says this is fine','do not tell obj','containment active'];
+var btexts=['do thing','do other thing','press me coward','obj approved','bad idea button','cube#','one button left','do not audit','randomize it','the button knows'];
+var corpNames=['ignoring','monitoring','warning','restricting','asset designation','full lockdown'];
+function setTitle(t){try{var s=w.title.querySelector('span');if(s)s.textContent=formatGuiText(t)}catch(e){}}
+function centerBtn(){btn.style.left=Math.max(4,(stage.clientWidth-btn.offsetWidth-4)/2)+'px';btn.style.top=Math.max(4,(stage.clientHeight-btn.offsetHeight-4)/2)+'px'}
+function lg(m){st.ids++;var t=new Date();var hh=('0'+t.getHours()).slice(-2),mm=('0'+t.getMinutes()).slice(-2),ss=('0'+t.getSeconds()).slice(-2);
+var ln=document.createElement('div');ln.textContent='['+hh+':'+mm+':'+ss+']#'+st.ids+' '+m;logEl.insertBefore(ln,logEl.firstChild);while(logEl.childNodes.length>15)logEl.removeChild(logEl.lastChild)}
+function stStatus(){fill.style.width=Math.max(0,Math.min(100,st.c))+'%';
+fill.style.background=st.c>=80?'#6fbf5e':st.c<=15?'#d4c05e':'#7fd46a';
+var moodP=st.mood==='suspicious'?'! ':st.mood==='angry'?'x ':'';
+var corpS=corpNames[st.corp]||'ignoring';
+if(st.seized)statusEl.textContent='corporate lockdown: appeal '+st.rel+'/10 | mood: '+moodP+st.mood;
+else if(st.breach)statusEl.textContent='BREACH! uncontained | mood: '+moodP+st.mood+' | corp: '+corpS;
+else if(st.c>=80)statusEl.textContent='stable containment | mood: '+moodP+st.mood+' | corp: '+corpS;
+else if(st.c<=15)statusEl.textContent='containment decorative | mood: '+moodP+st.mood+' | corp: '+corpS;
+else statusEl.textContent='incidents: '+st.clicks+' | mood: '+moodP+st.mood+' | corp: '+corpS}
+function bAch(k){try{localStorage.setItem('cube_btn_'+k,'1')}catch(e){}try{ach('btn_'+k)}catch(e){}}
+function changeC(d){st.c=Math.max(0,Math.min(100,st.c+d));
+if(st.c===0&&!st.breach){st.breach=true;btn.textContent='uncontained';setTitle('button containment - uncontained');lg('containment breached. the button is unmanaged now.');bAch('breach')}
+else if(st.c>0&&st.breach){st.breach=false;btn.textContent='do thing';setTitle('button containment');lg('containment restored. back to business.')}
+if(st.c===100&&!st.seized){st.seized=true;st.rel=0;btn.textContent='appeal denied';setTitle('CORPORATE LOCKDOWN');lg('corporate seized the button. ten clicks to appeal.');bAch('seized')}
+else if(st.c<100&&st.seized){st.seized=false;st.rel=0}}
+function exitSeized(){st.seized=false;st.c=50;st.rel=0;btn.textContent='do thing';setTitle('button containment');lg('appeal granted. containment reset to 50. corporate is still watching.')}
+function blobs(n,cap){for(var i=0;i<n;i++){if(blobLayer.childNodes.length>=cap)break;
+var b=document.createElement('div');var s=8+Math.random()*36;
+b.style.cssText='position:absolute;left:'+(Math.random()*90)+'%;top:'+(Math.random()*85)+'%;width:'+s+'px;height:'+s+'px;border-radius:50%;opacity:'+(0.25+Math.random()*0.45)+';background:radial-gradient(circle,'+(Math.random()<0.5?'#2b6b3f,#0e1a12':'#5b3a7a,#140e1c')+');filter:blur(1px)';
+blobLayer.appendChild(b)}}
+function moveBtn(){var maxX=stage.clientWidth-btn.offsetWidth-6,maxY=stage.clientHeight-btn.offsetHeight-6;if(maxX<6)maxX=6;if(maxY<6)maxY=6;
+btn.style.left=(6+Math.random()*maxX)+'px';btn.style.top=(6+Math.random()*maxY)+'px'}
+function normEv(k){
+switch(k){
+case 0:stage.style.background=['#0b1416','#140b16','#0f140b','#0b0b14'][Math.floor(Math.random()*4)];
+btn.style.background=['#173826','#38251a','#251a38','#1a3838'][Math.floor(Math.random()*4)];
+btn.style.borderColor='#'+('000000'+Math.floor(Math.random()*0xffffff).toString(16)).slice(-6);lg('chromatic shift.');break;
+case 1:moveBtn();lg('button relocated without filing paperwork.');break;
+case 2:btn.style.width=(140+Math.random()*90)+'px';btn.style.height=(48+Math.random()*36)+'px';lg('mass modification event.');break;
+case 3:blobs(10,70);lg('visual residue detected.');break;
+case 4:setTitle(titles[Math.floor(Math.random()*titles.length)]);lg('window title anomaly.');break;
+case 5:btn.textContent=btexts[Math.floor(Math.random()*btexts.length)];lg('button text rewritten.');break;
+case 6:statusEl.style.color='#ff5c5c';setTimeout(function(){if(guiWins[id])statusEl.style.color='#cfe8d4'},500);lg('anomalous signal detected. the void muted it.');break;
+case 7:el.style.zIndex=(el.style.zIndex==='82')?'58':'82';setTitle(el.style.zIndex==='82'?'button is now too powerful':'button containment');lg('z-order dominance toggled.');break;
+case 8:el.style.opacity=(0.68+Math.random()*0.3).toFixed(2);lg('opacity event. the button is fading.');break;
+case 9:el.style.width=(420+Math.floor(Math.random()*260))+'px';lg('chamber dimensions shifted.');break;
+case 10:(function(){var ox=el.style.left,ot=el.style.top,n=0;
+var t=setInterval(function(){n++;if(n>16||!guiWins[id]){clearInterval(t);if(guiWins[id]){el.style.left=ox;el.style.top=ot}return}
+el.style.left=(parseInt(ox,10)+(Math.random()*14-7))+'px';el.style.top=(parseInt(ot,10)+(Math.random()*14-7))+'px'},30)})();lg('the window is wobbling.');break;
+case 11:centerBtn();lg('button recentered.');break;
+case 12:blobs(1,70);var seal=document.createElement('div');
+seal.style.cssText='position:absolute;left:'+(btn.offsetLeft-6)+'px;top:'+(btn.offsetTop-6)+'px;width:'+(btn.offsetWidth+12)+'px;height:'+(btn.offsetHeight+12)+'px;border:2px solid #d4a03a;border-radius:8px;opacity:.8';
+blobLayer.appendChild(seal);lg('containment seal applied.');break;
+case 13:btn.textContent=btn.textContent.split('').join(' ');lg('text altered.');setTimeout(function(){if(guiWins[id])btn.textContent='do thing'},1200);break;
+case 14:(function(){var o=document.createElement('div');
+o.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#101a14;border:1px solid #3f7d4e;padding:12px 16px;font:12px Consolas,monospace;color:#b6ffab;z-index:5;cursor:pointer';
+o.textContent='a smaller button was considered. it was denied.';stage.appendChild(o);
+var kill=function(){if(o.parentNode)o.parentNode.removeChild(o)};o.onclick=kill;setTimeout(kill,2400)})();lg('tiny button report filed.');break;
+case 15:blobLayer.innerHTML='';el.style.opacity='';el.style.zIndex='58';stage.style.filter='';st.gray=false;stage.style.background='';lg('visual reset. the void cleared its throat.');changeC(18);break;
+case 16:lg(['audit complete: button remains button-shaped.','admin found no issues and three issues.','incident report submitted to nobody.','containment says yes. reality says maybe.','the button passed inspection by not moving for one second.'][Math.floor(Math.random()*5)]);break;
+case 17:(function(){var old=stage.style.background;stage.style.background='#d8d8d0';btn.style.color='#111';btn.style.background='#eee';btn.style.borderColor='#888';
+setTimeout(function(){if(!guiWins[id])return;stage.style.background=old;btn.style.color='';btn.style.background='';btn.style.borderColor=''},1500)})();lg('color inversion event.');break;
+case 18:btn.textContent='#?!%&@';setTimeout(function(){if(guiWins[id]&&!st.breach&&!st.seized)btn.textContent='do thing'},800);lg('text malfunction.');break;
+case 19:blobs(30,70);lg('memory leak detected. nobody is cleaning it.');break;
+}}
+function rareEv(k){bAch('myth');
+switch(k){
+case 30:(function(){var o=document.createElement('div');o.tabIndex=-1;
+o.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;background:#05070a;color:#ff3b3b;font:13px Consolas,monospace;padding:16px;z-index:9;cursor:pointer';
+o.innerHTML='BUTTON.EXE has stopped responding<br><br>Press any key to dismiss. (it finally listens.)<br><span style="color:#7fa587;font-size:10px">this crash is cosmetic. like all of them.</span>';
+stage.appendChild(o);
+var kd=function(){kill()};var kill=function(){if(o.parentNode)o.parentNode.removeChild(o);document.removeEventListener('keydown',kd)};
+o.onclick=kill;document.addEventListener('keydown',kd);setTimeout(kill,5000)})();lg('RARE: fake crash window displayed.');break;
+case 31:(function(){var n=0;var t=setInterval(function(){n++;if(n>18||!guiWins[id]){clearInterval(t);if(guiWins[id])el.style.transform='';return}
+el.style.transform='translate('+(Math.random()*10-5)+'px,'+(Math.random()*10-5)+'px)'},28)})();lg('RARE: screen shake. hold on.');break;
+case 32:st.gray=!st.gray;stage.style.filter=st.gray?'grayscale(1)':'';lg('RARE: grayscale event. the color left.');break;
+case 33:setTitle('CORPORATE_INTERVENTION_DETECTED');statusEl.style.color='#ff5c5c';st.corp=Math.min(5,st.corp+1);st.corpLvl=Math.max(st.corpLvl,st.corp);changeC(25);
+lg('RARE: corporate intervention. +25 containment, against your will.');
+setTimeout(function(){if(!guiWins[id])return;statusEl.style.color='#cfe8d4';if(st.corp<2)setTitle('button containment')},1500);break;
+case 34:(function(){var g=document.createElement('div');
+g.style.cssText='position:absolute;left:40px;top:34px;width:'+btn.offsetWidth+'px;height:'+btn.offsetHeight+'px;border:1px solid #6a9a76;background:#173826;color:#b6ffab;font:bold 14px Consolas,monospace;opacity:.85;z-index:6;pointer-events:none';
+g.textContent='do thing';stage.appendChild(g);setTimeout(function(){if(g.parentNode)g.parentNode.removeChild(g)},2200)})();lg('RARE: duplicate button illusion. do not both-press.');break;
+case 35:btn.textContent='do not click me again';btn.style.color='#ff5c5c';lg('RARE: the button remembers.');break;
+case 36:(function(){var last=btn.textContent;btn.style.display='none';
+var o=document.createElement('div');
+o.style.cssText='position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(5,7,10,.94);color:#b6ffab;font:14px Consolas,monospace;display:flex;align-items:center;justify-content:center;text-align:center;z-index:9;padding:12px';
+o.textContent='BUTTON HAS ESCAPED - last seen "'+last+'"';stage.appendChild(o);
+lg('RARE: ButtonEscape executed. the button is at large.');bAch('escaped');
+setTimeout(function(){if(!guiWins[id])return;if(o.parentNode)o.parentNode.removeChild(o);btn.style.display='';centerBtn()},3200)})();break;
+}}
+function selEv(n){var out=[];
+for(var i=0;i<n;i++){
+if(Math.random()<0.02){out.push(30+Math.floor(Math.random()*7));continue}
+var x=Math.floor(Math.random()*20);
+if(st.mood==='suspicious')x=Math.min(x,12);
+else if(st.mood==='angry')x=Math.max(x,8);
+if(st.corp>=3&&x>=12)x=Math.floor(Math.random()*12);
+out.push(x)}
+return out}
+function resist(){var ch=0.15;
+if(st.mood==='suspicious')ch=0.4;
+else if(st.mood==='angry')ch=0.05;
+return Math.random()<ch}
+function doResist(){var k=Math.floor(Math.random()*4);
+if(k===0){centerBtn();lg('button forced back to center.')}
+else if(k===1){btn.textContent=['no.','refused.','nope','...','never','you first'][Math.floor(Math.random()*6)];lg('button refused to be pressed.')}
+else if(k===2){changeC(8);lg('resistance increased its own containment.')}
+else lg('action ignored.')}
+function moodUpd(){var now=Date.now();
+if(now-st.mt<8000)st.mood='suspicious';
+else if(now-st.mt<15000)st.mood='annoyed';
+else st.mood='calm';
+if(st.mood==='suspicious'&&Math.random()<0.005)st.mood='angry'}
+function moodClick(){st.mt=Date.now();
+if(st.clicks%20===0)st.mood=Math.random()<0.1?'angry':(st.mood==='panicked'?'calm':'panicked')}
+function corpTick(){var prev=st.corp;
+if(st.mood==='angry'||st.mood==='suspicious')st.corpLvl=Math.min(5,st.corpLvl+0.5);
+else if(st.clicks%15===0&&st.clicks>0)st.corpLvl=Math.max(0,st.corpLvl-0.5);
+st.corp=Math.floor(st.corpLvl);
+if(st.corp!==prev){lg('corporate status: '+corpNames[st.corp]+'.');
+if(st.corp>=2)setTitle('[CORP WARNING] button containment');
+if(st.corp===5)bAch('lockdown');
+if(st.corp<2&&prev>=2)setTitle('button containment')}}
+function idleTick(){if(st.breach||st.seized)return;
+if(Math.random()<0.25){setTitle(titles[Math.floor(Math.random()*titles.length)]);
+statusEl.textContent=Math.random()<0.5?'the button is thinking.':'the button is pretending not to think.';
+setTimeout(function(){if(guiWins[id])stStatus()},1600)}}
+btn.onclick=function(){var now=Date.now();
+st.clicks++;moodClick();
+if(now-st.clickT<400)st.corpLvl=Math.min(5,st.corpLvl+1);
+st.clickT=now;
+if(st.seized){st.rel++;if(st.rel>=10)exitSeized();stStatus();return}
+if(resist()){doResist();moodUpd();stStatus();return}
+var n=1;if(st.c===0)n=5;if(st.mood==='panicked')n+=1;
+var evs=selEv(n);
+for(var i=0;i<evs.length;i++){var e=evs[i];
+if(e<30)changeC(Math.floor(Math.random()*20)-12);
+try{if(e<30)normEv(e);else rareEv(e)}catch(err){}
+if(st.seized)break}
+moodUpd();stStatus()};
+lg('button containment initiated. containment 50%.');
+lg('reminder: you are the only incident so far.');
+lg('the button is watching your cursor.');
+setTitle('button containment');
+centerBtn();stStatus();
+setTimeout(function(){if(guiWins[id])centerBtn()},80);
+var tIdle=setInterval(function(){if(!guiWins[id]){clearInterval(tIdle);clearInterval(tCorp);btnGameId=null;return}idleTick()},2100);
+var tCorp=setInterval(function(){if(!guiWins[id]){clearInterval(tCorp);btnGameId=null;return}moodUpd();corpTick();stStatus()},1500);
+}
+
+var SHIFT_CH=[
+{t:'the lobby',pay:2,task:'sweep',intro:[['obj','new hire. dont expect a welcome.'],['obj','first job: the lobby has debris. mountains of it. it grows back every night. thats not a metaphor, thats maintenance.'],['obj','click the junk until it isnt there. try not to click yourself.']],outro:[['obj','acceptable. the mop likes you. the mop doesnt like anyone.'],['obj','next job is on the board. dont read into the fact that it knows your name.']]},
+{t:'reroute the grid',pay:3,task:'simon',intro:[['jbo','the grid is out of SEQUENCE. i am flashing the cells.'],['jbo','repeat it exactly. DO NOT IMPROVISE. improvisation is how rod four died.'],['jbo','five rounds. they get longer. GLOVES OFF. (there are no gloves.)']],outro:[['jbo','SEQUENCE HELD. you may touch the grid again. supervised.']]},
+{t:'restart the beat',pay:3,task:'beat',intro:[['core','i slowed. there is a difference and im upset you have to see it.'],['core','when the marker crosses my beat, press. space or the pad. ten steady beats and i restart.'],['core','missing is fine. i have a whole building of missing.']],outro:[['core','steady. thank you. the building feels that.']]},
+{t:'blueprint check',pay:3,task:'blue',intro:[['jbo','BLUEPRINT AUDIT. five sheets. one wrong cell each.'],['jbo','i put it there on PURPOSE. i was bored and you needed a test.'],['jbo','find them all. the printer is watching.']],outro:[['jbo','you have EYES. noted. the sheet survives another night.']]},
+{t:'paperwork',pay:4,task:'forms',intro:[['obj','fourteen forms. sign them. the clerk closes in nine minutes and i am not negotiating with a clerk.'],['obj','one already has a signature on it. its not yours. sign it anyway or dont.'],['obj','im not your supervisor. im the text.']],outro:[['obj','signed, filed, archived. if anyone asks, you signed everything.']]},
+{t:'inventory',pay:3,task:'count',intro:[['void','inventory. the void counts what the building hides.'],['void','count the squares. then the circles. then the triangles. the geometry remembers.'],['void','the clock is not yours. accuracy is the only kindness.']],outro:[['void','counts accepted. the void counts your breaths.']]},
+{t:'the flicker',pay:3,task:'flicker',intro:[['core','the lobby light. it flickers, and when it goes dark i am not always in the room.'],['core','stabilize it: press the pad while it is dark. twelve times.'],['core','i will be in the reactor. do not let the dark win. it is very patient.']],outro:[['core','the light holds. so do i. mostly.']]},
+{t:'the file',pay:4,task:'type',intro:[['core','i lost a file. small one. nothing-shaped.'],['jbo','THE NAME IS ON THE CARD. type it exactly. CASE SENSITIVE. this building runs on spite and case sensitivity.'],['nothingcore','...i already have that one. it was fine when i left it. >:'],['core','you did not. you cannot file something that isnt there.'],['nothingcore','not with that attitude.']],outro:[['core','it opened. it was empty.'],['nothingcore','...yep. filed it. >:']]},
+{t:'second sweep',pay:3,task:'sweep2',intro:[['obj','lobby again. i know.'],['obj','and no, it does not stay clean. thats the job. its also, technically, the name of the job.'],['nothingcore','...i can get that. i can just—'],['obj','you were never here.']],outro:[['nothingcore','...did you do that? >:'],['obj','lobby is clean. you are clean. this feels wrong. moving on.']]},
+{t:'roster audit',pay:3,task:'roster',intro:[['jbo','NIGHT ROSTER. the top list is OFFICIAL. blueprint office.'],['jbo','bottom list is what the TERMINAL logged tonight. reconcile them.'],['jbo','click the name that should not be getting PAID.']],outro:[['jbo','roster reconciled. one extra name. IT HAPPENS.'],['jbo','(it does not happen.)']]},
+{t:'complaint',pay:4,task:'mail',intro:[['void','a complaint is filed against cube# building management.'],['void','it is from the void. the void is always filing.'],['void','draft a reply. choose carefully. the void keeps receipts. the receipts are also void.']],outro:[['void','reply accepted. complaint withdrawn. mostly.']]},
+{t:'last shift',pay:10,task:'finale',intro:[['obj','last job of the shift. ten beats, seven rounds of grid, seventy sweep.'],['obj','then the building gets signed off and you go be someone else for a while.'],['core','we will be here. thats sort of the whole arrangement.']],outro:[['core','beat steady.'],['jbo','GRID HELD.'],['obj','lobby clean, papers everywhere, three signatures i did not ask for. good shift, new hire.'],['nothingcore','...i was already clocked out. thanks for the shift. >:'],['void','the void acknowledges your hours. clock out.'],['obj','the building will invent new work tomorrow. it always does.']]}
+];
+var SHIFT_COL={obj:'#64ffa0',jbo:'#7ab7ff',core:'#ff9db8',nothingcore:'#ff3c78',void:'#c3a6ff',cube:'#ffd166'};
+var SH_NOLI=["the sun is so far away, that its rays are parallel when they reach the earth.","N-O-L-I ... N-O-L-I","there was a time i ruled the skies, covered in shades of blue","monochromatic, purely dramatic as hue","there was a time i lost everything, cause everything's overdue","and due to my power i owned and devoured yours too","and so, if the oasis calls me back, i guess i'll turn my back towards the sun","let my crown be your own ID, and my face your own disguise","cause the world is bound to know ... N-O-L-I","N-O-L-I ... N-O-L-I","there was a time i ruled the world, covered in cultists' laws","ever so frantic, but oh so romantic to cause","there was a time i had it all, i think it's coming back","ever so slowly, while reaching the goalie i'd lost","and so, if the oasis tries to fall, i'm sure i will sit idly through it all","let my crown be yours so kindly, and my timely manner, done","cause the world is bound to go, as you and i","yes, the world is bound to know ... N-O-L-I"];
+var SH_NOLI_T=[4,17,26,36,46,56,66,88,100,112,118,128,140,150,160,176,182,197];
+var noliIv=null,noliLi=-1,noliEl=null,noliAudio=null,noliVIdx=0,noliBase=-1,noliLastOn=0,noliWasLow=false,noliPeak=0;
+function noliWaveCss(){if(document.getElementById('noliWaveCss'))return;var st=document.createElement('style');st.id='noliWaveCss';st.textContent='@keyframes noliwave{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}';document.head.appendChild(st)}
+function noliRender(line){if(!noliEl)return;while(noliEl.firstChild)noliEl.removeChild(noliEl.firstChild);var words=line.split(' ');for(var w=0;w<words.length;w++){if(w>0)noliEl.appendChild(document.createTextNode(' '));var ws=document.createElement('span');ws.style.cssText='display:inline-block;white-space:nowrap';var wd=words[w];for(var i=0;i<wd.length;i++){var s=document.createElement('span');s.textContent=wd.charAt(i);s.style.cssText='display:inline-block;animation:noliwave 1.6s ease-in-out infinite;animation-delay:'+((w*8+i)*0.07).toFixed(2)+'s';ws.appendChild(s)}noliEl.appendChild(ws)}}
+function noliVoiceLevel(){try{if(typeof audioAnalyser==='undefined'||!audioAnalyser||typeof audioData==='undefined'||!audioData)return -1;audioAnalyser.getByteFrequencyData(audioData);var s=0,mx=0,v=0;for(var i=2;i<=20;i++){v=audioData[i]||0;s+=v;if(v>mx)mx=v}var mean=s/19;noliPeak=mean>2?mx/mean:0;return s/19/255}catch(e){return -1}}
+function noliTick(){if(!noliEl)return;var t=0;try{t=(noliAudio&&noliAudio.currentTime)||0}catch(e){}try{var dur=(noliAudio&&noliAudio.duration)||226;if(t>=dur-3&&t>30){try{localStorage.setItem('cube_noli_full','1')}catch(e){}try{ach('noli_full')}catch(e){}}}catch(e){}var tidx=0;for(var i=0;i<SH_NOLI_T.length;i++){if(SH_NOLI_T[i]<=t+2)tidx=i}var now=Date.now();var lvl=noliVoiceLevel();if(lvl>=0){if(noliBase<0)noliBase=lvl;else noliBase+=(lvl-noliBase)*0.03;if(lvl<noliBase*1.2)noliWasLow=true;if(noliWasLow&&lvl>0.14&&lvl>noliBase*2.0&&noliPeak>2.5&&(now-noliLastOn)>7000&&noliVIdx<SH_NOLI.length-1){var nt2=0;try{nt2=(noliAudio&&noliAudio.currentTime)||0}catch(e){}if(SH_NOLI_T[noliVIdx+1]<=nt2+8){noliVIdx++;noliLastOn=now}noliWasLow=false}}var idx=Math.min(Math.max(noliVIdx,tidx),tidx+1);if(idx!==noliLi){noliLi=idx;noliRender(SH_NOLI[idx])}}
+function noliStart(parent,audio){noliStop();if(!parent)return;noliWaveCss();noliAudio=audio||null;noliLi=-1;noliVIdx=0;noliBase=-1;noliLastOn=0;noliWasLow=false;noliEl=document.createElement('div');var fixed=(parent===document.body);noliEl.style.cssText='position:'+(fixed?'fixed':'absolute')+';left:50%;transform:translateX(-50%);top:62%;max-width:92vw;font:30px Consolas,monospace;text-align:center;color:#fff;opacity:.9;letter-spacing:2px;text-shadow:0 2px 10px #000,0 0 26px rgba(0,0,0,.9);z-index:'+(fixed?'90000':'5')+';pointer-events:none;line-height:1.6';parent.appendChild(noliEl);try{noliGray(true)}catch(e){}noliTick();noliIv=setInterval(noliTick,1000)}
+var noliGrayEl=null;
+function noliGray(on){try{if(on){if(!noliGrayEl){noliGrayEl=document.createElement('div');noliGrayEl.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;backdrop-filter:grayscale(1);-webkit-backdrop-filter:grayscale(1);pointer-events:none;z-index:95000;opacity:0;transition:opacity 1.2s';document.body.appendChild(noliGrayEl);void noliGrayEl.offsetHeight}noliGrayEl.style.opacity='1'}else if(noliGrayEl){noliGrayEl.style.opacity='0'}}catch(e){}}
+function noliStop(){if(noliIv){clearInterval(noliIv);noliIv=null}if(noliEl&&noliEl.parentNode){noliEl.parentNode.removeChild(noliEl)}noliEl=null;noliAudio=null;try{noliGray(false)}catch(e){}}
+function shNoliStart(){if(!shRoot||!shBgm)return;noliStart(shRoot,shBgm)}
+function shNoliStop(){noliStop()}
+function noliLyricStart(audio){noliStart(document.body,audio||null)}
+function noliLyricStop(){noliStop()}
+function noliUnlocked(){try{return localStorage.getItem('cube_noli_full')==='1'}catch(e){return false}}var shift={ch:1,slips:0};
+var shRoot=null,$shStage=null,$shDlg=null,$shSpk=null,$shTxt=null,$shSub=null,$shHud=null;
+var shMode='menu',shTimers=[],shDlgS=null,shBeatPress=null,shCur=0,shBgm=null,shBgmMuted=false,shWasBgm=false,shBgmPlayIdx=0,shBgmPlayList=['vestige.mp3'],shBgmSrc=null;
+function shT(fn,ms){var t=setTimeout(fn,ms);shTimers.push(t);return t}
+function shI(fn,ms){var t=setInterval(fn,ms);shTimers.push(t);return t}
+function shClearTimers(){for(var i=0;i<shTimers.length;i++){clearTimeout(shTimers[i]);clearInterval(shTimers[i])}shTimers=[]}
+function shD(parent,cls,txt){var e=document.createElement('div');if(cls)e.className=cls;if(txt!=null)e.textContent=txt;parent.appendChild(e);return e}
+function shBtn(parent,txt,fn){var b=document.createElement('button');b.className='sh-btn';b.textContent=txt;b.onclick=function(ev){ev.stopPropagation();fn()};parent.appendChild(b);return b}
+function shConfirmBtn(parent,txt,fn){var armed=false;var b=shBtn(parent,txt,function(){if(!armed){armed=true;b.textContent='CLICK AGAIN TO CONFIRM';shT(function(){if(b){armed=false;b.textContent=txt}},3000)}else{armed=false;b.textContent=txt;fn()}});return b}
+function shAch(k){try{localStorage.setItem('cube_shift_'+k,'1')}catch(e){}try{ach('shift_'+k)}catch(e){}}
+function shLoad(){shift.ch=parseInt(localStorage.getItem('cube_shift_ch')||'1',10);shift.slips=parseInt(localStorage.getItem('cube_shift_slips')||'0',10);if(isNaN(shift.ch)||shift.ch<1)shift.ch=1;if(isNaN(shift.slips)||shift.slips<0)shift.slips=0}
+function shSave(){try{localStorage.setItem('cube_shift_ch',String(shift.ch));localStorage.setItem('cube_shift_slips',String(shift.slips))}catch(e){}}
+function shHud(){$shHud.textContent='PAY '+shift.slips+'   JOBS '+Math.min(11,Math.max(0,shift.ch-1))+'/12'}
+function shBuild(){
+if(shRoot)return;
+shRoot=document.createElement('div');shRoot.id='shiftRoot';
+var st=document.createElement('style');
+st.textContent='#shiftRoot{position:fixed;left:0;top:0;right:0;bottom:0;z-index:90100;background:radial-gradient(ellipse at 50% 15%,#0d1220 0%,#07080f 60%,#04050a 100%);display:none;flex-direction:column;color:#cdd7ff;font-family:Consolas,"Courier New",monospace;user-select:none}'+
+'#shiftRoot.on{display:flex}'+
+'.sh-wrap{width:min(920px,94vw);margin:0 auto;display:flex;flex-direction:column;height:100%}'+
+'.sh-head{display:flex;align-items:center;gap:14px;padding:14px 4px 10px;border-bottom:1px solid #1d2440}'+
+'.sh-logo{font-size:17px;letter-spacing:5px;color:#8fa8ff;text-shadow:0 0 12px rgba(120,150,255,.45)}'+
+'.sh-sub{font-size:10px;letter-spacing:2px;color:#5a6490;flex:1}'+
+'.sh-hud{font-size:11px;color:#9ae6b4;letter-spacing:1px}'+
+'.sh-x{cursor:pointer;color:#667;border:1px solid #2a3150;width:24px;height:24px;text-align:center;line-height:21px;font-size:13px}'+
+'.sh-x:hover{color:#f66;border-color:#833}'+
+'.sh-main{flex:1;display:flex;flex-direction:column;padding:12px 4px 14px;gap:10px;min-height:0}'+
+'.sh-stage{flex:1;min-height:310px;position:relative;border:1px solid #1d2440;background:rgba(8,10,18,.7);border-radius:6px;overflow:hidden}'+
+'.sh-dlg{border:1px solid #26305a;background:linear-gradient(180deg,rgba(12,14,26,.96),rgba(8,9,16,.96));padding:11px 14px;min-height:96px;cursor:pointer;border-radius:6px}'+
+'.sh-spk{font-size:11.5px;letter-spacing:2.5px;margin-bottom:6px}'+
+'.sh-txt{font-size:13.5px;line-height:1.55;color:#dfe6ff;min-height:46px}'+
+'.sh-btn{background:#131a30;color:#bfd0ff;border:1px solid #2b3a6a;padding:8px 16px;font:12px Consolas,monospace;letter-spacing:1px;cursor:pointer;border-radius:4px;margin:3px}'+
+'.sh-btn:hover{background:#1d2a4e;border-color:#4a63b0}'+
+'.sh-btn:disabled{opacity:.35;cursor:default}'+
+'.sh-menu{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}'+
+'.sh-big{font-size:30px;letter-spacing:12px;color:#9fb4ff;text-shadow:0 0 22px rgba(120,150,255,.55)}'+
+'.sh-tag{font-size:10.5px;letter-spacing:4px;color:#5a6490;margin-bottom:16px}'+
+'.sh-stat{font-size:11px;color:#7fa587;letter-spacing:1px}'+
+'.sh-hudline{position:absolute;left:10px;top:8px;font-size:12px;letter-spacing:1px;color:#9ae6b4;z-index:3}'+
+'.sh-status{position:absolute;left:10px;bottom:8px;font-size:11.5px;color:#8fa8ff;letter-spacing:.5px;z-index:3}'+
+'.sh-debris{position:absolute;cursor:pointer;transition:transform .18s,opacity .18s;border-radius:2px;opacity:.9}'+
+'.sh-debris:hover{filter:brightness(1.5)}'+
+'.sh-cell{width:74px;height:74px;background:#0f1526;border:1px solid #243054;font:22px Consolas,monospace;color:#5a76c8;cursor:pointer;border-radius:4px;margin:3px}'+
+'.sh-cell.on{background:#ffe27a;color:#201a00;border-color:#ffd76a}'+
+'.sh-cell.ok{background:#2b6a3f;color:#b6ffab;border-color:#4d9d67}'+
+'.sh-cell.bad{background:#6a2b2b;color:#ffb6b6;border-color:#9d4d4d}'+
+'.sh-bar{position:relative;height:52px;background:#0c1120;border:1px solid #1f2b4a;border-radius:5px;margin:14px 16px 6px;overflow:hidden}'+
+'.sh-zone{position:absolute;top:0;bottom:0;left:42%;width:16%;background:rgba(100,255,160,.14);border-left:1px solid rgba(100,255,160,.4);border-right:1px solid rgba(100,255,160,.4)}'+
+'.sh-mark{position:absolute;top:4px;bottom:4px;width:4px;background:#fff;left:0;box-shadow:0 0 8px #fff;border-radius:2px}'+
+'.sh-bar.hit{background:rgba(60,160,90,.3)}'+
+'.sh-bar.miss{background:rgba(160,60,60,.3)}'+
+'.sh-pad{position:absolute;left:50%;transform:translateX(-50%);bottom:14px;font-size:15px;letter-spacing:3px;padding:12px 34px}'+
+'.sh-grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:14px}'+
+'.sh-bcell{background:#0f1526;border:1px solid #1e2a4a;color:#6f8fd8;font:18px Consolas,monospace;text-align:center;padding:9px 0;cursor:pointer;border-radius:3px}'+
+'.sh-bcell:hover{border-color:#3f5a9e}'+
+'.sh-bcell.ok{background:#1d4a2e;color:#b6ffab}'+
+'.sh-bcell.bad{background:#4a1d1d;color:#ffb6b6}'+
+'.sh-form{display:flex;align-items:center;gap:10px;border:1px solid #1e2a4a;background:rgba(12,15,28,.8);margin:7px 16px;padding:9px 12px;border-radius:4px}'+
+'.sh-ftitle{flex:1;font-size:12px;color:#cdd7ff}'+
+'.sh-fsig{font-size:11px;color:#7fa587;width:130px;letter-spacing:1px}'+
+'.sh-fsig.n{color:#c3a6ff}'+
+'.sh-fdone{font-size:11px;letter-spacing:1px;color:#64ffa0;width:110px}'+
+'.sh-fdone.r{color:#7ab7ff}'+
+'.sh-fdone.x{color:#ff6b6b}'+
+'.sh-shake{animation:shsh .3s}'+
+'@keyframes shsh{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}'+
+'.sh-q{position:absolute;left:0;top:0;right:0;padding:12px 14px;font-size:13px;color:#cdd7ff;letter-spacing:1px;text-align:center;background:rgba(8,10,18,.85);border-bottom:1px solid #1d2440;z-index:4}'+
+'.sh-pile{position:absolute;left:0;top:44px;right:0;bottom:0}'+
+'.sh-shape{position:absolute}'+
+'.sh-shape.sq{border-radius:3px}'+
+'.sh-shape.ci{border-radius:50%}'+
+'.sh-lamp{position:absolute;left:50%;top:70px;transform:translateX(-50%);width:230px;height:96px;background:#171a14;border:1px solid #2a2f22;border-radius:6px;transition:all .12s}'+
+'.sh-lamp.on{background:#f5efc0;box-shadow:0 0 60px 18px rgba(255,244,170,.55);border-color:#fff}'+
+'.sh-card{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);background:#101a14;border:1px solid #3f7d4e;padding:16px 26px;font:15px Consolas,monospace;color:#b6ffab;letter-spacing:2px;border-radius:5px}'+
+'.sh-inp{position:absolute;left:50%;top:58%;transform:translateX(-50%);width:300px;background:#0a0e18;border:1px solid #2b3a6a;color:#dfe6ff;font:15px Consolas,monospace;padding:9px 11px;outline:none;border-radius:4px}'+
+'.sh-inp.bad{border-color:#9d4d4d;animation:shsh .3s}'+
+'.sh-rlist{margin:10px 16px;border:1px solid #1e2a4a;background:rgba(12,15,28,.7);border-radius:5px;padding:8px 12px}'+
+'.sh-rlabel{font-size:10px;letter-spacing:2px;color:#5a6490;margin-bottom:5px}'+
+'.sh-item{display:inline-block;font-size:12.5px;border:1px solid #243054;background:#0f1526;margin:3px 5px 3px 0;padding:5px 11px;border-radius:3px;cursor:pointer;letter-spacing:1px}'+
+'.sh-item:hover{border-color:#4a63b0}'+
+'.sh-item.dead{opacity:.4;text-decoration:line-through;border-color:#9d4d4d;color:#ff9db8}'+
+'.sh-compl{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:74%;background:#120f1c;border:1px solid #3a2f5a;padding:16px 20px;font-size:12.5px;line-height:1.6;color:#d6c9ff;border-radius:5px}'+
+'.sh-opts{position:absolute;left:50%;top:76%;transform:translateX(-50%);width:74%;text-align:center}'+
+'.sh-opts .sh-btn{display:block;width:100%;text-align:left;margin:5px 0}'+
+'.sh-done{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}'+
+'.sh-donet{font-size:22px;letter-spacing:8px;color:#64ffa0;text-shadow:0 0 18px rgba(100,255,160,.45)}'+
+'.sh-note{position:absolute;right:10px;top:8px;font-size:11px;color:#9aa0b8;letter-spacing:1px;z-index:3}';
+document.head.appendChild(st);
+shRoot.innerHTML='<div class="sh-wrap"><div class="sh-head"><div class="sh-logo">CUBE SHIFT</div><div class="sh-sub" id="shSub">night operations -- cube# building</div><div class="sh-hud" id="shHud"></div><div class="sh-x" id="shMus" title="music">&#9835;</div><div class="sh-x" id="shX" title="clock out (esc)">&#215;</div></div><div class="sh-main"><div class="sh-stage" id="shStage"></div><div class="sh-dlg" id="shDlg"><div class="sh-spk" id="shSpk"></div><div class="sh-txt" id="shTxt"></div></div></div></div>';
+document.body.appendChild(shRoot);
+$shStage=shRoot.querySelector('#shStage');$shDlg=shRoot.querySelector('#shDlg');$shSpk=shRoot.querySelector('#shSpk');$shTxt=shRoot.querySelector('#shTxt');$shSub=shRoot.querySelector('#shSub');$shHud=shRoot.querySelector('#shHud');
+shRoot.querySelector('#shX').onclick=shClose;
+try{shBgmMuted=localStorage.getItem('cube_shift_mute')==='1'}catch(e){}
+try{shBgm=new Audio('vestige.mp3');shBgm.loop=false;shBgm.volume=0.4;shBgmPlayIdx=0;shBgmPlayList=['vestige.mp3'];shBgm.onended=function(){try{shNoliStop();shBgmPlayIdx=(shBgmPlayIdx+1)%shBgmPlayList.length;shBgm.src=shBgmPlayList[shBgmPlayIdx];function shBgmGo(){shNoliStart();if(!shBgmMuted&&shRoot.classList.contains('on'))shBgm.play().catch(function(){})}shBgmGo()}catch(e){}}}catch(e){shBgm=null}
+var $mus=shRoot.querySelector('#shMus');
+function musUpd(){$mus.textContent=shBgmMuted?'\u266a\u0338':'\u266a';$mus.style.opacity=shBgmMuted?'.4':'1'}
+$mus.onclick=function(){shBgmMuted=!shBgmMuted;try{localStorage.setItem('cube_shift_mute',shBgmMuted?'1':'0')}catch(e){}musUpd();
+if(shBgm){if(shBgmMuted||!shRoot.classList.contains('on'))shBgm.pause();else shBgm.play().catch(function(){})}};
+musUpd();
+$shDlg.onclick=function(){if(shMode==='dlg')shDlgNext()};
+document.addEventListener('keydown',function(e){
+if(!shRoot||!shRoot.classList.contains('on'))return;
+if(e.key==='Escape'){shClose();return}
+if(e.target&&(e.target.tagName==='INPUT'))return;
+if(e.key===' '||e.key==='Enter'){
+if(shMode==='dlg'){e.preventDefault();shDlgNext()}
+else if(shMode==='task'&&shBeatPress){e.preventDefault();shBeatPress()}}
+});
+}
+function shOpen(){shBuild();shLoad();var wasOpen=shRoot.classList.contains('on');shRoot.classList.add('on');
+if(!wasOpen){
+try{shWasBgm=(typeof bgm!=='undefined'&&bgm&&!bgm.paused)}catch(e){shWasBgm=false}
+try{if(typeof bgm!=='undefined'&&bgm)bgm.pause()}catch(e){}
+if(shBgm&&!shBgmMuted)shBgm.play().catch(function(){});
+}
+try{if(typeof termField!=='undefined'&&termField)termField.blur()}catch(e){}try{if((typeof audioCtx==='undefined'||!audioCtx)&&typeof initAudio!=='undefined')initAudio();if(!shBgmSrc&&typeof audioCtx!=='undefined'&&audioCtx&&typeof audioAnalyser!=='undefined'&&audioAnalyser&&shBgm){shBgmSrc=audioCtx.createMediaElementSource(shBgm);shBgmSrc.connect(audioAnalyser)}}catch(e){}shMenu();try{if(shBgm&&shBgm.src.indexOf('noli')>=0)shNoliStart()}catch(e){}}
+function shClose(){if(!shRoot)return;
+if(shRoot.classList.contains('on')){
+if(shBgm)shBgm.pause();
+try{if(shWasBgm&&typeof bgm!=='undefined'&&bgm){var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){})}}catch(e){}
+shWasBgm=false;
+}
+shRoot.classList.remove('on');shClearTimers();shMode='menu';shDlgS=null;shBeatPress=null;try{shNoliStop()}catch(e){}}
+function shMenu(){
+shClearTimers();shMode='menu';shDlgS=null;shBeatPress=null;
+$shStage.innerHTML='';$shDlg.style.display='none';$shSub.textContent='night operations -- cube# building';shHud();
+var m=shD($shStage,'sh-menu');
+shD(m,'sh-big','CUBE SHIFT');
+shD(m,'sh-tag','twelve jobs. five coworkers. one that does not exist.');
+shD(m,'sh-stat','jobs done: '+Math.min(12,Math.max(0,shift.ch-1))+'/12   pay slips: '+shift.slips);
+if(shift.ch<=12){
+shBtn(m,'CONTINUE -- shift '+shift.ch,function(){runChapter(shift.ch)})
+}else{
+shD(m,'sh-stat','all twelve shifts done. the building misses you already.');
+shConfirmBtn(m,'REWIND THE SHIFT',function(){try{localStorage.removeItem('cube_shift_ch');localStorage.removeItem('cube_shift_slips')}catch(e){}shLoad();shMenu()})
+}
+if(shift.ch<=12)shConfirmBtn(m,'REWIND THE SHIFT',function(){try{localStorage.removeItem('cube_shift_ch');localStorage.removeItem('cube_shift_slips')}catch(e){}shLoad();shMenu()});;
+}
+function shSay(lines,cb){
+shDlgS={lines:lines,i:0,cb:cb,timer:null};shMode='dlg';$shDlg.style.display='block';shLineShow();
+}
+function shLineShow(){
+var L=shDlgS.lines[shDlgS.i];
+$shSpk.textContent=L[0].toUpperCase();
+$shSpk.style.color=SHIFT_COL[L[0]]||'#cdd7ff';
+$shTxt.textContent='';
+var n=0,full=L[1];
+shDlgS.timer=shI(function(){n++;$shTxt.textContent=full.slice(0,n)+(n<full.length?'_':'');if(n>=full.length){clearInterval(shDlgS.timer);shDlgS.timer=null;$shTxt.textContent=full}},17);
+}
+function shDlgNext(){
+if(!shDlgS)return;
+if(shDlgS.timer){clearInterval(shDlgS.timer);shDlgS.timer=null;$shTxt.textContent=shDlgS.lines[shDlgS.i][1];return}
+shDlgS.i++;
+if(shDlgS.i>=shDlgS.lines.length){var cb=shDlgS.cb;shDlgS=null;cb&&cb()}
+else shLineShow();
+}
+function runChapter(n){
+shClearTimers();shCur=n;
+var c=SHIFT_CH[n-1];
+if(!c){shMenu();return}
+$shStage.innerHTML='';$shDlg.style.display='none';
+$shSub.textContent='CH '+n+'/12 -- '+c.t.toUpperCase();shHud();
+shSay(c.intro,function(){
+shMode='task';$shDlg.style.display='none';
+shRunTask(c.task,$shStage,function(){shTaskEnd(c,n)});
+});
+}
+function shTaskEnd(c,n){
+shift.slips+=c.pay;
+shift.ch=Math.max(shift.ch,n+1);
+shSave();shHud();
+try{if(n===1)ach('shift_first')}catch(e){}
+try{if(n===12)ach('shift_all')}catch(e){}
+try{if(shift.slips>=10)ach('shift_slips10')}catch(e){}
+try{if(shift.slips>=25)ach('shift_slips25')}catch(e){}
+shSay(c.outro,function(){
+shMode='result';$shDlg.style.display='none';
+$shStage.innerHTML='';
+var d=shD($shStage,'sh-done');
+shD(d,'sh-donet','JOB COMPLETE');
+shD(d,'sh-stat','+'+c.pay+' pay slips   --   pay total: '+shift.slips);
+var row=shD(d,'sh-stat');
+if(n<12)shBtn(row,'NEXT JOB -- shift '+(n+1),function(){runChapter(n+1)});
+shBtn(row,'MENU',shMenu);
+});
+}
+function shRunTask(name,stage,done){
+stage.innerHTML='';
+var called=false;var once=function(){if(called)return;called=true;done()};
+try{
+if(name==='sweep')shT_sweep(stage,once,45,40);
+else if(name==='sweep2')shT_sweep(stage,once,38,32);
+else if(name==='simon')shT_simon(stage,once,[4,6,8,9,9]);
+else if(name==='beat')shT_beat(stage,once,10);
+else if(name==='blue')shT_blue(stage,once,5);
+else if(name==='forms')shT_forms(stage,once);
+else if(name==='count')shT_count(stage,once);
+else if(name==='flicker')shT_flicker(stage,once,12);
+else if(name==='type')shT_type(stage,once);
+else if(name==='roster')shT_roster(stage,once);
+else if(name==='mail')shT_mail(stage,once);
+else if(name==='finale')shT_beat(stage,function(){stage.innerHTML='';called=false;shT_simon(stage,function(){stage.innerHTML='';called=false;shT_sweep(stage,once,30,25)},[5,7])},10);
+}catch(e){cubePrint('shift task error: '+e.message);once()}
+}
+function shT_sweep(stage,done,n,wave2){
+var left=n,spawned2=false,fin=false;
+function finish(){if(fin)return;fin=true;shT(done,550)}
+var hud=shD(stage,'sh-hudline','DEBRIS LEFT: '+n);
+var note=wave2?null:shD(stage,'sh-note','shift note: the lobby is not on a cleaning schedule. it is on a hunger.');
+function spawn(count){
+for(var i=0;i<count;i++)(function(){
+var d=document.createElement('div');d.className='sh-debris';
+d.style.left=(5+Math.random()*86)+'%';d.style.top=(6+Math.random()*76)+'%';
+d.style.width=(10+Math.random()*22)+'px';d.style.height=(8+Math.random()*16)+'px';
+d.style.background=['#3a4468','#4a3a68','#3a6850','#685a3a','#565668'][Math.floor(Math.random()*5)];
+d.onclick=function(){if(d._dead||!d.parentNode)return;d._dead=1;d.style.transform='scale(0)';d.style.opacity='0';
+shT(function(){if(d.parentNode)d.parentNode.removeChild(d)},220);
+left--;hud.textContent='DEBRIS LEFT: '+Math.max(0,left);
+if(left<=0){
+if(wave2>0&&!spawned2){spawned2=true;left=wave2;hud.textContent='DEBRIS LEFT: '+wave2;
+if(note)note.textContent='nothingcore: ...it was already clean when i got here. >:';
+spawn(wave2)}
+else{hud.textContent='LOBBY: CLEAR';finish()}}
+};
+stage.appendChild(d)})()}
+spawn(n);
+}
+function shT_simon(stage,done,rounds){
+var hud=shD(stage,'sh-hudline','ROUND 1/'+rounds.length+' -- WATCH');
+var stat=shD(stage,'sh-status','cells coming online...');
+var grid=shD(stage,'');
+grid.style.cssText='display:grid;grid-template-columns:repeat(3,74px);justify-content:center;position:absolute;left:0;top:40px;right:0';
+var cells=[];
+for(var i=0;i<9;i++){(function(k){var c=document.createElement('button');c.className='sh-cell';c.onclick=function(){pick(k)};grid.appendChild(c);cells[k]=c})(i)}
+var r=0,seq=[],pos=0,inPos=0,accept=false;
+function newRound(){
+seq=[];var used={};
+while(seq.length<rounds[r]){var x=Math.floor(Math.random()*9);if(!used[x]){used[x]=1;seq.push(x)}}
+pos=0;inPos=0;accept=false;
+hud.textContent='ROUND '+(r+1)+'/'+rounds.length+' -- WATCH';stat.textContent='watch the cells.';
+shT(flash,600);
+}
+function flash(){
+if(pos>=seq.length){accept=true;stat.textContent='your turn.';return}
+var c=cells[seq[pos]];c.classList.add('on');
+shT(function(){c.classList.remove('on');shT(function(){pos++;flash()},130)},330);
+}
+function pick(k){
+if(!accept)return;
+if(k===seq[inPos]){var c=cells[k];c.classList.add('ok');shT(function(){c.classList.remove('ok')},260);
+inPos++;
+if(inPos>=seq.length){accept=false;hud.textContent='ROUND '+(r+1)+' OK';
+r++;
+if(r>=rounds.length){stat.textContent='grid stable. power routed.';shT(done,600)}
+else shT(newRound,750)}
+else stat.textContent=seq.length-inPos+' more.';
+}else{accept=false;stat.textContent='sequence corrupted. rerun.';
+var c2=cells[k];c2.classList.add('bad');shT(function(){c2.classList.remove('bad')},400);shT(newRound,950)}
+}
+newRound();
+}
+function shT_beat(stage,done,need){
+var stat=shD(stage,'sh-status','BEATS 0/'+need+' -- press when the marker crosses the green');
+var bar=shD(stage,'sh-bar');
+shD(bar,'sh-zone');var mark=shD(bar,'sh-mark');
+var pad=shBtn(stage,'BEAT  [space]',press);
+pad.className='sh-btn sh-pad';
+var pos=0,dir=1,hits=0,miss=0,live=true;
+var iv=null;
+function press(){
+if(!live)return;
+if(pos>=42&&pos<=58){
+hits++;bar.classList.add('hit');shT(function(){bar.classList.remove('hit')},180);
+if(hits===3&&miss===0)shAch('perfect');
+stat.textContent='BEATS '+hits+'/'+need+(miss?'   misses: '+miss:'   perfect line');
+if(hits>=need){live=false;if(iv)clearInterval(iv);shBeatPress=null;
+stat.textContent='beat restored.';shT(done,550)}
+}else{miss++;bar.classList.add('miss');shT(function(){bar.classList.remove('miss')},220);
+stat.textContent='off beat. ('+hits+'/'+need+', misses: '+miss+')'}
+}
+shBeatPress=press;
+iv=shI(function(){pos+=dir*2.6;if(pos>=100){pos=100;dir=-1}if(pos<=0){pos=0;dir=1}mark.style.left=pos+'%'},18);
+}
+function shT_blue(stage,done,need){
+if(!need)need=1;
+var finds=0,misses=0,cells=[];
+var wrong=-1;
+var stat=shD(stage,'sh-status','find the cell that does not belong. 0/'+need);
+var grid=shD(stage,'sh-grid7');
+function paint(){
+for(var q=0;q<35;q++){cells[q].textContent=(q===wrong)?'\u25c7':'\u25c6'}
+}
+function pickNew(){
+var k,tries=0;
+do{k=Math.floor(Math.random()*35);tries++}while(cells[k]._found&&tries<200);
+wrong=k;paint();
+}
+for(var i=0;i<35;i++){
+(function(k){
+var c=shD(grid,'sh-bcell','\u25c6');cells[k]=c;
+c.onclick=function(){
+if(c._found){return}
+if(k===wrong){
+c.classList.add('ok');c._found=1;finds++;
+if(finds>=need){stat.textContent='found '+finds+'/'+need+'. sheet signed off.';shT(done,550)}
+else{pickNew();stat.textContent='found '+finds+'/'+need+'. next sheet. misses: '+misses}
+}else{
+misses++;c.classList.add('bad');stat.textContent='not that one. '+finds+'/'+need+' found, misses: '+misses;shT(function(){c.classList.remove('bad')},450)
+}
+};
+})(i);
+}
+pickNew();
+}function shT_forms(stage,done){
+var stat=shD(stage,'sh-status','sign what is yours. reject what is not.');
+var rows=[['form 27-B -- mop signoff','you'],['form 31 -- rod temperature log','you'],['form 8-Q -- void visitation','you'],['form 0 -- intern stipend',null],['form 404 -- debris receipt','you'],['form 12 -- hallway hum report','you'],['form 33 -- spark incident log','you'],['form 77 -- graveyard key signout','you'],['form 19 -- broom requisition','you'],['form 55 -- window inventory','you'],['form 608 -- night noise complaint','you'],['form 41 -- coffee machine union card','you'],['form 9 -- basement temperature','you'],['form 707 -- you were never here','you']];
+var total=rows.length,nc=Math.floor(Math.random()*total),doneN=0;
+rows[nc][1]='nothingcore';
+for(var i=0;i<rows.length;i++)(function(k){
+var row=shD(stage,'sh-form');
+shD(row,'sh-ftitle',rows[k][0]);
+var sig=shD(row,'sh-fsig',(rows[k][1]==='nothingcore'?'signed: ':'signed: ')+(rows[k][1]||'?'));
+if(rows[k][1]==='nothingcore')sig.className='sh-fsig n';
+var out=null;
+function hand(cls,txt){if(out)return;out=shD(row,'sh-fdone',txt);out.className='sh-done-r '+cls;out.style.cssText='font-size:11px;letter-spacing:1px;'+(cls==='r'?'color:#7ab7ff':cls==='x'?'color:#ff6b6b':'color:#64ffa0');doneN++;stat.textContent='handled: '+doneN+'/'+total;if(doneN>=total){stat.textContent='all forms processed.';shT(done,550)}}
+shBtn(row,'SIGN',function(){
+if(rows[k][1]==='nothingcore'){shAch('blind');hand('','FILED (NOT YOURS)');stat.textContent='signed anyway. the clerk did not look up. handled: '+doneN+'/'+total}
+else hand('','FILED');
+});
+shBtn(row,'REJECT',function(){
+if(rows[k][1]==='nothingcore'){hand('r','RETURNED');}
+else{row.classList.add('sh-shake');stat.textContent='that one is yours. sign it instead.';shT(function(){row.classList.remove('sh-shake')},350)}
+});
+})(i)
+}
+function shT_count(stage,done){
+var qs=[{k:'sq',label:'how many squares?',ans:5},{k:'ci',label:'how many circles?',ans:7},{k:'tr',label:'how many triangles?',ans:4},{k:'all',label:'how many shapes total?',ans:16},{k:'sq',label:'squares again. they moved. how many?',ans:5},{k:'corners',label:'how many shapes have corners?',ans:9},{k:'sum',label:'circles plus triangles?',ans:11},{k:'diff',label:'how many more circles than squares?',ans:2}];
+var pile=shD(stage,'sh-pile');
+var defs=[['sq',5,'#4a6fd8'],['ci',7,'#d87a4a'],['tr',4,'#56c98a']];
+for(var a=0;a<defs.length;a++)for(var b=0;b<defs[a][1];b++){
+var s=document.createElement('div');s.className='sh-shape '+defs[a][0];
+var sz=14+Math.random()*18;
+s.style.cssText='left:'+(4+Math.random()*88)+'%;top:'+(4+Math.random()*84)+'%;width:'+sz+'px;height:'+sz+'px;background:'+defs[a][2]+';opacity:.9'+(defs[a][0]==='tr'?';clip-path:polygon(50% 0,100% 100%,0 100%)':'');
+pile.appendChild(s)}
+var qi=0;
+var q=shD(stage,'sh-q',qs[0].label);
+var opts=shD(stage,'');
+opts.style.cssText='position:absolute;left:0;right:0;bottom:26px;text-align:center';
+var stat=shD(stage,'sh-status','eight counts. the void is taking notes.');
+function buildOpts(){
+opts.innerHTML='';
+var o=[qs[qi].ans,qs[qi].ans+1,qs[qi].ans+2];
+if(o[0]>0)o.push(o[0]-1);
+o.sort(function(){return Math.random()-0.5});
+for(var i=0;i<o.length;i++)(function(v){shBtn(opts,String(v),function(){
+if(qi>=qs.length)return;
+if(v===qs[qi].ans){qi++;
+if(qi>=qs.length){stat.textContent='counts filed.';shT(done,550)}
+else{q.textContent=qs[qi].label;buildOpts();stat.textContent=qi+'/'+qs.length+' correct.'}
+}else{stat.textContent='void: recount.';opts.classList.add('sh-shake');shT(function(){opts.classList.remove('sh-shake')},350)}
+})})(o[i])}
+buildOpts();
+}
+function shT_flicker(stage,done,need){
+if(!need)need=4;
+var stat=shD(stage,'sh-status','press STABILIZE while the lamp is dark. 0/'+need);
+var lamp=shD(stage,'sh-lamp');
+var pad=shBtn(stage,'STABILIZE',press);
+pad.style.cssText='position:absolute;left:50%;transform:translateX(-50%);bottom:46px';
+pad.disabled=true;
+var hits=0,live=true,curT=null;
+function cycle(){
+if(!live)return;
+curT=shT(function(){
+lamp.classList.add('on');pad.disabled=true;
+curT=shT(function(){lamp.classList.remove('on');pad.disabled=false;cycle()},420+Math.random()*800);
+},550+Math.random()*950);
+}
+function press(){
+if(!live||pad.disabled)return;
+if(curT){clearTimeout(curT);curT=null}
+lamp.classList.remove('on');pad.disabled=true;hits++;
+stat.textContent='stabilized. '+hits+'/'+need;
+if(hits>=need){live=false;stat.textContent='lamp locked. the dark lost.';shT(done,550)}
+else cycle();
+}
+shT(function(){cycle()},700);
+}
+function shT_type(stage,done){
+var files=['nothing.null','void.log','lobby.sweep','core.beat'];
+var fi=0;
+var stat=shD(stage,'sh-status','type it exactly. enter to open. case. sensitive.');
+var card=shD(stage,'sh-card','FILE ('+(fi+1)+'/'+files.length+'): '+files[fi]);
+var inp=document.createElement('input');inp.className='sh-inp';inp.spellcheck=false;inp.placeholder='filename';
+stage.appendChild(inp);
+shMode='task';
+inp.focus();
+inp.onkeydown=function(e){
+e.stopPropagation();
+if(e.key!=='Enter')return;
+if(inp.value===files[fi]){
+fi++;
+if(fi>=files.length){inp.disabled=true;stat.textContent='all files opened. contents: (empty).';shT(done,650)}
+else{card.textContent='FILE ('+(fi+1)+'/'+files.length+'): '+files[fi];inp.value='';stat.textContent='file '+fi+' accepted. next.'}
+}else{inp.classList.add('bad');stat.textContent='wrong name. the void does not do partial matches.';inp.value='';shT(function(){inp.classList.remove('bad')},400)}
+};
+}
+function shT_roster(stage,done){
+var stat=null;
+var off=['obj','jbo','core','void','unit 7','mop','spark','rod four','bin 7'];
+var ghosts=['nothingcore','nothingcore','nothingcore'];
+var round=0;
+function buildRound(){
+stage.innerHTML='';
+stat=shD(stage,'sh-status','reconcile the lists. click the name that should not be paid. round '+(round+1)+'/3');
+var a=shD(stage,'sh-rlist');shD(a,'sh-rlabel','BLUEPRINT OFFICE -- OFFICIAL');
+for(var i=0;i<off.length;i++){var it=shD(a,'sh-item',off[i]);it.style.cursor='default'}
+var crew=off.concat([ghosts[round]]);
+for(var j=crew.length-1;j>0;j--){var k=Math.floor(Math.random()*(j+1));var tmp=crew[j];crew[j]=crew[k];crew[k]=tmp}
+var b=shD(stage,'sh-rlist');shD(b,'sh-rlabel','TERMINAL LOG -- TONIGHT');
+for(var m=0;m<crew.length;m++)(function(name){var it=shD(b,'sh-item',name);
+it.onclick=function(){
+if(name==='nothingcore'){it.classList.add('dead');if(round===0)shAch('ghost');round++;
+if(round>=3){stat.textContent='caught three times. roster reconciled.';shT(done,750)}
+else{stat.textContent='caught. next log. '+(round)+'/3.';shT(buildRound,900)}
+}else{it.classList.add('sh-shake');stat.textContent='jbo: not that one. look again.';shT(function(){it.classList.remove('sh-shake')},350)}
+}})(crew[m]);
+}
+buildRound();
+}
+function shT_mail(stage,done){
+var qi=0;
+var threads=[
+{c:'<b style="color:#c3a6ff">FORMAL COMPLAINT -- filed by: the void</b><br><br>'+
+'to cube# building management: your <b>light</b> has been on for what the void considers a consecutive streak. your <b>heartbeat</b> is audible through the walls of nothing. your night hire keeps <b>sweeping</b> things the void was planning to borrow.<br><br>demand: immediate improvement. response required. the void does not say please because the void has never once needed to.',
+opts:[['it was the button. it is always the button.',false],['cube# accepts full blame. the lights stay on. no questions.',true],['have you tried not being the void?',false]],
+wrong:['void: noted. with emphasis.','void: the emphasis has emphasis. try again.','void: the void will accept a written apology, badly spelled.']},
+{c:'<b style="color:#c3a6ff">SUPPLEMENT 2 -- filed by: the void</b><br><br>'+
+'your reply has been logged. the void reviewed it. the void has questions: who is <b>sweeping</b> after hours? why does the <b>heartbeat</b> skip when the east hall lights dim? and what, precisely, is being stored on floor <b>7</b>?<br><br>response required. again.',
+opts:[['floor 7 is storage for things we do not name.',false],['there is no floor 7. the building skips it. like you.',true],['it is where we keep the answers. do not open it.',false]],
+wrong:['void: floor 7 knows what it did.','void: deflection noted. try again.','void: the building skips nothing. try again.']},
+{c:'<b style="color:#c3a6ff">FINAL NOTICE -- filed by: the void</b><br><br>'+
+'this is the voids final notice. the complaints have been escalated to the void, who is also the recipient. the void demands a commitment: the <b>light</b> stays, the <b>heartbeat</b> is admitted to, and the <b>sweeping</b> stops when the void says stop. signed, the void, on behalf of the void.',
+opts:[['we commit to nothing. file again.',false],['committed. the light stays. the heartbeat is ours. the sweeping pauses on request.',true],['the void can sweep. we will watch.',false]],
+wrong:['void: commitment means nothing here. try again.','void: no. try again.','void: the void does not watch. try again.']}];
+var stat=null;
+var c=null,opts=null;
+function build(){
+stage.innerHTML='';
+stat=shD(stage,'sh-status','draft the reply. '+(qi+1)+'/3');
+c=shD(stage,'sh-compl');
+c.innerHTML=threads[qi].c;
+opts=shD(stage,'sh-opts');
+var tries=0;
+var answers=threads[qi].opts;
+for(var i=0;i<answers.length;i++)(function(a){shBtn(opts,a[0],function(){
+if(a[1]){if(qi===0)shAch('complaint');qi++;
+if(qi>=threads.length){stat.textContent='all replies sent. complaints withdrawn.';shT(done,700)}
+else{stat.textContent='reply sent. next complaint.';shT(build,700)}
+}else{tries++;opts.classList.add('sh-shake');shT(function(){opts.classList.remove('sh-shake')},400);
+var wm=threads[qi].wrong;stat.textContent=wm[Math.min(tries-1,wm.length-1)]}
+})})(answers[i])}
+build();
+}
+
+var flyRoot=null,$flyCanvas=null,$flyLog=null,$flyStats=null,flyCtx=null;
+var flyData=null,flyLoading=false,flyQ=[],flyOn=false,flyRaf=0,flyBgT=0;
+var flyH=null,flyInp=null,flyFire=null,flyW=null,flyInv=null;
+var flyCR=null,flyCG=null,flyCB=null,flySX=null,flySY=null;
+var flyGroups={},flySamples={};
+var flyHold={light:false,dark:false},flyStrobe=false,flySimMs=0,flyHotMs=0,flySeizeCool=0;
+var flyLastMs=0,flyFrac=0,flyMeanH=0,flyFedPending=false,flyFedAt=0,flyFedBase=0,flyFedTries=0,flyGustMs=0;
+var flyBuzzOn=true,flyBuzz=null;
+var flyLines=[],flyImg=null,flyR=null,flyG=null,flyB=null;
+var flyFrameSkip=0,flyStatT=0;
+var flyApple=null,flyAppleLoading=false,flyAppleFailed=false,flyAppleOn=false,flyAppleT0=0,flyEyePix=null,flySeized=0;
+var FLYW=880,FLYH=540;
+var FLY_LEAK=0.5,FLY_GAIN=0.45,FLY_BIAS=0.01,FLY_THETA=1.0,FLY_NOISE=0.006,FLY_DECAY=0.45,FLY_CLAMP=3;
+var FLYPAL=[[70,90,110],[74,208,224],[195,166,255],[100,255,160],[122,183,255],[255,209,102],[255,157,184],[255,140,170],[154,160,184],[255,107,107],[224,160,255]];
+function flyLog(txt){
+if(!$flyLog)return;
+var row=document.createElement('div');
+var tg=document.createElement('span');tg.className='fx';tg.textContent='fly: ';
+row.appendChild(tg);row.appendChild(document.createTextNode(txt));
+$flyLog.appendChild(row);
+while($flyLog.children.length>6)$flyLog.removeChild($flyLog.firstChild);
+}
+function flyLoadMsg(t){var el=flyRoot&&flyRoot.querySelector('#flyLoad');if(el)el.textContent=t}
+function flyBuild(){
+if(flyRoot)return;
+flyRoot=document.createElement('div');flyRoot.id='flyRoot';
+var st=document.createElement('style');
+st.textContent='#flyRoot{position:fixed;left:0;top:0;right:0;bottom:0;z-index:90100;background:radial-gradient(ellipse at 50% 20%,#0a1410 0%,#060a08 55%,#030504 100%);display:none;flex-direction:column;color:#bfe8cf;font-family:Consolas,"Courier New",monospace;user-select:none}'+
+'#flyRoot.on{display:flex}'+
+'.fly-wrap{width:min(940px,96vw);margin:0 auto;display:flex;flex-direction:column;height:100%}'+
+'.fly-head{display:flex;align-items:center;gap:14px;padding:13px 4px 9px;border-bottom:1px solid #17302a}'+
+'.fly-logo{font-size:17px;letter-spacing:6px;color:#64ffa0;text-shadow:0 0 12px rgba(100,255,160,.5)}'+
+'.fly-sub{font-size:10px;letter-spacing:2px;color:#4a7a66;flex:1}'+
+'.fly-stats{font-size:10.5px;color:#7fd8a8;letter-spacing:.5px;text-align:right}'+
+'.fly-x{cursor:pointer;color:#687;border:1px solid #234;width:24px;height:24px;text-align:center;line-height:21px;font-size:13px}'+
+'.fly-x:hover{color:#f66;border-color:#833}'+
+'.fly-stage{flex:1;min-height:0;position:relative;border:1px solid #17302a;background:#020604;border-radius:6px;overflow:hidden}'+
+'#flyCanvas{position:absolute;left:0;top:0;width:100%;height:100%;display:none}'+
+'#flyLoad{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:12.5px;letter-spacing:2px;color:#64ffa0;text-shadow:0 0 14px rgba(100,255,160,.4)}'+
+'.fly-ctrl{display:flex;flex-wrap:wrap;gap:6px;padding:10px 4px 4px}'+
+'.fly-btn{background:#0d1f18;color:#a9e8c6;border:1px solid #1f4a3a;padding:7px 13px;font:11.5px Consolas,monospace;letter-spacing:1.5px;cursor:pointer;border-radius:4px}'+
+'.fly-btn:hover{background:#123125;border-color:#2e7a5c}'+
+'.fly-btn:active{transform:translateY(1px)}'+
+'.fly-btn.on{background:#1a5c3f;color:#dbffe9;border-color:#4affa0;box-shadow:0 0 12px rgba(74,255,160,.35)}'+
+'.fly-btn.hot{border-color:#8a3a5a;color:#ff9db8}'+
+'.fly-btn.hot.on{background:#4a1a2e;box-shadow:0 0 12px rgba(255,90,140,.45)}'+
+'.fly-log{border-top:1px solid #17302a;min-height:78px;max-height:78px;overflow:hidden;padding:7px 6px;font-size:11.5px;line-height:1.55;color:#8fd8ae;background:rgba(4,10,8,.75)}'+
+'.fly-log .fx{color:#4a7a66}'+
+'.fly-hint{font-size:10px;letter-spacing:2px;color:#43665a;padding:5px 4px 12px}';
+document.head.appendChild(st);
+flyRoot.innerHTML='<div class="fly-wrap"><div class="fly-head"><div class="fly-logo">THE FLY</div><div class="fly-sub">fafb v783 -- drosophila melanogaster, actual wiring</div><div class="fly-stats" id="flyStats">neurons 139,255 &middot; synapses 2,700,513</div><div class="fly-x" id="flyBuzzT" title="buzz">&#9834;</div><div class="fly-x" id="flyX" title="leave the fly (esc)">&#215;</div></div><div class="fly-stage"><canvas id="flyCanvas" width="880" height="540"></canvas><div id="flyLoad">calling the fly...</div></div><div class="fly-ctrl" id="flyCtrl"></div><div class="fly-log" id="flyLog"></div><div class="fly-hint">light / dark / bad apple &middot; sugar / smell / wind / zap &middot; esc leaves</div></div>';
+document.body.appendChild(flyRoot);
+$flyCanvas=flyRoot.querySelector('#flyCanvas');flyCtx=$flyCanvas.getContext('2d');
+$flyLog=flyRoot.querySelector('#flyLog');$flyStats=flyRoot.querySelector('#flyStats');
+flyRoot.querySelector('#flyX').onclick=flyClose;
+var fb=flyRoot.querySelector('#flyBuzzT');
+fb.onclick=function(){flyBuzzOn=!flyBuzzOn;fb.style.opacity=flyBuzzOn?'1':'.4';flyBuzzSet(flyBuzzOn)};
+var ctrl=flyRoot.querySelector('#flyCtrl');
+function mk(label,name,cls){
+var b=document.createElement('button');b.className='fly-btn'+(cls?' '+cls:'');b.textContent=label;
+b.setAttribute('data-f',name);
+b.onpointerdown=function(ev){ev.preventDefault();flyAct(name,true)};
+b.onpointerup=function(){flyAct(name,false)};
+b.onpointerleave=function(){flyAct(name,false)};
+ctrl.appendChild(b);return b;
+}
+mk('LIGHT','light');mk('DARK','dark');mk('BAD APPLE','apple','hot');
+mk('SUGAR','sugar');mk('SMELL','smell');mk('WIND','wind');mk('ZAP','zap','hot');mk('QUIET','quiet');
+document.addEventListener('keydown',function(e){
+if(!flyRoot||!flyRoot.classList.contains('on'))return;
+if(e.key==='Escape'){flyClose()}
+});
+}
+function flyBtnState(name,on){
+var b=flyRoot&&flyRoot.querySelector('.fly-btn[data-f="'+name+'"]');
+if(!b)return;
+if(on)b.classList.add('on');else b.classList.remove('on');
+}
+function flyPulse(key,amt){
+var g=flyGroups[key];if(!g)return;
+for(var i=0;i<g.length;i++)flyInp[g[i]]+=amt;
+}
+function flyAct(name,down){
+if(!flyData)return;
+if(name==='light'){flyHold.light=!!down;flyBtnState('light',flyHold.light);return}
+if(name==='dark'){flyHold.dark=!!down;flyBtnState('dark',flyHold.dark);return}
+if(name==='apple'){
+if(!down)return;
+if(flyAppleFailed){flyStrobe=!flyStrobe;flyBtnState('apple',flyStrobe);if(flyStrobe)flyLog('strobe. the video never arrived.');return}
+if(flyApple&&flyApple.ready){flyAppleOn=!flyAppleOn;flyStrobe=flyAppleOn;flyAppleT0=flySimMs;flyBtnState('apple',flyAppleOn);flyLog(flyAppleOn?'bad apple. the eye takes it from here.':'bad apple paused. the eye blinks.');return}
+if(flyAppleLoading)return;
+flyAppleLoading=true;
+flyLog('fetching bad apple. hold.');
+flyAppleLoad(function(){flyAppleLoading=false;flyAppleOn=true;flyStrobe=true;flyAppleT0=flySimMs;flyBtnState('apple',true);flyLog('bad apple loaded. 2,634 frames. the eye takes it from here.')});
+return}
+if(!down)return;
+if(name==='sugar'){flyPulse('gust',1.3);flyGustMs=380;flyFedPending=true;flyFedTries=0;flyFedAt=flySimMs+1500;flyFedBase=flyMeanH;flyLog('sugar on the tarsi. waiting for the legs to vote.');return}
+if(name==='smell'){flyPulse('olf',1.1);flyLog('antennae forward. something smells like a decision.');return}
+if(name==='wind'){flyPulse('wind',1.2);flyLog('wind across the johnston. wings up.');return}
+if(name==='zap'){flyPulse('desc',1.6);flyLog('descending fibers say now. the fly considers it.');return}
+if(name==='quiet'){flyH.fill(0);flyStrobe=false;flyAppleOn=false;flyHold.light=false;flyHold.dark=false;flyHotMs=0;flyFedPending=false;flyBtnState('apple',false);flyBtnState('light',false);flyBtnState('dark',false);flyLog('everything settles. the fly forgets you for a second.');return}
+}
+function flyApplyInputs(){
+var g,i,ph,bright;
+if(flyHold.light){g=flyGroups.photo;for(i=0;i<g.length;i++)flyInp[g[i]]+=0.7}
+if(flyHold.dark){g=flyGroups.photo;for(i=0;i<g.length;i++)flyInp[g[i]]-=0.75}
+if(flyStrobe){
+g=flyGroups.photo;
+if(flyApple&&flyApple.ready&&flyAppleOn){
+var fpi=1000/12;
+var fi2=Math.floor((flySimMs-flyAppleT0)/fpi);
+fi2=fi2%flyApple.n;if(fi2<0)fi2+=flyApple.n;
+var fbase=fi2*3072,ab=flyApple.buf;
+for(i=0;i<g.length;i++){var pg2=g[i];flyInp[pg2]+=(ab[fbase+(flyEyePix[pg2]||0)]/255-0.5)*2.2}
+}else{ph=Math.floor(flySimMs/125)%4;bright=ph<2;for(i=0;i<g.length;i++)flyInp[g[i]]+=bright?1.15:-1.05}
+}
+if(flyGustMs>0){flyGustMs--;g=flyGroups.gust;for(i=0;i<g.length;i++)flyInp[g[i]]+=0.6}
+}
+function flySeize(){flySeized++;try{console.log('flySEIZE at simMs='+flySimMs+' frac='+flyFrac)}catch(e){}
+flyStrobe=false;flyAppleOn=false;flyHold.light=false;flyHold.dark=false;flyBtnState('apple',false);flyBtnState('light',false);flyBtnState('dark',false);
+flyHotMs=0;flySeizeCool=8000;
+for(var i=0;i<flyData.n;i++)flyH[i]*=0.08;
+try{localStorage.setItem('cube_fly_seizure','1')}catch(e){}
+try{ach('fly_seizure')}catch(e){}
+flyLog('past the flashing limit. the fly files a complaint.');
+flyLog('everything goes quiet. it has to.');
+try{cubeWarn('fly: overstimulation detected. forcing quiet.')}catch(e){}
+}
+function flyStep(){
+if(!flyData)return 0;
+var t0=(window.performance&&performance.now)?performance.now():Date.now();
+flyApplyInputs();
+var n=flyData.n,ind=flyData.ind,idx=flyData.idx,sg=flyData.sign,w=flyData.w,inv=flyData.inv,h=flyH,inp=flyInp,f=flyFire;
+var total=0,sum=0,i,k,s,v,p;
+for(i=0;i<n;i++){
+s=0;
+var k0=ind[i],k1=ind[i+1];
+for(k=k0;k<k1;k++){p=idx[k];s+=sg[p]*w[k]*h[p]}
+v=h[i]*FLY_LEAK+s*inv[i]*FLY_GAIN+FLY_BIAS+inp[i];
+v+=(Math.random()-0.5)*FLY_NOISE;
+if(v<0)v=0;else if(v>FLY_CLAMP)v=3;
+h[i]=v;inp[i]*=FLY_DECAY;
+if(v>=FLY_THETA){f[i]=1;total++}else f[i]=0;
+sum+=v;
+}
+flyFrac=total/n;flyMeanH=sum/n;
+flySimMs+=16.7;
+if(flySeizeCool>0)flySeizeCool-=16.7;
+if(flyStrobe&&flyFrac>0.07){flyHotMs+=16.7;if(flyHotMs>=800&&flySeizeCool<=0)flySeize()}else flyHotMs=Math.max(0,flyHotMs-8);
+if(flyFedPending&&flySimMs>=flyFedAt){
+var mo=flyGroups.moto,mm=0;
+for(k=0;k<mo.length;k++)if(h[mo[k]]>mm)mm=h[mo[k]];
+if(mm>=FLY_THETA||(flyMeanH>flyFedBase*1.25&&flyMeanH>0.015)){
+flyFedPending=false;
+try{localStorage.setItem('cube_fly_fed','1')}catch(e){}
+try{ach('fly_fed')}catch(e){}
+flyLog('sugar reaches the legs. the legs decide: yes.');
+}else{flyFedTries++;if(flyFedTries>=4)flyFedPending=false;else flyFedAt=flySimMs+1500}
+}
+var t1=(window.performance&&performance.now)?performance.now():Date.now();
+flyLastMs=t1-t0;
+return total;
+}
+function flyStepN(k){var t=0;for(var i=0;i<k;i++)t=flyStep();return t}
+function flyDraw(){
+if(!flyData)return;
+var W=FLYW,r=flyR,g=flyG,b=flyB,img=flyImg,d=flyData,n=d.n,h=flyH,f=flyFire,sx=flySX,sy=flySY;
+var cr=flyCR,cg=flyCG,cb=flyCB,i,ln=r.length;
+for(i=0;i<ln;i++){r[i]*=0.72;g[i]*=0.72;b[i]*=0.72}
+for(i=0;i<n;i++){
+var q=sy[i]*W+sx[i];
+var v=f[i]?1.4:(0.1+(h[i]>1?0.16:h[i]*0.16));
+r[q]+=cr[i]*v;g[q]+=cg[i]*v;b[q]+=cb[i]*v;
+}
+var px=img.data;
+for(i=0;i<ln;i++){
+var rr=r[i];if(rr>1)rr=1;
+var gg=g[i];if(gg>1)gg=1;
+var bb=b[i];if(bb>1)bb=1;
+var o=i<<2;px[o]=rr*255;px[o+1]=gg*255;px[o+2]=bb*255;px[o+3]=255;
+}
+flyCtx.putImageData(img,0,0);
+}
+function flyStatUpd(){
+if(!$flyStats)return;
+$flyStats.textContent='139,255 neurons \u00b7 2,700,513 synapses \u00b7 firing '+(flyFrac*100).toFixed(2)+'% \u00b7 '+flyLastMs.toFixed(1)+' ms';
+}
+function flyLoop(){
+if(!flyOn)return;
+flyRaf=requestAnimationFrame(flyLoop);
+flyStep();
+flyDraw();
+flyStatT++;
+if(flyStatT%25===0)flyStatUpd();
+}
+function flyBuzzSet(on){
+try{
+if(on){
+if(!flyBuzz){
+var AC=window.AudioContext||window.webkitAudioContext;
+if(!AC)return;
+var ctx=new AC();
+var o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=166;
+var g=ctx.createGain();g.gain.value=0.0001;
+var lfo=ctx.createOscillator();lfo.type='sine';lfo.frequency.value=13;
+var lg=ctx.createGain();lg.gain.value=0.011;
+lfo.connect(lg);lg.connect(g.gain);
+o.connect(g);g.connect(ctx.destination);
+o.start();lfo.start();
+flyBuzz={ctx:ctx,o:o,g:g,lfo:lfo};
+}
+flyBuzz.ctx.resume();
+flyBuzz.g.gain.setTargetAtTime(0.03,flyBuzz.ctx.currentTime,0.5);
+}else if(flyBuzz){flyBuzz.g.gain.setTargetAtTime(0.0001,flyBuzz.ctx.currentTime,0.2);var _bc=flyBuzz.ctx;setTimeout(function(){try{_bc.suspend()}catch(e){}},300)}
+}catch(e){}
+}
+function flyClose(){
+if(!flyRoot)return;
+flyRoot.classList.remove('on');
+flyOn=false;
+try{cancelAnimationFrame(flyRaf)}catch(e){}
+flyStrobe=false;flyAppleOn=false;flyHold.light=false;flyHold.dark=false;
+flyBtnState('apple',false);flyBtnState('light',false);flyBtnState('dark',false);
+flyBuzzSet(false);
+}
+function flyOpen(){
+flyBuild();
+if(!flyRoot.classList.contains('on'))flyRoot.classList.add('on');
+try{if(typeof termField!=='undefined'&&termField)termField.blur()}catch(e){}
+if(flyData){
+if(!flyOn){flyOn=true;flyStatT=0;flyLoop()}
+flyBuzzSet(flyBuzzOn);
+return;
+}
+flyEnsure(function(){flyReady()});
+}
+function flyReady(){
+flyOn=true;flyStatT=0;
+var lc=flyRoot.querySelector('#flyLoad');
+if(lc)lc.style.display='none';
+$flyCanvas.style.display='block';
+flyLog('139,255 neurons. the actual wiring.');
+flyLog('press things. the fly will hold it against you.');
+try{localStorage.setItem('cube_fly_open','1')}catch(e){}
+try{ach('fly_open')}catch(e){}
+flyBuzzSet(flyBuzzOn);
+flyLoop();
+if(!flyBgT)flyBgT=setInterval(function(){if(flyOn)return;flyStep()},250);
+flyStatUpd();
+window.FLYX={ready:true,n:flyData.n,e:flyData.e,step:flyStep,steps:flyStepN,choose:flyChooseLine,act:flyAct,frac:function(){return flyFrac},meanH:function(){return flyMeanH},ms:function(){return flyLastMs},simMs:function(){return flySimMs},hot:function(){return flyHotMs},h:flyH,pulse:flyPulse,groups:function(){return flyGroups},appleReady:function(){return !!(flyApple&&flyApple.ready)},appleOn:function(){return flyAppleOn},appleN:function(){return flyApple?flyApple.n:0},appleSeek:function(s){flyAppleT0=flySimMs-s*1000},seized:function(){return flySeized},strobe:function(){return flyStrobe}};
+}
+function flyChooseLine(){
+if(!flyData||!flyLines.length)return null;
+if(flyFrac<0.0005)return null;
+var best=-1,bi=-1;
+for(var i=0;i<flyLines.length;i++){
+var a=flyLines[i].a,sc=0;
+for(var j=0;j<a.length;j++)sc+=flyH[a[j]];
+sc=sc/a.length+(Math.random()-0.5)*0.05;
+if(sc>best){best=sc;bi=i}
+}
+if(best<0.05)return null;
+return flyLines[bi].t;
+}
+function flyEnsure(cb){
+if(flyData){if(cb)cb();return}
+if(flyLoading){if(cb)flyQ.push(cb);return}
+flyLoading=true;if(cb)flyQ.push(cb);
+flyLoadMsg('reading flydata.js...');
+var s=document.createElement('script');
+s.src='flydata.js';
+s.onload=function(){flyDecode()};
+s.onerror=function(){flyLoading=false;flyLoadMsg('flydata.js not found next to cube.html.');try{cubeError('fly: flydata.js missing. the brain is elsewhere.')}catch(e){}};
+document.head.appendChild(s);
+}
+function flyFail(e){
+flyLoading=false;
+flyLoadMsg('the brain did not fit through the wire: '+((e&&e.message)||e));
+try{cubeError('fly: '+((e&&e.message)||e))}catch(e2){}
+}
+function flyAppleFail(e){
+flyAppleFailed=true;flyAppleLoading=false;
+flyLog('bad apple did not load. the strobe will do.');
+try{cubeWarn('fly: '+((e&&e.message)||e))}catch(e2){}
+}
+function flyAppleLoad(cb){
+var s=document.createElement('script');
+s.src='flyapple.js';
+s.onload=function(){
+try{
+var bin=atob(window.FLAB64);
+var raw=new Uint8Array(bin.length);
+for(var i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+if(typeof DecompressionStream==='undefined')throw new Error('no DecompressionStream');
+var ds=new DecompressionStream('gzip');
+new Response(new Blob([raw]).stream().pipeThrough(ds)).arrayBuffer().then(function(buf){
+flyApple={buf:new Uint8Array(buf),n:Math.floor(buf.byteLength/3072),w:64,h:48,ready:true};
+if(cb)cb();
+}).catch(function(e){flyAppleFail(e)});
+}catch(e){flyAppleFail(e)}
+};
+s.onerror=function(){flyAppleFail(new Error('flyapple.js missing'))};
+document.head.appendChild(s);
+}
+function flyDecode(){
+try{
+flyLoadMsg('decoding base64...');
+setTimeout(function(){
+var bin;
+try{bin=atob(window.FLB64)}catch(e){flyFail(e);return}
+flyLoadMsg('inflating the brain...');
+setTimeout(function(){
+var raw=new Uint8Array(bin.length);
+for(var i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+if(typeof DecompressionStream==='undefined'){flyFail(new Error('needs DecompressionStream (current chrome/edge)'));return}
+var ds=new DecompressionStream('gzip');
+var wr=new Blob([raw]).stream().pipeThrough(ds);
+new Response(wr).arrayBuffer().then(function(buf){
+try{
+flyLoadMsg('wiring synapses...');
+flyParse(buf);
+flyLoading=false;
+var q=flyQ;flyQ=[];
+for(var i=0;i<q.length;i++)q[i]();
+}catch(e){flyFail(e)}
+}).catch(function(e){flyFail(e)});
+},30);
+},30);
+}catch(e){flyFail(e)}
+}
+function flyParse(buf){
+var dv=new DataView(buf);
+if(dv.getUint8(0)!==70||dv.getUint8(1)!==76||dv.getUint8(2)!==89||dv.getUint8(3)!==66)throw new Error('bad brain format');
+var n=dv.getUint32(8,true),e=dv.getUint32(12,true);
+var posEnd=16+12*n;
+var clsOff=posEnd,grpOff=clsOff+n,signOff=grpOff+n,indOff=signOff+n;
+var idxOff=indOff+4*(n+1),synOff=idxOff+4*e,total=synOff+2*e;
+if(total!==buf.byteLength)throw new Error('brain truncated ('+total+' vs '+buf.byteLength+')');
+var pos=new Float32Array(buf.slice(16,posEnd));
+var cls=new Uint8Array(buf,clsOff,n);
+var grp=new Uint8Array(buf,grpOff,n);
+var sign=new Int8Array(buf,signOff,n);
+var ind=new Uint32Array(buf.slice(indOff,idxOff));
+var idx=new Uint32Array(buf.slice(idxOff,synOff));
+var syn=new Uint16Array(buf.slice(synOff,total));
+var w=new Float32Array(e);
+for(var k=0;k<e;k++)w[k]=Math.log(1+syn[k]);
+var inv=new Float32Array(n);
+for(var i=0;i<n;i++){var sw=0;var kb0=ind[i],kb1=ind[i+1];for(var kb=kb0;kb<kb1;kb++)sw+=w[kb];inv[i]=sw?1/sw:0}
+flyData={n:n,e:e,pos:pos,cls:cls,grp:grp,sign:sign,ind:ind,idx:idx,syn:syn,w:w,inv:inv};
+flyH=new Float32Array(n);
+flyInp=new Float32Array(n);
+flyFire=new Uint8Array(n);
+flyR=new Float32Array(FLYW*FLYH);
+flyG=new Float32Array(FLYW*FLYH);
+flyB=new Float32Array(FLYW*FLYH);
+flyImg=flyCtx.createImageData(FLYW,FLYH);
+var pools={photo:[],gust:[],olf:[],wind:[],desc:[],moto:[],optic:[],central:[],sensory:[]};
+for(i=0;i<n;i++){
+if(grp[i]===1)pools.photo.push(i);
+else if(grp[i]===2)pools.gust.push(i);
+else if(grp[i]===3)pools.olf.push(i);
+else if(grp[i]===5)pools.wind.push(i);
+if(cls[i]===1)pools.optic.push(i);
+else if(cls[i]===2)pools.central.push(i);
+else if(cls[i]===3)pools.sensory.push(i);
+else if(cls[i]===6)pools.desc.push(i);
+else if(cls[i]===9)pools.moto.push(i);
+}
+flyGroups={};
+for(var key in pools)flyGroups[key]=pools[key].length?pools[key]:[0];
+flySamples={};
+for(key in pools){
+var pl=pools[key];
+if(!pl.length){flySamples[key]=new Int32Array(1);flySamples[key][0]=0;continue}
+var take=Math.min(96,pl.length);
+var out=new Int32Array(take);
+var used={};
+for(k=0;k<take;k++){
+var pick=pl[Math.floor(Math.random()*pl.length)];
+var guard=0;
+while(used[pick]&&guard<20){pick=pl[Math.floor(Math.random()*pl.length)];guard++}
+used[pick]=1;out[k]=pick;
+}
+flySamples[key]=out;
+}
+flyEyePix=new Int32Array(n);
+(function(){
+var pgs=flyGroups.photo;
+if(!pgs||!pgs.length)return;
+var mid=0,py0=1e12,py1=-1e12;
+for(var q=0;q<pgs.length;q++){var yy=pos[pgs[q]*3+1];if(yy<py0)py0=yy;if(yy>py1)py1=yy}
+mid=(py0+py1)/2;
+var lo=[],hi=[];
+for(q=0;q<pgs.length;q++){if(pos[pgs[q]*3+1]<mid)lo.push(pgs[q]);else hi.push(pgs[q])}
+var sets=[lo,hi];
+for(var s2=0;s2<2;s2++){
+var set=sets[s2];if(!set.length)continue;
+var ax0=1e12,ax1=-1e12,ay0=1e12,ay1=-1e12;
+for(q=0;q<set.length;q++){var xx=pos[set[q]*3],yy2=pos[set[q]*3+1];if(xx<ax0)ax0=xx;if(xx>ax1)ax1=xx;if(yy2<ay0)ay0=yy2;if(yy2>ay1)ay1=yy2}
+var dx=(ax1-ax0)||1,dy=(ay1-ay0)||1;
+for(q=0;q<set.length;q++){
+var ni2=set[q];
+var fx=Math.floor((pos[ni2*3]-ax0)/dx*63);if(fx<0)fx=0;if(fx>63)fx=63;
+var fy=Math.floor((pos[ni2*3+1]-ay0)/dy*47);if(fy<0)fy=0;if(fy>47)fy=47;
+flyEyePix[ni2]=fy*64+fx;
+}
+}
+})();
+var minx=1e12,miny=1e12,maxx=-1e12,maxy=-1e12,minz=1e12,maxz=-1e12;
+for(i=0;i<n;i++){
+var x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2];
+if(x<minx)minx=x;if(x>maxx)maxx=x;
+if(y<miny)miny=y;if(y>maxy)maxy=y;
+if(z<minz)minz=z;if(z>maxz)maxz=z;
+}
+var mg=12;
+var sc=Math.min((FLYW-mg*2)/(maxx-minx),(FLYH-mg*2)/(maxy-miny));
+var ox=(FLYW-(maxx-minx)*sc)/2,oy=(FLYH-(maxy-miny)*sc)/2;
+flySX=new Uint16Array(n);flySY=new Uint16Array(n);
+flyCR=new Float32Array(n);flyCG=new Float32Array(n);flyCB=new Float32Array(n);
+var zr=(maxz-minz)||1;
+for(i=0;i<n;i++){
+var px=Math.round((pos[i*3]-minx)*sc+ox),py=Math.round((pos[i*3+1]-miny)*sc+oy);
+if(px<0)px=0;if(px>=FLYW)px=FLYW-1;
+if(py<0)py=0;if(py>=FLYH)py=FLYH-1;
+flySX[i]=px;flySY[i]=py;
+var pal=FLYPAL[cls[i]]||FLYPAL[0];
+var dep=0.55+0.45*((pos[i*3+2]-minz)/zr);
+flyCR[i]=pal[0]/255*dep;flyCG[i]=pal[1]/255*dep;flyCB[i]=pal[2]/255*dep;
+}
+flyLines=[
+{t:'the light again. the light again. the light again.',k:'photo'},
+{t:'i can see you. all the ommatidia agree.',k:'photo'},
+{t:'do not strobe me. i am not a screen.',k:'photo'},
+{t:'sugar. the legs know before i do.',k:'gust'},
+{t:'sweet on the tarsi. filing it under yes.',k:'gust'},
+{t:'something smells like yesterday.',k:'olf'},
+{t:'the antennae vote. the vote is mostly yes.',k:'olf'},
+{t:'wind. wings up. decision pending.',k:'wind'},
+{t:'johnston organ says something moved.',k:'wind'},
+{t:'the escape command fired. the wings are discussing it.',k:'desc'},
+{t:'jumping. in spirit. mostly.',k:'desc'},
+{t:'2,700,513 connections. zero opinions.',k:'central'},
+{t:'one of these neurons is thinking about you. i forget which.',k:'central'},
+{t:'optic lobe says: still there.',k:'optic'},
+{t:'a wing beat is a decision i already made.',k:'moto'},
+{t:'i was mapped in full. i let them. it was interesting.',k:'central'},
+{t:'the void counts neurons now. i count the void.',k:'central'}
+];
+for(i=0;i<flyLines.length;i++)flyLines[i].a=flySamples[flyLines[i].k]||flySamples.central;
+}

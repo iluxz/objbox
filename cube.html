@@ -45,8 +45,10 @@ body.ng-mode .transmission,body.ng-mode .gui-window{display:none!important}
 #ngJbo{width:100%;text-align:center;padding:10px 20px 14px;color:#ffd8b0;font-size:18px;letter-spacing:1px;border-bottom:1px solid rgba(255,138,42,0.3);min-height:20px;display:none;background:linear-gradient(180deg,rgba(26,16,8,0.85),rgba(14,9,5,0.7));box-shadow:0 8px 22px rgba(0,0,0,0.4)}
 #ngJbo .who{color:#ff8a2a;font-weight:bold;text-shadow:0 0 10px rgba(255,138,42,0.5)}
 #ngCore{width:100%;text-align:center;padding:10px 20px 14px;color:#f5d8e8;font-size:18px;letter-spacing:1px;border-bottom:1px solid rgba(255,158,207,0.3);min-height:20px;display:none;background:linear-gradient(180deg,rgba(26,10,20,0.85),rgba(14,6,11,0.7));box-shadow:0 8px 22px rgba(0,0,0,0.4)}
+#ngLandlord{width:100%;text-align:center;padding:10px 20px 14px;color:#f0dfb8;font-size:18px;letter-spacing:1px;border-bottom:1px solid rgba(216,169,64,0.3);min-height:20px;display:none;background:linear-gradient(180deg,rgba(26,20,8,0.85),rgba(14,11,5,0.7));box-shadow:0 8px 22px rgba(0,0,0,0.4)}
+#ngLandlord .who{color:#d8a940;font-weight:bold;text-shadow:0 0 10px rgba(216,169,64,0.5)}
 #ngCore .who{color:#ff9ecf;text-shadow:0 0 10px rgba(255,158,207,0.5)}
-#ngOverlay.sprint #ngObj,#ngOverlay.sprint #ngJbo,#ngOverlay.sprint #ngCore{display:none}
+#ngOverlay.sprint #ngObj,#ngOverlay.sprint #ngJbo,#ngOverlay.sprint #ngCore,#ngOverlay.sprint #ngLandlord{display:none}
 #ngStage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;width:100%}
 #ngTitle{color:#eef4fa;font-size:34px;letter-spacing:8px;text-shadow:0 0 20px rgba(120,180,255,0.35),0 0 54px rgba(80,140,220,0.22)}
 #ngSub{color:#8fa4bc;font-size:13px;letter-spacing:2px;text-shadow:0 0 10px rgba(120,160,220,0.28)}
@@ -750,10 +752,14 @@ END LOG
 <div class="help-cmd"><span class="hl">skill</span> - open the skill tree</div>
 <div class="help-cmd"><span class="hl">slots</span> - open the floppy shelf (5 save disks)</div>
 <div class="help-cmd"><span class="hl">play</span> [-1|0-20] - there is no game. (bare=ch0, numbers unlock by progress)</div>
+<div class="help-cmd"><span class="hl">button</span> - contain the button. one button, bad moods. (a non-game)</div>
+<div class="help-cmd"><span class="hl">shift</span> - night shift at cube#. twelve jobs, five coworkers. (a game)</div>
+<div class="help-cmd"><span class="hl">fly</span> - the actual fruit fly brain. 139,255 neurons, live. (a brain)</div>
 <div class="help-cmd"><span class="hl">obj</span> - ask obj for pull access</div>
 <div class="help-cmd"><span class="hl">pull</span> - play a procedural void demo (needs obj)</div>
 <div class="help-cmd"><span class="hl">demos</span> - list saved void demos</div>
 <div class="help-cmd"><span class="hl">replay</span> &lt;file&gt; - replay a saved void demo</div>
+<div class="help-cmd"><span class="hl">cubecheck</span> [on|off] - auto-demo graffiti scan on/off</div>
 <div class="help-cmd"><span class="hl">void-mute</span> - silence void transmissions</div>
 <div class="help-cmd"><span class="hl">void-unmute</span> - let the void talk again</div>
 <div class="help-cmd" data-skill-gate="finals"><span class="hl">upgrade</span> - open upgrade tree (locked until every skill)</div>
