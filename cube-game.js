@@ -956,7 +956,7 @@ var wedBeat=_party||isMoon?audioLevel:(_peaceful?audioLevel*0.5:0);
 
 // audio visualizer background pulse
 var th=themes[curTheme]||themes['1'];
-var bgPulse=audioLevel*(_party?0.2:0.09);
+var bgPulse=audioLevel*(_party?0.2:0.25);
 var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
 if(_mon){
@@ -1032,7 +1032,9 @@ oMod[12]+=(Math.random()-0.5)*wedBeat*0.3;
 oMod[13]+=(Math.random()-0.5)*wedBeat*0.3;
 }else if(!_mon){
 var _np=1.0+(audioPulse-1.0)*2.2;
-oMod[0]*=_np;oMod[5]*=_np;oMod[10]*=_np;
+oMod[0]*=_np;
+oMod[5]*=1.0+(audioPulse-1.0)*1.4;
+oMod[10]*=1.0+(audioPulse-1.0)*2.8;
 if(audioLevel>0.02){var _jit=audioLevel*0.014;rX+=(Math.random()-0.5)*_jit;rY+=(Math.random()-0.5)*_jit}
 }
 if(zr.cubeJitter){
