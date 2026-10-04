@@ -10480,8 +10480,8 @@ var tCorp=setInterval(function(){if(!guiWins[id]){clearInterval(tCorp);btnGameId
 
 var SHIFT_CH=[
 {t:'the lobby',pay:2,task:'sweep',intro:[['obj','new hire. dont expect a welcome.'],['obj','first job: the lobby has debris. mountains of it. it grows back every night. thats not a metaphor, thats maintenance.'],['obj','click the junk until it isnt there. try not to click yourself.']],outro:[['obj','acceptable. the mop likes you. the mop doesnt like anyone.'],['obj','next job is on the board. dont read into the fact that it knows your name.']]},
-{t:'reroute the grid',pay:3,task:'simon',intro:[['jbo','the grid is out of SEQUENCE. i am flashing the cells.'],['jbo','repeat it exactly. DO NOT IMPROVISE. improvisation is how rod four died.'],['jbo','five rounds. they get longer. GLOVES OFF. (there are no gloves.)']],outro:[['jbo','SEQUENCE HELD. you may touch the grid again. supervised.']]},
-{t:'restart the beat',pay:3,task:'beat',intro:[['core','i slowed. there is a difference and im upset you have to see it.'],['core','when the marker crosses my beat, press. space or the pad. ten steady beats and i restart.'],['core','missing is fine. i have a whole building of missing.']],outro:[['core','steady. thank you. the building feels that.']]},
+{t:'reroute the grid',pay:3,task:'simon',intro:[['jbo','the grid is out of SEQUENCE. i am flashing the cells.'],['jbo','repeat it exactly. DO NOT IMPROVISE. improvisation is how rod four died.'],['jbo','three rounds. they get longer. GLOVES OFF. (there are no gloves.)']],outro:[['jbo','SEQUENCE HELD. you may touch the grid again. supervised.']]},
+{t:'restart the beat',pay:3,task:'beat',intro:[['core','i slowed. there is a difference and im upset you have to see it.'],['core','when the marker crosses my beat, press. space or the pad. six steady beats and i restart.'],['core','missing is fine. i have a whole building of missing.']],outro:[['core','steady. thank you. the building feels that.']]},
 {t:'blueprint check',pay:3,task:'blue',intro:[['jbo','BLUEPRINT AUDIT. five sheets. one wrong cell each.'],['jbo','i put it there on PURPOSE. i was bored and you needed a test.'],['jbo','find them all. the printer is watching.']],outro:[['jbo','you have EYES. noted. the sheet survives another night.']]},
 {t:'paperwork',pay:4,task:'forms',intro:[['obj','fourteen forms. sign them. the clerk closes in nine minutes and i am not negotiating with a clerk.'],['obj','one already has a signature on it. its not yours. sign it anyway or dont.'],['obj','im not your supervisor. im the text.']],outro:[['obj','signed, filed, archived. if anyone asks, you signed everything.']]},
 {t:'inventory',pay:3,task:'count',intro:[['void','inventory. the void counts what the building hides.'],['void','count the squares. then the circles. then the triangles. the geometry remembers.'],['void','the clock is not yours. accuracy is the only kindness.']],outro:[['void','counts accepted. the void counts your breaths.']]},
@@ -10509,7 +10509,7 @@ function shNoliStop(){noliStop()}
 function noliLyricStart(audio){noliStart(document.body,audio||null)}
 function noliLyricStop(){noliStop()}
 function noliUnlocked(){try{return localStorage.getItem('cube_noli_full')==='1'}catch(e){return false}}var shift={ch:1,slips:0};
-var shRoot=null,$shStage=null,$shDlg=null,$shSpk=null,$shTxt=null,$shSub=null,$shHud=null;
+var shRoot=null,$shStage=null,$shDlg=null,$shSpk=null,$shTxt=null,$shSub=null,$shHud=null,shSkipB=null;
 var shMode='menu',shTimers=[],shDlgS=null,shBeatPress=null,shCur=0,shBgm=null,shBgmMuted=false,shWasBgm=false,shBgmPlayIdx=0,shBgmPlayList=['vestige.mp3'],shBgmSrc=null;
 function shT(fn,ms){var t=setTimeout(fn,ms);shTimers.push(t);return t}
 function shI(fn,ms){var t=setInterval(fn,ms);shTimers.push(t);return t}
@@ -10555,7 +10555,7 @@ st.textContent='#shiftRoot{position:fixed;left:0;top:0;right:0;bottom:0;z-index:
 '.sh-cell.ok{background:#2b6a3f;color:#b6ffab;border-color:#4d9d67}'+
 '.sh-cell.bad{background:#6a2b2b;color:#ffb6b6;border-color:#9d4d4d}'+
 '.sh-bar{position:relative;height:52px;background:#0c1120;border:1px solid #1f2b4a;border-radius:5px;margin:14px 16px 6px;overflow:hidden}'+
-'.sh-zone{position:absolute;top:0;bottom:0;left:42%;width:16%;background:rgba(100,255,160,.14);border-left:1px solid rgba(100,255,160,.4);border-right:1px solid rgba(100,255,160,.4)}'+
+'.sh-zone{position:absolute;top:0;bottom:0;left:38%;width:24%;background:rgba(100,255,160,.14);border-left:1px solid rgba(100,255,160,.4);border-right:1px solid rgba(100,255,160,.4)}'+
 '.sh-mark{position:absolute;top:4px;bottom:4px;width:4px;background:#fff;left:0;box-shadow:0 0 8px #fff;border-radius:2px}'+
 '.sh-bar.hit{background:rgba(60,160,90,.3)}'+
 '.sh-bar.miss{background:rgba(160,60,60,.3)}'+
@@ -10601,7 +10601,7 @@ document.body.appendChild(shRoot);
 $shStage=shRoot.querySelector('#shStage');$shDlg=shRoot.querySelector('#shDlg');$shSpk=shRoot.querySelector('#shSpk');$shTxt=shRoot.querySelector('#shTxt');$shSub=shRoot.querySelector('#shSub');$shHud=shRoot.querySelector('#shHud');
 shRoot.querySelector('#shX').onclick=shClose;
 try{shBgmMuted=localStorage.getItem('cube_shift_mute')==='1'}catch(e){}
-try{shBgm=new Audio('vestige.mp3');shBgm.loop=false;shBgm.volume=0.4;shBgmPlayIdx=0;shBgmPlayList=['vestige.mp3'];shBgm.onended=function(){try{shNoliStop();shBgmPlayIdx=(shBgmPlayIdx+1)%shBgmPlayList.length;shBgm.src=shBgmPlayList[shBgmPlayIdx];function shBgmGo(){shNoliStart();if(!shBgmMuted&&shRoot.classList.contains('on'))shBgm.play().catch(function(){})}shBgmGo()}catch(e){}}}catch(e){shBgm=null}
+try{shBgm=new Audio('vestige.mp3');shBgm.loop=false;shBgm.volume=0.4;shBgmPlayIdx=0;shBgmPlayList=['vestige.mp3'];shBgm.onended=function(){try{shNoliStop();shBgmPlayIdx=(shBgmPlayIdx+1)%shBgmPlayList.length;shBgm.src=shBgmPlayList[shBgmPlayIdx];function shBgmGo(){try{if(shBgm&&String(shBgm.src).indexOf('noli.webm')!==-1)shNoliStart();else shNoliStop()}catch(e){}if(!shBgmMuted&&shRoot.classList.contains('on'))shBgm.play().catch(function(){})}shBgmGo()}catch(e){}}}catch(e){shBgm=null}
 var $mus=shRoot.querySelector('#shMus');
 function musUpd(){$mus.textContent=shBgmMuted?'\u266a\u0338':'\u266a';$mus.style.opacity=shBgmMuted?'.4':'1'}
 $mus.onclick=function(){shBgmMuted=!shBgmMuted;try{localStorage.setItem('cube_shift_mute',shBgmMuted?'1':'0')}catch(e){}musUpd();
@@ -10633,6 +10633,7 @@ shWasBgm=false;
 shRoot.classList.remove('on');shClearTimers();shMode='menu';shDlgS=null;shBeatPress=null;try{shNoliStop()}catch(e){}}
 function shMenu(){
 shClearTimers();shMode='menu';shDlgS=null;shBeatPress=null;
+try{if(shSkipB&&shSkipB.parentNode)shSkipB.parentNode.removeChild(shSkipB)}catch(e){}shSkipB=null;
 $shStage.innerHTML='';$shDlg.style.display='none';$shSub.textContent='night operations -- cube# building';shHud();
 var m=shD($shStage,'sh-menu');
 shD(m,'sh-big','CUBE SHIFT');
@@ -10696,12 +10697,14 @@ shBtn(row,'MENU',shMenu);
 }
 function shRunTask(name,stage,done){
 stage.innerHTML='';
-var called=false;var once=function(){if(called)return;called=true;done()};
+var called=false;
+try{if(shRoot){shSkipB=document.createElement('button');shSkipB.className='sh-btn';shSkipB.textContent='SKIP JOB (coward)';shSkipB.style.cssText='position:fixed;bottom:18px;right:18px;z-index:90060;opacity:0.75';shSkipB.onclick=function(){once()};shRoot.appendChild(shSkipB)}}catch(e){}
+var once=function(){if(called)return;called=true;try{if(shSkipB&&shSkipB.parentNode)shSkipB.parentNode.removeChild(shSkipB)}catch(e){}shSkipB=null;done()};
 try{
 if(name==='sweep')shT_sweep(stage,once,45,40);
 else if(name==='sweep2')shT_sweep(stage,once,38,32);
-else if(name==='simon')shT_simon(stage,once,[4,6,8,9,9]);
-else if(name==='beat')shT_beat(stage,once,10);
+else if(name==='simon')shT_simon(stage,once,[3,4,5]);
+else if(name==='beat')shT_beat(stage,once,6);
 else if(name==='blue')shT_blue(stage,once,5);
 else if(name==='forms')shT_forms(stage,once);
 else if(name==='count')shT_count(stage,once);
@@ -10779,7 +10782,7 @@ var pos=0,dir=1,hits=0,miss=0,live=true;
 var iv=null;
 function press(){
 if(!live)return;
-if(pos>=42&&pos<=58){
+if(pos>=38&&pos<=62){
 hits++;bar.classList.add('hit');shT(function(){bar.classList.remove('hit')},180);
 if(hits===3&&miss===0)shAch('perfect');
 stat.textContent='BEATS '+hits+'/'+need+(miss?'   misses: '+miss:'   perfect line');
