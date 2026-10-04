@@ -950,13 +950,13 @@ var _sunEarly=window._cubeDay===0&&(window._cubeSunHalf==='early'||(!window._cub
 var _party=_wed||_fri||_sat;
 var _fire=_sat;
 var _peaceful=_sunEarly;
-var audioPulse=1.0+audioLevel*(_party?0.35:(_peaceful?0.15:(isMoon?0.4:0.08)));
+var audioPulse=1.0+audioLevel*(_party?0.35:(_peaceful?0.15:(isMoon?0.4:0.22)));
 var wedBoost=(_party||isMoon)?(isMoon?12:8):(_peaceful?2:1);
 var wedBeat=_party||isMoon?audioLevel:(_peaceful?audioLevel*0.5:0);
 
 // audio visualizer background pulse
 var th=themes[curTheme]||themes['1'];
-var bgPulse=audioLevel*(_party?0.2:0.03);
+var bgPulse=audioLevel*(_party?0.2:0.09);
 var hueShift=Math.sin(time*0.00008)*0.008;
 var zr=getZoneRenderFlags();
 if(_mon){
@@ -1041,7 +1041,7 @@ if(_fire){
 var _fe=(0.5+wedBeat*1.5+Math.sin(t*15)*0.2)*audioPulse;
 gl.uniform1f(uEm,_fe);gl.uniform1f(uAl,.4+wedBeat*0.3);
 }else{
-gl.uniform1f(uEm,_mon?0.02:audioLevel*0.05*wedBoost);gl.uniform1f(uAl,_mon?0.15:(.25+audioLevel*0.05*wedBoost));
+gl.uniform1f(uEm,_mon?0.02:audioLevel*0.11*wedBoost);gl.uniform1f(uAl,_mon?0.15:(.25+audioLevel*0.09*wedBoost));
 }
 gl.uniform1f(uInv,window._premInvert?1:(themes[curTheme]&&themes[curTheme].invert?1:0));
 gl.uniform1f(uFr,(window._skillFresnel||1)+(window._skillFresnelBoost||0));
