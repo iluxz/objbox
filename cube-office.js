@@ -44,6 +44,17 @@ var stExpoSeen=[];
 var stLeak=false;
 var stFigs=[];
 var stEpilogueReady=false;
+var stSprintOn=false;
+var stCrouchOn=false;
+var stJumpN=0;
+var stPitchSeen=[];
+function stPitchReset(){stSprintOn=false;stCrouchOn=false;try{var r=document.getElementById('stRoom');if(r)r.style.transform=''}catch(e){}}
+function stPitchSold(){
+if(stRunFlags.pitchSold)return;
+if(stPitchSeen.indexOf('jump')===-1||stPitchSeen.indexOf('sprint')===-1||stPitchSeen.indexOf('crouch')===-1)return;
+stRunFlags.pitchSold=true;
+stSay(['...THAT IS THE PITCH.','jumping. sprinting. crouching. OFFICE 2 is basically exercise.','the investors love it. (i am the investors.) (i love it.)','implementation: complete. probably. moving on.']);
+}
 function stBeep(){
 try{
 if(!stTypeCtx){try{stTypeCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return}}
@@ -68,7 +79,7 @@ function stPersist(){try{localStorage.setItem('cube_office',JSON.stringify({seen
 function stHas(id){return stSeen.indexOf(id)!==-1}
 function stMark(id){
 if(stSeen.indexOf(id)===-1){stSeen.push(id);stPersist()}
-try{if(typeof ach==='function'){if(stSeen.length>=1)ach('office_worker');if(stSeen.length>=20)ach('middle_manager');if(stSeen.length>=40)ach('employee_of_the_month');if(typeof achScan==='function')achScan()}}catch(e){}
+try{if(typeof ach==='function'){ach('off_'+id);if(stSeen.length>=1)ach('office_worker');if(stSeen.length>=20)ach('middle_manager');if(stSeen.length>=40)ach('employee_of_the_month');if(typeof achScan==='function')achScan()}}catch(e){}
 try{stBar()}catch(e){}
 }
 
@@ -215,7 +226,7 @@ document.getElementById('stMenuLeave').onclick=function(){stExit()};
 stStashUI();
 try{stBar()}catch(e){}
 }
-function stDial(){try{if(typeof dialSp==='function'){var v=dialSp();if(v>0&&v<=4)return v}}catch(e){}return 1}
+function stDial(){try{if(stSprintOn)return 4}catch(e){}try{if(typeof dialSp==='function'){var v=dialSp();if(v>0&&v<=4)return v}}catch(e){}return 1}
 var stSpeeds=[1,1.5,2,3];
 function stDialCycle(){
 try{
@@ -768,14 +779,14 @@ if(stRunFlags.phoneRings)O.push(obj('phone','the phone (answer it)',null,null));
 if(stRuns>=1)O.push(obj('newhire','a NEW HIRE (welcome them)',null,null));
 if(stRunFlags.night)O.push(obj('nightaudit','the night audit (read it)',null,null));
 if(stLeak)O.push(obj('leak_poster','an EXPO poster (take one)',null,null));
-if(stFigs.indexOf('fig_office')===-1)O.push(obj('fig_office','a tiny man (take it)',null,null));
+if(stLeak&&stFigs.indexOf('fig_office')===-1)O.push(obj('fig_office','a tiny man (take it)',null,null));
 }
 else if(r==='hallway'){
 if(stHas('intervention')&&stHas('audience')&&stHas('tenant')&&!stHas('confession'))O.push(obj('strangedoor','a door that was not here before',null,null));
 if(stLeak)O.push(obj('leak_balloon','a SYNERGY balloon (pop it)',null,null));
-if(stFigs.indexOf('fig_hall')===-1)O.push(obj('fig_hall','a tiny man (take it)',null,null));
+if(stLeak&&stFigs.indexOf('fig_hall')===-1)O.push(obj('fig_hall','a tiny man (take it)',null,null));
 }
-else if(r==='closet'){O.push(obj('broom','a broom (admire it)',null,null));O.push(obj('griev_mop','file a grievance (mops)',null,function(){return hasIt('griev_mop')}));if(stFigs.indexOf('fig_closet')===-1)O.push(obj('fig_closet','a tiny man (take it)',null,null))}
+else if(r==='closet'){O.push(obj('broom','a broom (admire it)',null,null));O.push(obj('griev_mop','file a grievance (mops)',null,function(){return hasIt('griev_mop')}));if(stLeak&&stFigs.indexOf('fig_closet')===-1)O.push(obj('fig_closet','a tiny man (take it)',null,null))}
 else if(r==='meeting'){
 O.push(obj('window','the window (look out)',null,null));
 O.push(obj('whiteboard','the whiteboard',null,null));
@@ -783,7 +794,7 @@ if(!hasIt('keycard'))O.push(obj('keycard','a keycard (take it)',function(){retur
 if(!stRunFlags.rating)O.push(obj('form','PERFORMANCE REVIEW form',null,null));
 else{for(var ri=1;ri<=5;ri++)(function(n){O.push(obj('rate'+n,n+' star'+(n>1?'s':''),null,null))})(ri)}
 if(!hasIt('redpen'))O.push(obj('redpen','a red pen (take it)',function(){return hasIt('redpen')},null));
-if(stFigs.indexOf('fig_meet')===-1)O.push(obj('fig_meet','a tiny man (take it)',null,null));
+if(stLeak&&stFigs.indexOf('fig_meet')===-1)O.push(obj('fig_meet','a tiny man (take it)',null,null));
 }
 else if(r==='kitchen'){
 O.push(obj('bucket','a bucket (pick it up)',null,function(){return hasIt('bucket')}));
@@ -808,17 +819,17 @@ if(hasIt('bucket'))O.push(obj('bucketdrop','set the bucket down',null,null));
 O.push(obj('griev_pay','file a grievance (pay stub)',null,function(){return hasIt('griev_pay')}));
 }
 else if(r==='supply'){O.push(obj('secondoffice','knock on the other office door',null,null))}
-else if(r==='basement'){O.push(obj('hole','the hole (jump in)',null,null));if(stFigs.indexOf('fig_base')===-1)O.push(obj('fig_base','a tiny man (take it)',null,null))}
+else if(r==='basement'){O.push(obj('hole','the hole (jump in)',null,null));if(stLeak&&stFigs.indexOf('fig_base')===-1)O.push(obj('fig_base','a tiny man (take it)',null,null))}
 else if(r==='lobby'){
 O.push(obj('exit','EXIT (leave the building)',null,null));
 O.push(obj('revolving','revolving door (spin)',null,null));
 if(stRuns>=3)O.push(obj('visitor','a VISITOR (not the man)',null,null));
-if(stFigs.indexOf('fig_lobby')===-1)O.push(obj('fig_lobby','a tiny man (take it)',null,null));
+if(stLeak&&stFigs.indexOf('fig_lobby')===-1)O.push(obj('fig_lobby','a tiny man (take it)',null,null));
 }
 else if(r==='archive'){O.push(obj('gallery','the gallery (tour it)',null,null));if(stSeen.length>=27)O.push(obj('watch','a gold watch (take it)',null,null))}
 else if(r==='white'){O.push(obj('leavewhite','leave',null,null))}
 else if(r==='pod'){O.push(obj('launch','LAUNCH',null,null))}
-else if(r==='pitch'){O.push(obj('poster1','poster: SYNERGY 2.0 (read it)',null,null))}
+else if(r==='pitch'){O.push(obj('poster1','poster: SYNERGY 2.0 (read it)',null,null));O.push(obj('proto_jump','prototype: JUMPING (try it)',null,null));O.push(obj('proto_sprint','prototype: SPRINT (toggle)',null,null));O.push(obj('proto_crouch','prototype: CROUCH (toggle)',null,null))}
 else if(r==='brainstorm'){O.push(obj('poster2','circled idea: MORE OFFICE (read it)',null,null))}
 else if(r==='expohall'){
 O.push(obj('expo_balloon','exhibit: synergy balloons',null,null));
@@ -849,6 +860,7 @@ else if(stClosetSec>=210){stClosetStop();try{stEndCloset()}catch(e){}}
 }
 // ── arrival narration ──
 function stOnArrive(to){
+if(to!=='pitch')try{stPitchReset()}catch(e){}
 var seen='st_v_'+to;
 var first=false;
 try{if(!stRunFlags[seen]){stRunFlags[seen]=1;first=true}}catch(e){first=true}
@@ -891,7 +903,7 @@ else if(to==='supply'&&first){stSay(['the supply closet.','paper. toner. a door 
 else if(to==='archive'&&first){stSay(['the archive.','dust an inch thick. and in the middle, cleared with care: a small gallery.','someone has been expecting you. it was me.'])}
 else if(to==='white'&&first){stSay(['...','this room is white.','i did not build this room.','...anyway.'])}
 else if(to==='pod'&&first){stSay(['the escape pod.','one seat. one button. one small window showing the stairwell.','the man felt hope. the man should not have.'])}
-else if(to==='pitch'&&first){stSay(['...what. where did THIS come from.','i have had an idea. a big idea. a sequel-sized idea. WELCOME TO THE PITCH.','investors, that means you. (the investors are also me.)'])}
+else if(to==='pitch'&&first){stSay(['...what. where did THIS come from.','i have had an idea. a big idea. a sequel-sized idea. WELCOME TO THE PITCH.','investors, that means you. (the investors are also me.)','three prototypes on the table. try them. (i will be implementing these. probably.)'])}
 else if(to==='brainstorm'&&first){stSay(['the brainstorming halls.','every idea i ever had, crossed out except one.','...MORE OFFICE.'])}
 else if(to==='expohall'&&first){stSay(['EXPO HALL 2. OFFICE 2: THE SEQUELENING.','four exhibits. four terrible, wonderful ideas. see them all, then touch the title screen.','the future of office is here. (the future is sticky.)'])}
 // office right-door keystroke counter moved to top of stOnArrive (observed fires on 3rd entry)
@@ -1016,6 +1028,32 @@ else if(id==='launch'){try{stEndPod()}catch(e){}}
 else if(id==='strangedoor'){try{stEndConfession()}catch(e){}}
 else if(id==='poster1'){stSay(['SYNERGY 2.0: twice the synergy. half the meaning.','investors love it. (i am the investors.)'])}
 else if(id==='poster2'){stSay(['MORE OFFICE. circled three times. underlined once.','the best idea. the only idea.'])}
+else if(id==='proto_jump'){
+if(stPitchSeen.indexOf('jump')===-1)stPitchSeen.push('jump');
+stJumpN++;
+try{var rj=document.getElementById('stRoom');if(rj){rj.style.transition='transform .16s';rj.style.transform='translateY(-26px)';setTimeout(function(){try{var q=document.getElementById('stRoom');if(q)q.style.transform=stCrouchOn?'scale(.82)':''}catch(e){}},200)}}catch(e){}
+if(stJumpN===1)stSay(['the man jumped.','...the man can jump now. OFFICE 2 has jumping.','investors, write that down.']);
+else if(stJumpN===3)stSay(['again. higher this time. (it was the same height.)']);
+else if(stJumpN===5)stSay(['five jumps. the sequel has legs.']);
+else if(stJumpN>=10)stSay(['TEN.','jumping is implemented. STOP jumping.']);
+else stSay(['hop.']);
+try{stPitchSold()}catch(e){}
+}
+else if(id==='proto_sprint'){
+if(stPitchSeen.indexOf('sprint')===-1)stPitchSeen.push('sprint');
+stSprintOn=!stSprintOn;
+if(stSprintOn)stSay(['SPRINT implemented. narration at maximum velocity.','everything is faster now. TIME is faster now.']);
+else stSay(['sprint unimplemented. time returns to normal.','the man catches his breath. the man never breathes.']);
+try{stPitchSold()}catch(e){}
+}
+else if(id==='proto_crouch'){
+if(stPitchSeen.indexOf('crouch')===-1)stPitchSeen.push('crouch');
+stCrouchOn=!stCrouchOn;
+try{var rc=document.getElementById('stRoom');if(rc)rc.style.transform=stCrouchOn?'scale(.82)':''}catch(e){}
+if(stCrouchOn)stSay(['CROUCH implemented. the man is 18% smaller.','(whispering) stealth sequel. nobody can see the man now. everyone can see the man.']);
+else stSay(['the man stands. full height. full man.']);
+try{stPitchSold()}catch(e){}
+}
 else if(id==='expo_balloon'||id==='expo_meeting'||id==='expo_thirdman'||id==='expo_bucket2'){
 if(stExpoSeen.indexOf(id)===-1){stExpoSeen.push(id);stPersist()}
 stRender();
