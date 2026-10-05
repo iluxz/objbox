@@ -500,6 +500,7 @@ setTimeout(function(){themeIndicator.style.color='rgba(255,255,255,0.15)'},1500)
 }
 document.addEventListener('keydown',function(e){
 if(typeof ngActive!=='undefined'&&ngActive){if(e.key==='Escape'){try{var _m=document.getElementById('ngMenu');if(_m&&_m.style.display==='block')_m.style.display='none';else ngExit()}catch(err){}}return}
+if(typeof stActive!=='undefined'&&stActive){if(e.key==='Escape'){try{var _sm=document.getElementById('stMenu');if(_sm&&_sm.style.display==='block')_sm.style.display='none'}catch(err){}}return}
 if(e.key>='1'&&e.key<='7'&&!e.ctrlKey&&!e.metaKey&&document.activeElement!==document.getElementById('termField')&&document.activeElement!==document.getElementById('studioCode')&&!(typeof demoPlaying!=='undefined'&&demoPlaying)){
 if(themes[e.key])applyTheme(e.key);
 }
