@@ -111,6 +111,25 @@ var out=lines.slice();
 out.splice(out.length>1?out.length-1:out.length,0,line);
 return out;
 }
+var stRockArrive={
+office:'the man sat down. the rock does not sit. the rock looms, pocket-sized.',
+hallway:'the hallway. the carpet. the rock, riding along. the carpet remembers all three.',
+closet:'the closet. the mops. the rock. a summit of silent things.',
+meeting:'the meeting room. twelve chairs. the rock has the floor.',
+stairwell:'up: money. down: noises. the rock votes noises. the rock loves a basement.',
+basement:'the basement. the hole. the rock looked into the hole. the hole looked back, deeper.',
+executive:'the executive office. everything here costs money. the rock is priceless. do the math.',
+kitchen:'the break room. the fridge hums. the rock hums back, lower.',
+server:'the server room. the servers blink at the man. they blink twice at the rock. respect.',
+lobby:'the lobby. daylight. the rock has never seen daylight. the rock is unimpressed. daylight, take notes.',
+supply:'paper. toner. another office. the rock has been to that office. the rock will not say what it saw.',
+archive:'the archive. everything the man has done, filed. the rock has its own shelf. (it does not. yet.)',
+white:'white. just white. the rock provides the only contrast in here. thank the rock.',
+pod:'the escape pod. one seat. the rock already called it. (the rock did not call it. there is one seat.)',
+pitch:'the pitch. the prototypes. the rock tried them all, off-screen. the rock can jump. you cannot see it jump.',
+brainstorm:'MORE OFFICE. the rock agrees. the rock circled it a fourth time.',
+expohall:'EXPO HALL 2. the rock toured this expo once. the rock left a review: rock.'
+};
 function stPitchSold(){
 if(stRunFlags.pitchSold)return;
 if(stPitchSeen.indexOf('jump')===-1||stPitchSeen.indexOf('sprint')===-1||stPitchSeen.indexOf('crouch')===-1)return;
@@ -972,6 +991,8 @@ else if(to==='pitch'&&first){stSay(['...what. where did THIS come from.','i have
 else if(to==='brainstorm'&&first){stSay(['the brainstorming halls.','every idea i ever had, crossed out except one.','...MORE OFFICE.'])}
 else if(to==='expohall'&&first){stSay(['EXPO HALL 2. OFFICE 2: THE SEQUELENING.','four exhibits. four terrible, wonderful ideas. see them all, then touch the title screen.','the future of office is here. (the future is sticky.)'])}
 // office right-door keystroke counter moved to top of stOnArrive (observed fires on 3rd entry)
+// rock interjection: the narrator cannot stop mentioning the rock
+if(stRock&&first){try{var ra=stRockArrive[to];if(ra)stSay([ra])}catch(e){}}
 // cage check: perfect obedience reaching executive
 if(to==='executive'&&stDisobey===0&&stObey>=7&&!stHas('cage')){try{stEndCage()}catch(e){return}}
 // applause check: spotless run reaching the lobby exit area
@@ -992,12 +1013,12 @@ if(id==='stapler'){stTake('stapler','stapler')}
 else if(id==='mug'){stTake('mug','mug')}
 else if(id==='keycard'){stTake('keycard','keycard')}
 else if(id==='bucket'){
-if(stInv.indexOf('bucket')===-1){stInv.push('bucket');stRender();stSay(['the man picked up the bucket.','...put it down.','the man did not put it down.','fine. carry the bucket. see if i care. (i care.)'])}
+if(stInv.indexOf('bucket')===-1){stInv.push('bucket');stRender();if(stRock)stSay(['the man picked up the bucket.','the rock watched.','...the man now carries a bucket AND a rock. this is too many things. (it is exactly enough things.)']);else stSay(['the man picked up the bucket.','...put it down.','the man did not put it down.','fine. carry the bucket. see if i care. (i care.)'])}
 }
 else if(id==='nameplate'){
 stNameClicks++;
-if(stNameClicks===1)stSay(['the nameplate reads: THE MAN.','accurate. concise. hr-approved.']);
-else if(stNameClicks===2)stSay(['still says THE MAN.','staring at it will not change it. nothing you do changes anything. (keep doing things.)']);
+if(stNameClicks===1){if(stRock)stSay(['the nameplate reads: THE MAN.','the rock has no nameplate. the rock needs none. the rock is known.']);else stSay(['the nameplate reads: THE MAN.','accurate. concise. hr-approved.'])}
+else if(stNameClicks===2){if(stRock)stSay(['still says THE MAN.','the rock checked. the rock can read. (the rock cannot read. the rock vibes.)']);else stSay(['still says THE MAN.','staring at it will not change it. nothing you do changes anything. (keep doing things.)'])}
 else{try{stEndRename()}catch(e){}}
 }
 else if(id==='pinknote'){
@@ -1009,13 +1030,14 @@ else{try{stEndTakeover()}catch(e){}}
 else if(id==='phone'){try{stEndPhone()}catch(e){}}
 else if(id==='broom'){
 stClosetT++;
-if(stClosetT===1)stSay(['the man admired the broom.','a fine broom. straight handle. honest bristles.']);
-else if(stClosetT===2)stSay(['the man admired the broom again.','the broom appreciates it. the broom told me. (the broom is quiet. like the man.)']);
+if(stClosetT===1){if(stRock)stSay(['the man admired the broom.','the rock admired it too. silently. the broom prefers the rock.']);else stSay(['the man admired the broom.','a fine broom. straight handle. honest bristles.'])}
+else if(stClosetT===2){if(stRock)stSay(['the man admired the broom again.','the rock nodded. rocks nod at 0.1 degrees. the broom noticed.']);else stSay(['the man admired the broom again.','the broom appreciates it. the broom told me. (the broom is quiet. like the man.)'])}
 else stSay(['the broom. yes. still a broom.','admiration noted and filed.']);
 }
 else if(id==='window'){try{stEndAudience()}catch(e){}}
 else if(id==='whiteboard'){
 if(stInv.indexOf('redpen')!==-1){try{stEndTypo()}catch(e){}}
+else if(stRock)stSay(['SYNERGY. ACTION ITEMS. Q4.','the rock read the whiteboard. the rock understood it. the rock wishes it had not.','the word was still HELP.']);
 else stSay(['SYNERGY. ACTION ITEMS. Q4.','the whiteboard has not been erased in six years. the marker dried mid-word.','the word was HELP.']);
 }
 else if(id==='redpen'){stTake('redpen','red pen')}
@@ -1027,7 +1049,7 @@ else if(id==='rate4'){try{stEndReview(4)}catch(e){}}
 else if(id==='rate5'){try{stEndReview(5)}catch(e){}}
 else if(id==='vending'){
 stRunFlags.vend=(stRunFlags.vend||0)+1;
-if(stRunFlags.vend===1)stSay(['the vending machine wants EXACT CHANGE.','the man has no change. the man has never had change. the machine knew.']);
+if(stRunFlags.vend===1){if(stRock)stSay(['the vending machine wants EXACT CHANGE.','the rock offered itself. the machine refused. the machine has standards. (the machine does not have standards. the machine is a box.)']);else stSay(['the vending machine wants EXACT CHANGE.','the man has no change. the man has never had change. the machine knew.'])}
 else{try{stEndVending()}catch(e){}}
 }
 else if(id==='griev_mop'||id==='griev_fridge'||id==='griev_pay'){
@@ -1040,6 +1062,7 @@ else stSay(['grievance filed: '+gname+'. ('+gc+'/3)','the void HR department has
 else if(id==='alarm'){try{stEndDrill()}catch(e){}}
 else if(id==='elevator'){
 if(stRuns>=9){try{stEndElevator()}catch(e){}}
+else if(stRock)stSay(['the elevator is OUT OF ORDER.','it has been out of order for every run. it will be out of order for several more.','the rock will wait. the rock is good at waiting. rocks invented waiting.']);
 else stSay(['the elevator is OUT OF ORDER.','it has been out of order for every run. it will be out of order for several more.','...check back around run ten. elevators have schedules too.']);
 }
 else if(id==='newhire'){try{stEndIntern()}catch(e){}}
@@ -1087,7 +1110,7 @@ stRender();try{stEndBucket()}catch(e){}
 else if(id==='secondoffice'){try{stEndDuplicate()}catch(e){}}
 else if(id==='hole'){try{stEndHole()}catch(e){}}
 else if(id==='exit'){try{stEndLoop()}catch(e){}}
-else if(id==='revolving'){stSay(['the man spun the revolving door.','round and round. the lobby watched. the daylight stayed exactly where it was.','the man stepped out where he stepped in. progress.'])}
+else if(id==='revolving'){if(stRock)stSay(['the man spun the revolving door. the rock spun faster. (the rock did not move. physics.)','round and round. progress, plus rock.']);else stSay(['the man spun the revolving door.','round and round. the lobby watched. the daylight stayed exactly where it was.','the man stepped out where he stepped in. progress.'])}
 else if(id==='gallery'){try{stEndMuseum()}catch(e){}}
 else if(id==='leavewhite'){try{stEndBlank()}catch(e){}}
 else if(id==='launch'){try{stEndPod()}catch(e){}}
