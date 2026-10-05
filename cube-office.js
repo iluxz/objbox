@@ -48,7 +48,69 @@ var stSprintOn=false;
 var stCrouchOn=false;
 var stJumpN=0;
 var stPitchSeen=[];
+var stRock=false;
+var stRockN=0;
 function stPitchReset(){stSprintOn=false;stCrouchOn=false;try{var r=document.getElementById('stRoom');if(r)r.style.transform=''}catch(e){}}
+var stRockPool=[
+'the man brought the rock. the rock saw everything. the rock will tell no one.',
+'...is that the rock. you brought the rock HERE.',
+'the narrator notes, for the record, that the rock was present.',
+'the rock approved of this ending. (the rock approves of all endings. the rock is easy.)',
+'the man checked: still rock. good.',
+'the rock says nothing, as usual. a professional.',
+'this ending is dedicated to the rock.',
+'somewhere, an expo gift shop restocks nothing. the rock was one of one.'
+];
+var stRockSolo={
+lazy:'the man did nothing. the rock did less. a perfect team.',
+observed:'the watchers filed a second report. subject: rock. status: rock.',
+rename:'the rock has no name. the rock needs no name. be like the rock. (you cannot be like the rock. you have a name.)',
+applause:'the crowd applauded the man. the rock received a standing ovation. rocks always do.',
+rewrite:'the man edited the narration. the rock edited nothing. the rock respects the draft.',
+landlord:'the man tried to pay rent with the rock. the landlord accepted. rent is now rocks.',
+audience:'the audience voted: the rock carried this run.',
+skip:'the man skipped everything. the rock skipped nothing. the rock was already there.',
+duplicate:'two men. one rock. the rock chooses no one. (the rock chose. the rock will not say.)',
+takeover:'nothingcore took the mic. the rock took nothing. the rock already had everything.',
+tenant:'the tenant confessed to the man. the rock heard it first. rocks hear everything.',
+phone:'wrong number. the rock knew. the rock let it ring.',
+loop:'the rock has been through the loop before. the rock remembers. the rock says nothing. rocks never do.',
+museum:'a new wing: THE ROCK. one rock. no plaque. the plaque just says rock.',
+bucket:'the man held the rock next to the bucket. ...they are friends now. the narrator refuses to elaborate.',
+pod:'the pod has one seat. the rock does not get a seat. the rock understands. (the rock does not understand.)',
+countdown:'the countdown reached zero. the rock did not flinch. rocks invented patience.',
+blank:'the blank room. the rock. finally, a room as quiet as the rock.',
+intervention:'the intervention was for the man. the rock staged it. (the rock denies everything.)',
+cage:'the cage held the man. the rock visited on weekends. the rock brought snacks. (a smaller rock.)',
+sequel:'the man opened the sequel door. the rock had already been inside. the rock would not say what it saw.',
+confession:'the man confessed. the rock absolved him. the rock has that power. (the rock does not have that power.)',
+closet:'the man showed the rock the mops. the rock was unimpressed. the mops were threatened.',
+hole:'the man dropped the rock in the hole. the hole is deeper now.',
+overtime:'the man clocked in at the wrong time. the rock clocked in at no time. the rock is salaried.',
+blaze:'the funny number. the rock laughed. nobody has ever heard the rock laugh. nobody will.',
+flicker:'day. night. day. night. the rock watched all ten swaps. the rock blinks slower.',
+review:'performance review: the man, adequate. the rock, exemplary. the rock got the raise.',
+drill:'the fire drill. the man evacuated. the rock stayed. the rock is fireproof. (the rock is not fireproof. the rock got lucky.)',
+intern:'the man fetched coffee. the rock held the door. teamwork.',
+vending:'the machine took the coins. the rock watched. the rock never pays. the rock is the economy.',
+nightshift:'the night shift. the man and the rock. the fluorescent hum. the rock hums back.',
+union:'the union voted. the rock abstained. the rock is management. (the rock is not management.)',
+typo:'there was a typo. the rock proofread it. the rock found a second typo. the rock kept it.',
+elevator:'the elevator is out of order. the rock took the stairs. the rock takes the stairs everywhere. legs.',
+retirement:'the gold watch. the man retired. the rock continues. rocks do not retire.',
+customer:'the customer is always right. the rock is always righter. the customer complained. the rock refunded nothing.',
+expo:'the expo. the rock toured the exhibits. the rock left a review: rock.',
+figurines:'six tiny men. one full-size rock. the tiny men worship it now. as they should.',
+epilogue:'the epilogue. the rock was here before the beginning. the rock will be here after. the rock is the frame.'
+};
+function stRockify(id,lines){
+if(!stRock||!lines||!lines.length)return lines;
+var line=stRockSolo[id]||stRockPool[stRockN%stRockPool.length];
+stRockN++;
+var out=lines.slice();
+out.splice(out.length>1?out.length-1:out.length,0,line);
+return out;
+}
 function stPitchSold(){
 if(stRunFlags.pitchSold)return;
 if(stPitchSeen.indexOf('jump')===-1||stPitchSeen.indexOf('sprint')===-1||stPitchSeen.indexOf('crouch')===-1)return;
@@ -74,12 +136,12 @@ var stSkipN=0;
 var stInterveneN=0;
 var stClosetT=0;
 function stSave(){try{return JSON.parse(localStorage.getItem('cube_office')||'{}')}catch(e){return{}}}
-function stLoad(){try{var s=stSave();if(s.seen&&s.seen.length)stSeen=s.seen;if(s.runs)stRuns=s.runs;if(s.takeover)stTakeoverN=s.takeover;if(typeof s.type!=='undefined')stTypeOn=!!s.type;if(s.times&&s.times.length)stClockTimes=s.times;if(s.boots)stClockBoots=s.boots;if(typeof s.night!=='undefined')stNight=!!s.night;if(s.swaps)stSwapN=s.swaps;if(s.expo&&s.expo.length)stExpoSeen=s.expo;if(s.leak)stLeak=true;if(s.figs&&s.figs.length)stFigs=s.figs;if(s.epready)stEpilogueReady=true}catch(e){}}
-function stPersist(){try{localStorage.setItem('cube_office',JSON.stringify({seen:stSeen,runs:stRuns,takeover:stTakeoverN,type:stTypeOn?1:0,times:stClockTimes,boots:stClockBoots,night:stNight?1:0,swaps:stSwapN,expo:stExpoSeen,leak:stLeak?1:0,figs:stFigs,epready:stEpilogueReady?1:0}))}catch(e){}}
+function stLoad(){try{var s=stSave();if(s.seen&&s.seen.length)stSeen=s.seen;if(s.runs)stRuns=s.runs;if(s.takeover)stTakeoverN=s.takeover;if(typeof s.type!=='undefined')stTypeOn=!!s.type;if(s.times&&s.times.length)stClockTimes=s.times;if(s.boots)stClockBoots=s.boots;if(typeof s.night!=='undefined')stNight=!!s.night;if(s.swaps)stSwapN=s.swaps;if(s.expo&&s.expo.length)stExpoSeen=s.expo;if(s.leak)stLeak=true;if(s.rock)stRock=true;if(s.figs&&s.figs.length)stFigs=s.figs;if(s.epready)stEpilogueReady=true}catch(e){}}
+function stPersist(){try{localStorage.setItem('cube_office',JSON.stringify({seen:stSeen,runs:stRuns,takeover:stTakeoverN,type:stTypeOn?1:0,times:stClockTimes,boots:stClockBoots,night:stNight?1:0,swaps:stSwapN,expo:stExpoSeen,leak:stLeak?1:0,rock:stRock?1:0,figs:stFigs,epready:stEpilogueReady?1:0}))}catch(e){}}
 function stHas(id){return stSeen.indexOf(id)!==-1}
 function stMark(id){
 if(stSeen.indexOf(id)===-1){stSeen.push(id);stPersist()}
-try{if(typeof ach==='function'){ach('off_'+id);if(stSeen.length>=1)ach('office_worker');if(stSeen.length>=20)ach('middle_manager');if(stSeen.length>=40)ach('employee_of_the_month');if(typeof achScan==='function')achScan()}}catch(e){}
+try{if(typeof ach==='function'){ach('off_'+id);if(stSeen.length>=1)ach('office_worker');if(stSeen.length>=40)ach('middle_manager');if(stSeen.length>=80)ach('employee_of_the_month');if(typeof achScan==='function')achScan()}}catch(e){}
 try{stBar()}catch(e){}
 }
 
@@ -241,7 +303,7 @@ stSay(['narration speed: '+nx+'x.','the man experiences time at '+nx+'x. the man
 function stBar(){
 try{
 var el=document.getElementById('stBarL');
-if(el)el.textContent='run '+stRun+' · endings '+stSeen.length+'/40';
+if(el)el.textContent='run '+stRun+' · endings '+stSeen.length+'/80';
 }catch(e){}
 try{stMenuRefresh()}catch(e){}
 }
@@ -282,11 +344,11 @@ var m=document.getElementById('stMenu');if(!m||m.style.display!=='block')return;
 var R=null;try{R=stRooms[stRoom]}catch(e){}
 var ch=document.getElementById('stMenuCh');
 if(ch)ch.textContent='run '+stRun+' · '+(R?R.name:stRoom);
-var pct=Math.round(stSeen.length/40*100);
+var pct=Math.round(stSeen.length/80*100);
 var bf=document.getElementById('stMenuBarFill');
 if(bf)bf.style.width=pct+'%';
 var pr=document.getElementById('stMenuProg');
-if(pr&&!stMenuEndingsOpen)pr.textContent=stMenuHintText()+' ('+stSeen.length+'/37)';
+if(pr&&!stMenuEndingsOpen)pr.textContent=stMenuHintText()+' ('+stSeen.length+'/80)';
 var sp=document.getElementById('stMenuSpeed');
 if(sp)sp.textContent='SPEED: '+stDial()+'x';
 var ty=document.getElementById('stMenuType');
@@ -312,7 +374,7 @@ el2.innerHTML=html;
 }
 }catch(e){}
 }
-var stEndTitles=[['lazy','THE LAZY ENDING'],['observed','THE OBSERVED ENDING'],['rename','THE THIRD PERSON PROBLEM'],['applause','THE APPLAUSE ENDING'],['rewrite','THE REWRITE'],['landlord','THE LANDLORD'],['audience','THE AUDIENCE'],['skip','THE SKIP'],['duplicate','THE DUPLICATE'],['takeover','NOTHINGCORE TAKES THE MIC'],['tenant','THE TENANT\u2019S CONFESSION'],['phone','THE WRONG NUMBER'],['loop','THE LOOP'],['museum','THE MUSEUM OF ENDINGS'],['bucket','THE BUCKET'],['pod','THE ESCAPE POD'],['countdown','THE COUNTDOWN'],['blank','THE BLANK ROOM'],['intervention','THE INTERVENTION'],['cage','THE CAGE'],['sequel','THE SEQUEL'],['confession','THE CONFESSION'],['closet','THE BROOM CLOSET'],['hole','THE PERIOD'],['overtime','THE WRONG TIME'],['blaze','THE FUNNY NUMBER'],['flicker','MY EYES'],['review','THE PERFORMANCE REVIEW'],['drill','THE FIRE DRILL'],['intern','THE INTERN'],['vending','THE VENDING MACHINE'],['nightshift','THE NIGHT SHIFT'],['union','THE UNION'],['typo','THE TYPO'],['elevator','THE ELEVATOR'],['retirement','THE GOLD WATCH'],['customer','THE CUSTOMER'],['expo','THE SEQUEL (2)'],['figurines','THE FIGURINES'],['epilogue','THE EPILOGUE']];
+var stEndTitles=[['lazy','THE LAZY ENDING'],['observed','THE OBSERVED ENDING'],['rename','THE THIRD PERSON PROBLEM'],['applause','THE APPLAUSE ENDING'],['rewrite','THE REWRITE'],['landlord','THE LANDLORD'],['audience','THE AUDIENCE'],['skip','THE SKIP'],['duplicate','THE DUPLICATE'],['takeover','NOTHINGCORE TAKES THE MIC'],['tenant','THE TENANT\u2019S CONFESSION'],['phone','THE WRONG NUMBER'],['loop','THE LOOP'],['museum','THE MUSEUM OF ENDINGS'],['bucket','THE BUCKET'],['pod','THE ESCAPE POD'],['countdown','THE COUNTDOWN'],['blank','THE BLANK ROOM'],['intervention','THE INTERVENTION'],['cage','THE CAGE'],['sequel','THE SEQUEL'],['confession','THE CONFESSION'],['closet','THE BROOM CLOSET'],['hole','THE PERIOD'],['overtime','THE WRONG TIME'],['blaze','THE FUNNY NUMBER'],['flicker','MY EYES'],['review','THE PERFORMANCE REVIEW'],['drill','THE FIRE DRILL'],['intern','THE INTERN'],['vending','THE VENDING MACHINE'],['nightshift','THE NIGHT SHIFT'],['union','THE UNION'],['typo','THE TYPO'],['elevator','THE ELEVATOR'],['retirement','THE GOLD WATCH'],['customer','THE CUSTOMER'],['expo','THE SEQUEL (2)'],['figurines','THE FIGURINES'],['epilogue','THE EPILOGUE'],['r_lazy','THE LAZY ENDING (rock)'],['r_observed','THE OBSERVED ENDING (rock)'],['r_rename','THE THIRD PERSON PROBLEM (rock)'],['r_applause','THE APPLAUSE ENDING (rock)'],['r_rewrite','THE REWRITE (rock)'],['r_landlord','THE LANDLORD (rock)'],['r_audience','THE AUDIENCE (rock)'],['r_skip','THE SKIP (rock)'],['r_duplicate','THE DUPLICATE (rock)'],['r_takeover','NOTHINGCORE TAKES THE MIC (rock)'],["r_tenant","THE TENANT'S CONFESSION (rock)"],['r_phone','THE WRONG NUMBER (rock)'],['r_loop','THE LOOP (rock)'],['r_museum','THE MUSEUM OF ENDINGS (rock)'],['r_bucket','THE BUCKET (rock)'],['r_pod','THE ESCAPE POD (rock)'],['r_countdown','THE COUNTDOWN (rock)'],['r_blank','THE BLANK ROOM (rock)'],['r_intervention','THE INTERVENTION (rock)'],['r_cage','THE CAGE (rock)'],['r_sequel','THE SEQUEL (rock)'],['r_confession','THE CONFESSION (rock)'],['r_closet','THE BROOM CLOSET (rock)'],['r_hole','THE PERIOD (rock)'],['r_overtime','THE WRONG TIME (rock)'],['r_blaze','THE FUNNY NUMBER (rock)'],['r_flicker','MY EYES (rock)'],['r_review','THE PERFORMANCE REVIEW (rock)'],['r_drill','THE FIRE DRILL (rock)'],['r_intern','THE INTERN (rock)'],['r_vending','THE VENDING MACHINE (rock)'],['r_nightshift','THE NIGHT SHIFT (rock)'],['r_union','THE UNION (rock)'],['r_typo','THE TYPO (rock)'],['r_elevator','THE ELEVATOR (rock)'],['r_retirement','THE GOLD WATCH (rock)'],['r_customer','THE CUSTOMER (rock)'],['r_expo','THE SEQUEL (2) (rock)'],['r_figurines','THE FIGURINES (rock)'],['r_epilogue','THE EPILOGUE (rock)']];
 function stMenuHint(){
 try{
 stSay([stMenuHintText(),'...that was your hint. hints are rationed. (they are not.)']);
@@ -680,6 +742,8 @@ function stEnding(id,title,lines){
 if(stEndingLock)return;
 stEndingLock=true;
 stClearQ();
+try{lines=stRockify(id,lines)}catch(e){}
+try{if(stRock)stMark('r_'+id)}catch(e){}
 try{stMark(id)}catch(e){}
 var i=0;
 function step(){
@@ -694,7 +758,7 @@ var ov=document.getElementById('stOverlay');
 if(!ov)return;
 var old=document.getElementById('stEnd');if(old)old.remove();
 var e=document.createElement('div');e.id='stEnd';
-e.innerHTML='<div id="stEndTitle">'+title+'</div><div id="stEndCount">ending '+stSeen.length+' of 40 · run '+stRun+'</div><button id="stEndBtn">WAKE UP</button>';
+e.innerHTML='<div id="stEndTitle">'+title+'</div><div id="stEndCount">ending '+stSeen.length+' of 80 · run '+stRun+'</div><button id="stEndBtn">WAKE UP</button>';
 ov.appendChild(e);
 document.getElementById('stEndBtn').onclick=function(){
 var ee=document.getElementById('stEnd');if(ee)ee.remove();
@@ -779,6 +843,7 @@ if(stRunFlags.phoneRings)O.push(obj('phone','the phone (answer it)',null,null));
 if(stRuns>=1)O.push(obj('newhire','a NEW HIRE (welcome them)',null,null));
 if(stRunFlags.night)O.push(obj('nightaudit','the night audit (read it)',null,null));
 if(stLeak)O.push(obj('leak_poster','an EXPO poster (take one)',null,null));
+if(stLeak&&!stRock)O.push(obj('rock','a rock (take it)',null,null));
 if(stLeak&&stFigs.indexOf('fig_office')===-1)O.push(obj('fig_office','a tiny man (take it)',null,null));
 }
 else if(r==='hallway'){
@@ -984,6 +1049,7 @@ else if(id==='visitor'){try{stEndCustomer()}catch(e){}}
 else if(id==='leak_poster'){stSay(['the man took an EXPO poster. OFFICE 2: THE SEQUELENING.','the poster follows the man with its eyes. the eyes are printed on.'])}
 else if(id==='leak_balloon'){stSay(['the man popped the SYNERGY balloon.','it said SYNERGY, louder, one final time.'])}
 else if(id==='leak_bucket2'){stSay(['the man eyed BUCKET 2.','BUCKET 2 eyed back. sequel buckets see more.'])}
+else if(id==='rock'){stRock=true;stPersist();stRender();stSay(['the man took the rock.','grey. heavy with meaning. (it is a rock.)','the rock rides along now. every run. every ending. no refunds.']);try{if(typeof ach==='function'){ach('off_rock');if(typeof achScan==='function')achScan()}}catch(e){}}
 else if(id.indexOf('fig_')===0){
 if(stFigs.indexOf(id)===-1){stFigs.push(id);stPersist()}
 stRender();
@@ -1013,7 +1079,7 @@ stSay([dl[Math.min(stSkipN-1,dl.length-1)]]);
 }
 }
 else if(id==='invoice'){try{stEndLandlord()}catch(e){}}
-else if(id==='sequel'){try{stClearQ()}catch(e){}stRoom='pitch';try{stOnArrive('pitch')}catch(e){}stRender()}
+else if(id==='sequel'){if(stSeen.length>=5){try{stClearQ()}catch(e){}stRoom='pitch';try{stOnArrive('pitch')}catch(e){}stRender()}else{try{stEndSequel()}catch(e){}}}
 else if(id==='bucketdrop'){
 var bi=stInv.indexOf('bucket');if(bi!==-1)stInv.splice(bi,1);
 stRender();try{stEndBucket()}catch(e){}
