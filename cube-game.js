@@ -1853,7 +1853,7 @@ var ACH=[
 {sec:'THE OFFICE'},
 {id:'office_worker',h:'clock in.',n:'clocked in',d:'get your first office ending. (the office)',c:function(){return offSeenN()>=1}},
 {id:'middle_manager',h:'climb. 40 endings.',n:'middle manager',d:'get 40 office endings. (the office)',c:function(){return offSeenN()>=40}},
-{id:'employee_of_the_month',h:'collect them all. 80.',n:'employee of the month',d:'get all 80 office endings. (the office)',c:function(){return offSeenN()>=80}},
+{id:'employee_of_the_month',h:'collect them all. 83.',n:'employee of the month',d:'get all 83 office endings. (the office)',c:function(){return offSeenN()>=83}},
 {id:'off_rock',n:'the rock',d:'take the rock. (the office)',h:'a rock. one of one.',c:function(){return offRock()}},
 {id:'off_r_lazy',n:'the lazy ending (rock)',d:'do nothing, with the rock. (the office)',h:'nothing. with rock.',c:function(){return offSeen('r_lazy')}},
 {id:'off_r_observed',n:'the observed ending (rock)',d:'get watched, with the rock. (the office)',h:'watched. with rock.',c:function(){return offSeen('r_observed')}},
@@ -1895,6 +1895,9 @@ var ACH=[
 {id:'off_r_expo',n:'the sequel (2) (rock)',d:'attend the expo, with the rock. (the office)',h:'expo. rock reviewed.',c:function(){return offSeen('r_expo')}},
 {id:'off_r_figurines',n:'the figurines (rock)',d:'collect all 6 tiny men, with the rock. (the office)',h:'six men. one rock.',c:function(){return offSeen('r_figurines')}},
 {id:'off_r_epilogue',n:'the epilogue (rock)',d:'earn the epilogue, with the rock. (the office)',h:'the frame. rock.',c:function(){return offSeen('r_epilogue')}},
+{id:'off_gameshow',n:'the game show',d:'win the game show. (the office)',h:'lights. camera. endings.',c:function(){return offSeen('gameshow')}},
+{id:'off_playtest',n:'the playtest',d:'play the test build. (the office)',h:'untested. unready. play it.',c:function(){return offSeen('playtest')}},
+{id:'off_confusion',n:'the confusion',d:'follow the red tape. (the office)',h:'do not deviate.',c:function(){return offSeen('confusion')}},
 {id:'off_lazy',h:'the man who did nothing.',n:'the lazy ending',d:'do nothing. (the office)',c:function(){return offSeen('lazy')}},
 {id:'off_observed',h:'someone is watching the worker.',n:'the observed ending',d:'get watched. (the office)',c:function(){return offSeen('observed')}},
 {id:'off_rename',h:'that is not your name.',n:'the third person problem',d:'refuse your name. (the office)',c:function(){return offSeen('rename')}},
@@ -4870,7 +4873,7 @@ applySkillPan();
 function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active')}
 function openUpgradeTree(){skillOpen();if(!skillAllFinals()){cubeWarn('upgrade locked — buy every skill');return}panSkillToUpgrade()}
 function skillClose(){var el=document.getElementById('skillTree');if(el)el.classList.remove('active')}
-var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_jedec','cube_pwned','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_hud_min','cube_run_acc','cube_run_last','cube_dial_sp','cube_speedrun','cube_office'];
+var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_jedec','cube_pwned','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_hud_min','cube_run_acc','cube_run_last','cube_dial_sp','cube_speedrun','cube_office','cube_greyhall'];
 var slotDefNames=['main','testing','slot 3','slot 4','slot 5'];
 function slotRead(n){try{var s=localStorage.getItem('cube_slot_'+n);if(!s)return null;var b=JSON.parse(s);if(b&&typeof b==='object')return b}catch(e){}return null}
 function slotActive(){try{var a=parseInt(localStorage.getItem('cube_active_slot')||'1',10);if(a>=1&&a<=5)return a}catch(e){}return 1}

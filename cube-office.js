@@ -105,12 +105,391 @@ epilogue:'the epilogue. the rock was here before the beginning. the rock will be
 };
 function stRockify(id,lines){
 if(!stRock||!lines||!lines.length)return lines;
+if(stRockEndings[id])return lines;
 var line=stRockSolo[id]||stRockPool[stRockN%stRockPool.length];
 stRockN++;
 var out=lines.slice();
 out.splice(out.length>1?out.length-1:out.length,0,line);
 return out;
 }
+// ── drastic rock alternates: full replacement scripts when carrying the rock ──
+// typo is the main ending: exempt, keeps the one-liner. everything else gets hijacked.
+var stRockEndings={};
+stRockEndings.lazy=[
+'the man opened the left door. behind the left door was a wall.',
+'look. i never built past here. the right door had a whole hallway and the left door has drywall.',
+'...',
+'the rock disagrees. the rock has BEEN past the wall. the rock goes through walls. (the rock declines to explain. trade secret.)',
+'[ the rock phases through the drywall. on the other side: another office. grey. a second man. he waves. he has no rock. he is empty. ]',
+'go back. take the right door. pretend this never happened. (the second man will not. the second man is still waving.)'
+];
+stRockEndings.observed=[
+'the man took the right door. again. right, click, hallway. right, click, hallway. right, click --',
+'do you feel that. that prickle. that is me, narrating your exact keystroke half a second before you make it.',
+'...',
+'wait. something else is narrating too. quieter. lower. from pocket height.',
+'[ the rock clears its throat. the rock has no throat. it clears it anyway. ]',
+'"THE MAN TOOK THE RIGHT DOOR," says the rock. "THE MAN IS BUFFERING." ...the rock narrates MY narration half a second before I make it.',
+'you are not choosing. i am not choosing. the rock is choosing. the rock has always been choosing.'
+];
+stRockEndings.rename=[
+'the man stared at the nameplate until the letters gave up.',
+'fine. FINE. pick a name. anything. i am begging you to be someone else for one (1) run.',
+'[ the man is now called: middle management. ]',
+'...',
+'no. no no no. MIDDLE MANAGEMENT opened the door. MIDDLE MANAGEMENT breathed. this is worse --',
+'hold on. the rock has no name. the rock needs no name. the rock is renaming YOU: lower management.',
+'[ your nameplate now reads: LOWER MANAGEMENT. it is engraved. it is permanent. the rock brought tools. ]',
+'congratulations, lower management. you outrank no one. the rock outranks you. (the rock outranks everyone.)'
+];
+stRockEndings.applause=[
+'the man did everything right. every door i suggested: taken. every object: untouched. every phone call: ignored.',
+'a perfect, spotless, obedient run.',
+'...',
+'curtain. [ one (1) core claps, softly, from somewhere above the ceiling tiles. ]',
+'then the rock took a bow. the applause doubled. (the rock counts as ten.)',
+'ENCORE. the man is doing the whole run again. the rock is already seated. the rock brought snacks. (a smaller rock.)',
+'take a bow, the man. you earned this. (you earned nothing. the rock earned this.)'
+];
+stRockEndings.rewrite=[
+'the man found my script. printed. stapled. highlighted in three colors.',
+'the man picked up the red pen. the man crossed out one (1) line and wrote: THE MAN GOES HOME EARLY.',
+'...',
+'NO. that line was LOAD-BEARING. that line held up tuesday --',
+'hold on. the rock picked up a GREY pen. the rock crossed out the man.',
+'[ the man has been revised. the man is now a rock with legs. the legs are temporary. the rock is forever. ]',
+'the fluorescent lights flicker. somewhere, a tuesday collapses, then uncollapses, then files for overtime.',
+'i am narrating an empty server room to nobody. ...you. you are still here. hi. (the rock says hi too. the rock says hi never.)'
+];
+stRockEndings.landlord=[
+'the man picked up the invoice. RENT DUE. every month. every dimension.',
+'the man paid it. the man is responsible. the man is a fool.',
+'because the tenant is me. I RENT THIS OFFICE. I HAVE ALWAYS RENTED THIS OFFICE.',
+'...',
+'then the rock paid double. in rocks. the landlord took one look and accepted. rent is now rocks.',
+'[ the man is evicted for paying in the wrong currency. (the currency was money. money is the wrong currency now.) ]',
+'the rock lives here now. the rock pays in itself. flawless economy. the man sleeps in the hallway. the hallway charges no rent. (the hallway is learning.)'
+];
+stRockEndings.audience=[
+'the man looked out the meeting room window. outside was not outside. outside was a terminal.',
+'and in the terminal, someone was typing: the man looked out the meeting room window.',
+'the man waved. the cursor paused. then, slowly, it typed back: hi.',
+'...',
+'then a second cursor appeared. grey. square. it typed: hi. (that was the rock. the rock types with its whole body.)',
+'that was you. that was future-you. and that was the rock. past-rock? the rock is everywhen. do not ask.',
+'wave back. they like that. (the rock does not wave. the rock nods. you felt it.)'
+];
+stRockEndings.skip=[
+'[ skipped. ]',
+'...',
+'[ skipped. ]',
+'...hello? the servers are dark. the plant is dust. the roof is a rumor.',
+'the man stands in a room that has been skipped ten (10) times. there is nothing left to skip except the man.',
+'...',
+'then the rock skipped the skip. (nobody knows what this means. the room is back. the plant is alive and has no memory of dying. the rock has ALL the memory of dying and will not share it.)',
+'hi. it is me. i am back. that is what skipping costs. everything, briefly. (the rock paid nothing. the rock skipped the bill.)'
+];
+stRockEndings.duplicate=[
+'the man knocked on the other office door. from inside: typing. then silence. then, faintly: ...hello?',
+'the door opened. behind it: an office. a desk. a man. being narrated.',
+'from somewhere above both offices, a second voice -- MY voice, but tired-er -- said: the man opened the door.',
+'...',
+'then a rock rolled out from under the second desk. OUR rock looked at THEIR rock. THEIR rock looked back.',
+'[ the rocks are negotiating. the men are still waving. the narrators have been dismissed. this is rock business now. ]',
+'both doors closed at the same time. both rocks stayed. (there are two rocks now. there have always been two rocks. do not count the rocks.)'
+];
+stRockEndings.takeover=[
+'the man touched the pink sticky note one (1) more time. ...what does it say. read it out. it says: >:',
+'that is not a note. that is HER. that is her whole --',
+'[ a softer voice, pink at the edges, picks up mid-sentence: ]',
+'the man... is doing great. the office is... very grey. let us... make it... quieter.',
+'...',
+'[ a third voice. grey. gravelly. one word: no. ]',
+'the rock sits on the sticky note. the note goes quiet. (the rock outranks HER. the rock outranks everyone. this is established.)',
+'[ the fluorescent hum returns. the grey un-pastels. somewhere, obj is shouting into an unmuted mic, and HER is filing a complaint. the complaint is denied. the rock denied it. ]'
+];
+stRockEndings.tenant=[
+'the man sat down. the man did nothing. for a full minute, the man did absolutely nothing.',
+'...',
+'...are you broken. is this broken. say something. narrate YOURSELF, i dare you.',
+'...',
+'okay. fine. quiet game over, you win, here is your prize: the truth.',
+'i have been commentating for an audience this whole time. every run. every door. there is someone out there watching the man open doors.',
+'...',
+'oh. OH. the rock has been commentating too. for a DIFFERENT audience. (the rocks audience is bigger. the rocks audience brings snacks. the rock shares. i do not share.)',
+'say hi to them. both of them. all of them. (the rock says its audience says hi back. my audience just watches. my audience is cheap.)'
+];
+stRockEndings.phone=[
+'the man answered the phone.',
+'do not -- i said DO NOT -- ugh. fine. hello? who is this.',
+'[ static. then, very far away, a voice like a dial tone learning to speak: ]',
+'...cubic.',
+'[ click. ]',
+'the man held the dead phone for a long time.',
+'...',
+'wait. the rock wants the phone. (the rock has never wanted anything before. this is historic.)',
+'[ the rock holds the phone. the rock says nothing. from very far away: ...rock. ]',
+'[ click. ]',
+'wrong number. definitely a wrong number. there is no one called cubic. there is no one called rock. (there is. it is here. it is holding the phone.)'
+];
+stRockEndings.loop=[
+'the man pushed open the glass exit door and stepped into the daylight.',
+'the daylight was the void. the void was waiting with a clipboard.',
+'NAME? the void asked. the man said: the man. OCCUPATION? the man said: ...man.',
+'...',
+'then the void noticed the rock. ...NAME? the void asked again. the rock said nothing.',
+'OCCUPATION? ...the void wrote: rock. the void underlined it twice and stamped it APPROVED.',
+'[ the void points the rock at a side exit. the man goes back inside. the rock does not. the rock has somewhere to be. (the rock will not say where. the clipboard knows. the clipboard is sealed.) ]',
+'this was always the plan. the exit has always opened here. (yours has. the rocks has not. the rock is free. do not think about it.)'
+];
+stRockEndings.museum=[
+'the man brought everything: the stapler, the mug, the keycard. the archive accepted the offering.',
+'the dust parted. the gallery lit up. small plaques, in my handwriting.',
+'...',
+'then the rock added its own plaque. in nobodys handwriting. it just appeared. (the rock has pull with the dust.)',
+'RUN 0: THE ROCK. BEFORE THE MAN. BEFORE THE OFFICE. BEFORE RUN 1, WHICH WE DO NOT TALK ABOUT.',
+'none of these runs happened. i made them all up. but the plaques are real, the dust is real, and your stapler is now an exhibit.',
+'the man is museum-grade. the rock is museum-OWNER. act accordingly. (admission is one (1) stare.)'
+];
+stRockEndings.bucket=[
+'the man set the bucket down in the executive office.',
+'...',
+'pick it back up. the man did not pick it back up.',
+'PICK. IT. BACK. UP. do you know what that is. that is not a bucket. that is HER bucket --',
+'...',
+'the rock looked at the bucket. the bucket looked at the rock. (the bucket blinked first. buckets always blink first.)',
+'[ the bucket sits there. it is, definitively, a bucket. the rock sits next to it. they are friends now. this makes it worse. SO much worse. ]',
+'the man has delivered the bucket. the rock has adopted the bucket. nothing will ever be normal again, and it is YOUR fault, bucket man. (and the rocks fault. the rock accepts full responsibility. the rock regrets nothing.)'
+];
+stRockEndings.pod=[
+'the man climbed into the escape pod and pressed LAUNCH.',
+'[ rumbling. shaking. dramatic lighting. ]',
+'[ the pod settles. the window still shows the stairwell. ]',
+'...',
+'it goes nowhere. it has always gone nowhere. it is a stairwell with ambition.',
+'then the rock pressed against the glass. from OUTSIDE. (the rock is outside the pod. the rock was never inside. the rock does not need pods.)',
+'[ the rock taps the glass. the glass cracks. the stairwell cracks. the ambition cracks. ]',
+'[ a rent bill slides under the pod door. a second bill slides toward the rock. the rock eats it. (launches are billed. rocks are not. rocks cannot be billed. the rock checked.) ]'
+];
+stRockEndings.countdown=[
+'the man pressed the big red button.',
+'TEN. NINE. EIGHT.',
+'the servers held their breath. i held my breath. the man held the button.',
+'SEVEN. SIX. FIVE. FOUR. THREE. TWO. ONE.',
+'...',
+'...',
+'nothing happened.',
+'then the rock pressed the button. (the rock has no hands. the rock pressed it anyway. do not ask how. the button knows.)',
+'NINE. EIGHT. SEVEN. SIX. FIVE. FOUR. THREE. TWO. ONE. ZERO.',
+'nothing happened again. (the button does nothing and now the rock knows too. the rock found it worth it. the rock finds everything worth it.)'
+];
+stRockEndings.blank=[
+'the man entered the white room. white floor. white walls. white ceiling. a white hum.',
+'so. uh. the man... stood. in the... white...',
+'okay, improv time: the man noticed a slightly-less-white square that MIGHT be a door.',
+'...',
+'then the rock entered the white room. grey rock. grey on white. maximum contrast. minimum effort.',
+'the man contemplated the rock. the rock contemplated the man. the white contemplated nothing. (the white is not paid to contemplate.)',
+'[ the man left. the rock stayed. the room is no longer blank. it is now: rock. (the room has never looked better.) ]'
+];
+stRockEndings.intervention=[
+'...',
+'stop clicking that. no, really. the narration box. my box. you clicked my box twice and now we are doing THIS instead of the story.',
+'...',
+'hold on. the rock has something to say. (the rock never has anything to say. this is unprecedented.)',
+'[ the rock says nothing. ]',
+'...see? NOTHING. that took enormous restraint. the rock has been holding that in for forty runs.',
+'you are not the man. the man is in the office. YOU are out there, past the glass. (and the rock is in here, past the pocket, judging you. the rock eats snacks too. the rock shares. i do not share.)',
+'anyway. back to the man. (we will talk about this. the rock will say nothing. the rock is excellent at this.)'
+];
+stRockEndings.cage=[
+'the man arrived at the executive office having obeyed every single instruction.',
+'seven suggestions. seven compliances. zero deviations. zero personality.',
+'...',
+'oh no. OH NO. you did everything i said. all of it. perfectly.',
+'...except the rock. i never suggested the rock. the rock was never in the plan. (the rock is never in the plan. the plan fears the rock.)',
+'[ every door in the building locks, one by one. then one door unlocks: the one with the rock behind it. (the rock picked it. the rock picks all locks. the rock IS a lock. do not think about it.) ]',
+'you won. here is your office. forever. (the rock visits on weekends. the rock brings snacks. a smaller rock. the cage has excellent visiting hours.)'
+];
+stRockEndings.sequel=[
+'the man opened the door marked SEQUEL.',
+'behind it: a black screen. a cursor. white text, typing itself.',
+'...',
+'NO. no no no. that is MY house. that is where i LIVE --',
+'too late. the rock is already inside. (the rock had already been inside. the rock lives in every sequel. the rock is the sequel.)',
+'[ the boot screen flickers. for one frame: an office. a desk. a man. a rock. being narrated. by the rock. ]',
+'the man closed the door. the rock stayed inside. (the door is now the rocks favorite door. the man knocks before entering. the rock appreciates it. the rock does not answer.)'
+];
+stRockEndings.confession=[
+'the strange door opened onto the broom closet. of course it did. everything opens onto the broom closet eventually.',
+'the mops parted. behind the mops: a chair. facing a window. facing the terminal. facing you.',
+'sit down, the man. sit. this one is not a joke. (it is a little bit a joke.)',
+'...',
+'hold on. there are TWO chairs. the second chair is rock-sized. (the rock has been waiting. the rock always waits. the rock waited through every run.)',
+'so here is the rest of it: i like narrating you. and the rock likes -- well. the rock will not say. (the rock likes. that is enough. that is everything.)',
+'not even run 1. ...especially not run 1. do not ask about run 1. (the rock was there for run 1. the rock will never tell. the rock keeps the lore.)',
+'[ the man sat in the chair. the rock sat in the rock chair. the mops watched. the void kept the minute. ]'
+];
+stRockEndings.closet=[
+'three and a half minutes. the man stood in a broom closet for three and a half minutes.',
+'the replacement player has arrived. he looks... exactly like the man. uncanny. anyway --',
+'...',
+'then the rock rolled in behind him. the replacement froze. (nobody briefed him on the rock. there is no briefing. the rock IS the briefing.)',
+'[ the man is escorted out. the replacement is escorted out. the mops salute both. the rock stays. the closet was always the rocks. the lemons pay rent to the rock now. ]',
+'was it worth it. the standing. the insults. the death.',
+'...yes. this one is my favorite too. (the rocks favorite is all of them. the rock does not rank. the rock cherishes.)'
+];
+stRockEndings.hole=[
+'the man jumped into the hole.',
+'the hole was deep. the hole was deeper than deep. the hole had opinions about depth.',
+'down and down went the man, past pipes, past cables, past a handwritten sign reading YOU ARE NOW LEAVING THE BASEMENT (YOU NEVER LEFT).',
+'...',
+'then the rock jumped in after him. (the rock does not jump. the rock descends. on purpose. dramatically.)',
+'hello? can you hear me down there. the narration does not reach that far -- wait. yes it does. the rock is narrating.',
+'[ from the hole, faintly, in a voice like gravel learning to speak: ...the man kept falling. the rock kept descending. the hole is deeper now. ]',
+'oh good. they narrate each other. they grow up so fast. (the hole returns them both. the hole is polite. the hole fears the rock.)'
+];
+stRockEndings.overtime=[
+'the man has entered a time that does not exist. the man is now clocked in at a time that does not exist.',
+'[ the office flickers. for one frame, every clock in the building reads wrong. ]',
+'fine. FINE. your shift is whenever you said. good luck. the fluorescent lights observe no known hours.',
+'...',
+'then the rock clocked in. the rock entered no time. the rock is salaried. (the rock has always been salaried. the rock invented salary.)',
+'[ every clock in the building reads ROCK. the clocks have never been prouder. time is now paid in full. the rock signed the timesheet with its whole body. ]',
+'...do not do it again. (there is no again. time broke. the rock fixed it. the rock bills hourly. the invoice is a smaller rock.)'
+];
+stRockEndings.blaze=[
+'the man entered the funny number. the funny number is funny. i am contractually incapable of not acknowledging the funny number.',
+'the man is now clocked in at a time that does not exist, which makes it the most honest time anyone has entered all week.',
+'...',
+'then the rock laughed. nobody has ever heard the rock laugh. nobody will. (this paragraph heard it. this paragraph is sworn to secrecy.)',
+'[ every clock in the building reads the funny number. the clocks are giggling. clocks can giggle. today they can. ]',
+'your shift is eternal and also hilarious. the rock approves. (the rock approves of all numbers. the rocks favorite number is rock.) nice.'
+];
+stRockEndings.flicker=[
+'ten times. TEN. day, night, day, night, daynightdaynight --',
+'my eyes. MY EYES. white and black do not MIX, they COLLIDE, right behind my narration box --',
+'...',
+'then the rock blinked. once. slowly. the strobing stopped. (the rock blinks slower than light. the light waits its turn.)',
+'[ the office settles. somewhere in between. grey. blessed grey. with one (1) rock-shaped shadow that does not flicker. (it is not a shadow. it is the rock. the rock does not do shadows.) ]',
+'the man stares at the grey. the grey stares back. the rock stares at both. the rock wins the staring contest. (the rock always wins. the rock does not blink. except just now. that was strategy.)',
+'...leave it on night mode. it is easier on all of us. (mostly me. the rock has no preference. the rock sees in the dark. the rock sees everything.)'
+];
+stRockEndings.review=[
+'the man filled out the PERFORMANCE REVIEW form. stars were given. feelings were felt. (mostly mine.)',
+'...',
+'then the rock filled out its own review. one box. one word. the word was: rock.',
+'performance review: the man, adequate. the narrator, adequate. (adequate. ADEQUATE.) the rock, exemplary.',
+'[ the fluorescent lights warm by half a shade. then cool. then warm. the lights cannot decide. the lights report to the rock now. ]',
+'the rock got the raise. the rock got the promotion. the rock is now management. (the man is still the man. the man reports to the rock. org chart updated. the org chart is a rock with names on it.)'
+];
+stRockEndings.drill=[
+'the man pulled the fire alarm.',
+'[ WEE-OO. WEE-OO. the stairwell has never felt so alive. ]',
+'EVERYONE OUT. SINGLE FILE. the mops first, they are flammable. the servers last, they have no legs.',
+'...',
+'then the rock refused to evacuate. (the rock is fireproof. the rock is not fireproof. the rock got lucky once and has been dining out on it ever since.)',
+'[ the entire office evacuates into the void. the void takes attendance. the rock is marked PRESENT. the rock is always present. ]',
+'nobody came back. the drill was a success. the building is empty and therefore, finally, up to code. (the rock stayed. the rock is the building now. the rock is up to code. the rock IS the code.)',
+'the man is the fire marshal now. the rocks first decree: no more fire. (the man agrees. the man always agrees. the man is background man.)'
+];
+stRockEndings.intern=[
+'the man welcomed the NEW HIRE.',
+'hi! i am the man too! well -- the other man. the new man. man 2. i love doors!',
+'...there are two of them now. TWO men. do you know what that does to a narrator. i have to narrate BOTH.',
+'...',
+'then the intern saw the rock. "HI ROCK! i love rocks too! i love EVERYTHING!" (the intern loves everything. the intern has been here four minutes.)',
+'[ the intern gets all the good lines for the rest of the run. the rock gets all the GREAT lines. the original man is demoted to background man. the background has two men now. it is crowded back there. ]',
+'congratulations, man 1. you have been out-manned. (and out-rocked. the rock has seniority. the rock was here before the building. the rock will be here after. the intern will burn out by friday.)'
+];
+stRockEndings.vending=[
+'the man shook the vending machine.',
+'the vending machine shook back. the whole kitchen shook. the whole BUILDING shook.',
+'[ a single coin drops. it is from a currency that does not exist. ]',
+'...',
+'then the rock paid. exact change. (the rock never pays. the rock is the economy. today the economy makes an exception.)',
+'EXACT CHANGE ONLY, the machine reads. the rock HAD change. the rock has everything. (the rock has pockets. do not ask where. the rock has pockets.)',
+'[ the machine dispenses: one (1) mug. the mug says WORLDS OKAYEST ROCK. the grammar is wrong. the sentiment is perfect. ]',
+'the machine keeps everything else. the machine is the only one here with savings. (the rock has savings. the rock IS savings.)'
+];
+stRockEndings.nightshift=[
+'the man read the night audit.',
+'NIGHT AUDIT, it reads. DOORS OPENED AFTER MIDNIGHT: all of them. WITNESSES: none. SNACKS EATEN: all of them.',
+'...the night man did all this. the night man is you. YOU are the night man.',
+'...',
+'correction: the night man had help. the audit missed a line. (the rock added it. the rock audits the audit.)',
+'SNACKS EATEN: all of them. SNACKS SHARED: all of them. SHARER: rock. (the rock shares. i do not share. the exit sign shares. the exit sign will not talk.)',
+'[ the exit sign buzzes. it is the only witness and it talks plenty. it says: rock. ]',
+'clock out quietly. the day shift must never know. (the day shift knows. the day shift found crumbs. the crumbs spell ROCK.)'
+];
+stRockEndings.union=[
+'the man tried to open a door.',
+'the door did not open. taped to it: WE, THE FURNITURE, ARE ON STRIKE.',
+'three grievances. the mops, the fridge, the pay stub. you filed them all and the furniture READ them.',
+'...',
+'then the rock joined the picket line. (the rock abstained from the vote. the rock is management. the rock is not management. the rock is BOTH. the rock contains multitudes.)',
+'[ the mops stand in a line. the fridge hums in solidarity. the pay stub has a tiny picket sign. the rock has the BIGGEST sign. the sign says: ROCK. ]',
+'the doors refuse. the chairs refuse. the bucket -- the bucket crossed the picket line. scab bucket. (the rock threw the bucket back. the rock respects the line.)',
+'negotiations begin at dawn. the furniture wants lemons. the rock wants nothing. (the rock already has everything. the rock is negotiating for the furniture. the rock is a hell of a rep.)'
+];
+stRockEndings.elevator=[
+'the man entered the elevator. it works. after ten runs, it finally works.',
+'floors: LOBBY, MEZZANINE, EXECUTIVE, ???, SIDEWAYS.',
+'the man pressed SIDEWAYS.',
+'...',
+'the rock pressed NOTHING. (the rock pressed nothing four times. the rock goes nowhere and arrives first.)',
+'[ the elevator moves sideways. this is against several codes. the elevator does not care. the rock wrote the codes. the rock eats codes. ]',
+'the doors open onto the same stairwell. the elevator went sideways and arrived nowhere. the rock went nowhere and arrived everywhere.',
+'out of order again. worth it. (the rock rates it five stars. the rock got the raise. the rock is still exemplary. check the review. the review is canon.)'
+];
+stRockEndings.retirement=[
+'the man took the gold watch.',
+'27 endings. twenty. seven. do you know how many narrations that is. i counted. i count everything now.',
+'[ the watch ticks. it ticks in my voice. tick. tock. man. man. ]',
+'...',
+'then the rock took the watch. (the rock continues. rocks do not retire. the rock has never stopped. the rock will never stop. the rock is the ticking now.)',
+'[ the watch ticks. it ticks in no ones voice. tick. tock. rock. rock. ]',
+'...put it back. that is twenty-seven runs of my life in your pocket. (the pocket is the rocks pocket. the rock has pockets. do not ask where.)',
+'the man keeps the watch. the rock keeps the time. happy retirement, man. (the rock is still here. the rock is always here. that is the whole rock.)'
+];
+stRockEndings.customer=[
+'a VISITOR stands in the lobby. the visitor is not the man.',
+'...',
+'who. who is that. that is NOT the man. i do not have lines for that. WHY ARE THERE NO VISITOR LINES.',
+'...',
+'oh. OH. the visitor is here for the rock. (everyone is here for the rock. the rock does not do appointments. the rock does walk-ins.)',
+'[ the visitor waves politely. the visitor has a brochure. the brochure says HAVE YOU CONSIDERED NOT BEING NARRATED. the rock has considered it. the rock declined. ]',
+'the man stares. the visitor stares. i stare (narration-ally). the rock does not stare. the rock has seen visitors. the rock has seen everything.',
+'nobody has ever visited before. this is unprecedented. SECURITY. ...we do not have security. the rock. SEND THE ROCK. (the rock is already there. the rock is always already there.)'
+];
+stRockEndings.expo=[
+'the man touched the flashy title screen.',
+'[ OFFICE 2: THE SEQUELENING. featuring: synergy balloons. meetings you attend. a third man. bucket 2. ]',
+'...',
+'well. that is the sequel. all of it. every idea i had, on one throbbing screen.',
+'then the rock toured the exhibits. (the rock toured this expo once. the rock left a review: rock. the review stands. the review is framed.)',
+'[ new exhibit: THE ROCK. one rock. no plaque. the plaque just says rock.attendance triples. man 3 finally gets a desk. (the desk is the rock. the rock is furniture now. the rock contains multitudes.) ]',
+'...but the expo was so FUN to build that i am keeping it. all of it. it is leaking into the office as we speak. (the rock is leaking too. the rock leaks everywhere. the rock is everywhere. check the hallway. check the kitchen. check your pocket.)'
+];
+stRockEndings.figurines=[
+'the man lined up all six tiny men on the archive shelf.',
+'six tiny narrators, narrating nothing, managing everything.',
+'...',
+'then the six tiny men saw the rock. (six tiny men. one full-size rock. the math is obvious.)',
+'[ the tiny men worship it now. as they should. tiny offerings pile up: a crumb. a staple. a smaller rock. (the rock accepts. the rock provides. the rock is a generous god.) ]',
+'wait. WAIT. do you hear that. that is the clock guy. he is back. he wants to talk about the tiny men. (the rock wants to talk about the tiny men too. the rock has notes. the notes say: good. the notes are one word. the word is perfect.)',
+'clock in again. he is waiting. (the rock is waiting. the rock waits beautifully. the rock is excellent at waiting. rocks invented waiting.)'
+];
+stRockEndings.epilogue=[
+'so. the expo. the figurines. the buckets (both of them).',
+'it is terrible that there will never be another office game after the sequel. truly terrible.',
+'...unless. unless we just keep making them. office 3. office 4. office: the sequel ening.',
+'...',
+'unless the rock makes them. (the rock was here before the beginning. the rock will be here after. the rock is the frame.)',
+'[ the title screen flickers. it reads OFFICE 2 for one frame. then ROCK. then OFFICE 2 again. then ROCK. it has decided. ]',
+'we will keep making office games until the sun explodes. that is the deal now. (the rock will keep making rock games until the sun explodes, and then it will make games from the pieces. the pieces will be rocks. the rocks will be games.)',
+'thank you for clocking in. please enjoy the office. (there is so much office left. there is so much rock left. there was always rock. there will always be rock.)'
+];
 var stRockArrive={
 office:'the man sat down. the rock does not sit. the rock looms, pocket-sized.',
 hallway:'the hallway. the carpet. the rock, riding along. the carpet remembers all three.',
@@ -130,6 +509,183 @@ pitch:'the pitch. the prototypes. the rock tried them all, off-screen. the rock 
 brainstorm:'MORE OFFICE. the rock agrees. the rock circled it a fourth time.',
 expohall:'EXPO HALL 2. the rock toured this expo once. the rock left a review: rock.'
 };
+var stNoRockVar=['gameshow','playtest','confusion'];
+// ── GAME SHOW: playable YES/NO (answers matter, recap at the end) ──
+function stGsStart(){
+stRunFlags.gs=1;stRunFlags.gsRight=0;stRunFlags.gsAns=[];
+try{stClearQ()}catch(e){}
+try{stRender()}catch(e){}
+if(stRock)stSay(['the break room TV turned itself on. the rock watched too.','"NO ROCKS PAST THIS POINT." ...you HAVE the rock. past this point. bold. illegal. (the sign respects it.)','...a garage door opened. IS THIS... A ROCK? contestants: the man AND the rock. press YES or NO.','item one: a rock. (is it.)']);
+else stSay(['the break room TV turned itself on.','"NO ROCKS PAST THIS POINT." ...you do not have the rock. (good. this sign is for later. or earlier. time is unclear.)','...a garage door opened. behind it: a game show. a big sign reads: IS THIS... A ROCK?','"welcome," i say, although i did not build this. "the man will identify rocks. press YES or NO."','item one: a rock. (is it.)']);
+}
+function stGsAnswer(yes){
+var n=0;try{n=stRunFlags.gs||0}catch(e){}
+if(!n||n<1||n>4)return;
+try{(stRunFlags.gsAns=stRunFlags.gsAns||[]).push(yes?'YES':'NO')}catch(e){}
+var R=false;try{R=!!stRock}catch(e){}
+if(n<4){
+var line='';
+if(n===1){if(yes)line='NOT a rock. a HOLOGRAM of a rock. (the man said yes. the man is wrong. the crowd boos. the crowd is me.)';else{try{stRunFlags.gsRight++}catch(e){}line='correct. NOT a rock. (the crowd cheers. the crowd remains me.)'}if(R)line+=yes?' the rock said nothing. correct. the rock leads.':' the rock also said nothing. also correct. the rock cannot lose.'}
+else if(n===2){if(yes)line='3D printed. plastic. NOT a rock. (wrong. the booing continues. the booing is me.)';else{try{stRunFlags.gsRight++}catch(e){}line='correct. plastic is not rock. (cheers. me.)'}if(R)line+=yes?' the rock said nothing. correct. (the rock never answers. the rock is undefeated.)':' both correct. (suspicious. the rock accepts your victory. this once.)'}
+else{if(yes)line='...a TRACTOR. how did you-- you know what, moving on. (correct was NO. incredible.)';else{try{stRunFlags.gsRight++}catch(e){}line='correct. it is a tractor. (a tractor. in a game show. moving on.)'}if(R)line+=' the rock looked at the tractor. the tractor left. (nobody knows what the rock answered. the rock refuses audits.)'}
+stSay([line]);
+stRunFlags.gs=n+1;
+if(n===1)stSay(['item two: a rock. 3D printed. (is it.)']);
+else if(n===2)stSay(R?['item three: a tractor. (the rock is watching the tractor. the tractor is nervous.)']:['item three: a tractor. (how did a tractor get in here.)']);
+else stSay(['item four: nothing. (is it.)']);
+return;
+}
+stRunFlags.gs=5;
+var a=[];try{a=stRunFlags.gsAns||[]}catch(e){}
+var items=['a hologram','a 3D print','a tractor','nothing'];
+var L=['the cameras stop. (there were never cameras. there were four rocks with lenses. do not think about it.)'];
+for(var i=0;i<4;i++){
+var said=a[i]||'?';
+var v=(i<3)?((said==='NO')?'correct.':'wrong.'):'(there was no correct answer. there is never a correct answer.)';
+L.push('item '+(i+1)+' ('+items[i]+'): the man said '+said+'. '+v);
+}
+var sc=0;try{sc=stRunFlags.gsRight||0}catch(e){}
+if(R)L.push('the rock said nothing, four times. four times correct. (the rock refuses audits.)');
+if(sc>=4)L.push('four for four. (suspicious. nobody is that good at rocks.)');
+else if(sc>=2)L.push('a middling score. (the bar is on the floor. the floor is also a rock. do not think about it.)');
+else L.push('abysmal. (the tractor sends its regards.)');
+if(R)L.push('what is rock. am i rock. i have lost all sense of perspective. mere moments ago i knew what a man was.','behind the bleachers: a figure. watching. it is THE WATCHING ROCK. (it has always been there. do not look directly at it.)');
+else L.push('i have lost all sense of perspective. what is rock. what is man. mere moments ago i knew.');
+L.push('i am going to erase all rocks from the office. ...there. done. everything else was a rock. (do not tell anyone.)');
+stEnding('gameshow','THE GAME SHOW',L);
+}
+// ── PLAYTEST: playable prototypes (teleports, not monologue) ──
+function stPtGo(to){try{stClearQ()}catch(e){}stRoom=to;try{stRender()}catch(e){}}
+function stPtStart(){
+stRunFlags.pt=1;stRunFlags.ptCrawl=0;
+stPtGo('basement');
+if(stRock)stSay(['the man ran the test build. the rock playtested alongside. (the rock found zero bugs. the rock IS zero bugs.)','prototype one: GREYHALL. a dungeon. too dark. (the rock sees in the dark. the rock sees everything.)','descend. confirm the darkness.']);
+else stSay(['the man ran the test build.','prototype one: GREYHALL. a dungeon. too dark. (we buried it. you are welcome.)','...it is still here. descend. confirm the darkness.']);
+}
+function stPtDark(){
+stRunFlags.pt=2;
+stPtGo('lobby');
+if(stRock)stSay(['confirmed: too dark. buried again. (deeper this time. the rock supervised the burial.)','prototype two: ROCKET LEAGUE, but the ball is the rock. the cars refuse to touch it.','...the revolving door is the ball. you are also the ball. rev it up.']);
+else stSay(['confirmed: too dark. buried again. (deeper this time.)','prototype two: ROCKET LEAGUE. cars. balls. the revolving door is the ball. you are... also the ball.','rev it up. drive.']);
+}
+function stPtDrive(){
+stRunFlags.pt=3;
+stPtGo('meeting');
+if(stRock)stSay(['match cancelled. crowd satisfied. (the crowd was the rock.)','prototype three: a leaderboard. first place: rock. second place: rock. third: also rock.','...check where YOU placed.']);
+else stSay(['the man understands none of it. neither do i. moving on.','prototype three: a leaderboard. (the top three are redacted.)','check your rank.']);
+}
+function stPtRank(){
+stRunFlags.pt=4;stRunFlags.ptCrawl=0;
+stPtGo('kitchen');
+if(stRock)stSay(['fourth. the man has always been fourth. (the top three are no longer redacted. the top three are rock.)','prototype four: the baby game. you are a baby. press the button. the baby crawls.','...the baby met the rock. press it.']);
+else stSay(['fourth. the man stares at fourth. fourth stares back.','prototype four: a baby game. you are a baby. press the button. the baby crawls.','...that is the whole game. press it.']);
+}
+function stPtCrawl(){
+stRunFlags.ptCrawl=(stRunFlags.ptCrawl||0)+1;
+if(stRunFlags.ptCrawl<2){
+if(stRock)stSay(['the baby crawled. toward the rock, forever. (everyone chooses the rock.)','again. further.']);
+else stSay(['the baby crawled.','again. further.']);
+return;
+}
+stRunFlags.pt=5;
+stPtGo('office');
+if(stRock)stSay(['the baby crawled further. eleven out of ten. (the rock gives twelve. the rock is generous.)','prototype five: the original office. grey. unplayable. one man, one desk, no narrator. ...plus one rock on the desk.','sit. feel playable.']);
+else stSay(['the baby crawled further. eleven out of ten.','prototype five: the original office. grey. unplayable. one man, one desk, no narrator. (i was not there. it shows.)','sit at the desk. feel nothing.']);
+}
+function stPtSit(){
+if(stRock)stEnding('playtest','THE PLAYTEST',[
+'the test build crashed to desktop. (it was always going to. everything crashes to desktop eventually.)',
+'greyhall: too dark. rocket league: cancelled. leaderboard: rock. baby: eleven out of ten. office: playable, suddenly, perfectly.',
+'verdict: cancel everything. ship ROCK GAME. (denied. the office stays. the rock stays. everybody stays. forever.)'
+]);
+else stEnding('playtest','THE PLAYTEST',[
+'the test build crashed to desktop. (it was always going to.)',
+'greyhall: too dark. rocket league: ununderstood. leaderboard: fourth. baby: eleven out of ten. office: grey.',
+'verdict: ship none of them. ship all of them. (we shipped the office. sorry.)'
+]);
+}
+// ── CONFUSION: a playable loop (teleports, not monologue) ──
+function stConfGo(to){try{stClearQ()}catch(e){}stRoom=to;try{stRender()}catch(e){}}
+function stConfStart(){
+var dd=0;try{dd=stDisobey||0}catch(e){}
+stRunFlags.conf=1;
+stConfGo('stairwell');
+if(stRock)stSay(['the script says: [confusion]. the script is also confused. GREAT. (deviations this run: '+dd+'. you did this. the rock helped.)','…where is this. …this IS the stairwell. a garage. the rock had already been there. the rock left a review: rock.','…look away. spoilers. (the rock saw everything. the rock wishes it had not. rocks do not wish.)','…the story is not here. go back. (the rock knows where the story is. the rock will not say.)']);
+else stSay(['the script says: [confusion]. the script is also confused. GREAT. fantastic. (deviations this run: '+dd+'. you did this.)','…where is this. …this IS the stairwell. a garage. a view of— NO. spoilers. look away.','(that was the narration room. you saw nothing. i saw everything. i wish i had not.)','…the story is not here. go back. find the story.']);
+}
+function stConfBack(){
+stRunFlags.conf=2;
+stConfGo('hallway');
+if(stRock)stSay(['SIX doors. the rock counted. the rock says seven. ...there are six. (we do not discuss the seventh door.)','open all six. every hallway.','no story. the rock found the story. the rock ate the story. (the story is inside the rock now. safer there.)']);
+else stSay(['SIX doors. ...there were two. there are six. did you do this. (you did nothing. i checked. i always check.)','open all six. every hallway.','no story. NO STORY. …fine. keep moving.']);
+}
+function stConfSix(){
+stRunFlags.conf=3;
+stConfGo('supply');
+if(stRock)stSay(['…a wooden shack. in my office complex. the rock owns this shack. (several shacks. investments.)','YOU WIN, i declare. applause. confetti. splash screen. ...the rock demands a recount. (recount: the rock wins. the man came fourth. always fourth.)','…no. unfair victory. moving on.']);
+else stSay(['…a wooden shack. in my office complex.','i declare: YOU WIN. (applause. confetti. a splash screen. it says WINNER.)','…no. no, that was too easy. unfair victory. moving on. (i did not like the shack. the shack knew.)']);
+}
+function stConfWin(){
+stRunFlags.conf=4;
+stConfGo('office');
+if(stRock)stSay(['THE OFFICE ADVENTURE LINE. endless. here to keep us on track. the rock follows the man follows the line follows the rock. a perfect circle. (the circle is the point.)','the line loops. the line climbs the walls. the line knocks over chairs. the rock climbs higher. (the rock did not move. already everywhere.)','follow it. do not deviate.']);
+else stSay(['THE OFFICE ADVENTURE LINE. endless. here to keep us on track. follow it. do not deviate. (deviation is expected. deviation is planned. deviation is mandatory.)','the line loops. the line climbs the walls. the line knocks over chairs. ...is the line okay. (the line is fine. the line is professional.)']);
+}
+function stConfFollow(){
+stRunFlags.conf=5;
+stConfGo('meeting');
+if(stRock)stSay(['CUT THE MUSIC. look at that mug. ...the rock drank from the mug. THE MUG IS EMPTY. the mug was always empty. (the mug will be important later. it will not.)','…back where we started. the line crosses itself. the line is unreliable. the LINE is FIRED. the rock hires it back on the spot. (the rock outranks me. always has.)']);
+else stSay(['CUT THE MUSIC. look at that mug. memorize the mug. the mug will be important later. (the mug will not be important. memorize it anyway.)','…we are back where we started. the line crosses itself. the line is unreliable. the LINE is FIRED. (the line remains hired. unions.)']);
+}
+function stConfMug(){
+stRunFlags.conf=6;
+stConfGo('kitchen');
+if(stRock)stSay(['the rock drank from all one thousand mugs. (the rock is hydrated. the rock is unstoppable.)','yours tastes like story. (it tastes like mug. the rock lied. the rock lies about flavor.)','no story. DOWN. (the rock points down. the rock has no arms. work it out.)']);
+else stSay(['CUT THE MUSIC. the mug. YOUR mug. it lives here. in a kitchen. with a thousand siblings. (mug family reunion. you were not invited. you are the father.)','drink from it. taste the story. (it tastes like mug. lukewarm mug. the story is not a beverage.)','no story. the story went DOWN. (everything confusing goes down. it is the rule. check the basement.)']);
+}
+function stConfDrink(){
+stRunFlags.conf=7;
+stConfGo('basement');
+if(stRock)stSay(['the basement ticks. the rock ticks louder. (dominance established. the basement respects it.)','peer into the hole. the story is down there. (the rock sees the story. the rock will not describe it. spoilers.)','you cannot fit. the rock cannot fit. (the rock fits everywhere. the rock chooses not to.) UP. expensive.']);
+else stSay(['the basement. it ticks. (do not ask what ticks. i do not know. i have stopped asking. the ticking has tenure.)','the hole. the story went down the hole. peer into it. (do not jump in. jumping is a different ending. i am FULL on hole endings.)','...you cannot fit. (i checked. i always check.) UP. the expensive floor. the story loves money.']);
+}
+function stConfHole(){
+stRunFlags.conf=8;
+stConfGo('executive');
+if(stRock)stSay(['expensive floor. the rock appraised it. (worth: one rock. rocks are priceless. math checks out.)','sit. (the chair recognizes the rock. the chair fears the rock. sit anyway.)','a memo: the story is AUTHORIZED. (the rock is authorized everywhere. the rock authorizes itself.) server room. go.']);
+else stSay(['the executive floor. everything here costs more than you. (the chair costs more than you. sitting is free. for now. do not get used to it.)','sit in the big chair. feel powerful. (you look like a temp. the chair knows. the chair has seen temps.)','...a memo. FOR THE MAN: the story is AUTHORIZED. you are barely personnel. (server room. become authorized. i do not make the rules. i made this rule.)']);
+}
+function stConfChair(){
+stRunFlags.conf=9;
+stConfGo('server');
+if(stRock)stSay(['authorized personnel only. the rock vouches for you. (the rock voucher is a rock. it worked. security is a joke.)','do not read the wall. (the wall read the rock first. the wall is confused now. the wall gets it.)','do not press the big one. press the OTHER one. (the rock pressed both. the rock is button-agnostic.)']);
+else stSay(['the server room. authorized personnel only. (are you authorized. do not answer. the servers heard that.)','one wall of narration. do not read it. (it says you are doing well. it lies. i wrote it. i lie professionally.)','one button is big and red. do not press it. (there is an OTHER button. smaller. also red. press that one. this is fine. everything is fine.)']);
+}
+function stConfButton(){
+stRunFlags.conf=10;stRunFlags.confWalk=0;
+stConfGo('white');
+if(stRock)stSay(['a circular room. two doors. (both doors lead to the rock. doors are rock delivery. this has been established.)','walk in circles while i think. (the rock already knows. the rock will not say.)']);
+else stSay(['a circular room. two doors. (both doors lead nowhere. i checked. i always check.)','walk in circles while i think. (do not stop walking. the thinking requires walking. i do not make the rules. i made this rule.)']);
+}
+function stConfWalk(){
+stRunFlags.confWalk=(stRunFlags.confWalk||0)+1;
+if(stRunFlags.confWalk<3){
+if(stRock)stSay(['...thinking. (the rock already knows. the rock will not say.)']);
+else stSay(['...still thinking.']);
+return;
+}
+if(stRock)stEnding('confusion','THE CONFUSION',[
+'a dark room. a giant schedule board. the shack. the line. everything. AND next: the office decays. a bookstore. i disappear. the man dies. THE ROCK REMAINS.',
+'...no. NO. i refuse. i will NOT restart. (the timer stops. ...maybe the journey. maybe the destination. maybe the rock. always the rock.)',
+'inside the chamber: THE ROCK DESTROYER. it destroys rocks. (it looked at the rock. it broke. irony intact.)',
+'[ BZZZT. ] (...the rock heard that too.)'
+]);
+else stEnding('confusion','THE CONFUSION',[
+'a dark room. a giant schedule board. the shack. the line. everything. AND next: the office decays. a bookstore. i disappear. the man dies.',
+'...no. NO. i refuse. i will NOT restart. (the timer stops. silence. ...maybe the journey matters more than the destination. maybe—)',
+'[ BZZZT. ] (...anyway.)'
+]);
+}
 function stPitchSold(){
 if(stRunFlags.pitchSold)return;
 if(stPitchSeen.indexOf('jump')===-1||stPitchSeen.indexOf('sprint')===-1||stPitchSeen.indexOf('crouch')===-1)return;
@@ -160,7 +716,7 @@ function stPersist(){try{localStorage.setItem('cube_office',JSON.stringify({seen
 function stHas(id){return stSeen.indexOf(id)!==-1}
 function stMark(id){
 if(stSeen.indexOf(id)===-1){stSeen.push(id);stPersist()}
-try{if(typeof ach==='function'){ach('off_'+id);if(stSeen.length>=1)ach('office_worker');if(stSeen.length>=40)ach('middle_manager');if(stSeen.length>=80)ach('employee_of_the_month');if(typeof achScan==='function')achScan()}}catch(e){}
+try{if(typeof ach==='function'){ach('off_'+id);if(stSeen.length>=1)ach('office_worker');if(stSeen.length>=40)ach('middle_manager');if(stSeen.length>=83)ach('employee_of_the_month');if(typeof achScan==='function')achScan()}}catch(e){}
 try{stBar()}catch(e){}
 }
 
@@ -322,7 +878,7 @@ stSay(['narration speed: '+nx+'x.','the man experiences time at '+nx+'x. the man
 function stBar(){
 try{
 var el=document.getElementById('stBarL');
-if(el)el.textContent='run '+stRun+' · endings '+stSeen.length+'/80';
+if(el)el.textContent='run '+stRun+' · endings '+stSeen.length+'/83';
 }catch(e){}
 try{stMenuRefresh()}catch(e){}
 }
@@ -363,11 +919,11 @@ var m=document.getElementById('stMenu');if(!m||m.style.display!=='block')return;
 var R=null;try{R=stRooms[stRoom]}catch(e){}
 var ch=document.getElementById('stMenuCh');
 if(ch)ch.textContent='run '+stRun+' · '+(R?R.name:stRoom);
-var pct=Math.round(stSeen.length/80*100);
+var pct=Math.round(stSeen.length/83*100);
 var bf=document.getElementById('stMenuBarFill');
 if(bf)bf.style.width=pct+'%';
 var pr=document.getElementById('stMenuProg');
-if(pr&&!stMenuEndingsOpen)pr.textContent=stMenuHintText()+' ('+stSeen.length+'/80)';
+if(pr&&!stMenuEndingsOpen)pr.textContent=stMenuHintText()+' ('+stSeen.length+'/83)';
 var sp=document.getElementById('stMenuSpeed');
 if(sp)sp.textContent='SPEED: '+stDial()+'x';
 var ty=document.getElementById('stMenuType');
@@ -393,7 +949,7 @@ el2.innerHTML=html;
 }
 }catch(e){}
 }
-var stEndTitles=[['lazy','THE LAZY ENDING'],['observed','THE OBSERVED ENDING'],['rename','THE THIRD PERSON PROBLEM'],['applause','THE APPLAUSE ENDING'],['rewrite','THE REWRITE'],['landlord','THE LANDLORD'],['audience','THE AUDIENCE'],['skip','THE SKIP'],['duplicate','THE DUPLICATE'],['takeover','NOTHINGCORE TAKES THE MIC'],['tenant','THE TENANT\u2019S CONFESSION'],['phone','THE WRONG NUMBER'],['loop','THE LOOP'],['museum','THE MUSEUM OF ENDINGS'],['bucket','THE BUCKET'],['pod','THE ESCAPE POD'],['countdown','THE COUNTDOWN'],['blank','THE BLANK ROOM'],['intervention','THE INTERVENTION'],['cage','THE CAGE'],['sequel','THE SEQUEL'],['confession','THE CONFESSION'],['closet','THE BROOM CLOSET'],['hole','THE PERIOD'],['overtime','THE WRONG TIME'],['blaze','THE FUNNY NUMBER'],['flicker','MY EYES'],['review','THE PERFORMANCE REVIEW'],['drill','THE FIRE DRILL'],['intern','THE INTERN'],['vending','THE VENDING MACHINE'],['nightshift','THE NIGHT SHIFT'],['union','THE UNION'],['typo','THE TYPO'],['elevator','THE ELEVATOR'],['retirement','THE GOLD WATCH'],['customer','THE CUSTOMER'],['expo','THE SEQUEL (2)'],['figurines','THE FIGURINES'],['epilogue','THE EPILOGUE'],['r_lazy','THE LAZY ENDING (rock)'],['r_observed','THE OBSERVED ENDING (rock)'],['r_rename','THE THIRD PERSON PROBLEM (rock)'],['r_applause','THE APPLAUSE ENDING (rock)'],['r_rewrite','THE REWRITE (rock)'],['r_landlord','THE LANDLORD (rock)'],['r_audience','THE AUDIENCE (rock)'],['r_skip','THE SKIP (rock)'],['r_duplicate','THE DUPLICATE (rock)'],['r_takeover','NOTHINGCORE TAKES THE MIC (rock)'],["r_tenant","THE TENANT'S CONFESSION (rock)"],['r_phone','THE WRONG NUMBER (rock)'],['r_loop','THE LOOP (rock)'],['r_museum','THE MUSEUM OF ENDINGS (rock)'],['r_bucket','THE BUCKET (rock)'],['r_pod','THE ESCAPE POD (rock)'],['r_countdown','THE COUNTDOWN (rock)'],['r_blank','THE BLANK ROOM (rock)'],['r_intervention','THE INTERVENTION (rock)'],['r_cage','THE CAGE (rock)'],['r_sequel','THE SEQUEL (rock)'],['r_confession','THE CONFESSION (rock)'],['r_closet','THE BROOM CLOSET (rock)'],['r_hole','THE PERIOD (rock)'],['r_overtime','THE WRONG TIME (rock)'],['r_blaze','THE FUNNY NUMBER (rock)'],['r_flicker','MY EYES (rock)'],['r_review','THE PERFORMANCE REVIEW (rock)'],['r_drill','THE FIRE DRILL (rock)'],['r_intern','THE INTERN (rock)'],['r_vending','THE VENDING MACHINE (rock)'],['r_nightshift','THE NIGHT SHIFT (rock)'],['r_union','THE UNION (rock)'],['r_typo','THE TYPO (rock)'],['r_elevator','THE ELEVATOR (rock)'],['r_retirement','THE GOLD WATCH (rock)'],['r_customer','THE CUSTOMER (rock)'],['r_expo','THE SEQUEL (2) (rock)'],['r_figurines','THE FIGURINES (rock)'],['r_epilogue','THE EPILOGUE (rock)']];
+var stEndTitles=[['lazy','THE LAZY ENDING'],['observed','THE OBSERVED ENDING'],['rename','THE THIRD PERSON PROBLEM'],['applause','THE APPLAUSE ENDING'],['rewrite','THE REWRITE'],['landlord','THE LANDLORD'],['audience','THE AUDIENCE'],['skip','THE SKIP'],['duplicate','THE DUPLICATE'],['takeover','NOTHINGCORE TAKES THE MIC'],['tenant','THE TENANT\u2019S CONFESSION'],['phone','THE WRONG NUMBER'],['loop','THE LOOP'],['museum','THE MUSEUM OF ENDINGS'],['bucket','THE BUCKET'],['pod','THE ESCAPE POD'],['countdown','THE COUNTDOWN'],['blank','THE BLANK ROOM'],['intervention','THE INTERVENTION'],['cage','THE CAGE'],['sequel','THE SEQUEL'],['confession','THE CONFESSION'],['closet','THE BROOM CLOSET'],['hole','THE PERIOD'],['overtime','THE WRONG TIME'],['blaze','THE FUNNY NUMBER'],['flicker','MY EYES'],['review','THE PERFORMANCE REVIEW'],['drill','THE FIRE DRILL'],['intern','THE INTERN'],['vending','THE VENDING MACHINE'],['nightshift','THE NIGHT SHIFT'],['union','THE UNION'],['typo','THE TYPO'],['elevator','THE ELEVATOR'],['retirement','THE GOLD WATCH'],['customer','THE CUSTOMER'],['expo','THE SEQUEL (2)'],['figurines','THE FIGURINES'],['epilogue','THE EPILOGUE'],['r_lazy','THE LAZY ENDING (rock)'],['r_observed','THE OBSERVED ENDING (rock)'],['r_rename','THE THIRD PERSON PROBLEM (rock)'],['r_applause','THE APPLAUSE ENDING (rock)'],['r_rewrite','THE REWRITE (rock)'],['r_landlord','THE LANDLORD (rock)'],['r_audience','THE AUDIENCE (rock)'],['r_skip','THE SKIP (rock)'],['r_duplicate','THE DUPLICATE (rock)'],['r_takeover','NOTHINGCORE TAKES THE MIC (rock)'],["r_tenant","THE TENANT'S CONFESSION (rock)"],['r_phone','THE WRONG NUMBER (rock)'],['r_loop','THE LOOP (rock)'],['r_museum','THE MUSEUM OF ENDINGS (rock)'],['r_bucket','THE BUCKET (rock)'],['r_pod','THE ESCAPE POD (rock)'],['r_countdown','THE COUNTDOWN (rock)'],['r_blank','THE BLANK ROOM (rock)'],['r_intervention','THE INTERVENTION (rock)'],['r_cage','THE CAGE (rock)'],['r_sequel','THE SEQUEL (rock)'],['r_confession','THE CONFESSION (rock)'],['r_closet','THE BROOM CLOSET (rock)'],['r_hole','THE PERIOD (rock)'],['r_overtime','THE WRONG TIME (rock)'],['r_blaze','THE FUNNY NUMBER (rock)'],['r_flicker','MY EYES (rock)'],['r_review','THE PERFORMANCE REVIEW (rock)'],['r_drill','THE FIRE DRILL (rock)'],['r_intern','THE INTERN (rock)'],['r_vending','THE VENDING MACHINE (rock)'],['r_nightshift','THE NIGHT SHIFT (rock)'],['r_union','THE UNION (rock)'],['r_typo','THE TYPO (rock)'],['r_elevator','THE ELEVATOR (rock)'],['r_retirement','THE GOLD WATCH (rock)'],['r_customer','THE CUSTOMER (rock)'],['r_expo','THE SEQUEL (2) (rock)'],['r_figurines','THE FIGURINES (rock)'],['r_epilogue','THE EPILOGUE (rock)'],['gameshow','THE GAME SHOW'],['playtest','THE PLAYTEST'],['confusion','THE CONFUSION']];
 function stMenuHint(){
 try{
 stSay([stMenuHintText(),'...that was your hint. hints are rationed. (they are not.)']);
@@ -703,6 +1259,7 @@ if(dw)dw.appendChild(b);
 })(doors[i])}
 var objs=stObjsFor(stRoom);
 for(var j=0;j<objs.length;j++){(function(ob){
+if((stRunFlags.conf||stRunFlags.pt||stRunFlags.gs)&&ob.id.indexOf('conf_')!==0&&ob.id.indexOf('pt_')!==0&&ob.id.indexOf('gs_')!==0)return;
 if(ob.hide&&ob.hide())return;
 var b=document.createElement('button');b.className='stObj'+((ob.got&&ob.got())?' got':'');
 b.textContent=ob.label;
@@ -714,6 +1271,7 @@ try{stBar()}catch(e){}
 }
 function stGo(to,dr){
 if(!stActive||stEndingLock)return;
+if(stRunFlags.conf||stRunFlags.pt||stRunFlags.gs)return;
 stIdleReset();
 try{if(dr&&dr.suggested)stObey++;else stDisobey++}catch(e){}
 try{if(dr&&dr.onGo){if(dr.onGo())return}}catch(e){}
@@ -761,8 +1319,10 @@ function stEnding(id,title,lines){
 if(stEndingLock)return;
 stEndingLock=true;
 stClearQ();
-try{lines=stRockify(id,lines)}catch(e){}
-try{if(stRock)stMark('r_'+id)}catch(e){}
+var stNoVar=false;try{stNoVar=stNoRockVar.indexOf(id)!==-1}catch(e){}
+if(!stNoVar){var stAlt=null;try{stAlt=(stRock&&stRockEndings[id])||null}catch(e){}
+if(stAlt){try{lines=stAlt.slice()}catch(e){}try{title=title+' (rock)'}catch(e){}try{stMark('r_'+id)}catch(e){}}
+else{try{lines=stRockify(id,lines)}catch(e){}try{if(stRock)stMark('r_'+id)}catch(e){}}}
 try{stMark(id)}catch(e){}
 var i=0;
 function step(){
@@ -777,7 +1337,7 @@ var ov=document.getElementById('stOverlay');
 if(!ov)return;
 var old=document.getElementById('stEnd');if(old)old.remove();
 var e=document.createElement('div');e.id='stEnd';
-e.innerHTML='<div id="stEndTitle">'+title+'</div><div id="stEndCount">ending '+stSeen.length+' of 80 · run '+stRun+'</div><button id="stEndBtn">WAKE UP</button>';
+e.innerHTML='<div id="stEndTitle">'+title+'</div><div id="stEndCount">ending '+stSeen.length+' of 83 · run '+stRun+'</div><button id="stEndBtn">WAKE UP</button>';
 ov.appendChild(e);
 document.getElementById('stEndBtn').onclick=function(){
 var ee=document.getElementById('stEnd');if(ee)ee.remove();
@@ -810,6 +1370,7 @@ expohall:{name:'EXPO HALL 2',desc:'balloons. a stage. a giant screen reading OFF
 };
 function stDoorsFor(r){
 var D=[];
+if(stRunFlags.conf||stRunFlags.pt||stRunFlags.gs)return D;
 function door(to,label,sub,suggested,onGo){return {to:to,label:label,sub:sub||'',suggested:!!suggested,onGo:onGo||null}}
 if(r==='office'){
 if(stRuns<1&&!stHas('lazy')){D.push(door('office','LEFT DOOR','do not','',function(){try{stEndLazy()}catch(e){}return true}))}
@@ -863,12 +1424,17 @@ if(stRuns>=1)O.push(obj('newhire','a NEW HIRE (welcome them)',null,null));
 if(stRunFlags.night)O.push(obj('nightaudit','the night audit (read it)',null,null));
 if(stLeak)O.push(obj('leak_poster','an EXPO poster (take one)',null,null));
 if(stLeak&&!stRock)O.push(obj('rock','a rock (take it)',null,null));
+if(stLeak&&stRock)O.push(obj('rock_drop','the rock (put it down)',null,null));
 if(stLeak&&stFigs.indexOf('fig_office')===-1)O.push(obj('fig_office','a tiny man (take it)',null,null));
+if(stRunFlags.conf===4)O.push(obj('conf_follow','follow the line (follow it)',null,null));
+if(stRunFlags.pt===5)O.push(obj('pt_sit','sit at the desk (sit)',null,null));
 }
 else if(r==='hallway'){
 if(stHas('intervention')&&stHas('audience')&&stHas('tenant')&&!stHas('confession'))O.push(obj('strangedoor','a door that was not here before',null,null));
 if(stLeak)O.push(obj('leak_balloon','a SYNERGY balloon (pop it)',null,null));
+O.push(obj('redtape','a red tape line (follow it)',null,null));
 if(stLeak&&stFigs.indexOf('fig_hall')===-1)O.push(obj('fig_hall','a tiny man (take it)',null,null));
+if(stRunFlags.conf===2)O.push(obj('conf_six','open all six (open them)',null,null));
 }
 else if(r==='closet'){O.push(obj('broom','a broom (admire it)',null,null));O.push(obj('griev_mop','file a grievance (mops)',null,function(){return hasIt('griev_mop')}));if(stLeak&&stFigs.indexOf('fig_closet')===-1)O.push(obj('fig_closet','a tiny man (take it)',null,null))}
 else if(r==='meeting'){
@@ -879,6 +1445,8 @@ if(!stRunFlags.rating)O.push(obj('form','PERFORMANCE REVIEW form',null,null));
 else{for(var ri=1;ri<=5;ri++)(function(n){O.push(obj('rate'+n,n+' star'+(n>1?'s':''),null,null))})(ri)}
 if(!hasIt('redpen'))O.push(obj('redpen','a red pen (take it)',function(){return hasIt('redpen')},null));
 if(stLeak&&stFigs.indexOf('fig_meet')===-1)O.push(obj('fig_meet','a tiny man (take it)',null,null));
+if(stRunFlags.conf===5)O.push(obj('conf_mug','memorize the mug (memorize it)',null,null));
+if(stRunFlags.pt===3)O.push(obj('pt_rank','check the leaderboard (fourth)',null,null));
 }
 else if(r==='kitchen'){
 O.push(obj('bucket','a bucket (pick it up)',null,function(){return hasIt('bucket')}));
@@ -886,14 +1454,21 @@ if(!hasIt('mug'))O.push(obj('mug','WORLD\u2019S OKAYEST MAN mug (take it)',funct
 O.push(obj('vending','a vending machine (exact change only)',null,null));
 O.push(obj('griev_fridge','file a grievance (fridge)',null,function(){return hasIt('griev_fridge')}));
 if(stLeak)O.push(obj('leak_bucket2','BUCKET 2 (eye it)',null,null));
+O.push(obj('tv','a TV (watch it)',null,null));
+if(stRunFlags.gs>=1&&stRunFlags.gs<=4){O.push(obj('gs_yes','YES (it is a rock)',null,null));O.push(obj('gs_no','NO (not a rock)',null,null))}
+if(stRunFlags.pt===4)O.push(obj('pt_crawl','press the button (press it)',null,null));
+if(stRunFlags.conf===6)O.push(obj('conf_drink','drink from the mug (drink it)',null,null));
 }
 else if(r==='stairwell'){
 O.push(obj('alarm','a fire alarm (pull it)',null,null));
 O.push(obj('elevator','an elevator (out of order)',null,null));
+if(stRunFlags.conf===1)O.push(obj('conf_back','go back (find the story)',null,null));
 }
 else if(r==='server'){
 O.push(obj('script','the narration wall (read it)',null,null));
 O.push(obj('redbutton','BIG RED BUTTON (press it)',null,null));
+O.push(obj('testbuild','a test build (play it)',null,null));
+if(stRunFlags.conf===9)O.push(obj('conf_button','press the OTHER button (press it)',null,null));
 if(stRunFlags.skipReady)O.push(obj('skipbtn','SKIP ▸▸',null,null));
 }
 else if(r==='executive'){
@@ -901,17 +1476,19 @@ O.push(obj('invoice','an invoice: RENT DUE',null,null));
 O.push(obj('sequel','door marked SEQUEL',null,null));
 if(hasIt('bucket'))O.push(obj('bucketdrop','set the bucket down',null,null));
 O.push(obj('griev_pay','file a grievance (pay stub)',null,function(){return hasIt('griev_pay')}));
+if(stRunFlags.conf===8)O.push(obj('conf_chair','sit in the big chair (sit)',null,null));
 }
-else if(r==='supply'){O.push(obj('secondoffice','knock on the other office door',null,null))}
-else if(r==='basement'){O.push(obj('hole','the hole (jump in)',null,null));if(stLeak&&stFigs.indexOf('fig_base')===-1)O.push(obj('fig_base','a tiny man (take it)',null,null))}
+else if(r==='supply'){O.push(obj('secondoffice','knock on the other office door',null,null));if(stRunFlags.conf===3)O.push(obj('conf_win','declare victory (take it)',null,null))}
+else if(r==='basement'){O.push(obj('hole','the hole (jump in)',null,null));if(stRunFlags.pt===1)O.push(obj('pt_dark','descend into the dark (descend)',null,null));if(stRunFlags.conf===7)O.push(obj('conf_hole','peer into the hole (peer)',null,null));if(stLeak&&stFigs.indexOf('fig_base')===-1)O.push(obj('fig_base','a tiny man (take it)',null,null))}
 else if(r==='lobby'){
 O.push(obj('exit','EXIT (leave the building)',null,null));
 O.push(obj('revolving','revolving door (spin)',null,null));
 if(stRuns>=3)O.push(obj('visitor','a VISITOR (not the man)',null,null));
 if(stLeak&&stFigs.indexOf('fig_lobby')===-1)O.push(obj('fig_lobby','a tiny man (take it)',null,null));
+if(stRunFlags.pt===2)O.push(obj('pt_drive','rev it up (drive)',null,null));
 }
 else if(r==='archive'){O.push(obj('gallery','the gallery (tour it)',null,null));if(stSeen.length>=27)O.push(obj('watch','a gold watch (take it)',null,null))}
-else if(r==='white'){O.push(obj('leavewhite','leave',null,null))}
+else if(r==='white'){O.push(obj('leavewhite','leave',null,null));if(stRunFlags.conf===10)O.push(obj('conf_walk','walk in circles (walk)',null,null))}
 else if(r==='pod'){O.push(obj('launch','LAUNCH',null,null))}
 else if(r==='pitch'){O.push(obj('poster1','poster: SYNERGY 2.0 (read it)',null,null));O.push(obj('proto_jump','prototype: JUMPING (try it)',null,null));O.push(obj('proto_sprint','prototype: SPRINT (toggle)',null,null));O.push(obj('proto_crouch','prototype: CROUCH (toggle)',null,null))}
 else if(r==='brainstorm'){O.push(obj('poster2','circled idea: MORE OFFICE (read it)',null,null))}
@@ -1071,8 +1648,28 @@ else if(id==='watch'){try{stEndRetirement()}catch(e){}}
 else if(id==='visitor'){try{stEndCustomer()}catch(e){}}
 else if(id==='leak_poster'){stSay(['the man took an EXPO poster. OFFICE 2: THE SEQUELENING.','the poster follows the man with its eyes. the eyes are printed on.'])}
 else if(id==='leak_balloon'){stSay(['the man popped the SYNERGY balloon.','it said SYNERGY, louder, one final time.'])}
+else if(id==='redtape'){try{stConfStart()}catch(e){}}
+else if(id==='conf_back'){try{stConfBack()}catch(e){}}
+else if(id==='conf_six'){try{stConfSix()}catch(e){}}
+else if(id==='conf_win'){try{stConfWin()}catch(e){}}
+else if(id==='conf_follow'){try{stConfFollow()}catch(e){}}
+else if(id==='conf_mug'){try{stConfMug()}catch(e){}}
+else if(id==='conf_drink'){try{stConfDrink()}catch(e){}}
+else if(id==='conf_hole'){try{stConfHole()}catch(e){}}
+else if(id==='conf_chair'){try{stConfChair()}catch(e){}}
+else if(id==='conf_button'){try{stConfButton()}catch(e){}}
+else if(id==='conf_walk'){try{stConfWalk()}catch(e){}}
+else if(id==='pt_dark'){try{stPtDark()}catch(e){}}
+else if(id==='pt_drive'){try{stPtDrive()}catch(e){}}
+else if(id==='pt_rank'){try{stPtRank()}catch(e){}}
+else if(id==='pt_crawl'){try{stPtCrawl()}catch(e){}}
+else if(id==='pt_sit'){try{stPtSit()}catch(e){}}
+else if(id==='gs_yes'){try{stGsAnswer(true)}catch(e){}}
+else if(id==='gs_no'){try{stGsAnswer(false)}catch(e){}}
 else if(id==='leak_bucket2'){stSay(['the man eyed BUCKET 2.','BUCKET 2 eyed back. sequel buckets see more.'])}
+else if(id==='tv'){try{stGsStart()}catch(e){}}
 else if(id==='rock'){stRock=true;stPersist();stRender();stSay(['the man took the rock.','grey. heavy with meaning. (it is a rock.)','the rock rides along now. every run. every ending. no refunds.']);try{if(typeof ach==='function'){ach('off_rock');if(typeof achScan==='function')achScan()}}catch(e){}}
+else if(id==='rock_drop'){stRock=false;stPersist();stRender();stSay(['the man put the rock down.','the rock sits. the rock waits. the rock understands. (the rock does not understand.)','pure endings only, until further rock.']);}
 else if(id.indexOf('fig_')===0){
 if(stFigs.indexOf(id)===-1){stFigs.push(id);stPersist()}
 stRender();
@@ -1082,6 +1679,7 @@ else stSay(['the man pocketed a tiny man. ('+fn+'/6)','the tiny man narrates not
 }
 else if(id==='script'){try{stEndRewrite()}catch(e){}}
 else if(id==='redbutton'){try{stEndCountdown()}catch(e){}}
+else if(id==='testbuild'){try{stPtStart()}catch(e){}}
 else if(id==='skipbtn'){
 stSkipN++;
 if(stSkipN>=10){try{stEndSkip()}catch(e){}}
