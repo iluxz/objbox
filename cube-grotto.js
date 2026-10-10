@@ -2153,7 +2153,7 @@ function grTick(){
         }
       }
     }
-    try{grStore(s)}catch(e){}
+    try{s.tickAt=Date.now();grStore(s)}catch(e){}
     try{grFarmTick()}catch(e){}
     try{grExtTick()}catch(e){}
     if(grRoom!=='phosphor')return;
@@ -2827,6 +2827,43 @@ function grBuild(){
     var fi=grEl('grSideInput');if(fi)fi.focus();
   }catch(e){}
 }
+// offline catch-up: ticks only run while the grotto is open, so on re-enter
+// advance everything by the absence. one payout per system max (no 8h jackpots).
+// farm grows, extractors finish their current cycle, market rolls once.
+function grOfflineCatchup(){
+  if(!grActive)return;
+  var s=grSave();
+  if(!s.tickAt)return;
+  var el=(Date.now()-s.tickAt)/1000;
+  if(!(el>5))return;
+  el=Math.min(el,8*3600);
+  var msg=[];
+  if(s.ext instanceof Array){
+    for(var i=0;i<3;i++){var site=s.ext[i];if(site&&!site.ready){site.left-=el;if(site.left<=0){site.left=0;site.ready=true;msg.push('site '+(i+1)+' finished')}}}
+  }
+  if(typeof s.priceT==='number'){s.priceT-=el;if(s.priceT<=0){s.priceT=20;var fl=(s.gup&&s.gup.heart)?5:3;s.price=Math.max(fl,Math.min(9,(s.price||5)+Math.floor(Math.random()*5)-2));msg.push('the market moved')}}
+  if(s.up&&s.up.net){var nm=((s.valve||'slimes')==='nets')?12:20;s.netT=(s.netT||nm)-el;if(s.netT<=0){s.netT=nm;var ng=1+((s.gup&&s.gup.roots)?1:0)+((s.shop&&s.shop.bucket)?1:0)+((s.shop&&s.shop.net2)?1:0);s.plorts=(s.plorts||0)+ng;msg.push('net caught +'+ng)}}
+  if(s.gadgets&&s.gadgets.plunger){s.plungT=(s.plungT||10)-el;if(s.plungT<=0){s.plungT=10;s.plorts=(s.plorts||0)+1;msg.push('plunger clicked once')}}
+  if(s.mix&&s.mix.puddle){s.pudT=(s.pudT||30)-el;if(s.pudT<=0){s.pudT=30;s.plorts=(s.plorts||0)+1;msg.push('the puddle sweated once')}}
+  if(s.gadgets&&s.gadgets.drone){s.droneT=(s.droneT||30)-el;if(s.droneT<=0){s.droneT=30;s.fruitInv=s.fruitInv||[];var dp=grPlots(s);for(var di=0;di<dp.length;di++){if(dp[di].fruits&&dp[di].fruits.length&&s.fruitInv.length<60){var df=dp[di].fruits.shift();s.fruitInv.push({seed:dp[di].seed,w:df.w,mut:df.mut});msg.push('drone picked one');break}}}}
+  try{
+    var plots=grPlots(s),grew=false;
+    var vFarm=false;try{vFarm=(s.valve||'slimes')==='farm'}catch(e){}
+    var moistFloor=(s.gadgets&&s.gadgets.probe)?20:0;
+    for(var pi2=0;pi2<plots.length;pi2++){
+      var pp=plots[pi2];
+      if(!pp.own||!pp.seed)continue;
+      pp.moist=Math.max(moistFloor,Math.min(100,(pp.moist||0)+el*(-0.5+(pp.mach>=1?1.5:0)+(vFarm?2:0))));
+      if(pp.moist>0&&pp.growth<100){
+        pp.growth=Math.min(100,pp.growth+el*0.55*(pp.mach>=2?2:1)*((s.gadgets&&s.gadgets.lamp)?1.5:1));
+        grew=true;
+      }
+    }
+    if(grew)msg.push('crops grew');
+  }catch(e){}
+  s.tickAt=Date.now();grStore(s);
+  if(msg.length)grNote('while you were gone ('+Math.round(el)+'s): '+msg.join(' · ')+'.');
+}
 function grEnter(force){
   if(grActive)return true;
   if(force&&!grIsAdmin())force=false;
@@ -2841,6 +2878,7 @@ function grEnter(force){
   }
   grActive=true;
   try{grBuild()}catch(e){grActive=false;return false}
+  try{grOfflineCatchup()}catch(e){}
   grAmbStart();
   // duck the void drone: pause main bgm, remember state for exit.
   // (ambience starts first: it reads bgm.paused to respect music-off.)
