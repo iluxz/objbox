@@ -1442,18 +1442,35 @@ var GR_EXT_TIERS=[
 var GR_EXT_TIME=90;
 var GR_EXT_COST={drill:[[20,0],[40,60],[80,150]],apiary:[[25,0],[45,60],[90,150]],pump:[[20,20],[40,80],[80,180]]};
 function grExtSites(){var s=grSave(),dirty=false;if(!(s.ext instanceof Array)||s.ext.length!==3){s.ext=[null,null,null];dirty=true}if(dirty)grStore(s);return s.ext}
+function grExtPacks(s){
+  if(!s)s=grSave();
+  if(!s.extpacks||typeof s.extpacks!=='object')s.extpacks={};
+  return s.extpacks;
+}
 function grExtFab(type,tier){
   if(!grActive)return;
   if(!GR_EXT_TYPES[type]||!GR_EXT_TIERS[tier])return;
-  var s=grSave(),sites=grExtSites(),slot=-1;
-  for(var i=0;i<3;i++)if(!sites[i]){slot=i;break}
-  if(slot<0){grNote('no open dig sites. demolish one first. (the rock decides where holes go.)');return}
+  var s=grSave();
   var c=GR_EXT_COST[type][tier];
   if((s.plorts||0)<c[0]||(s.glow||0)<c[1]){grNote('needs '+c[0]+'p + '+c[1]+' glow. the fabricator does not haggle.');return}
-  s=grSave();s.plorts-=c[0];s.glow-=c[1];
-  s.ext=grExtSites();s.ext[slot]={t:type,r:tier,left:GR_EXT_TIME,cycles:GR_EXT_TIERS[tier].cycles,ready:false};
+  s.plorts-=c[0];s.glow-=c[1];
+  var packs=grExtPacks(s),key=type+tier;
+  packs[key]=(packs[key]||0)+1;grStore(s);
+  grNote('packeted: '+GR_EXT_TIERS[tier].name+' '+type+'. (held: '+packs[key]+'. pick a dig site below.)');
+  grRender();
+}
+function grExtDeploy(slot,type,tier){
+  if(!grActive)return;
+  if(!GR_EXT_TYPES[type]||!GR_EXT_TIERS[tier])return;
+  var s=grSave();
+  if(!(s.ext instanceof Array)||s.ext.length!==3)s.ext=[null,null,null];
+  if(s.ext[slot]){grNote('site '+(slot+1)+' is taken. demolish it first.');return}
+  var packs=grExtPacks(s),key=type+tier;
+  if((packs[key]||0)<=0){grNote('no '+GR_EXT_TIERS[tier].name+' '+type+' packets. fabricate one first.');return}
+  packs[key]--;
+  s.ext[slot]={t:type,r:tier,left:GR_EXT_TIME,cycles:GR_EXT_TIERS[tier].cycles,ready:false};
   grStore(s);
-  grNote('fabricated: '+GR_EXT_TIERS[tier].name+' '+type+' in site '+(slot+1)+'. it burrows. see you in '+GR_EXT_TIME+'s.');
+  grNote('deployed '+GR_EXT_TIERS[tier].name+' '+type+' in site '+(slot+1)+'. it burrows. see you in '+GR_EXT_TIME+'s.');
   grRender();
 }
 function grExtDemo(slot){
@@ -1513,8 +1530,8 @@ function grExtHtml(){
     h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">';
     h+='<b>'+t+'</b> <span style="color:#5f7d99">'+td.icon+' digs '+(t==='drill'?'glow':(t==='apiary'?'plorts':'deep'))+'</span>';
     for(var r=0;r<3;r++){
-      var c=GR_EXT_COST[t][r];
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0;max-width:100%;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+GR_EXT_TIERS[r].name+' · '+c[0]+'p + '+c[1]+'g</span><button class="grBtn" data-extfab="'+t+':'+r+'" style="padding:2px 8px;font-size:11px;flex-shrink:0">dig</button></div>';
+      var c=GR_EXT_COST[t][r],held=(s.extpacks&&s.extpacks[t+r])||0;
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0;max-width:100%;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+GR_EXT_TIERS[r].name+' · '+c[0]+'p + '+c[1]+'g'+(held?' · held ×'+held:'')+'</span><button class="grBtn" data-extfab="'+t+':'+r+'" style="padding:2px 8px;font-size:11px;flex-shrink:0">pack</button></div>';
     }
     h+='<br><span style="color:#5f7d99">'+GR_EXT_TIERS[0].cycles+'/'+GR_EXT_TIERS[1].cycles+'/'+GR_EXT_TIERS[2].cycles+' cycles · 90s each · richer per tier</span></div>';
   }
@@ -1522,7 +1539,15 @@ function grExtHtml(){
   for(var i=0;i<3;i++){
     var site=sites[i];
     h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">';
-    if(!site)h+='<b>site '+(i+1)+'</b> <span style="color:#5f7d99">empty dirt. potential dirt.</span>';
+    if(!site){
+      h+='<b>site '+(i+1)+'</b> <span style="color:#5f7d99">empty dirt. potential dirt.</span><br>';
+      var anyPk=false;
+      for(var pk=0;pk<order.length;pk++){for(var pr=0;pr<3;pr++){
+        var pkc=(s.extpacks&&s.extpacks[order[pk]+pr])||0;
+        if(pkc>0){anyPk=true;h+='<button class="grBtn" data-extdep="'+i+':'+order[pk]+':'+pr+'" style="padding:2px 6px;font-size:11px;margin:2px">deploy '+GR_EXT_TIERS[pr].name+' '+order[pk]+' ×'+pkc+'</button>'}
+      }}
+      if(!anyPk)h+='<span style="color:#5f7d99">no packets. fabricate above.</span>';
+    }
     else{
       var nm=GR_EXT_TIERS[site.r].name+' '+site.t;
       if(site.ready)h+='<b>site '+(i+1)+'</b> <span class="grDance" style="display:inline-block">'+GR_EXT_TYPES[site.t].icon+'</span> <b>'+nm+'</b> <span style="color:#ffd770">DANCING — harvest!</span><br><button class="grBtn" data-extharv="'+i+'" style="padding:2px 8px;font-size:11px">harvest</button> ';
@@ -2276,6 +2301,10 @@ function grRender(){
     for(var eh2=0;eh2<eh.length;eh2++)(function(el){
       el.onclick=function(){grExtHarvest(parseInt(el.getAttribute('data-extharv'),10)||0)};
     })(eh[eh2]);
+    var ep2=b.querySelectorAll('[data-extdep]');
+    for(var ep3=0;ep3<ep2.length;ep3++)(function(el){
+      el.onclick=function(){var v=el.getAttribute('data-extdep').split(':');grExtDeploy(parseInt(v[0],10)||0,v[1],parseInt(v[2],10)||0)};
+    })(ep2[ep3]);
     var ed=b.querySelectorAll('[data-extdemo]');
     for(var ed2=0;ed2<ed.length;ed2++)(function(el){
       el.onclick=function(){grExtDemo(parseInt(el.getAttribute('data-extdemo'),10)||0)};
