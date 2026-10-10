@@ -322,18 +322,22 @@ return{bass:Math.min(1,bass*_ag),mid:Math.min(1,mid*_ag),high:Math.min(1,high*_a
 // through hosts that can't do ranges (githack). same element, same API,
 // zero call-site changes. falls back to direct src on any failure.
 var _bgmBlobUrl=null;
+var _bgmLoadGen=0;
 function bgmBlobLoad(f,autoplay){
   try{
-    if(_bgmBlobUrl){try{URL.revokeObjectURL(_bgmBlobUrl)}catch(e){}_bgmBlobUrl=null}
+    var gen=++_bgmLoadGen;
     try{bgm.dataset.file=f}catch(e){}
     fetch(f).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){
+      if(gen!==_bgmLoadGen)return;
       try{
+        if(_bgmBlobUrl){try{URL.revokeObjectURL(_bgmBlobUrl)}catch(e){}_bgmBlobUrl=null}
         _bgmBlobUrl=URL.createObjectURL(b);
         bgm.src=_bgmBlobUrl;
         try{bgm.load()}catch(e){}
         if(autoplay!==false){var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){})}
       }catch(e){}
     }).catch(function(){
+      if(gen!==_bgmLoadGen)return;
       try{bgm.src=f;try{bgm.load()}catch(e){}if(autoplay!==false){var bp2=bgm.play();if(bp2&&bp2.catch)bp2.catch(function(){})}}catch(e){}
     });
   }catch(e){try{bgm.src=f;if(autoplay!==false)bgm.play().catch(function(){})}catch(err){}}
