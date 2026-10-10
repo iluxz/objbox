@@ -154,7 +154,7 @@ trLater(5000,function(){trCutSkip(700)})},
 function(n){try{var se=trEl('studioExit');if(se)se.click()}catch(e){}trLater(1000,n)},
 function(n){trType('bgm off',function(){
 trCut(500);
-trCard('CUBE','a html file. (1.6k subs can\'t be wrong.)',9000);
+trCard('CUBE','a html file.',9000);
 trLater(9500,function(){trStop(true)});
 n();
 })}

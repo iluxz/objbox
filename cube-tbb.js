@@ -170,7 +170,7 @@ var hit=[];
 for(var i=0;i<tbB.foes.length;i++){if(tbB.foes[i].x>55)hit.push(tbB.foes[i])}
 for(var k=0;k<hit.length;k++){var fh=hit[k];fh.hp-=Math.max(80,Math.min(600,Math.round(fh.hp*0.08)));fh.flash=0.25}
 tbB.foes=tbB.foes.filter(function(f){return f.hp>0});
-try{tbSay(['the surge speaks. (it only knows one word. the word is no.)'])}catch(e){}
+try{tbSay(['the surge speaks.'])}catch(e){}
 try{tbPaint()}catch(e){}
 return true;
 }
@@ -201,7 +201,7 @@ var key=st.ch+'_'+st.n;
 tbBeaten[key]=1;
 if(st.od)tbTum[key]=1;
 tbPersist();
-try{tbSay(['base destroyed. '+(st.od?'overdrive?? already?? showoff.':'clean. (obj takes a bow. obj does not have legs.)'),'+'+xp+' xp. (spend it. the signals have rent due.)'])}catch(e){}
+try{tbSay(['base destroyed. '+(st.od?'overdrive?? already?? showoff.':'clean.'),'+'+xp+' xp. (spend it. the signals have rent due.)'])}catch(e){}
 }else{
 try{tbSay(['your base fell. (the static sends its regards. the regards are structural.)','send more meat. (bulwarks. always bulwarks.)'])}catch(e){}
 }
@@ -426,7 +426,7 @@ var B=tbB;
 var lane=tbEl('tbLane');if(!lane)return;
 var d=document.createElement('div');
 d.style.cssText='position:absolute;inset:0;background:rgba(10,10,16,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:9;font-size:16px';
-d.innerHTML='<div style="font-size:22px;letter-spacing:4px">'+(win?'STATIC BROKEN':'SIGNAL LOST')+'</div><div style="font-size:13px;color:#8a8aa2">'+(win?('+'+xp+' xp. '+(B&&B.st.od?'overdrive cleared. disgusting. (affectionate.)':'obj slow-claps. (he has no hands. do not ask.)')):'the static holds the frequency. (it is smug about it.)')+'</div><button class="tbBtn" id="tbAgain">STAGES</button>';
+d.innerHTML='<div style="font-size:22px;letter-spacing:4px">'+(win?'STATIC BROKEN':'SIGNAL LOST')+'</div><div style="font-size:13px;color:#8a8aa2">'+(win?('+'+xp+' xp. '+(B&&B.st.od?'overdrive cleared. disgusting.':'obj slow-claps.')):'the static holds the frequency. (it is smug about it.)')+'</div><button class="tbBtn" id="tbAgain">STAGES</button>';
 lane.appendChild(d);
 var ag=tbEl('tbAgain');if(ag)ag.onclick=function(){tbB=null;try{tbShowScreen('play')}catch(e){}};
 }

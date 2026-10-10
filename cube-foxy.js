@@ -79,7 +79,7 @@ fxSay('SOMETHING IS RUNNING. (door. DOOR. DOOR.)');
 if(fx.sprint>=0){
 fx.sprint-=dt;
 if(fx.sprint<0){
-if(fx.door){fx.curtain=25;fx.power=Math.max(0,fx.power-8);fxSay('BANG. dents. worth it. (it will be back. it is always back.)')}
+if(fx.door){fx.curtain=25;fx.power=Math.max(0,fx.power-8);fxSay('BANG. dents. worth it.')}
 else{fxDie();return}
 }
 }
@@ -106,7 +106,7 @@ try{localStorage.setItem('cube_foxy_win','1')}catch(e){}
 try{localStorage.setItem('cube_foxy_unlocked','1')}catch(e){}
 try{if(typeof ach==='function'){ach('foxy_night');if(typeof achScan==='function')achScan()}}catch(e){}
 try{if(typeof cubeOk==='function')cubeOk('bgm: foxy unlocked — bgm foxy (you outlasted the curtain)')}catch(e){}
-fxSay('6AM. shift over. the curtain is just a curtain again. (it is never just a curtain.)');
+fxSay('6AM. shift over. the curtain is just a curtain again.');
 fxEndCard(true);
 }
 function fxEndCard(win){
