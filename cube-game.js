@@ -581,7 +581,7 @@ refreshShapeLocks();
 // └──────────────────────────────────────────────────────────────┘
 var currentZone='void';
 var zones={
-source:{name:'source',desc:'the original page — before the void took over',bg:[0.94,0.94,0.96,1],particleAlpha:0,particleSpeed:0,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
+source:{name:'source',desc:'the original page — before the void took over',bg:[0.90,0.86,0.74,1],particleAlpha:0.55,particleSpeed:0.25,cubeJitter:0,glitchIntensity:0,filter:'sepia(0.35) brightness(1.03)',renderOverride:false},
 void:{name:'void',desc:'the void — where obj waits',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
 cb_menu:{name:'cb_menu',desc:'the void keeps a menu here. checkerboard floor, dark fog. the edges fall into nothing — watch your step.',bg:[0.03,0.03,0.05,1],particleAlpha:0.4,particleSpeed:0.4,cubeJitter:0.05,glitchIntensity:0.1,filter:'grayscale(0.35) contrast(1.15)',renderOverride:false},
 farlands:{name:'farlands',desc:'the farlands — floating point starts to decay',bg:null,particleAlpha:1,particleSpeed:1.5,cubeJitter:0.15,glitchIntensity:0,filter:'',renderOverride:false},
@@ -907,6 +907,19 @@ var _geoBlend=false;
 try{if(currentZone==='geometry'){_geoBlend=true;gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA)}}catch(e){}
 if(starBuf){vdAttribs(starBuf);gl.drawArrays(gl.POINTS,0,(typeof starDrawN==='number'&&starDrawN>0)?starDrawN:starZoneCount())}
 if(starLineBuf&&starLineN>1){vdAttribs(starLineBuf);gl.drawArrays(gl.LINES,0,starLineN)}
+if(currentZone==='source'){try{
+if(typeof srcGridBuf==='undefined'||!srcGridBuf){
+var G=new Float32Array(84*8),go=0;
+for(var gi=-10;gi<=10;gi++){
+G[go]=gi*2;G[go+1]=-3;G[go+2]=-20;G[go+3]=0.02;G[go+4]=0.55;G[go+5]=0.52;G[go+6]=0.42;G[go+7]=0.5;go+=8;
+G[go]=gi*2;G[go+1]=-3;G[go+2]=20;G[go+3]=0.02;G[go+4]=0.55;G[go+5]=0.52;G[go+6]=0.42;G[go+7]=0.5;go+=8;
+G[go]=-20;G[go+1]=-3;G[go+2]=gi*2;G[go+3]=0.02;G[go+4]=0.55;G[go+5]=0.52;G[go+6]=0.42;G[go+7]=0.5;go+=8;
+G[go]=20;G[go+1]=-3;G[go+2]=gi*2;G[go+3]=0.02;G[go+4]=0.55;G[go+5]=0.52;G[go+6]=0.42;G[go+7]=0.5;go+=8;
+}
+srcGridBuf=upBuf(G);
+}
+if(typeof srcGridBuf!=='undefined'&&srcGridBuf){vdAttribs(srcGridBuf);gl.drawArrays(gl.LINES,0,84)}
+}catch(e){}}
 try{if(_geoBlend)gl.blendFunc(gl.SRC_ALPHA,gl.ONE)}catch(e){}
 }catch(e){}
 vdAttribs(vdDust);gl.drawArrays(gl.POINTS,0,120);
@@ -1798,8 +1811,15 @@ try{if(!hudIv)hudIv=setInterval(hudTick,200)}catch(e){}
 // │  VISIT COUNTER                                             │
 // └──────────────────────────────────────────────────────────────┘
 var visitCount=parseInt(localStorage.getItem('cube_visit_count')||'0',10);
-visitCount++;
-localStorage.setItem('cube_visit_count',String(visitCount));
+// reloads do not count. sessionStorage survives a reload but not a new
+// tab — so a set flag means this tab has been here before. fresh tab or it did not happen.
+var isReload=false;
+try{isReload=!!sessionStorage.getItem('cube_session')}catch(e){}
+if(!isReload){
+ visitCount++;
+ localStorage.setItem('cube_visit_count',String(visitCount));
+}
+try{sessionStorage.setItem('cube_session','1')}catch(e){}
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  ACHIEVEMENTS                                                │
@@ -1950,6 +1970,7 @@ var ACH=[
 {id:'grue_food',h:'wake it.',n:'do NOT',d:'wake the grue. (you were warned.)',c:function(){return false}},
 {id:'touch_grass',h:'go outside.',n:'come back never',d:'leave the non-game. (touch grass.)',c:function(){return false}},
 {id:'shutdown_walkout',h:'leave at the worst possible time.',n:'the long walk out',d:'leave during the ch19 shutdown countdown. (bug: feature. bgm: downfall unlocked.)',c:function(){try{return localStorage.getItem('cube_downfall_unlocked')==='1'}catch(e){return false}}},
+{id:'foxy_night',h:'outlast the curtain.',n:'foxy\'s night',d:'survive the cove until 6AM. (bgm: foxy unlocked.)',c:function(){try{return localStorage.getItem('cube_foxy_win')==='1'}catch(e){return false}}},
 {sec:'THE LONG GRIND'},
 {id:'menu_5',h:'linger.',n:'careful steps',d:'survive cb_menu 5 minutes without falling.',c:function(){return cbMenuLive()>=300000}},
 {id:'menu_10',h:'linger longer.',n:'edge walker',d:'survive cb_menu 10 minutes.',c:function(){return cbMenuLive()>=600000}},
@@ -2003,7 +2024,16 @@ var ACH=[
 {id:'vandal',h:'rename the credits. five times.',n:'credits adjusted',d:'rename credits 2 names five times. the void kept receipts.',c:function(){return parseInt(achKV('cube_cred2_edits')||'0',10)>=5}},
 {id:'seen_enough',h:'declare you have seen enough.',n:'director\u2019s cut',d:'hit I HAVE SEEN ENOUGH.',c:function(){return achKV('cube_cred2_seen')==='1'}},
 {id:'hard_morning',h:'finish MORNING on hard.',n:'9 to 5',d:'finish MORNING on hard mode.',c:function(){var p=achP19();return !!(p&&p.done&&p.hard===1)}},
-{id:'void_mail',h:'you have mail.',n:'return to sender',d:'read your mail. (you have mail. act 2 mail.)',c:function(){return achKV('cube_mail_read')==='1'}}
+{id:'void_mail',h:'you have mail.',n:'return to sender',d:'read your mail. (you have mail. act 2 mail.)',c:function(){return achKV('cube_mail_read')==='1'}},
+{sec:'THE GROTTO'},
+{id:'gr_lorekeeper',h:'read everything.',n:'lorekeeper',d:'read all three truth files in the grotto vault.',c:false},
+{id:'gr_gauntlet',h:'pay and sing.',n:'gauntlet run',d:'clear all 3 gates of the grotto gauntlet (toll + tune).',c:false},
+{id:'gr_warden',h:'go through the warden.',n:'warden wardened',d:'defeat the warden below the grotto.',c:false},
+{id:'gr_spare',h:'lower it.',n:'mercy, again',d:'spare obj at the heart of the grotto.',c:false},
+{id:'gr_kill',h:'pull it.',n:'the trigger',d:'kill obj at the heart of the grotto.',c:false},
+{id:'gr_noskip',h:'sit through it.',n:'unskippable',d:'watch the entire kill credits reel without skipping. (all 3:42. unlocks bgm employment.)',c:false},
+{id:'chism100',h:'???',n:'Chism',d:'speak the complicated code.',c:false},
+{id:'gr_chismfriend',h:'feed the ranch.',n:'friend of the hollow',d:'finish Chism\u2019s questline in the grotto.',c:false}
 ];
 function ngCh(){try{return ngLoad().ch||0}catch(e){return 0}}
 function ngAct2Done(){try{return localStorage.getItem('cube_act2')==='1'}catch(e){return false}}
@@ -2018,7 +2048,7 @@ function offSeenN(){try{var s=JSON.parse(localStorage.getItem('cube_office')||'{
 function offRock(){try{var s=JSON.parse(localStorage.getItem('cube_office')||'{}');return !!(s&&s.rock)}catch(e){return false}}
 function achSet(){try{var v=JSON.parse(localStorage.getItem('cube_ach')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achSave(s){try{localStorage.setItem('cube_ach',JSON.stringify(s))}catch(e){}}
-var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10},pet100:{s:10},gone_fishing:{s:10},the_big_one:{s:15},full_box:{s:20}};
+var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10},pet100:{s:10},gone_fishing:{s:10},the_big_one:{s:15},full_box:{s:20},gr_lorekeeper:{s:15},gr_gauntlet:{s:20,u:5},gr_warden:{s:25,u:10},gr_spare:{s:25},gr_kill:{s:25},gr_noskip:{s:20,u:5},chism100:{s:25,u:10},gr_chismfriend:{s:25,u:10}};
 function achPaid(){try{var v=JSON.parse(localStorage.getItem('cube_ach_paid')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achPaidSave(s){try{localStorage.setItem('cube_ach_paid',JSON.stringify(s))}catch(e){}}
 function achRwOf(id){try{if(typeof achRW!=='undefined'&&achRW[id])return achRW[id]}catch(e){}return{s:5}}
@@ -2510,6 +2540,7 @@ function starZoneCount(){var z=starZone();return z?z.n:0}
 function starZoneLoad(){try{if(!starCharts[currentZone])starCharts[currentZone]=[];starCharted=starCharts[currentZone];starSave();starBuf=null;starLineBuf=null;starLineN=0}catch(e){}}
 function starZoneTint(){try{if(currentZone==='x')return [1,0.32,0.32];if(currentZone==='end')return [0.7,0.7,0.78];if(currentZone==='geometry')return [0.06,0.06,0.1]}catch(e){}return [0.85,0.9,1]}
 var starBuf=null,starLineBuf=null,starLineN=0;
+var srcGridBuf=null;
 function starFrac(v){return v-Math.floor(v)}
 function starPos3(i){
 var seed=0,fix=null;try{var z=starZone();seed=z?z.seed:0;if(z&&z.fix)fix=z.fix}catch(e){}
@@ -3914,6 +3945,29 @@ for(var ji=0;ji<jboLines.length;ji++){
 }
 return}
 
+if(cmd==='chism100'){
+var jcr=null;try{jcr=chism100Redeem()}catch(e){}
+var jboLines2=(jcr&&jcr.already)?[
+'jbo: CHISM AGAIN??',
+'jbo: ...you know what. respect.',
+'jbo: no double rewards though. I HAVE A BUDGET.',
+'jbo: the budget is enforced by ME and I am STRICT.'
+]:[
+'jbo: ...CHISM?!',
+'jbo: THE CHISM?? IN MY REACTOR??',
+'jbo: okay. OKAY. you know the guy?!',
+'jbo: obj told me. obj said "hes got people" and i said WHAT PEOPLE.',
+'jbo: +100 upgrade points. FIVE achievements. ON THE HOUSE.',
+'jbo: do NOT tell the safety inspector.',
+'jbo: ...actually tell him. i want him to know i have CONNECTIONS.',
+'jbo: chism gets free coolant for life. TELL HIM I SAID THAT.'
+];
+reactorPrint('');
+for(var jc=0;jc<jboLines2.length;jc++){
+(function(idx){setTimeout(function(){reactorPrint(jboLines2[idx],'rgba(255,200,50,0.9)')},idx*150)})(jc);
+}
+return}
+
 reactorPrintErr('unknown command: "'+cmd+'" — type "help" for available commands');
 }
 
@@ -4873,7 +4927,7 @@ applySkillPan();
 function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active')}
 function openUpgradeTree(){skillOpen();if(!skillAllFinals()){cubeWarn('upgrade locked — buy every skill');return}panSkillToUpgrade()}
 function skillClose(){var el=document.getElementById('skillTree');if(el)el.classList.remove('active')}
-var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_jedec','cube_pwned','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_hud_min','cube_run_acc','cube_run_last','cube_dial_sp','cube_speedrun','cube_office','cube_greyhall'];
+var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_jedec','cube_pwned','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_hud_min','cube_run_acc','cube_run_last','cube_dial_sp','cube_speedrun','cube_office','cube_greyhall','cube_tbb','cube_geo'];
 var slotDefNames=['main','testing','slot 3','slot 4','slot 5'];
 function slotRead(n){try{var s=localStorage.getItem('cube_slot_'+n);if(!s)return null;var b=JSON.parse(s);if(b&&typeof b==='object')return b}catch(e){}return null}
 function slotActive(){try{var a=parseInt(localStorage.getItem('cube_active_slot')||'1',10);if(a>=1&&a<=5)return a}catch(e){}return 1}
@@ -10970,6 +11024,18 @@ function shNoliStart(){if(!shRoot||!shBgm)return;noliStart(shRoot,shBgm)}
 function shNoliStop(){noliStop()}
 function noliLyricStart(audio){noliStart(document.body,audio||null)}
 function noliLyricStop(){noliStop()}
+// EMPLOYMENT captions: same trick as noli, lux's own lyrics.
+// timestamps are v1 even-spaced across the 3:42 — lux corrects by ear.
+var EMP_LYRICS=["[instrumental]","I hate employment I hate employment","A Job is for people who are a big disappointment","I hate employment I hate employment","A Job is for people who are a big disappointment","Why Would You Work That Is So Very Lame","Working At A Job Is Very Gay","I Would Rather Stay At Home And Relax","Where I Can Go To Your Mom And Crack","When Applying For Job","The Business Will Never Call You Back","This Shit Spikes My Cortisol Very Fast","[instrumental]","I hate employment I hate employment","A Job is for people who are a big disappointment","I hate employment I hate employment","A Job is for people who are a big disappointment","I Will Never Work At A Job To Make Money, No I Will Not","Because I Can Just Scam People On A Phone Call","[instrumental]","Getting A Job Is Very Horrible","The Longs Hours They Want To Me Work Is Seriously Deplorable","Looking For Employment Brings Me Such Despair","Never Ever Get A Job It\u2019s A Such Huge Nightmare","I Would Rather Spend My Time Elsewhere","I hate employment I hate employment","A Job is for people who are a big disappointment","I hate employment I hate employment","A Job is for people who are a big disappointment","I Will Never Work At A Job To Make Money, No I Will Not","Because I Can Just Scam People On A Phone Call","[accordion solo]","Instead Of Getting A Job","I Would Rather Die","Finding A Job Is So Difficult So Why Even Try","All The Old People Say This New Generation Doesn\u2019t Want To Work","The Main Problem Is Nobody\u2019s Wants To Hire","I\u2019m About To Go Berserk","If You Ever Tell Me To Go And Work","I\u2019m Going To Shoot You Like They Did To Charlie Kirk","I hate employment I hate employment","A Job is for people who are a big disappointment","I hate employment I hate employment","A Job is for people who are a big disappointment","I Will Never Work At A Job To Make Money, No I Will Not","Because I Can Just Scam People On A Phone Call","[instrumental]"];
+var EMP_TIMES=[0,7.5,11.5,15.5,19.5,22.5,26.5,28.5,32,35,39,43,48,57.5,61.5,65.5,69.5,73.5,75.5,78.5,91.5,97.5,103.5,109.5,115.5,120.5,122.5,125.5,129.5,132.5,134.5,136.5,167.5,171.5,174.5,176.5,180.5,183.5,185.5,189.5,194.5,197.5,201.5,205.5,208.5,210.5,212.5];
+var empIv=null,empLi=-1,empEl=null,empAudio=null;
+function empBoomCss(){if(document.getElementById('empBoomCss'))return;var st=document.createElement('style');st.id='empBoomCss';st.textContent='@keyframes empboom{0%{transform:scale(2.4);opacity:0}55%{transform:scale(.92);opacity:1}100%{transform:scale(1);opacity:1}}';document.head.appendChild(st)}
+function empRender(line){if(!empEl)return;var marker=line.charAt(0)==='[';empEl.style.color=marker?'#5f7d99':'#ffe9a8';while(empEl.firstChild)empEl.removeChild(empEl.firstChild);var words=line.split(' ');for(var w=0;w<words.length;w++){if(w>0)empEl.appendChild(document.createTextNode(' '));var ws=document.createElement('span');ws.style.cssText='display:inline-block;white-space:nowrap';var wd=words[w];for(var i=0;i<wd.length;i++){var s=document.createElement('span');s.textContent=wd.charAt(i);s.style.cssText='display:inline-block;animation:empboom .45s cubic-bezier(.2,1.6,.4,1) both;animation-delay:'+((w*8+i)*0.028).toFixed(2)+'s';ws.appendChild(s)}empEl.appendChild(ws)}}
+function empTick(){if(!empEl)return;var t=0;try{t=(empAudio&&empAudio.currentTime)||0}catch(e){}var idx=0;for(var i=0;i<EMP_TIMES.length;i++){if(EMP_TIMES[i]<=t)idx=i}if(idx!==empLi){empLi=idx;empRender(EMP_LYRICS[idx])}}
+function empStart(parent,audio){empStop();if(!parent)return;noliWaveCss();empBoomCss();empAudio=audio||null;empLi=-1;empEl=document.createElement('div');var fixed=(parent===document.body);empEl.style.cssText='position:'+(fixed?'fixed':'absolute')+';left:50%;transform:translateX(-50%);top:68%;max-width:92vw;font:26px Consolas,monospace;text-align:center;opacity:.95;letter-spacing:2px;text-shadow:0 2px 10px #000,0 0 26px rgba(0,0,0,.9);z-index:'+(fixed?'90000':'5')+';pointer-events:none;line-height:1.6';parent.appendChild(empEl);empTick();empIv=setInterval(empTick,1000)}
+function empStop(){if(empIv){clearInterval(empIv);empIv=null}if(empEl&&empEl.parentNode){empEl.parentNode.removeChild(empEl)}empEl=null;empAudio=null}
+function empLyricStart(audio){empStart(document.body,audio||null)}
+function empLyricStop(){empStop()}
 function noliUnlocked(){try{return localStorage.getItem('cube_noli_full')==='1'}catch(e){return false}}var shift={ch:1,slips:0};
 var shRoot=null,$shStage=null,$shDlg=null,$shSpk=null,$shTxt=null,$shSub=null,$shHud=null,shSkipB=null;
 var shMode='menu',shTimers=[],shDlgS=null,shBeatPress=null,shCur=0,shBgm=null,shBgmMuted=false,shWasBgm=false,shBgmPlayIdx=0,shBgmPlayList=['vestige.mp3','coffee.mp3'],shBgmSrc=null;

@@ -9,7 +9,7 @@ window.ghLoaded=true;
 var ghActive=false;
 var ghRoom='landing';
 var ghHp=100,ghMaxHp=100;
-var ghAmmo={pistol:0,magnum:0};
+var ghAmmo={pistol:0,magnum:0,smg:0};
 var ghGuns=[];
 var ghGun='pistol';
 var ghMossOpen=false;
@@ -34,8 +34,8 @@ if(talking)r.classList.add('talking');else r.classList.remove('talking');
 }catch(e){}
 }
 function ghSave(){try{return JSON.parse(localStorage.getItem('cube_greyhall')||'{}')}catch(e){return{}}}
-function ghLoad(){try{var s=ghSave();if(typeof s.hp==='number')ghHp=s.hp;if(s.ammo)ghAmmo=s.ammo;if(s.guns)ghGuns=s.guns;if(s.inv)ghInv=s.inv;if(s.cards)ghCards=s.cards;if(typeof s.deaths==='number')ghDeaths=s.deaths;if(s.diff)ghDiff=s.diff;if(s.station)ghStation=s.station;if(s.gun)ghGun=s.gun;if(s.moss)ghMossOpen=true;if(s.plate1)ghPlate1=true}catch(e){}}
-function ghPersist(){try{localStorage.setItem('cube_greyhall',JSON.stringify({hp:ghHp,ammo:ghAmmo,guns:ghGuns,gun:ghGun,inv:ghInv,cards:ghCards,deaths:ghDeaths,diff:ghDiff,station:ghStation,moss:ghMossOpen?1:0,plate1:ghPlate1?1:0}))}catch(e){}}
+function ghLoad(){try{var s=ghSave();if(typeof s.hp==='number')ghHp=s.hp;if(s.ammo)ghAmmo=s.ammo;if(s.guns)ghGuns=s.guns;if(s.inv)ghInv=s.inv;if(s.cards)ghCards=s.cards;if(typeof s.deaths==='number')ghDeaths=s.deaths;if(s.diff)ghDiff=s.diff;if(s.station)ghStation=s.station;if(s.gun)ghGun=s.gun;if(s.moss)ghMossOpen=true;if(s.plate1)ghPlate1=true;if(s.rust)ghRustOpen=true;if(s.ammo&&typeof s.ammo.smg!=='number')ghAmmo.smg=0}catch(e){}}
+function ghPersist(){try{localStorage.setItem('cube_greyhall',JSON.stringify({hp:ghHp,ammo:ghAmmo,guns:ghGuns,gun:ghGun,inv:ghInv,cards:ghCards,deaths:ghDeaths,diff:ghDiff,station:ghStation,moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0}))}catch(e){}}
 function ghHas(id){return ghInv.indexOf(id)!==-1}
 function ghInvFree(){return ghInv.length<9}
 
@@ -452,7 +452,7 @@ while(stash.firstChild)document.body.insertBefore(stash.firstChild,keep);
 }
 window.ghEnter=ghEnter;
 window.ghExit=ghExit;
-window.ghDbg=function(){try{return {x:Math.round(ghP.x*10)/10,z:Math.round(ghP.z*10)/10,hp:ghHp,ammo:ghAmmo.pistol,guns:ghGuns.slice(),inv:ghInv.slice(),cards:ghCards.slice(),lumber:ghLumber.hp,lumberAlive:ghLumber.alive,mode3d:ghMode3d,gl:!!ghGL,deaths:ghDeaths}}catch(e){return {err:String(e)}}};
+window.ghDbg=function(){try{return {x:Math.round(ghP.x*10)/10,z:Math.round(ghP.z*10)/10,hp:ghHp,ammo:ghAmmo.pistol,smg:ghAmmo.smg,magnum:ghAmmo.magnum,guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),lumber:ghLumber.hp,lumberAlive:ghLumber.alive,lumber3:ghLumber3.hp,l3alive:ghLumber3.alive,l3x:Math.round(ghLumber3.x*10)/10,l3z:Math.round(ghLumber3.z*10)/10,rust:ghRustOpen,skAlive:(function(){var n=0;for(var i=0;i<ghSkitters.length;i++)if(ghSkitters[i].alive)n++;return n})(),mode3d:ghMode3d,gl:!!ghGL,deaths:ghDeaths}}catch(e){return {err:String(e)}}};
 window.ghDbg2=function(){try{return {frame:ghFrame,keysW:!!ghKeys['w'],keysSp:!!ghKeys[' ']}}catch(e){return {err:String(e)}}};
 window.ghAim=function(v){try{ghAiming=!!v;return ghAiming}catch(e){return false}};
 window.ghDbg3=function(){try{return {y:Math.round((ghP.y||0)*100)/100,cam:[Math.round(ghCamPos[0]*10)/10,Math.round(ghCamPos[2]*10)/10],prompt:document.getElementById('ghPrompt').textContent,narr:document.getElementById('ghNarrText').textContent}}catch(e){return {err:String(e)}}};
@@ -644,7 +644,12 @@ rects:[
 {x0:58,z0:0,x1:68,z1:6},
 {x0:68,z0:0,x1:78,z1:6},
 {x0:78,z0:0,x1:86,z1:6},
-{x0:68,z0:6,x1:78,z1:11}
+{x0:68,z0:6,x1:78,z1:11},
+// ── RUST (phase 3) ──
+{x0:86,z0:2,x1:92,z1:4},
+{x0:92,z0:0,x1:102,z1:6},
+{x0:102,z0:0,x1:112,z1:6},
+{x0:92,z0:6,x1:102,z1:11}
 ],
 walls:[
 [5,-0.3,10.6,0.6],[5,6.3,10.6,0.6],[-0.3,3,0.6,6.6],
@@ -669,11 +674,27 @@ walls:[
 [82,-0.3,8.6,0.6],[82,6.3,8.6,0.6],[86.3,3,0.6,6.6],
 [73,11.3,10.6,0.6],[67.7,8.5,0.6,5.6],[78.3,8.5,0.6,5.6],
 // moss gate (plate1 opens; zeroed at runtime)
-[72.5,6.3,3.4,0.6]
+[72.5,6.3,3.4,0.6],
+// ── RUST (phase 3) ──
+[89,1.7,6.6,0.6],[89,4.3,6.6,0.6],
+[97,-0.3,10.6,0.6],
+[93.5,6.3,3.6,0.6],[100,6.3,4.6,0.6],
+[91.7,1,0.6,2],[91.7,5,0.6,2],
+[101.7,1,0.6,2],[101.7,5,0.6,2],
+[107,-0.3,10.6,0.6],[107,6.3,10.6,0.6],[112.3,3,0.6,6.6],
+[91.7,8.5,0.6,5.6],[102.3,8.5,0.6,5.6],[97,11.3,10.6,0.6]
 ],
-floorC:[0.16,0.16,0.19],wallC:[0.75,0.75,0.78],chalkC:[0.85,0.85,0.88],mossC:[0.45,0.62,0.4]
+floorC:[0.16,0.16,0.19],wallC:[0.75,0.75,0.78],chalkC:[0.85,0.85,0.88],mossC:[0.45,0.62,0.4],rustC:[0.55,0.35,0.22],rustWallC:[0.72,0.5,0.35]
 };
 var ghDarkRect={x0:78,z0:0,x1:86,z1:6};
+// rect zones: 0-5 chalk, 6-10 moss, 11+ rust
+function ghZoneOf(i){return i<=5?0:(i<=10?1:2)}
+function ghOpenRust(){
+ghRustOpen=true;ghPersist();
+for(var j=0;j<ghLevel.walls.length;j++){var W=ghLevel.walls[j];
+if(Math.abs(W[0]-86.3)<0.01&&Math.abs(W[1]-3)<0.01){W[2]=0;W[3]=0}}
+}
+var ghRustOpen=false;
 function ghOpenSeal(){
 ghMossOpen=true;ghPersist();
 for(var j=0;j<ghLevel.walls.length;j++){var W=ghLevel.walls[j];
@@ -687,6 +708,7 @@ if(Math.abs(W[0]-72.5)<0.01&&Math.abs(W[1]-6.3)<0.01){W[2]=0;W[3]=0}}
 function ghApplyOpened(){
 if(ghMossOpen)for(var a=0;a<ghLevel.walls.length;a++){var A=ghLevel.walls[a];if(Math.abs(A[0]-52.3)<0.01&&Math.abs(A[1]-3)<0.01){A[2]=0;A[3]=0}}
 if(ghPlate1)for(var b=0;b<ghLevel.walls.length;b++){var B=ghLevel.walls[b];if(Math.abs(B[0]-72.5)<0.01&&Math.abs(B[1]-6.3)<0.01){B[2]=0;B[3]=0}}
+if(ghRustOpen)for(var c=0;c<ghLevel.walls.length;c++){var C=ghLevel.walls[c];if(Math.abs(C[0]-86.3)<0.01&&Math.abs(C[1]-3)<0.01){C[2]=0;C[3]=0}}
 }
 function ghWalkOK(x,z,r){
 for(var i=0;i<ghLevel.rects.length;i++){var R=ghLevel.rects[i];
@@ -732,7 +754,8 @@ function ghDrawWorld(){var gl=ghGL;if(!gl)return;
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 // floors
 for(var i=0;i<ghLevel.rects.length;i++){var R=ghLevel.rects[i];
-var fc=i===0?ghLevel.floorC:((i>=7)?ghLevel.mossC:ghLevel.chalkC);
+var zn=ghZoneOf(i);
+var fc=i===0?ghLevel.floorC:(zn===1?ghLevel.mossC:(zn===2?ghLevel.rustC:ghLevel.chalkC));
 var ft=i===0?ghTexFloorD:ghTexTile;
 ghBox((R.x0+R.x1)/2,-0.25,(R.z0+R.z1)/2,R.x1-R.x0,0.5,R.z1-R.z0,fc,0,ft,Math.max(R.x1-R.x0,R.z1-R.z0)/2)}
 // ceilings (roof slabs, one per room)
@@ -740,7 +763,8 @@ for(var ci=0;ci<ghLevel.rects.length;ci++){var CR=ghLevel.rects[ci];
 ghBox((CR.x0+CR.x1)/2,3.3,(CR.z0+CR.z1)/2,CR.x1-CR.x0,0.5,CR.z1-CR.z0,[0.1,0.1,0.13],0,ghTexDark,4)}
 // walls
 for(var j=0;j<ghLevel.walls.length;j++){var W=ghLevel.walls[j];
-ghBox(W[0],1.5,W[1],W[2],3,W[3],ghLevel.wallC,0,ghTexPanel,Math.max(W[2],W[3])/2)}
+var wc=W[0]>87?ghLevel.rustWallC:ghLevel.wallC;
+ghBox(W[0],1.5,W[1],W[2],3,W[3],wc,0,ghTexPanel,Math.max(W[2],W[3])/2)}
 // player: legs, torso, arms, head, visor, gun. bobs when moving.
 var px=ghP.x,pz=ghP.z;
 var dx=Math.sin(ghP.yaw),dz=Math.cos(ghP.yaw);
@@ -748,29 +772,66 @@ var px2=-dz,pz2=dx;
 var moving=(ghKeys['w']||ghKeys['s']||ghKeys['a']||ghKeys['d']||ghKeys['arrowup']||ghKeys['arrowdown']||ghKeys['arrowleft']||ghKeys['arrowright'])?1:0;
 var bob=(moving?Math.sin(Date.now()/90)*0.06:0)+(ghP.y||0);
 var sw=moving?Math.sin(Date.now()/90)*0.12:0;
-// legs
-ghBox(px+px2*0.18,0.25+bob*0.5+sw*0.3,pz+pz2*0.18,0.22,0.5,0.22,[0.25,0.3,0.4],ghP.yaw,ghTexArmor,1);
-ghBox(px-px2*0.18,0.25+bob*0.5-sw*0.3,pz-pz2*0.18,0.22,0.5,0.22,[0.25,0.3,0.4],ghP.yaw,ghTexArmor,1);
+// player: legs, torso, arms, head, visor, gun. walk cycle, jump tuck, land dip.
+var px=ghP.x,pz=ghP.z;
+var dx=Math.sin(ghP.yaw),dz=Math.cos(ghP.yaw);
+var px2=-dz,pz2=dx;
+var moving=(ghKeys['w']||ghKeys['s']||ghKeys['a']||ghKeys['d']||ghKeys['arrowup']||ghKeys['arrowdown']||ghKeys['arrowleft']||ghKeys['arrowright'])?1:0;
+var air=ghP.y||0;
+var tuck=Math.min(1,air/0.75);
+var vyAir=0;try{vyAir=ghP.vy||0}catch(e){}
+var lean=vyAir>0?Math.min(0.16,vyAir*0.035):(vyAir<0?Math.max(-0.06,vyAir*0.012):0);
+var landDip=0;try{if(ghLandT&&Date.now()-ghLandT<180)landDip=(1-(Date.now()-ghLandT)/180)*0.13}catch(e){}
+var bob=(moving?Math.sin(Date.now()/90)*0.06:0)+air;
+var bobU=bob-landDip;
+var sw=moving?Math.sin(Date.now()/90)*0.12:0;
+var lx=dx*lean,lz=dz*lean;
+// legs (shorten + lift as knees bend)
+var legH=0.5-0.2*tuck,legY=0.25+bob*0.5+tuck*0.28;
+ghBox(px+px2*0.18,legY+sw*0.3,pz+pz2*0.18,0.22,legH,0.22,[0.25,0.3,0.4],ghP.yaw,ghTexArmor,1);
+ghBox(px-px2*0.18,legY-sw*0.3,pz-pz2*0.18,0.22,legH,0.22,[0.25,0.3,0.4],ghP.yaw,ghTexArmor,1);
+// knee pads
+ghBox(px+px2*0.18+dx*0.13,legY-0.02+sw*0.3,pz+pz2*0.18+dz*0.13,0.24,0.16,0.1,[0.55,0.7,0.9],ghP.yaw,ghTexArmor,1);
+ghBox(px-px2*0.18+dx*0.13,legY-0.02-sw*0.3,pz-pz2*0.18+dz*0.13,0.24,0.16,0.1,[0.55,0.7,0.9],ghP.yaw,ghTexArmor,1);
+// boots (rise WITH the body, tuck back when airborne)
+var bootY=0.08+air+tuck*0.32;
+var bootBx=px-dx*tuck*0.15,bootBz=pz-dz*tuck*0.15;
+ghBox(bootBx+px2*0.18,bootY+sw*0.2,bootBz+pz2*0.18,0.26,0.16,0.34,[0.15,0.15,0.18],ghP.yaw,ghTexDark,1);
+ghBox(bootBx-px2*0.18,bootY-sw*0.2,bootBz-pz2*0.18,0.26,0.16,0.34,[0.15,0.15,0.18],ghP.yaw,ghTexDark,1);
+// belt
+ghBox(px+lx,0.62+bobU,pz+lz,0.72,0.12,0.47,[0.12,0.12,0.15],ghP.yaw,ghTexDark,1);
 // torso
-ghBox(px,0.85+bob,pz,0.7,0.9,0.45,[0.35,0.5,0.7],ghP.yaw,ghTexArmor,1);
-// chest plate
-ghBox(px+dx*0.2,0.9+bob,pz+dz*0.2,0.4,0.5,0.1,[0.5,0.65,0.85],ghP.yaw,ghTexArmor,1);
-// backpack
-ghBox(px-dx*0.35,0.95+bob,pz-dz*0.35,0.4,0.6,0.25,[0.28,0.36,0.5],ghP.yaw,ghTexArmor,1);
+ghBox(px+lx,0.85+bobU,pz+lz,0.7,0.9,0.45,[0.35,0.5,0.7],ghP.yaw,ghTexArmor,1);
+// chest plate + status light
+ghBox(px+dx*0.2+lx,0.9+bobU,pz+dz*0.2+lz,0.4,0.5,0.1,[0.5,0.65,0.85],ghP.yaw,ghTexArmor,1);
+var blink=((Date.now()/500)%2<1);
+ghBox(px+dx*0.26+lx,1.05+bobU,pz+dz*0.26+lz,0.1,0.08,0.06,blink?[0.2,1,0.4]:[0.1,0.4,0.2],ghP.yaw,ghTexPlain,1);
+// backpack + antenna
+ghBox(px-dx*0.35+lx,0.95+bobU,pz-dz*0.35+lz,0.4,0.6,0.25,[0.28,0.36,0.5],ghP.yaw,ghTexArmor,1);
+ghBox(px-dx*0.42+lx+px2*0.12,1.45+bobU,pz-dz*0.42+lz+pz2*0.12,0.05,0.5,0.05,[0.2,0.2,0.25],ghP.yaw,ghTexDark,1);
+ghBox(px-dx*0.42+lx+px2*0.12,1.72+bobU,pz-dz*0.42+lz+pz2*0.12,0.09,0.09,0.09,blink?[1,0.25,0.2]:[0.35,0.08,0.08],ghP.yaw,ghTexPlain,1);
 // shoulder pads
-ghBox(px+px2*0.48,1.25+bob,pz+pz2*0.48,0.28,0.2,0.28,[0.55,0.7,0.9],ghP.yaw,ghTexArmor,1);
-ghBox(px-px2*0.48,1.25+bob,pz-pz2*0.48,0.28,0.2,0.28,[0.55,0.7,0.9],ghP.yaw,ghTexArmor,1);
-// boots
-ghBox(px+px2*0.18,0.08,pz+pz2*0.18,0.26,0.16,0.3,[0.15,0.15,0.18],ghP.yaw,ghTexDark,1);
-ghBox(px-px2*0.18,0.08,pz-pz2*0.18,0.26,0.16,0.3,[0.15,0.15,0.18],ghP.yaw,ghTexDark,1);
-// arms
-ghBox(px+px2*0.48,0.85+bob-sw*0.4,pz+pz2*0.48,0.2,0.7,0.2,[0.3,0.42,0.6],ghP.yaw,ghTexArmor,1);
-ghBox(px-px2*0.48,0.85+bob+sw*0.4,pz-pz2*0.48,0.2,0.7,0.2,[0.3,0.42,0.6],ghP.yaw,ghTexArmor,1);
-// head + visor
-ghBox(px+dx*0.05,1.62+bob,pz+dz*0.05,0.42,0.4,0.42,[0.8,0.75,0.65],ghP.yaw,ghTexPlain,1);
-ghBox(px+dx*0.26,1.64+bob,pz+dz*0.26,0.28,0.1,0.08,[0.2,0.9,1],ghP.yaw,ghTexDark,1);
-// gun
-ghBox(px+dx*0.55-px2*0.3,0.95+bob,pz+dz*0.55-pz2*0.3,0.55,0.14,0.14,[0.18,0.18,0.22],ghP.yaw,ghTexDark,1);
+ghBox(px+px2*0.48,1.25+bobU,pz+pz2*0.48,0.28,0.2,0.28,[0.55,0.7,0.9],ghP.yaw,ghTexArmor,1);
+ghBox(px-px2*0.48,1.25+bobU,pz-pz2*0.48,0.28,0.2,0.28,[0.55,0.7,0.9],ghP.yaw,ghTexArmor,1);
+// arms (rise when airborne) + gloves
+var armSpread=0.48+tuck*0.12,armY=0.85+bobU+tuck*0.28;
+ghBox(px+px2*armSpread+lx,armY-sw*0.4,pz+pz2*armSpread+lz,0.2,0.7,0.2,[0.3,0.42,0.6],ghP.yaw,ghTexArmor,1);
+ghBox(px-px2*armSpread+lx,armY+sw*0.4,pz-pz2*armSpread+lz,0.2,0.7,0.2,[0.3,0.42,0.6],ghP.yaw,ghTexArmor,1);
+ghBox(px+px2*armSpread+lx,armY-0.4-sw*0.4,pz+pz2*armSpread+lz,0.22,0.14,0.22,[0.16,0.16,0.2],ghP.yaw,ghTexDark,1);
+ghBox(px-px2*armSpread+lx,armY-0.4+sw*0.4,pz-pz2*armSpread+lz,0.22,0.14,0.22,[0.16,0.16,0.2],ghP.yaw,ghTexDark,1);
+// head + helmet + visor
+ghBox(px+dx*0.05+lx,1.62+bobU,pz+dz*0.05+lz,0.42,0.4,0.42,[0.8,0.75,0.65],ghP.yaw,ghTexPlain,1);
+ghBox(px+dx*0.05+lx,1.86+bobU,pz+dz*0.05+lz,0.46,0.12,0.46,[0.3,0.42,0.6],ghP.yaw,ghTexArmor,1);
+ghBox(px+dx*0.26+lx,1.64+bobU,pz+dz*0.26+lz,0.28,0.1,0.08,[0.2,0.9,1],ghP.yaw,ghTexDark,1);
+// gun (per-weapon mesh)
+if(ghGun==='smg'){
+ghBox(px+dx*0.6-px2*0.3+lx,0.95+bobU,pz+dz*0.6-pz2*0.3+lz,0.8,0.13,0.13,[0.2,0.2,0.24],ghP.yaw,ghTexDark,1);
+ghBox(px+dx*0.45-px2*0.3+lx,0.83+bobU,pz+dz*0.45-pz2*0.3+lz,0.12,0.24,0.12,[0.35,0.25,0.12],ghP.yaw,ghTexDark,1);
+}else if(ghGun==='magnum'){
+ghBox(px+dx*0.6-px2*0.3+lx,0.95+bobU,pz+dz*0.6-pz2*0.3+lz,0.7,0.18,0.18,[0.25,0.18,0.12],ghP.yaw,ghTexDark,1);
+}else{
+ghBox(px+dx*0.55-px2*0.3+lx,0.95+bobU,pz+dz*0.55-pz2*0.3+lz,0.55,0.14,0.14,[0.18,0.18,0.22],ghP.yaw,ghTexDark,1);
+}
 }
 var ghOnTitle=true;
 function ghDrawTitle(){
@@ -850,17 +911,28 @@ ghThings=[
 {id:'magammo',x:74,z:4,c:[0.9,0.6,0.2],s:0.5,taken:false},
 {id:'station2',x:70,z:9,c:[0.2,0.6,0.9],s:1.0,taken:false,prop:true},
 {id:'medkit2',x:76,z:9,c:[0.9,0.25,0.25],s:0.5,taken:false},
-{id:'greenkey',x:82,z:3,c:[0.4,1,0.4],s:0.4,taken:false,hidden:true}
+{id:'greenkey',x:82,z:3,c:[0.4,1,0.4],s:0.4,taken:false,hidden:true},
+// ── RUST (phase 3) ──
+{id:'rustseal',x:84.5,z:3,c:[0.8,0.4,0.2],s:1.2,taken:false,prop:true},
+{id:'floppy3',x:94,z:1,c:[0.9,0.7,0.2],s:0.5,taken:false},
+{id:'smg',x:97,z:2,c:[0.6,0.4,0.2],s:0.6,taken:false},
+{id:'smgammo',x:108,z:4,c:[0.9,0.7,0.3],s:0.5,taken:false},
+{id:'medkit3',x:109,z:1,c:[0.9,0.25,0.25],s:0.5,taken:false},
+{id:'station3',x:97,z:9,c:[0.9,0.5,0.2],s:1.0,taken:false,prop:true}
 ];
 }
 var ghSkitters=[
 {x:64,z:4,hp:2,alive:true,cd:0,wob:0},
 {x:70,z:1,hp:2,alive:false,cd:0,wob:2},
-{x:76,z:5,hp:2,alive:false,cd:0,wob:4}
+{x:76,z:5,hp:2,alive:false,cd:0,wob:4},
+// ── RUST (phase 3, wake on SMG pickup) ──
+{x:97,z:5,hp:3,alive:false,cd:0,wob:6},
+{x:105,z:1,hp:3,alive:false,cd:0,wob:8}
 ];
-var ghLumber2={x:73,z:8,hp:6,alive:true,cd:0};
+var ghLumber2={x:73,z:8,hp:6,alive:true,cd:0,sw:2};
+var ghLumber3={x:99,z:4,hp:10,alive:true,cd:0,sw:4};
 var ghLumber={x:45,z:3,hp:6,alive:true,cd:0};
-var ghPrevF=false,ghPrevSp=false,ghPrevJ=false,ghPrev1=false,ghPrev2=false,ghFrame=0;
+var ghPrevF=false,ghPrevSp=false,ghPrevJ=false,ghPrev1=false,ghPrev2=false,ghFrame=0,ghLandT=0;
 function ghDrawThingsReal(){
 var t=(Date.now()/1000);
 for(var i=0;i<ghThings.length;i++){var th=ghThings[i];
@@ -871,24 +943,36 @@ if(th.id==='whitekey'&&!ghRunFlags.lumberDead)continue;
 var bob=th.prop?0:Math.sin(t*3+i)*0.15;
 ghBox(th.x,0.6+bob,th.z,th.s,th.s,th.s,th.c,t*0.8,ghTexPlain,1);
 }
-// lumber: torso, head, jaw, arms, red eyes. sways.
-if(ghLumber.alive){
-var sway=Math.sin(Date.now()/500)*0.08;ghBox(ghLumber.x,1.1,ghLumber.z,1.2,2.0,1.1,[0.15,0.15,0.18],sway,ghTexDark,1);
-ghBox(ghLumber.x,2.3,ghLumber.z,0.8,0.6,0.8,[0.12,0.12,0.15],sway,ghTexDark,1);
-ghBox(ghLumber.x,1.95,ghLumber.z+0.45,0.6,0.2,0.15,[0.2,0.2,0.24],0,ghTexDark,1);
-ghBox(ghLumber.x,2.35,ghLumber.z+0.42,0.14,0.12,0.1,[0.9,0.1,0.1],0,ghTexPlain,1);
-ghBox(ghLumber.x,2.35,ghLumber.z-0.42,0.14,0.12,0.1,[0.9,0.1,0.1],0,ghTexPlain,1);
-ghBox(ghLumber.x+0.85,1.0,ghLumber.z,0.4,1.4,0.4,[0.13,0.13,0.16],sway,ghTexDark,1);
-ghBox(ghLumber.x-0.85,1.0,ghLumber.z,0.4,1.4,0.4,[0.13,0.13,0.16],-sway,ghTexDark,1);
+// lumber: stubby legs, torso, head, jaw, arms + claws, teeth, spikes, core. sways.
+function ghDrawLumber(o,tint,eye){
+if(!o.alive)return;
+var sway=Math.sin(Date.now()/500+(o.sw||0))*0.08;
+var Lx=o.x,Lz=o.z;
+// legs
+ghBox(Lx-0.35,0.3,Lz,0.4,0.6,0.4,tint,sway,ghTexDark,1);
+ghBox(Lx+0.35,0.3,Lz,0.4,0.6,0.4,tint,-sway,ghTexDark,1);
+// torso + head + jaw
+ghBox(Lx,1.1,Lz,1.2,2.0,1.1,tint,sway,ghTexDark,1);
+ghBox(Lx,2.3,Lz,0.8,0.6,0.8,tint,sway,ghTexDark,1);
+ghBox(Lx,1.95,Lz+0.45,0.6,0.2,0.15,[0.2,0.2,0.24],0,ghTexDark,1);
+// eyes
+ghBox(Lx,2.35,Lz+0.42,0.14,0.12,0.1,eye,0,ghTexPlain,1);
+ghBox(Lx,2.35,Lz-0.42,0.14,0.12,0.1,eye,0,ghTexPlain,1);
+// arms + claws
+ghBox(Lx+0.85,1.0,Lz,0.4,1.4,0.4,tint,sway,ghTexDark,1);
+ghBox(Lx-0.85,1.0,Lz,0.4,1.4,0.4,tint,-sway,ghTexDark,1);
+ghBox(Lx+0.85,0.25,Lz+0.3,0.22,0.3,0.22,[0.7,0.68,0.6],sway,ghTexPlain,1);
+ghBox(Lx-0.85,0.25,Lz+0.3,0.22,0.3,0.22,[0.7,0.68,0.6],-sway,ghTexPlain,1);
 // teeth
-ghBox(ghLumber.x,1.82,ghLumber.z+0.5,0.5,0.12,0.08,[0.85,0.83,0.75],0,ghTexPlain,1);
+ghBox(Lx,1.82,Lz+0.5,0.5,0.12,0.08,[0.85,0.83,0.75],0,ghTexPlain,1);
 // back spikes
-ghBox(ghLumber.x,2.2,ghLumber.z-0.6,0.25,0.5,0.25,[0.1,0.1,0.12],0,ghTexDark,1);
-ghBox(ghLumber.x,1.5,ghLumber.z-0.62,0.25,0.5,0.25,[0.1,0.1,0.12],0,ghTexDark,1);
+ghBox(Lx,2.2,Lz-0.6,0.25,0.5,0.25,[0.1,0.1,0.12],0,ghTexDark,1);
+ghBox(Lx,1.5,Lz-0.62,0.25,0.5,0.25,[0.1,0.1,0.12],0,ghTexDark,1);
 // glowing core (weak point, allegedly)
-ghBox(ghLumber.x,1.1,ghLumber.z+0.58,0.3,0.3,0.06,[1,0.45,0.1],0,ghTexPlain,1);
+ghBox(Lx,1.1,Lz+0.58,0.3,0.3,0.06,[1,0.45,0.1],0,ghTexPlain,1);
 }
-// skitters: small fast boxes, yellow eyes
+if(ghLumber.alive)ghDrawLumber(ghLumber,[0.15,0.15,0.18],[0.9,0.1,0.1]);
+// skitters: small fast boxes, legs, mandibles, yellow eyes
 for(var ski=0;ski<ghSkitters.length;ski++){var sk=ghSkitters[ski];
 if(!sk.alive)continue;
 var wob=Math.sin(Date.now()/200+sk.wob)*0.15;
@@ -896,15 +980,22 @@ ghBox(sk.x,0.35,sk.z,0.7,0.5,0.9,[0.3,0.28,0.2],wob,ghTexDark,1);
 ghBox(sk.x,0.7,sk.z,0.4,0.25,0.4,[0.35,0.32,0.22],wob,ghTexDark,1);
 ghBox(sk.x,0.72,sk.z+0.22,0.1,0.08,0.06,[1,0.85,0.1],0,ghTexPlain,1);
 ghBox(sk.x,0.72,sk.z-0.22,0.1,0.08,0.06,[1,0.85,0.1],0,ghTexPlain,1);
+// legs (alternate lift)
+var t2=Date.now()/1000;
+var lft=Math.max(0,Math.sin(t2*18+sk.wob))*0.14;
+var lft2=Math.max(0,Math.sin(t2*18+sk.wob+Math.PI))*0.14;
+ghBox(sk.x+0.35,0.15+lft,sk.z+0.28,0.12,0.3,0.12,[0.25,0.22,0.15],0,ghTexDark,1);
+ghBox(sk.x-0.35,0.15+lft2,sk.z+0.28,0.12,0.3,0.12,[0.25,0.22,0.15],0,ghTexDark,1);
+ghBox(sk.x+0.35,0.15+lft2,sk.z-0.28,0.12,0.3,0.12,[0.25,0.22,0.15],0,ghTexDark,1);
+ghBox(sk.x-0.35,0.15+lft,sk.z-0.28,0.12,0.3,0.12,[0.25,0.22,0.15],0,ghTexDark,1);
+// mandibles
+ghBox(sk.x+0.15,0.3,sk.z+0.48,0.08,0.12,0.14,[0.4,0.36,0.25],0,ghTexDark,1);
+ghBox(sk.x-0.15,0.3,sk.z+0.48,0.08,0.12,0.14,[0.4,0.36,0.25],0,ghTexDark,1);
 }
 // lumber 2 (moss warden)
-if(ghLumber2.alive){
-var sw2=Math.sin(Date.now()/500+2)*0.08;
-ghBox(ghLumber2.x,1.1,ghLumber2.z,1.2,2.0,1.1,[0.18,0.14,0.14],sw2,ghTexDark,1);
-ghBox(ghLumber2.x,2.3,ghLumber2.z,0.8,0.6,0.8,[0.14,0.12,0.12],sw2,ghTexDark,1);
-ghBox(ghLumber2.x,2.35,ghLumber2.z+0.42,0.14,0.12,0.1,[1,0.5,0.1],0,ghTexPlain,1);
-ghBox(ghLumber2.x,2.35,ghLumber2.z-0.42,0.14,0.12,0.1,[1,0.5,0.1],0,ghTexPlain,1);
-}
+if(ghLumber2.alive)ghDrawLumber(ghLumber2,[0.18,0.14,0.14],[1,0.5,0.1]);
+// lumber 3 (rust guardian)
+if(typeof ghLumber3!=='undefined'&&ghLumber3.alive)ghDrawLumber(ghLumber3,[0.24,0.13,0.08],[1,0.3,0.05]);
 }
 function ghDist(ax,az,bx,bz){var dx=ax-bx,dz=az-bz;return Math.sqrt(dx*dx+dz*dz)}
 function ghNearestInteract(){
@@ -934,6 +1025,12 @@ if(th.id==='magammo')return '[F] take magnum rounds';
 if(th.id==='medkit2')return '[F] take medkit';
 if(th.id==='greenkey')return '[F] take green keycard';
 if(th.id==='seal')return '[F] touch the moss seal';
+if(th.id==='rustseal')return '[F] touch the rust seal';
+if(th.id==='smg')return '[F] take SMG';
+if(th.id==='smgammo')return '[F] take SMG rounds';
+if(th.id==='medkit3')return '[F] take medkit';
+if(th.id==='floppy3')return '[F] take floppy';
+if(th.id==='station3')return '[F] use save station';
 return '';
 }
 function ghDoInteract(th){
@@ -952,14 +1049,14 @@ else if(th.id==='medkit2'){if(!ghInvFree()){ghSay(['inventory full.']);return}th
 else if(th.id==='station2'){
 if(ghInv.indexOf('floppy')===-1){ghSay(['the station wants a floppy.']);return}
 ghInv.splice(ghInv.indexOf('floppy'),1);
-ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,room:'moss4'};
+ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0,room:'moss4'};
 ghPersist();ghSay(['floppy inserted. remembered.']);
 }
 else if(th.id==='greenkey'){th.taken=true;ghCards.push('green');ghInv.push('greenkey');ghPersist();ghSay(['green keycard.','it opens RUST. (phase 3. rust never sleeps.)'])}
 else if(th.id==='station'){
 if(ghInv.indexOf('floppy')===-1){ghSay(['the station wants a floppy.','you have no floppy.']);return}
 ghInv.splice(ghInv.indexOf('floppy'),1);
-ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,room:'chalk_save'};
+ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0,room:'chalk_save'};
 ghPersist();ghSay(['floppy inserted. remembered.','die now, wake here.']);
 }
 else if(th.id==='seal'){
@@ -968,10 +1065,28 @@ if(!ghMossOpen){try{ghOpenSeal()}catch(e){}ghSay(['the moss seal drinks the keyc
 else ghSay(['the moss corridor. open. waiting.']);
 }else ghSay(['sealed. MOSS.','it wants a white keycard.']);
 }
+else if(th.id==='rustseal'){
+if(ghCards.indexOf('green')!==-1){
+if(!ghRustOpen){try{ghOpenRust()}catch(e){}ghSay(['the rust seal drinks the green keycard.','orange dust. heat. the smell of old engines. RUST is open.','something heavy moved in there. (it heard you. it is waiting.)'])}
+else ghSay(['the rust corridor. open. waiting. (it is still waiting.)']);
+}else ghSay(['sealed. RUST.','it wants a green keycard. (dark room. past the gate. bring the visor.)']);
+}
+else if(th.id==='smg'){th.taken=true;ghGuns.push('smg');ghGun='smg';ghAmmo.smg=(ghAmmo.smg||0)+30;ghPersist();
+if(!ghRunFlags.rustAmbush){ghRunFlags.rustAmbush=true;ghSkitters[3].alive=true;ghSkitters[4].alive=true}
+ghSay(['SMG. 30 rounds. bullet hose. subtle as a brick.','...scratching. behind the pipes. (rust ambush. classic, but orange.)'])}
+else if(th.id==='smgammo'){th.taken=true;ghRunFlags.smgammo=true;ghAmmo.smg=(ghAmmo.smg||0)+18;ghPersist();ghSay(['+18 SMG rounds.','spend them all in one hallway. (you will.)'])}
+else if(th.id==='medkit3'){if(!ghInvFree()){ghSay(['inventory full.']);return}th.taken=true;ghRunFlags.medkit3=true;ghInv.push('medkit');ghPersist();ghSay(['medkit. +50. (H. rust hurts. be ready.)'])}
+else if(th.id==='floppy3'){if(!ghInvFree()){ghSay(['inventory full. 9 slots.']);return}th.taken=true;ghInv.push('floppy');ghPersist();ghSay(['the man took the floppy.','save stations eat these. (the orange one is hungry.)'])}
+else if(th.id==='station3'){
+if(ghInv.indexOf('floppy')===-1){ghSay(['the station wants a floppy.']);return}
+ghInv.splice(ghInv.indexOf('floppy'),1);
+ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0,room:'rust_up'};
+ghPersist();ghSay(['floppy inserted. remembered.','die now, wake orange.']);
+}
 }
 function ghShoot(){
 var now=0;try{now=Date.now()}catch(e){}
-var cd=ghGun==='magnum'?(ghAiming?600:800):(ghAiming?400:280);
+var cd=ghGun==='smg'?(ghAiming?320:170):ghGun==='magnum'?(ghAiming?600:800):(ghAiming?400:280);
 if(now<ghShootCd)return;
 ghShootCd=now+cd;
 if(ghGuns.indexOf(ghGun)===-1){ghSay(['no gun. (come back armed.)']);return}
@@ -979,7 +1094,7 @@ if((ghAmmo[ghGun]||0)<=0){ghSay(['click. no rounds.']);return}
 var dx=Math.sin(ghP.yaw),dz=Math.cos(ghP.yaw);
 // nearest hittable enemy in cone
 var best=null,bd=14;
-var foes=[{o:ghLumber,r:1.0},{o:ghLumber2,r:1.0}];
+var foes=[{o:ghLumber,r:1.0},{o:ghLumber2,r:1.0},{o:ghLumber3,r:1.0}];
 for(var si=0;si<ghSkitters.length;si++)foes.push({o:ghSkitters[si],r:0.7});
 for(var fi=0;fi<foes.length;fi++){var fo=foes[fi].o;
 if(!fo.alive)continue;
@@ -997,9 +1112,10 @@ if(best.hp<=0){
 best.alive=false;
 if(best===ghLumber){ghRunFlags.lumberDead=true;ghAmmo.pistol+=6;ghSay(['the LUMBER falls. slowly.','+6 rounds from its pockets. (it had a white keycard behind it.)'])}
 else if(best===ghLumber2){ghRunFlags.lumber2Dead=true;ghAmmo.pistol+=6;ghSay(['the moss LUMBER falls.','+6 rounds. (it guarded a station. stations need guards.)'])}
+else if(best===ghLumber3){ghRunFlags.lumber3Dead=true;ghAmmo.smg=(ghAmmo.smg||0)+8;ghSay(['the rust LUMBER falls. orange dust settles.','+8 SMG rounds from its bandolier. (it wore one. fashion.)'])}
 else{ghAmmo.pistol+=4;ghSay(['SKITTER down.','+4 rounds. (it ate them. skitters eat rounds.)'])}
 }else{
-var nm=best===ghLumber||best===ghLumber2?'LUMBER':'SKITTER';
+var nm=(best===ghLumber||best===ghLumber2||best===ghLumber3)?'LUMBER':'SKITTER';
 ghSay(['hit. '+nm+' HP: '+best.hp+'.']);
 }
 ghPersist();
@@ -1048,7 +1164,8 @@ ghSay(['the LUMBER hits. HP '+ghHp+'.']);
 function ghEnemyHome(){
 ghLumber.x=45;ghLumber.z=3;
 ghLumber2.x=73;ghLumber2.z=8;
-var homes=[[64,4],[70,1],[76,5]];
+ghLumber3.x=99;ghLumber3.z=4;
+var homes=[[64,4],[70,1],[76,5],[97,5],[105,1]];
 for(var i=0;i<ghSkitters.length&&i<homes.length;i++){ghSkitters[i].x=homes[i][0];ghSkitters[i].z=homes[i][1];ghSkitters[i].cd=0}
 }
 function ghDie3D(){
@@ -1059,6 +1176,7 @@ if(ghStation){
 ghHp=ghStation.hp;ghAmmo=JSON.parse(JSON.stringify(ghStation.ammo));ghGuns=ghStation.guns.slice();ghGun=ghStation.gun||'pistol';ghInv=ghStation.inv.slice();ghCards=ghStation.cards.slice();
 if(ghStation.moss&&!ghMossOpen){ghMossOpen=true;try{ghApplyOpened()}catch(e){}}
 if(ghStation.plate1&&!ghPlate1){ghPlate1=true;try{ghApplyOpened()}catch(e){}}
+if(ghStation.rust&&!ghRustOpen){ghRustOpen=true;try{ghApplyOpened()}catch(e){}}
 }else{
 ghHp=ghMaxHp;
 }
@@ -1067,8 +1185,11 @@ ghLumber.x=45;ghLumber.z=3;
 if(!ghRunFlags.lumberDead){ghLumber.hp=6;ghLumber.alive=true}
 ghLumber2.x=73;ghLumber2.z=8;
 if(!ghRunFlags.lumber2Dead){ghLumber2.hp=6;ghLumber2.alive=true}
-for(var si=0;si<ghSkitters.length;si++){var sk0=ghSkitters[si];sk0.hp=2;sk0.alive=true;sk0.cd=0}
+ghLumber3.x=99;ghLumber3.z=4;
+if(!ghRunFlags.lumber3Dead){ghLumber3.hp=10;ghLumber3.alive=true}
+for(var si=0;si<ghSkitters.length;si++){var sk0=ghSkitters[si];sk0.hp=si<3?2:3;sk0.alive=true;sk0.cd=0}
 if(ghRunFlags.ambush){ghSkitters[1].alive=false;ghSkitters[2].alive=false}
+if(ghRunFlags.rustAmbush){ghSkitters[3].alive=false;ghSkitters[4].alive=false}
 ghPersist();
 ghSay([line,'wake up at the landing. (stations are earned.)']);
 }
@@ -1112,10 +1233,12 @@ ghMovePlayer(dt);
 var lurk=ghDiff==='hard'?20:12;
 if(ghLumber.alive)ghChase(ghLumber,1.3,lurk,1.1,dt);
 if(ghLumber2.alive)ghChase(ghLumber2,1.3,lurk,1.1,dt);
+if(ghLumber3.alive)ghChase(ghLumber3,1.5,lurk,1.1,dt);
 for(var qi=0;qi<ghSkitters.length;qi++){if(ghSkitters[qi].alive)ghChase(ghSkitters[qi],3.0,ghDiff==='hard'?14:8,0.8,dt)}
 // gun switching 1/2
 if(ghKeys['1']){ghKeys['1']=false;if(ghGuns.indexOf('pistol')!==-1&&ghGun!=='pistol'){ghGun='pistol';ghPersist()}}
 if(ghKeys['2']){ghKeys['2']=false;if(ghGuns.indexOf('magnum')!==-1&&ghGun!=='magnum'){ghGun='magnum';ghPersist()}}
+if(ghKeys['3']){ghKeys['3']=false;if(ghGuns.indexOf('smg')!==-1&&ghGun!=='smg'){ghGun='smg';ghPersist()}}
 // pressure plate 1
 if(!ghPlate1&&ghDist(ghP.x,ghP.z,60,5)<1.3){try{ghOpenGate()}catch(e){}ghSay(['CLUNK. somewhere, a gate gives up.','(moss lower. past the second room. it is open now.)'])}
 // dark overlay
@@ -1139,9 +1262,10 @@ ghPrevJ=jk;
 try{
 ghP.vy=ghP.vy||0;ghP.y=ghP.y||0;
 if(ghP.y>0||ghP.vy!==0){
+var wasAir=ghP.y>0.05;
 ghP.vy-=12*dt;
 ghP.y+=ghP.vy*dt;
-if(ghP.y<=0){ghP.y=0;ghP.vy=0}
+if(ghP.y<=0){ghP.y=0;ghP.vy=0;if(wasAir){try{ghLandT=Date.now()}catch(e){}}}
 }
 }catch(e){}
 // prompt
@@ -1149,8 +1273,8 @@ var near=ghNearestInteract();
 var pr='';
 if(Date.now()<ghMsgUntil&&ghMsgTxt)pr=ghMsgTxt;
 else if(near)pr=ghInteractLabel(near);
-else if((function(){var anyE=null,anyD=14;var es=[ghLumber,ghLumber2];for(var ei=0;ei<ghSkitters.length;ei++)es.push(ghSkitters[ei]);for(var ej=0;ej<es.length;ej++){if(!es[ej].alive)continue;var ed=ghDist(ghP.x,ghP.z,es[ej].x,es[ej].z);if(ed<anyD){anyD=ed;anyE=es[ej]}}if(anyE&&ghGuns.length){pr='[RMB] aim · [LMB] shoot ('+anyE.hp+' HP)';return true}return false})()){}
-if(!pr){try{var lcv=document.getElementById('ghCanvas');if(!lcv||document.pointerLockElement!==lcv)pr='[click] look · WASD move · SPACE jump - TAB inv'}catch(e){}}
+else if((function(){var anyE=null,anyD=14;var es=[ghLumber,ghLumber2,ghLumber3];for(var ei=0;ei<ghSkitters.length;ei++)es.push(ghSkitters[ei]);for(var ej=0;ej<es.length;ej++){if(!es[ej].alive)continue;var ed=ghDist(ghP.x,ghP.z,es[ej].x,es[ej].z);if(ed<anyD){anyD=ed;anyE=es[ej]}}if(anyE&&ghGuns.length){pr='[RMB] aim · [LMB] shoot ('+anyE.hp+' HP)';return true}return false})()){}
+if(!pr){try{var lcv=document.getElementById('ghCanvas');if(!lcv||document.pointerLockElement!==lcv)pr='[click] look · WASD move · SPACE jump - 1/2/3 guns - TAB inv'}catch(e){}}
 ghPrompt(pr);
 ghFrame++;
 if(ghFrame%30===0){try{ghBar()}catch(e){}try{if(ghInvOpen)ghRenderInv()}catch(e){}}

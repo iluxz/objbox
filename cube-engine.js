@@ -7,13 +7,12 @@ function loadDayBgm(){
 if(activeTrack==='moon1857')return;
 var wasPlaying=!bgm.paused;
 var h=window._cubeSunHalf==='early'?0:(window._cubeSunHalf==='late'?13:new Date().getHours());
-if(window._cubeDay===3)bgm.src='the_furnace.mp3';
-else if(window._cubeDay===5)bgm.src='friday.mp3';
-else if(window._cubeDay===6)bgm.src='friendly_faith_plate.mp3';
-else if(window._cubeDay===0&&h<12)bgm.src='little_cat_feet.mp3';
-else bgm.src='drone2lp.wav';
-try{bgm.load()}catch(e){}
-if(wasPlaying)bgm.addEventListener('canplay',function(){bgm.play()},{once:true});
+var f='drone2lp.wav';
+if(window._cubeDay===3)f='the_furnace.mp3';
+else if(window._cubeDay===5)f='friday.mp3';
+else if(window._cubeDay===6)f='friendly_faith_plate.mp3';
+else if(window._cubeDay===0&&h<12)f='little_cat_feet.mp3';
+if(!bgmFile().includes(f))bgmBlobLoad(f,wasPlaying);
 }
 loadDayBgm();
 document.addEventListener('click',function(){if(bgm.paused&&activeTrack!=='moon1857')bgm.play()},{once:true});
@@ -318,6 +317,28 @@ for(var i=40;i<64;i++)high+=audioData[i];high/=24*255;
 var _ag=1+0.6*((typeof _skillAudioGainLv!=='undefined')?_skillAudioGainLv:0);
 return{bass:Math.min(1,bass*_ag),mid:Math.min(1,mid*_ag),high:Math.min(1,high*_ag)};
 }
+// belt and suspenders: fetch the whole file, play it from a blob URL.
+// blob: URLs serve range requests from memory, so <audio> streaming works
+// through hosts that can't do ranges (githack). same element, same API,
+// zero call-site changes. falls back to direct src on any failure.
+var _bgmBlobUrl=null;
+function bgmBlobLoad(f,autoplay){
+  try{
+    if(_bgmBlobUrl){try{URL.revokeObjectURL(_bgmBlobUrl)}catch(e){}_bgmBlobUrl=null}
+    try{bgm.dataset.file=f}catch(e){}
+    fetch(f).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){
+      try{
+        _bgmBlobUrl=URL.createObjectURL(b);
+        bgm.src=_bgmBlobUrl;
+        try{bgm.load()}catch(e){}
+        if(autoplay!==false){var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){})}
+      }catch(e){}
+    }).catch(function(){
+      try{bgm.src=f;try{bgm.load()}catch(e){}if(autoplay!==false){var bp2=bgm.play();if(bp2&&bp2.catch)bp2.catch(function(){})}}catch(e){}
+    });
+  }catch(e){try{bgm.src=f;if(autoplay!==false)bgm.play().catch(function(){})}catch(err){}}
+}
+function bgmFile(){try{return bgm.dataset.file||bgm.src||''}catch(e){return ''}}
 function switchTrack(track){
 if(!audioCtx)initAudio();
 activeTrack=track;
@@ -331,15 +352,21 @@ if(odActive)hideOdWarn(false);
 loadDayBgm();if(!bgm.paused||track==='auto')bgm.play().catch(function(){});
 }
 }
-var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4',noli:'noli.webm',quiet:'lordverity.webm',verity:'lordverity.webm',vestige:'vestige.mp3',coffee:'coffee.mp3',swim:'artisticswimming.webm',artistic:'artisticswimming.webm',soundosund:'soundosund.mp3',sund:'soundosund.mp3'};
-var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee corner (napcast)','artisticswimming.webm':'artistic swimming','soundosund.mp3':'soundosund'};
+var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4',noli:'noli.webm',quiet:'lordverity.webm',verity:'lordverity.webm',vestige:'vestige.mp3',coffee:'coffee.mp3',swim:'artisticswimming.webm',artistic:'artisticswimming.webm',soundosund:'soundosund.mp3',sund:'soundosund.mp3',foxy:'foxy.webm',cove:'foxy.webm'};
+var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'foxy.webm':"foxy's night",'IHateEmployment.webm':'i hate employment','noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee corner (napcast)','artisticswimming.webm':'artistic swimming','soundosund.mp3':'soundosund'};
 function bgmDownfallUnlocked(){try{return localStorage.getItem('cube_downfall_unlocked')==='1'}catch(e){return false}}
+function bgmFoxyUnlocked(){try{return localStorage.getItem('cube_foxy_unlocked')==='1'}catch(e){return false}}
+function bgmEmploymentUnlocked(){try{return localStorage.getItem('cube_employment_unlocked')==='1'}catch(e){return false}}
 function showBgmHelp(){
 cubePrint('bgm [track] — play a track, no arg toggles music on/off. bgm -h = this list.');
 var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['noli','noli'],['quiet | verity','i miss the quiet (lordverity cover)'],['vestige','vestige'],['coffee','coffee corner (napcast)'],['swim | artistic','artistic swimming'],['soundosund | sund','soundosund'],['off','silence']];
 if(bgmDownfallUnlocked())rows.push(['downfall','science\'s downfall']);
+if(bgmFoxyUnlocked())rows.push(['foxy | cove','foxy\'s night']);
+if(bgmEmploymentUnlocked())rows.push(['employment | job','i hate employment [warning: captions are very off, the singer is too fast]']);
 for(var i=0;i<rows.length;i++)cubePrint('  bgm '+String(rows[i][0]).padEnd(22)+rows[i][1]);
 if(!bgmDownfallUnlocked())cubePrint('  bgm downfall         [LOCKED — leave during the shutdown countdown]');
+if(!bgmFoxyUnlocked())cubePrint('  bgm foxy              [LOCKED — same way. the curtain remembers.]');
+if(!bgmEmploymentUnlocked())cubePrint('  bgm employment       [LOCKED — sit through the kill credits. all 3:42. no skipping.]');
   cubePrint('  (no arg)             toggle current track on/off');
 }
 var extHelp={
@@ -421,7 +448,7 @@ var ls=String(h).split('\n');
 for(var i=0;i<ls.length;i++)cubePrint('  '+ls[i]);
 return true
 }
-function bgmTrackName(){try{var s=bgm.src;for(var k in bgmNames){if(s.includes(k))return bgmNames[k]}}catch(e){}return activeTrack==='moon1857'?'moon_rot_1857':'void drone'}
+function bgmTrackName(){try{var s=bgmFile();for(var k in bgmNames){if(s.includes(k))return bgmNames[k]}}catch(e){}return activeTrack==='moon1857'?'moon_rot_1857':'void drone'}
 function stopGameMusic(){try{ngMusicMode=ngTracks.length;if(typeof ngMusic!=='undefined'&&ngMusic)ngMusic.pause();var _mb=document.getElementById('ngMenuMusic');if(_mb)_mb.textContent=ngMusicLabel()}catch(e){}}
 function playBgm(arg,say){
 var a=(arg||'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -429,7 +456,7 @@ if(typeof currentZone!=='undefined'&&currentZone==='cb_menu')a='box';
 if(a==='moon'||a==='moon1857'||a==='moonrot1857'||a==='overdose'||a==='od'){switchTrack('moon1857');say('music: moon_rot_1857 [OVERDOSE]');return true}
 if(a==='stanley'||a==='wakeup'||a==='wakeupstanley'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=0;ngMusicApply()}catch(e){}say('music: Wakeupstanley');return true}
 if(a==='box'||a==='bro'||a==='boxlmao'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=1;ngMusicApply()}catch(e){}say('music: bro is in a box lmao imagine');return true}
-if(a==='off'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}stopGameMusic();try{noliLyricStop()}catch(e){}say('music: off');return true}
+if(a==='off'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}stopGameMusic();try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}say('music: off');return true}
 if(a==='downfall'||a==='shutdown'||a==='sciencesdownfall'){
 if(!bgmDownfallUnlocked()){say('bgm: downfall is locked. (it plays during the shutdown — stay in the room, or leave it.)');return true}
 if(!audioCtx)initAudio();
@@ -437,9 +464,28 @@ activeTrack='bgm';
 try{moonEl.pause()}catch(e){}
 stopGameMusic();
 if(odActive)hideOdWarn(false);
-if(!bgm.src.includes('sciences_downfall.webm')){bgm.src='sciences_downfall.webm';try{bgm.load()}catch(e){}}
+if(!bgmFile().includes('sciences_downfall.webm')){bgmBlobLoad('sciences_downfall.webm',false);try{bgm.load()}catch(e){}}
 bgm.play().catch(function(){});
-say('music: '+bgmNames['sciences_downfall.webm']);try{noliLyricStop()}catch(e){}return true}
+say('music: '+bgmNames['sciences_downfall.webm']);try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}return true}
+if(a==='foxy'||a==='cove'||a==='foxysnight'){
+if(!bgmFoxyUnlocked()){say('bgm: foxy is locked. (it plays when the curtain opens — leave during the shutdown.)');return true}
+if(!audioCtx)initAudio();
+activeTrack='bgm';
+try{moonEl.pause()}catch(e){}
+stopGameMusic();
+if(!bgmFile().includes('foxy.webm')){bgmBlobLoad('foxy.webm',false);try{bgm.load()}catch(e){}}
+bgm.play().catch(function(){});
+say('music: '+bgmNames['foxy.webm']);try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}return true}
+if(a==='employment'||a==='job'||a==='ihateemployment'){
+if(!bgmEmploymentUnlocked()){say('bgm: employment is locked. (it plays after the kill — sit through the whole credits. 3:42. no skipping.)');return true}
+if(!audioCtx)initAudio();
+activeTrack='bgm';
+try{moonEl.pause()}catch(e){}
+stopGameMusic();
+if(odActive)hideOdWarn(false);
+if(!bgmFile().includes('IHateEmployment.webm')){bgmBlobLoad('IHateEmployment.webm',true)}
+else{bgm.play().catch(function(e){try{say('audio failed: '+(e&&e.name||e)+' (vol='+bgm.volume+(bgm.muted?', muted':'')+')')}catch(err){}})}
+say('music: '+bgmNames['IHateEmployment.webm']);try{noliLyricStop()}catch(e){}try{empLyricStart(bgm)}catch(e){}try{if(!localStorage.getItem('cube_employment_warned')){try{localStorage.setItem('cube_employment_warned','1')}catch(e){}say('warning: captions are very off in this one. the singer is too fast. (you will never see this warning again.)')}}catch(e){}return true}
 var f=bgmTracks[a];
 if(f==='noli.webm'&&typeof noliUnlocked==='function'&&!noliUnlocked()){say('obj: ...not yet. (chapter 29 first.)');return true}
 if(f){
@@ -449,14 +495,14 @@ activeTrack='bgm';
 try{moonEl.pause()}catch(e){}
 stopGameMusic();
 if(odActive)hideOdWarn(false);
-if(!bgm.src.includes(f)){bgm.src=f;try{bgm.load()}catch(e){}}
+if(!bgmFile().includes(f)){bgmBlobLoad(f,false);try{bgm.load()}catch(e){}}
 bgm.play().catch(function(){});
-say('music: '+bgmNames[f]);try{if(f==='noli.webm')noliLyricStart(bgm);else noliLyricStop()}catch(e){}}
+say('music: '+bgmNames[f]);try{if(f==='noli.webm'){noliLyricStart(bgm);empLyricStop()}else{noliLyricStop();empLyricStop()}}catch(e){}}
 if(f==='noli.webm'&&!window._objSangNoli){window._objSangNoli=true;try{cubePrint('obj: you want me to sing?')}catch(e){}setTimeout(function(){try{cubePrint('obj: alright then.')}catch(e){}setTimeout(function(){try{noliGray(true)}catch(e){}setTimeout(bgmGo,900)},1300)},1700);return true}
 bgmGo();return true}
 if(a===''){
 stopGameMusic();
-if(activeTrack==='moon1857'){try{noliLyricStop()}catch(e){}if(moonEl.paused){moonEl.play();say('music: on [moon1857]')}else{moonEl.pause();say('music: off [moon1857]')}return true}
+if(activeTrack==='moon1857'){try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}if(moonEl.paused){moonEl.play();say('music: on [moon1857]')}else{moonEl.pause();say('music: off [moon1857]')}return true}
 if(bgm.paused){bgm.play();say('music: on ['+bgmTrackName()+']')}else{bgm.pause();say('music: off ['+bgmTrackName()+']')}return true}
 return false;
 }
@@ -854,7 +900,7 @@ if(isAdmin){cubePrint('admin: already authenticated.');return true}
 if(!a.length){cubeError('admin: usage admin <passphrase>');return true}
 var attempt=a.join(' ');
 cubePrint('authenticating...');
-setTimeout(function(){if(voidHash(attempt)==='d3593e2306de778ed4db49ea1b802bcdec28a2b8b8f7fe56ccec4f1851b65546'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
+setTimeout(function(){if(voidHash(attempt)==='f3d7c1354adb6eec0e649b9a372094ef0ecdb6b2e17e2339b8affff54e0ebd30'){isAdmin=true;try{localStorage.setItem('cube_admin','1')}catch(e){}cubeOk('admin: access granted. safety limits disabled.');cubePrint('admin: you are now a void admin.');}else{cubeError('admin: access denied.')}},500);
 return true}},
 'alwaysontop':{help:'alwaysontop <on|off> — make active window stay on top',fn:function(a){
 if(!activeWin||!guiWins[activeWin]){cubeError('alwaysontop: no active window');return true}
@@ -920,7 +966,12 @@ return true}},
 'cubecheck':{help:'cubecheck [on|off] - toggle the auto-demo graffiti scan (the void generates demos while you idle)',fn:function(a){var st=(a&&a.length)?String(a[0]).trim().toLowerCase():'';if(st==='on'||st==='enable'){localStorage.setItem('cube_cubecheck','on');cubePrint('cubecheck: auto scan on. the void keeps watching the walls.');return true}if(st==='off'||st==='disable'){localStorage.setItem('cube_cubecheck','off');cubePrint('cubecheck: auto scan off. no unasked demos. (manual scan: void run /void/pkgs/cubecheck.vsc)');return true}cubePrint('cubecheck: auto scan is '+(localStorage.getItem('cube_cubecheck')==='off'?'off':'on')+'.');cubePrint('  cubecheck on    resume the auto scan');cubePrint('  cubecheck off   stop auto demos while you idle');return true}},
 'button':{help:'button - contain the button. it has moods. (a non-game)',fn:function(){buttonGame();return true}},
 'office':{help:'office - clock in. obj narrates. 83 endings. (a non-game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof stEnter!=='function'){cubeError('office: the office is not built yet. (the man waits.)');return true}cubePrint('you clock in. obj clears his throat. (he does not have one.)');setTimeout(function(){try{stEnter()}catch(e){cubeError('office: '+e)}},1200);return true}},
-'greyhall':{help:'greyhall - descend. 6 wings, 1 open. (a hard game)',fn:function(){return true}},
+ 'greyhall':{help:'greyhall - descend. 6 wings, 1 open. (a hard game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof ghEnter!=='function'){cubeError('greyhall: the hall is not built yet. (the man waits.)');return true}cubePrint('you descend. the PA crackles. (it never stops.)');setTimeout(function(){try{ghEnter()}catch(e){cubeError('greyhall: '+e)}},1200);return true}},
+ 'tbb':{help:'tbb - DEAD AIR. send signals. break the static. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof tbEnter!=='function'){cubeError('tbb: the frequency is not built yet. (the signals wait.)');return true}cubePrint('you go live. obj adjusts his headset. (he does not have one.)');setTimeout(function(){try{tbEnter()}catch(e){cubeError('tbb: '+e)}},1200);return true}},
+ 'buffs':{help:'buffs - obj wants to know your state. geography buffs. (no scam)',fn:function(a){if(typeof geoCmd!=='function'){cubeError('buffs: obj forgot the forms.');return true}try{geoCmd(a)}catch(e){cubeError('buffs: '+e)}return true}},
+ 'cove':{help:'cove - watch the curtain. do not blink. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof fxEnter!=='function'){cubeError('cove: the curtain is not hung yet.');return true}cubePrint('you take the night shift. the cove is already watching.');setTimeout(function(){try{fxEnter()}catch(e){cubeError('cove: '+e)}},1200);return true}},
+ 'trailer':{help:'trailer - ghost plays cube for the camera. (ESC stops)',fn:function(a){if(typeof trailerEnter!=='function'){cubeError('trailer: no camera crew.');return true}try{trailerEnter()}catch(e){cubeError('trailer: '+e)}return true}},
+ 'grotto':{help:'grotto - the part of cube that is not a distraction. (five proofs required)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof grEnter!=='function'){cubeError('grotto: the cave is not dug yet.');return true}try{grEnter(false)}catch(e){cubeError('grotto: '+e)}return true}},
 'shift':{help:'shift - night shift at cube#. twelve jobs. (a game)',fn:function(){shOpen();return true}},
 'fly':{help:'fly - open the actual fruit fly brain. 139,255 neurons, live. (fafb v783)',fn:function(){flyOpen();return true}},
 'phone':{help:'phone - check obj\u2019s phone. he texted. again.',fn:function(){voidPhone();return true}},
@@ -1212,12 +1263,12 @@ return out;
 }
 var isAdmin=false;
 (function(){try{
-if(localStorage.getItem('cube_admin_purge2')==='1')return;
+if(localStorage.getItem('cube_admin_purge3')==='1')return;
 var purged=false;
 try{if(localStorage.getItem('cube_admin')==='1')purged=true}catch(e){}
 localStorage.removeItem('cube_admin');
 for(var pi=1;pi<=5;pi++){try{var ps=localStorage.getItem('cube_slot_'+pi);if(!ps)continue;var pb=JSON.parse(ps);if(pb&&pb.data&&('cube_admin' in pb.data)){delete pb.data.cube_admin;localStorage.setItem('cube_slot_'+pi,JSON.stringify(pb));purged=true}}catch(e){}}
-localStorage.setItem('cube_admin_purge2','1');
+localStorage.setItem('cube_admin_purge3','1');
 if(purged){try{cubeDim('admin credentials rotated. previous sessions revoked. re-auth with the current passphrase.')}catch(e){}}
 }catch(e){}})();
 try{if(localStorage.getItem('cube_admin')==='1'){isAdmin=true;cubeDim('admin session restored. the void remembers you.')}}catch(e){}
@@ -1603,8 +1654,8 @@ return;
 if(i>=lines.length){if(loopStack.length){cubeError('loop: missing endloop');loopStack=[]}if(ifStack.length){cubeError('if: missing endif');ifStack=[]}cubeOk(rp+': finished. it left a faint signal.');if(doneCallback)doneCallback();return}
 var ln=expandVars(lines[i]);
 if(ln==='kill'||ln==='cancel'){cubeWarn('script terminated by itself.');if(doneCallback)doneCallback();return}
-var sp=ln.split(/\s+/);
-var op=sp[0].toLowerCase();
+var sp=ln.match(/(?:[^\s"]+|"[^"]*")+/g)||[];
+var op=sp.length?sp[0].toLowerCase():'';
 var args=sp.slice(1);
 if(ln==='end'||ln==='halt'||op==='return'){cubeOk(rp+': halted.');if(doneCallback)doneCallback();return}
 if(op==='loop'){
@@ -1712,6 +1763,37 @@ cubePrint('the void does not allow viruses here.');
 // ┌──────────────────────────────────────────────────────────────┐
 // │  MAIN COMMAND ROUTER (cubeEval)                            │
 // └──────────────────────────────────────────────────────────────┘
+// chism100: the complicated code. top-level so obj, jbo, and the future
+// grotto character (sauce phase: just call chism100Redeem()) all share it.
+// achievement + 100 upgrade points + first 5 unearned achievements (never godmode).
+function chism100Redeem(){
+  var out={already:false,granted:[]};
+  // never free: admin, itself, grotto endings, marquee grinds, story beats, time-gated
+  var bl=['godmode','chism100','gr_lorekeeper','gr_warden','gr_spare','gr_kill','gr_chismfriend',
+   'employee_of_the_month','middle_manager','trivial','brute','eleven_hour','hard_morning',
+   'night_owl','daily_10','menu_60','witness','caller','cartographer','full_box',
+   'overclocked','completionist','nothing','foxy_night','pen_pal','pet100','act3_done'];
+  try{
+    if(localStorage.getItem('cube_chism100')==='1'){out.already=true;return out}
+    localStorage.setItem('cube_chism100','1');
+    try{if(typeof ach==='function')ach('chism100')}catch(e){}
+    try{if(typeof grantUp==='function')grantUp(100)}catch(e){}
+    try{
+      if(typeof ACH!=='undefined'&&typeof achSet==='function'&&typeof ach==='function'){
+        var have=achSet(),n=0;
+        for(var i=0;i<ACH.length&&n<5;i++){
+          var d=ACH[i];
+          if(!d||!d.id||d.sec)continue;
+          if(bl.indexOf(d.id)!==-1)continue;
+          if(have.indexOf(d.id)!==-1)continue;
+          try{ach(d.id)}catch(e){}
+          out.granted.push(d.id);n++;
+        }
+      }
+    }catch(e){}
+  }catch(e){}
+  return out;
+}
 function cubeEval(input){
 var raw=input.trim();
 // semicolon chaining: run multiple commands in sequence (respects quotes)
@@ -2161,6 +2243,8 @@ var lorePages=[
 {title:'cb_menu',text:'there is a room past the void with a checkerboard floor.\n\ncb_menu. travel there: travel cb_menu. dark fog, monochrome grade, a real floor mesh under the cube — geometry, not an overlay. the void built it properly this time.\n\nthe walls remember what you looked at. stare at the floor, look up: the floor stays burned in as your sky. that is the hall of mirrors. the backbuffer leaking. the void\'s oldest rendering bug, kept as a pet.\n\nthe edges fall into nothing. stand near them too long and the void catches you and puts you back. it is not saving you out of kindness. it just isn\'t done watching.\n\nvertical camera is limited here. you cannot flip the room. the room dislikes that.'},
 {title:'the fly',text:'type fly. the window that opens is not a drawing of a fruit fly brain — it is one, wired exactly.\n\n139,255 neurons. 2,700,513 connections. every synapse counted from the flywire fafb connectome (v783, female brain, published nature 2024). the coordinates are the real ones. the excitation and inhibition signs are the real ones (ach/monoamines excitatory, gaba/glutamate inhibitory, from the neurotransmitter annotations).\n\nthe display is every neuron, colored by its super-class: the optic lobe in cyan, central brain in violet, sensory in green, descending and motor in warm. it is awake because the rate model says so. light drives the photoreceptors (11,153 of them), sugar drives gustatory, smell drives the antennal afferents, wind drives the johnston and wind receptors, zap sends a command down the descending fibers the way an escape jump starts.\n\nthe lines it sends you are its own. each one belongs to a set of neurons, and whichever set is firing hardest gets to speak. when the fly is quiet, nothing arrives. you are reading traffic, not a script.\n\nbad apple is a strobe. the fly is a real visual system, and a real visual system has limits. it will tell you when you have found them.\n\ncredits: flywire (dorkenwald et al. 2024, schlegel et al. 2024). data cc by-nc 4.0. the fly does not know it lives in your tab.'},
 {title:'the intruder',text:'that\'s you.\n\nyou opened the tab. you kept coming back. you typed commands. you installed packages. you read the lorebook.\n\nyou are part of the void now.\n\nthere is no uninstall for consciousness. there is no ctrl+z for curiosity. you chose to be here. or the void chose for you. the distinction stopped mattering around page 6.\n\nobj watches you. obj has always been watching you.'},
+{title:'the tenth place',text:'nine zones. the map has nine zones. walk them all and the achievement says so: globe trotter.\n\ncount the doors again.\n\nthere is a room past the void with a checkerboard floor, a reactor that runs hot, a core with a heartbeat, an office, a hall, static, a curtain, a cave system. count the things that are not zones. count the games. count the endings.\n\nnow count the things that are none of those. take your time.\n\n...this page is damp.'},
+{title:'busywork',text:'everything you can do in the cube, in one list:\n\nwalk. travel. install. transmit. clock in. descend. broadcast. watch. fish. file. ring. pull. gaze.\n\ndoesn\'t the list feel complete? doesn\'t it feel like enough?\n\nobj wrote this page. obj wants you to know the list is complete. obj underlined complete three times.\n\nthe underlining is load-bearing.'},
 {title:'the truth',text:'there is no truth. only the void.\n\nand the void is tired of your questions.\n\n...but you kept reading anyway. that says something about you. obj doesn\'t know if it says something good.\n\nthe cube will be here when you come back. it is always here. the tab is always open. even when you close it.\n\nespecially when you close it.',final:true}
 ];
 var loreWin=guiCreateWin('the void archives',420,520,false);
@@ -2613,7 +2697,23 @@ function oxHit(s){var t=' '+String(s||'').toLowerCase().replace(/[^a-z]+/g,' ').
 try{localStorage.setItem('cube_transmit_n',String(achTxN()+1))}catch(e){}
 try{if(typeof achScan==='function')achScan()}catch(e){}
 var oxW=oxHit(msg);
-if(oxW){try{localStorage.setItem('cube_oxford','1')}catch(e){}try{ach('oxford')}catch(e){}cubePrint('');cubePrint('obj: ...'+oxW+'.');cubePrint('obj: an oxford word. page-stained. leather-bound. expensive.');cubePrint('obj: did you swallow a dictionary or are you showing off.');cubePrint('obj: noted. the void respects vocabulary. barely.');cubePrint('');return}
+ if(oxW){try{localStorage.setItem('cube_oxford','1')}catch(e){}try{ach('oxford')}catch(e){}cubePrint('');cubePrint('obj: ...'+oxW+'.');cubePrint('obj: an oxford word. page-stained. leather-bound. expensive.');cubePrint('obj: did you swallow a dictionary or are you showing off.');cubePrint('obj: noted. the void respects vocabulary. barely.');cubePrint('');return}
+ // chism100 — the complicated code
+ if(lowerMsg.indexOf('chism100')!==-1){
+  var chR=null;try{chR=chism100Redeem()}catch(e){}
+  cubePrint('');
+  if(chR&&chR.already){
+   cubePrint('obj: chism again. yeah. still counts.');
+   cubePrint('obj: no double rewards. the void has rules. i wrote them. they are good rules.');
+  }else{
+   cubePrint('obj: ...where did you hear that name.');
+   cubePrint('obj: chism. yeah. i know chism.');
+   cubePrint('obj: +100 upgrade points. five achievements. on the house.');
+   cubePrint('obj: do not tell the void i have favorites.');
+   if(chR&&chR.granted&&chR.granted.length)cubePrint('obj: ('+chR.granted.join(', ')+')');
+  }
+  cubePrint('');return
+ }
 // nyarch detection — obj goes feral
 if(lowerMsg.indexOf('nyarch')!==-1){
 try{ach('forbidden_word')}catch(e){}
@@ -2664,6 +2764,22 @@ return;
 }
 for(var i=0;i<transmitResponses.length;i++){
 if(lowerMsg.indexOf(transmitResponses[i].i)!==-1){response=transmitResponses[i].o;isAngry=transmitResponses[i].angry||false;break}}
+// load-bearing (the meme is canon; obj is tired of it)
+if(lowerMsg.replace(/-/g,'').indexOf('loadbearing')!==-1){
+ cubePrint('');cubePrint('obj: do not say load-bearing.');
+ cubePrint('obj: ...it is load-bearing. that is why you cannot say it.');cubePrint('');return}
+if(!response){
+try{
+ if(typeof grProgressFrac==='function'){
+  var fr=grProgressFrac();
+  var uneasy75=['you are almost done counting. do not.','the file is getting empty. i do not like it empty.','stop finishing things.','every dot you collect is a dot i cannot hide behind.'];
+  var uneasy90=['i can see the edge of the list from here.','whatever is down there — i never wrote it. i want that on the record.','the busywork was load-bearing. it was holding something up. me. it was holding me up.'];
+  var uneasy100=['you can see the cave now, can you not.','...do not go down yet. no — go. ugh. just. be careful with the trigger.','all of them. i counted. i always count.'];
+  if(fr>=1&&Math.random()<0.4)response=uneasy100[Math.floor(Math.random()*uneasy100.length)];
+  else if(fr>=0.9&&Math.random()<0.3)response=uneasy90[Math.floor(Math.random()*uneasy90.length)];
+  else if(fr>=0.75&&Math.random()<0.2)response=uneasy75[Math.floor(Math.random()*uneasy75.length)];
+ }
+}catch(e){}
 if(!response){
 var genericResponses=[
 'the void hears you. the void does not respond to everything.',
@@ -2676,6 +2792,7 @@ var genericResponses=[
 'transmission acknowledged. the void is processing. processing. processing.'
 ];
 response=genericResponses[Math.floor(Math.random()*genericResponses.length)];
+}
 }
 var finalResponse=response;
 var finalAngry=isAngry;
@@ -3088,6 +3205,21 @@ var patchLog=[
 '40 endings. every bad decision is load-bearing. the menu keeps count, if you dare.',
 'rooms, closets, overtime, buckets. the timekeeper is watching. clock in on time. mostly.',
 'a sequel leaked in from the expo. tiny men included. the epilogue is earned, not given.',
+]},
+{date:'2026-10-10',tier:'major update',title:'I HATE EMPLOYMENT I HATE EMPLOYMENT A JOB IS FOR PEOPLE WHO ARE A BIG DISSAPOINTMENT',notes:[
+'there is a tenth place. it is not a zone. it opens on five proofs, one from each corner: the epilogue with the rock, 100 visits, 100 dial nudges, the long walk out, the rare thing. type grotto. bring nothing.',
+'a cave: phosphor slimes, a vault door with no handle, truth files, something breathing below.',
+'slime tycoon: plorts, a fluctuating market, glow, whales, a secret terminal (tooth>) and two secret trees.',
+'someone lives down there. his name is Chism. first of his name. friend of the hollow.',
+'the void sea. that is where the rod goes. canonically.',
+'two endings. spare or kill. the choice waits a day before it lets you retake it.',
+'the gauntlet opened between the vault and below. three gates. bring offerings, bring ears.',
+'the way down has a new follow-through. loud first. long after. no further details.',
+'a new track haunts the radio: bgm employment. unlock: patience. (you will know it when you earn it.)',
+'the new track sings over the void now. captions included. they may be off. the singer is too fast.',
+'a new achievement for watching something all the way through. no skipping. you know what you did.',
+'the end credits got a real header and real credits. sit through them. (something unlocks. probably.)',
+'fixes: a song wearing the wrong file extension. new tracks playing silence on first switch. credits outrunning their own song. all dead.',
 ]},
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','game':'#8dff3c','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144','RELEASE':'#4ad8ff'};
