@@ -215,12 +215,12 @@ var first=false;
 try{if(!ghRunFlags[seen]){ghRunFlags[seen]=1;first=true}}catch(e){first=true}
 if(!ghDiff){ghSay(['welcome to GREYHALL.','the man stands on the landing. six wings. five sealed. one white.','pick a difficulty. easy is soft. hard is greyhall. (the PA recommends hard. the PA is cruel.)']);return}
 if(to==='landing'&&first)ghSay(['the landing. a walkway over nothing.','chalk wing is open. the rest are sealed. (phase 2. ambition. construction noise.)']);
-else if(to==='chalk1'&&first)ghSay(['chalk entry. white everything.','take the medkit. take everything. everything here is yours. (everything here is bait.)']);
+else if(to==='chalk1'&&first)ghSay(['chalk entry. white everything.','take the medkit. take everything. everything here is yours.']);
 else if(to==='chalk2'&&first)ghSay(['chalk armory.','one pistol. one note. TAKE IT.','...take it.']);
 else if(to==='chalk3'&&first)ghSay(['chalk stores. crates and rounds.','something heavy breathes behind the far door. that is a LUMBER. lumbears. (it lumbers.)']);
-else if(to==='chalk4'&&first)ghSay(['chalk warden.','the LUMBER blocks the card door. slow. armored. patient.','shoot the head or shoot the body. running is also a choice. (a bad one.)']);
+else if(to==='chalk4'&&first)ghSay(['chalk warden.','the LUMBER blocks the card door. slow. armored. patient.','shoot the head or shoot the body. running is also a choice.']);
 else if(to==='chalk_save'&&first)ghSay(['chalk station.','insert a floppy: it remembers your HP, your ammo, your sins.','die, and you wake here. (dying elsewhere is still dying.)']);
-else if(to==='chalk_gate'&&first)ghSay(['the moss seal.','it wants a white keycard. the moss wing is under construction.','touch it anyway. touching things is free. (touching things is how you die.)']);
+else if(to==='chalk_gate'&&first)ghSay(['the moss seal.','it wants a white keycard. the moss wing is under construction.','touch it anyway. touching things is free.']);
 }
 
 // ── touches ──
@@ -229,22 +229,22 @@ if(!ghActive)return;
 if(id==='diff_easy'||id==='diff_hard'){
 ghDiff=(id==='diff_easy')?'easy':'hard';
 ghInv.push('floppy');ghPersist();ghRender();
-ghSay(ghDiff==='easy'?['easy. soft. the PA is disappointed. (the PA will mock you gently.)']:['HARD. greyhall. the PA approves. (the PA will mock you relentlessly.)','a floppy, for the station. do not waste it. (you will waste it.)']);
+ghSay(ghDiff==='easy'?['easy. soft. the PA is disappointed. (the PA will mock you gently.)']:['HARD. greyhall. the PA approves.','a floppy, for the station. do not waste it.']);
 return;
 }
 if(ghCombat){ghCombatTurn(id);return}
-if(id==='floppy0'){if(!ghInvFree()){ghSay(['inventory full. 9 slots. drop something. (you cannot drop things. manage better.)']);return}ghInv.push('floppy');ghPersist();ghRender();ghSay(['the man took the floppy.','save stations eat these.']);return}
+if(id==='floppy0'){if(!ghInvFree()){ghSay(['inventory full. 9 slots. drop something.']);return}ghInv.push('floppy');ghPersist();ghRender();ghSay(['the man took the floppy.','save stations eat these.']);return}
 if(id==='medkit0'){if(!ghInvFree()){ghSay(['inventory full.']);return}ghInv.push('medkit');ghPersist();ghRender();ghSay(['the man took the medkit.','+50 HP when used. (in combat, from the menu of violence.)']);return}
-if(id==='pistol0'){ghGuns.push('pistol');ghAmmo.pistol+=6;ghPersist();ghRender();ghSay(['the man took the pistol. 6 rounds.','precise. reliable. the PA respects the pistol. (the PA respects nothing.)']);return}
-if(id==='ammo3'){ghRunFlags.ammo3=true;ghAmmo.pistol+=12;ghPersist();ghRender();ghSay(['+12 rounds.','count them. conserve them. (you will not.)']);return}
-if(id==='whitekey'){ghCards.push('white');ghInv.push('whitekey');ghPersist();ghRender();ghSay(['the man took the white keycard.','it opens the moss seal. the moss wing is under construction. (the card works anyway. cards do not care.)']);return}
+if(id==='pistol0'){ghGuns.push('pistol');ghAmmo.pistol+=6;ghPersist();ghRender();ghSay(['the man took the pistol. 6 rounds.','precise. reliable. the PA respects the pistol.']);return}
+if(id==='ammo3'){ghRunFlags.ammo3=true;ghAmmo.pistol+=12;ghPersist();ghRender();ghSay(['+12 rounds.','count them. conserve them.']);return}
+if(id==='whitekey'){ghCards.push('white');ghInv.push('whitekey');ghPersist();ghRender();ghSay(['the man took the white keycard.','it opens the moss seal. the moss wing is under construction.']);return}
 if(id==='lumber'){ghStartCombat();return}
 if(id==='station'){
 if(ghInv.indexOf('floppy')===-1){ghSay(['the station wants a floppy.','you have no floppy. the station waits. (the station is patient. stations are.)']);return}
 ghInv.splice(ghInv.indexOf('floppy'),1);
 ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,room:ghRoom};
 ghPersist();ghRender();
-ghSay(['floppy inserted.','HP '+ghHp+'. ammo '+ghAmmo.pistol+'. sins: all of them.','remembered. die now, wake here. (do not die. dying is embarrassing.)']);
+ghSay(['floppy inserted.','HP '+ghHp+'. ammo '+ghAmmo.pistol+'. sins: all of them.','remembered. die now, wake here.']);
 return;
 }
 if(id==='seal'){
@@ -277,7 +277,7 @@ ghSay(['+50. the LUMBER watched.','the LUMBER does not approve of healthcare.'])
 return;
 }
 if(id!=='c_head'&&id!=='c_body')return;
-if(ghAmmo.pistol<=0){ghSay(['click. no rounds.','the LUMBER smiles. (it has no mouth. it smiles anyway.)']);return}
+if(ghAmmo.pistol<=0){ghSay(['click. no rounds.','the LUMBER smiles.']);return}
 ghAmmo.pistol--;
 var dmg=0,miss=false;
 if(id==='c_head'){if(Math.random()<0.25)miss=true;else dmg=2}
@@ -300,7 +300,7 @@ ghHp-=d;
 }
 var ghDeathLines=[
 'death %N. the floor sends its regards.',
-'death %N. the PA saw nothing. (the PA saw everything.)',
+'death %N. the PA saw nothing.',
 'death %N. lumbears 1, man 0.',
 'death %N. shall we try aiming this time.',
 'death %N. the floppy remembers you better than you remember yourself.'
@@ -315,7 +315,7 @@ ghHp=ghStation.hp;ghAmmo=JSON.parse(JSON.stringify(ghStation.ammo));ghGuns=ghSta
 ghHp=ghMaxHp;ghRoom='landing';
 }
 ghPersist();ghRender();
-ghSay([line,'wake up at the station. (or the landing. stations are earned.)']);
+ghSay([line,'wake up at the station.']);
 }
 
 // ── title screen (haydee-simple: the man, water, music) ──
@@ -391,7 +391,7 @@ gh3DShow();
 ghRender();
 if(!ghRunFlags.ghGreeted){
 ghRunFlags.ghGreeted=true;
-if(ghDiff==='hard')ghSay(['GREYHALL. hard.','the PA approves. (the PA will mock you relentlessly.)']);
+if(ghDiff==='hard')ghSay(['GREYHALL. hard.','the PA approves.']);
 else ghSay(['GREYHALL. easy.','the PA is disappointed. (the PA will mock you gently.)']);
 }else{
 ghSay(['GREYHALL. the landing.','HP '+ghHp+'. deaths: '+ghDeaths+'. (the PA counted. the PA always counts.)']);
@@ -1036,15 +1036,15 @@ return '';
 function ghDoInteract(th){
 if(!th)return;
 if(th.id==='floppy'){if(!ghInvFree()){ghSay(['inventory full. 9 slots.']);return}th.taken=true;ghInv.push('floppy');ghPersist();ghSay(['the man took the floppy.','save stations eat these.'])}
-else if(th.id==='medkit'){if(!ghInvFree()){ghSay(['inventory full.']);return}th.taken=true;ghInv.push('medkit');ghPersist();ghSay(['the man took the medkit.','+50 HP. (press... no. medkits are used from... actually: walk into danger, then... hmm. press H.)'])}
+else if(th.id==='medkit'){if(!ghInvFree()){ghSay(['inventory full.']);return}th.taken=true;ghInv.push('medkit');ghPersist();ghSay(['the man took the medkit.','+50 HP. (press H.)'])}
 else if(th.id==='pistol'){th.taken=true;ghGuns.push('pistol');ghAmmo.pistol+=6;ghPersist();ghSay(['the man took the pistol. 6 rounds.','SPACE to fire. precise. reliable.'])}
-else if(th.id==='ammo'){th.taken=true;ghRunFlags.ammo3=true;ghAmmo.pistol+=12;ghPersist();ghSay(['+12 rounds.','count them. conserve them. (you will not.)'])}
+else if(th.id==='ammo'){th.taken=true;ghRunFlags.ammo3=true;ghAmmo.pistol+=12;ghPersist();ghSay(['+12 rounds.','count them. conserve them.'])}
 else if(th.id==='whitekey'){th.taken=true;ghCards.push('white');ghInv.push('whitekey');ghPersist();ghSay(['the man took the white keycard.','it opens the moss seal. (phase 2. ambition.)'])}
 else if(th.id==='visor'){if(!ghInvFree()){ghSay(['inventory full.']);return}th.taken=true;ghInv.push('visor');ghPersist();ghSay(['night visor.','wear it with H? no. it wears itself. (dark rooms fear it.)'])}
 else if(th.id==='magnum'){th.taken=true;ghGuns.push('magnum');ghGun='magnum';ghAmmo.magnum+=6;ghPersist();
 if(!ghRunFlags.ambush){ghRunFlags.ambush=true;ghSkitters[1].alive=true;ghSkitters[2].alive=true}
 ghSay(['MAGNUM. 6 rounds. big stopper, slow hand.','...movement. behind you. (ambush. classic.)'])}
-else if(th.id==='magammo'){th.taken=true;ghRunFlags.magammo=true;ghAmmo.magnum+=6;ghPersist();ghSay(['+6 magnum rounds.','each one counts triple. (roughly.)'])}
+else if(th.id==='magammo'){th.taken=true;ghRunFlags.magammo=true;ghAmmo.magnum+=6;ghPersist();ghSay(['+6 magnum rounds.','each one counts triple.'])}
 else if(th.id==='medkit2'){if(!ghInvFree()){ghSay(['inventory full.']);return}th.taken=true;ghRunFlags.medkit2=true;ghInv.push('medkit');ghPersist();ghSay(['medkit. +50. (H.)'])}
 else if(th.id==='station2'){
 if(ghInv.indexOf('floppy')===-1){ghSay(['the station wants a floppy.']);return}
@@ -1216,7 +1216,7 @@ for(var o=0;o<order.length;o++){var id=order[o];
 if(counts[id])html+='<div style="color:#c8c8d0;font-size:13px;padding:3px 0">'+(ghItemNames[id]||id)+' ×'+counts[id]+(id==='medkit'?' <span style="color:#5a7a9a">[H] use</span>':'')+'</div>'}
 for(var gi=0;gi<ghGuns.length;gi++){var g=ghGuns[gi];
 html+='<div style="color:#c8c8d0;font-size:13px;padding:3px 0">'+g.toUpperCase()+' '+(ghAmmo[g]||0)+'rds'+(ghGun===g?' ◄':'')+'</div>'}
-if(!ghInv.length&&!ghGuns.length)html+='<div style="color:#44445a;font-size:13px">empty. (take everything. everything is bait.)</div>';
+if(!ghInv.length&&!ghGuns.length)html+='<div style="color:#44445a;font-size:13px">empty.</div>';
 iv.innerHTML=html;
 }catch(e){}
 }

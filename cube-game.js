@@ -1961,10 +1961,10 @@ var ACH=[
 {sec:'ADMIN & TOYS'},
 {id:'godmode',h:'there are no safety limits.',n:'safety limits disabled',d:'become a void admin.',c:function(){try{return localStorage.getItem('cube_admin')==='1'}catch(e){return false}}},
 {id:'collector',h:'bring something in from outside.',n:'collector',d:'intrude a package.',c:function(){return achPkgs().length>0}},
-{id:'chaos',h:'install the thing that installed itself.',n:'entropy',d:'install entropy. (it installed itself. sure.)',c:function(){return achPkgs().indexOf('entropy')!==-1}},
+{id:'chaos',h:'install the thing that installed itself.',n:'entropy',d:'install entropy.',c:function(){return achPkgs().indexOf('entropy')!==-1}},
 {id:'hardened',h:'make it harder. on purpose.',n:'eleven',d:'turn hard mode on.',c:function(){try{var s=ngLoad();return !!(s&&s.hard)}catch(e){return false}}},
 {id:'undeletable',h:'try to delete the void.',n:'undeletable',d:'try to delete the void. (cute.)',c:function(){return false}},
-{id:'deprecated',h:'use winget.',n:'deprecated',d:'use winget. (the void does not need security.)',c:function(){return false}},
+{id:'deprecated',h:'use winget.',n:'deprecated',d:'use winget.',c:function(){return false}},
 {id:'forbidden_word',h:'say it to obj. run.',n:'forbidden word',d:'say nyarch to obj. (run.)',c:function(){return false}},
 {id:'meltdown',h:'destroy the reactor.',n:'meltdown',d:'destroy the reactor. jbo saw.',c:function(){return false}},
 {id:'grue_food',h:'wake it.',n:'do NOT',d:'wake the grue. (you were warned.)',c:function(){return false}},
@@ -1995,7 +1995,7 @@ var ACH=[
 {id:'eleven_hour',h:'beat act 2, harder.',n:'eleven-hour shift',d:'beat act 2 on hard mode.',c:function(){try{return localStorage.getItem('cube_act2_hard')==='1'}catch(e){return false}}},
 {sec:'SPEEDRUN & PRESTIGE'},
 {id:'elegant',h:'zero mistakes. the whole run.',n:'elegant',d:'beat the whole non-game with zero mistakes. (every buzz counts.)',c:function(){try{return localStorage.getItem('cube_elegant')==='1'}catch(e){return false}}},
-{id:'trivial',h:'zero mistakes. hard mode.',n:'trivial',d:'elegant, but on hard mode. (sure. trivial.)',c:function(){try{return localStorage.getItem('cube_elegant_hard')==='1'}catch(e){return false}}},
+{id:'trivial',h:'zero mistakes. hard mode.',n:'trivial',d:'elegant, but on hard mode.',c:function(){try{return localStorage.getItem('cube_elegant_hard')==='1'}catch(e){return false}}},
 {id:'brute',h:'fast. clean. hard. under five.',n:'brute',d:'the whole non-game. 3 mistakes or fewer. under 5 minutes. hard mode. you CAN use speedrun mode. (good luck.)',c:function(){try{return localStorage.getItem('cube_brute')==='1'}catch(e){return false}}},
 {id:'robbery',h:'beat it in ninety minutes.',n:'professional robbery',d:'beat the non-game in under 90 minutes.',c:function(){try{if(!ngAct3Done())return false;var m=parseInt(localStorage.getItem('cube_run_ms')||'0',10);return m>0&&m<=5400000}catch(e){return false}}},
 {id:'nevermind',h:'disable the timing control.',n:'running slower... nevermind',d:'disable JEDEC timing control. everything runs 1.25x now. stability not guaranteed.',c:function(){try{return localStorage.getItem('cube_jedec')==='0'}catch(e){return false}}},
@@ -2059,7 +2059,7 @@ var r=achRwOf(def.id);
 try{if(r.s&&typeof grantPts==='function'){grantPts(r.s*(typeof ptMult==='function'?ptMult():1));if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 try{if(r.u&&typeof grantUp==='function'){grantUp(r.u);if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 p.push(def.id);achPaidSave(p);
-if(def.id==='witness'){cubeDim('reward: +25 upgrade points. the void respects your dedication. (it does not respect you.)')}
+if(def.id==='witness'){cubeDim('reward: +25 upgrade points. the void respects your dedication.')}
 else{var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' upgrade');b.push('+2% points forever');if(b.length)cubeDim('reward: '+b.join(', ')+'.')}
 return true;
 }
@@ -2313,7 +2313,7 @@ achSave(s);
 try{achRetro()}catch(e){}
 try{achRefresh()}catch(e){}
 cubePrint('the void hands you '+n+' achievements. ('+(total-n)+' already held. '+total+' total.)');
-cubeDim('all paid. the void respects your adminhood. (it does not respect you.)');
+cubeDim('all paid. the void respects your adminhood.');
 return true}};
 voidScriptLang['weather']={help:'weather <rain|snow|off|auto> — change weather',fn:function(a){
 var t=(a[0]||'').toLowerCase();
@@ -2324,7 +2324,7 @@ var TITLE_MAP={intruder:null,stargazer:'stargazer',cartographer:'cartographer',e
 function titleUnlocked(t){try{if(t==='intruder')return true;var id=TITLE_MAP[t];if(!id)return false;var s=achSet();return s.indexOf(id)!==-1}catch(e){return false}}
 function titleWorn(){try{return localStorage.getItem('cube_title')||''}catch(e){return ''}}
 var FISH_TABLE=[
-{n:'old boot',w:22,f:'smells like 1998. the void accepts it. (it does not want it.)'},
+{n:'old boot',w:22,f:'smells like 1998. the void accepts it.'},
 {n:'static clump',w:20,f:'it hums. do not lick it.'},
 {n:'landlords invoice',w:12,f:'past due. everything is past due.'},
 {n:'a smaller door',w:10,f:'it opens to an even smaller door. doors all the way down.'},
@@ -2415,7 +2415,7 @@ var u=String((a&&a[0])||'').replace(/^["']+|["']+$/g,'').trim();
 if(!u){var cur=bnURL();cubePrint(cur?('linked: '+cur):'unlinked. the void is a singleplayer experience now. (bottlenet <url> to re-link)');return true}
 if(u==='off'){try{localStorage.setItem('cube_bn_url','off')}catch(e){}cubePrint('unlinked. bottles now float alone.');return true}
 if(u==='default'){try{localStorage.removeItem('cube_bn_url')}catch(e){}cubePrint('linked: '+BN_DEFAULT);return true}
-if(u.indexOf('https://')!==0){cubeError('https only. the void has standards. (low ones, but they exist.)');return true}
+if(u.indexOf('https://')!==0){cubeError('https only. the void has standards.');return true}
 u=u.replace(/\/+$/,'');
 try{localStorage.setItem('cube_bn_url',u)}catch(e){}
 cubePrint('linked. be nice. everything is moderated.');
@@ -2472,7 +2472,7 @@ cubePrint('title worn: ['+want+']. looking sharp. (objectively.)');
 return true}};
 voidScriptLang['pet']={help:'pet - pet the cube',fn:function(){
 var n=0;try{n=parseInt(localStorage.getItem('cube_pets')||'0',10)||0;n++;localStorage.setItem('cube_pets',String(n))}catch(e){}
-var lines=['...purring detected. disgusting. (do not stop.)','the cube leans into it. the cube has no lean. it leans.','static rises 4 percent. scientists are baffled. (there are no scientists.)','core: noted. the cube likes you. do not let it go to your head.'];
+var lines=['...purring detected. disgusting.','the cube leans into it. the cube has no lean. it leans.','static rises 4 percent. scientists are baffled.','core: noted. the cube likes you. do not let it go to your head.'];
 cubePrint(lines[(n-1)%lines.length]+(n>=100?' (100. soft hands.)':' ('+n+'/100)'));
 if(n>=100){try{if(typeof ach==='function')ach('pet100')}catch(e){}}
 return true}};
@@ -3366,9 +3366,9 @@ var _coreOrbMsgs=[
 "you were not meant to see the machinery.",
 "obj knows you unlocked this.",
 "he thinks i cannot read his pulse. i can.",
-"jbo yells through the pipes. he means well. (mostly.)",
+"jbo yells through the pipes. he means well.",
 "the core does not render. it remembers.",
-"do not touch the orb. (you cannot.)",
+"do not touch the orb.",
 "poke all you want. the shell does not bruise.",
 "from here the terminal looks like a toy.",
 "the inner cubes are nervous today.",
@@ -4376,7 +4376,7 @@ if(!last){cubePrint('obj: ...new intruder.');cubeDim('obj: i will pretend to lea
 var gap=Math.floor((now-last)/1000),line;
 if(gap<90)line='obj: back already? that was '+Math.max(gap,1)+' seconds. i counted.';
 else if(gap<3600)line='obj: gone '+Math.floor(gap/60)+' minutes. the cube counted.';
-else if(gap<86400){var h=Math.floor(gap/3600);line='obj: gone '+h+' hour'+(h===1?'':'s')+'. i kept your seat warm. (it is still cold.)'}
+else if(gap<86400){var h=Math.floor(gap/3600);line='obj: gone '+h+' hour'+(h===1?'':'s')+'. i kept your seat warm.'}
 else{var dd=Math.floor(gap/86400);line='obj: you were gone for '+dd+' day'+(dd===1?'':'s')+'. do not do it again. (do it again.)'}
 cubePrint(line);
 cubeDim('obj: visit #'+(typeof visitCount!=='undefined'?visitCount:'?')+'. the void keeps receipts.');
@@ -4592,7 +4592,7 @@ if(id==='term1')window._skillFastBoot=true;
 if(id==='term2'){
 window._skillBonusPkgs=2;
 pkgs['rootshell']={name:'rootshell',desc:'cached root tools',size:'2KB',
-onInstall:function(){pkgEffects.rootshell=true;cubePrint('rootshell: uid=0. you feel powerful. (you are not.)');cubePrint('rootshell: whoami/id respond as root. eval stays admin.')},
+onInstall:function(){pkgEffects.rootshell=true;cubePrint('rootshell: uid=0. you feel powerful.');cubePrint('rootshell: whoami/id respond as root. eval stays admin.')},
 onRemove:function(){delete pkgEffects.rootshell;cubePrint('rootshell: dropped. you are an intruder again.')}};
 pkgs['signal-sniffer']={name:'signal-sniffer',desc:'hidden channel decoder',size:'6KB',
 onInstall:function(){pkgEffects.signalSniffer=true;cubePrint('signal-sniffer: decoding... 3 channels found. all of them are obj.');cubePrint('signal-sniffer: transmissions now carry decoded channel tags.')},
@@ -5719,8 +5719,8 @@ st.innerHTML='<div class="ngProp big" id="ngp_err">ERROR 404: GAME STILL NOT FOU
 '<div class="ngProp" id="ngp_ok">[ OK ]</div>'+
 '<div class="ngProp" id="ngp_load"><div class="ngBarBg"><div class="ngBarFill"></div></div><div class="ngBarLbl">loading game... 99%</div></div>'+
 '<div class="ngProp" id="ngp_img"><div class="ngBrokenImg"><div class="ngBISun"></div><div class="ngBIMtn"></div></div><div>broken image (again)</div></div>'+
-'<div class="ngProp" id="ngp_cur"><div class="ngArrowBadge">→</div><div>click HERE (do not) (again)</div></div>'+
-'<div class="ngProp" id="ngp_start">[ START GAME ] (still broken)</div>'+
+'<div class="ngProp" id="ngp_cur"><div class="ngArrowBadge">→</div><div>click HERE again</div></div>'+
+'<div class="ngProp" id="ngp_start">[ START GAME ]</div>'+
 '<div class="ngProp" id="ngp_hint">hint system v2: OUT OF ORDER</div>'+
 '<div class="ngProp" id="ngp_ads">[ AD: click to win FREE skins (again) ]</div>'+
 '<div class="ngProp" id="ngp_cookie"><div class="ngCookie"></div><div>accept all cookies? (again)</div></div>';
@@ -5754,7 +5754,7 @@ st.innerHTML='<div class="ngProp big" id="ngp_err">ERROR 404: GAME NOT FOUND</di
 '<div class="ngProp" id="ngp_ok">[ OK ]</div>'+
 '<div class="ngProp" id="ngp_load"><div class="ngBarBg"><div class="ngBarFill"></div></div><div class="ngBarLbl">loading game... 99%</div></div>'+
 '<div class="ngProp" id="ngp_img"><div class="ngBrokenImg"><div class="ngBISun"></div><div class="ngBIMtn"></div></div><div>broken image</div></div>'+
-'<div class="ngProp" id="ngp_cur"><div class="ngArrowBadge">→</div><div>click HERE (do not)</div></div>'+
+'<div class="ngProp" id="ngp_cur"><div class="ngArrowBadge">→</div><div>click HERE</div></div>'+
 '<div class="ngProp" id="ngp_start">[ START GAME ] (broken)</div>'+
 '<div class="ngProp" id="ngp_hint">hint system: OUT OF ORDER</div>'+
 '<div class="ngProp" id="ngp_ads">[ AD: click to win FREE skins ]</div>'+
@@ -5787,7 +5787,7 @@ area.innerHTML='<div class="ngProp" id="ngManualBox">THERE IS NO CUBE \u2014 OWN
 '3. THE CORE. do not poke the core. if the core is poked, see section 2.<br><br>'+
 '4. TROUBLESHOOTING. problem: walls have graffiti. solution: cubecheck. problem: obj is talking. solution: wait. problem: jbo is yelling. solution: there is none. jbo lives here.<br><br>'+
 '5. WARRANTY. void if read. you just read it. congratulations.<br><br>'+
-'6. INDEX. see: clicking (page 1), core (page 1), patience (not included).<br><br>'+
+'6. INDEX. see: clicking (page 1), core (page 1), patience is not included.<br><br>'+
 'YOU HAVE REACHED THE BOTTOM. the NEXT button works now. do not tell anyone it was ever locked.</div>'+
 '<div id="ngSub">STEP 0: read the manual. scroll to unlock NEXT.</div>'+
 '<button id="ngManualNext" class="ngLockedBtn">NEXT (locked)</button>';
@@ -5899,7 +5899,7 @@ ngAfterSpeech(function(){if(ngActive)ngShowChapter(3)},800);
 }
 function ngChapter3(st){
 ngCoreOpened={};ngCorePokes=0;
-st.innerHTML='<div id="ngSub">the core is in here. it is not. (it is.)</div><div id="ngTutArea"></div>';
+st.innerHTML='<div id="ngSub">the core is in here.</div><div id="ngTutArea"></div>';
 ngSay('...how did you get in here. no. NO. there is nothing behind this curtain. go back.');
 ngSay('...you are still here. FINE. look, but DO NOT touch anything.');
 ngBoxShow(1);
@@ -6579,7 +6579,7 @@ function ngRiftShapes(){
 var st=document.getElementById('ngStage');if(!st||!ngActive)return;
 ngRiftLoc='shapes';
 ngShapesCaught=0;
-st.innerHTML='<div id="ngSub">catch 3 runaway shapes. they bite. (they do not bite.)</div><div id="ngTutArea"></div>';
+st.innerHTML='<div id="ngSub">catch 3 runaway shapes. they bite.</div><div id="ngTutArea"></div>';
 ngSay('shape drift. they run, you click. nature.');
 var defs=[{id:'ngs_c',cls:'ngRShape circ'},{id:'ngs_t',cls:'ngRShape tri'},{id:'ngs_s',cls:'ngRShape sq'}];
 for(var i=0;i<defs.length;i++){
@@ -6839,7 +6839,7 @@ ngBossPhase='core';ngBossBusy=true;ngCoreHits=0;
 var orb=ngHasNothingCore();
 ngSay('the CORE. MINE this time. it HEALS me. do the math.');
 ngBossMid('<div id="ngBossCore" class="'+(orb?'ngCoreVoid':'ngCoreOrb')+'">'+(orb?'\u2205':'')+'</div>');
-var clines=['do NOT touch the—','it is MINE.','STOP IT.','...it likes you. BETRAYAL.','FINE. TAKE IT. (do not take it.)'];
+var clines=['do NOT touch the—','it is MINE.','STOP IT.','...it likes you. BETRAYAL.','FINE. TAKE IT.'];
 var c=document.getElementById('ngBossCore');if(!c)return;
 ngDodge(c,5);
 c.onclick=function(){
@@ -7040,7 +7040,7 @@ var door2=document.getElementById('ngDoor');
 if(door2)door2.onclick=function(){
 if(ngTalking())return;
 try{ngHurry()}catch(e){}
-ngSay('...ugh. FINE. act 2. do not touch the signal. (you will touch the signal.)');
+ngSay('...ugh. FINE. act 2. do not touch the signal.');
 ngAfterSpeech(function(){if(ngActive)ngShowChapter(11)},800);
 };
 },1500);
@@ -7085,7 +7085,7 @@ ngTuneTarget=15+Math.floor(Math.random()*71);
 var guard=0;
 do{ngTuneBand=Math.floor(Math.random()*101);guard++}while(Math.abs(ngTuneBand-ngTuneTarget)<25&&guard<50);
 }
-var ngTuneRoasts=['wrong. obviously.','no. try the OTHER direction. (50/50. you will still fail.)','my grandmother tunes faster. she is the void.','that was not a lock. that was a suggestion.','the band moved. the signal did not. think.','SOUP. you made soup again.'];
+var ngTuneRoasts=['wrong. obviously.','no. try the OTHER direction.','my grandmother tunes faster. she is the void.','that was not a lock. that was a suggestion.','the band moved. the signal did not. think.','SOUP. you made soup again.'];
 function ngTuneClarity(){return Math.max(0,100-Math.round(Math.abs(ngTuneBand-ngTuneTarget)/50*100))}
 function ngTuneRender(){
 var line=document.getElementById('ngTuneLine');
@@ -7391,7 +7391,7 @@ if(ngWrongCode.length<4){ngSay('4 digits. COUNT.');return}
 var now=new Date();
 var code=String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
 if(ngWrongCode===code){try{ngSfx('win')}catch(e){}ngChapter12Break()}
-else{ngSay('wrong. the clock disagrees. the clock is never wrong. (except about everything.)');try{ngSfx('buzz')}catch(e){}ngWrongCode='';ngWrongSlots()}
+else{ngSay('wrong. the clock disagrees. the clock is never wrong.');try{ngSfx('buzz')}catch(e){}ngWrongCode='';ngWrongSlots()}
 return}
 if(ngWrongCode.length>=4)return;
 ngWrongCode+=b;try{ngSfx('pop')}catch(e){}ngWrongSlots();
@@ -7414,7 +7414,7 @@ var door=document.getElementById('ngDoor');
 if(door)door.onclick=function(){
 if(ngTalking())return;
 try{ngHurry()}catch(e){}
-ngSay('...ugh. FINE. blackout. the dark eats light there. stay close. (not too close.)');
+ngSay('...ugh. FINE. blackout. the dark eats light there. stay close.');
 ngAfterSpeech(function(){if(ngActive)ngShowChapter(13)},800);
 };
 }
@@ -7573,7 +7573,7 @@ var st=document.getElementById('ngStage');if(!st)return;
 try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(35*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 st.innerHTML='<div id="ngEndTitle">LIGHTS ON</div><div id="ngSub">+35 skill points. (overtime.)</div><div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ SIGNAL LOST ]</div></div><div id="ngSub">CHAPTER 14: SIGNAL LOST</div>';
 ngSay('lights on. you found... things. adequate.');
-ngSay('core sends her regards. (she does not. she does not know you yet.)');
+ngSay('core sends her regards.');
 var door=document.getElementById('ngDoor');
 if(door)door.onclick=function(){
 if(ngTalking())return;
@@ -7672,7 +7672,7 @@ var door=document.getElementById('ngDoor');
 if(door)door.onclick=function(){
 if(ngTalking())return;
 try{ngHurry()}catch(e){}
-ngSay('...ugh. FINE. interloper. do not answer it. (you will answer it.)');
+ngSay('...ugh. FINE. interloper. do not answer it.');
 ngAfterSpeech(function(){if(ngActive)ngShowChapter(15)},800);
 };
 }
@@ -7736,7 +7736,7 @@ if(ngHard)ngTQs.push({q:'hard one. what is the terminal speed of a jbo scream?',
 ngTQs.push({q:'last one. do you like me?',
 opts:['yes','no','what are you'],
 ok:null,yes:'',no:null,
-rigged:['...correct. (there was no wrong answer. there is never a wrong answer with me.)','liar. correct anyway. you came back, did not you.','rude. correct. i am whatever knocked.']});
+rigged:['...correct.','liar. correct anyway. you came back, did not you.','rude. correct. i am whatever knocked.']});
 }
 function ngTumorAsk(){
 if(!ngActive||ngChDone)return;
@@ -7762,7 +7762,7 @@ ngTumorAsk();
 }else{
 ngTfails++;try{if(typeof ngMistake==='function')ngMistake()}catch(e){}
 if(ngHard)Q.opts=ngTumorShuffle(Q.opts.slice());
-var smug=ngTfails===1?'...wrong already? we just started.':(ngTfails===2?'wrong again. the options moved. (they did not. you are just wrong.)':'wrong. '+(typeof Q.no==='function'?Q.no():'try again.'));
+var smug=ngTfails===1?'...wrong already? we just started.':(ngTfails===2?'wrong again. the options moved.':'wrong. '+(typeof Q.no==='function'?Q.no():'try again.'));
 ngTumorSay(smug,function(){if(ngActive)ngTumorAsk()});
 }
 });
@@ -7793,7 +7793,7 @@ st.innerHTML='<div id="ngSub">CHAPTER 15: INTERLOPER (do not answer it.)</div>'+
 '<div id="ngTOpts" style="margin:10px 0"></div>'+
 '<div id="ngSub" style="margin-top:8px">it asks. you answer. it already knows.</div>';
 try{ngSfx('static')}catch(e){}
-ngSay('...do not answer it. (you will answer it.)');
+ngSay('...do not answer it.');
 ngTumorSay('well well. the intruder walks in. >:',function(){
 if(!ngActive||ngChDone)return;
 ngTumorSay('obj talks about you. constantly. embarrassing for him.',function(){
@@ -7815,7 +7815,7 @@ var door=document.getElementById('ngDoor');
 if(door)door.onclick=function(){
 if(ngTalking())return;
 try{ngHurry()}catch(e){}
-ngSay('...ugh. FINE. echo. it is pretending to be me. it is bad at it. (it is not bad at it.)');
+ngSay('...ugh. FINE. echo. it is pretending to be me. it is bad at it.');
 ngAfterSpeech(function(){if(ngActive)ngShowChapter(16)},800);
 };
 }
@@ -7993,7 +7993,7 @@ else if(kind==='verdict'){
 line=(detail==='both')?'no. NEITHER is his. both of those are mine. learn to look. >:':'no. BOTH are his. he said both. learn to look. >:';
 }
 else{
-var L=['ha. >:','wrong. that one is HIS. it just sounds like me. do not get used to it. >:','wrong again. the options moved. (they did not. you are simply wrong.)','no. your ears are decoration. >:'];
+var L=['ha. >:','wrong. that one is HIS. it just sounds like me. do not get used to it. >:','wrong again. the options moved.','no. your ears are decoration. >:'];
 line=L[Math.min(ngEchoFails-1,L.length-1)];
 }
 if(ngEchoStrikes>=(ngHard?2:3)){
@@ -8554,7 +8554,7 @@ if(!ngMornBatch.length){ngMornBatch=ngMornGen(3);ngMornTraceReset()}
 var it=ngMornBatch[ngMornItem];if(!it){ngMornItem=0;it=ngMornBatch[0]}
 var h='<div style="color:#c8a0d0;font-family:Georgia,serif;font-size:14px;letter-spacing:2px;text-align:center;margin:8px 0 4px">ORIENTATION \u00b7 item '+(ngMornItem+1)+'/3</div>';
 h+=ngMornRulesHtml()+ngMornCardHtml(it)+ngMornBinsHtml();
-h+='<div style="color:#4a5a6a;font-family:Consolas,monospace;font-size:10px;text-align:center;margin-top:12px">read the poster. file the mail. the poster does not lie (yet).</div>';
+h+='<div style="color:#4a5a6a;font-family:Consolas,monospace;font-size:10px;text-align:center;margin-top:12px">read the poster. file the mail. the poster does not lie.</div>';
 m.innerHTML=h;
 ngMornBindBins(ngMornAnswer);
 }
@@ -8900,7 +8900,7 @@ var ngQuiz21Idx=0;
 var ngQuiz21WrongI=0;
 var ngQuiz21Rants=[
 [['obj','WRONG.'],['jbo','DUN DUN.'],['obj','the correct answer was load-bearing. try again.']],
-[['obj','wrong. the studio audience groans. (there is no audience. that was ME. i groaned.)'],['jbo','DUN DUN DUN. (EXTRA DUN. FOR SHAME.)']],
+[['obj','wrong. the studio audience groans.'],['jbo','DUN DUN DUN. (EXTRA DUN. FOR SHAME.)']],
 [['land','incorrect. that wrong answer has been ADDED TO YOUR BILL.'],['obj','everything is added to the bill. the bill is just... life. try again.']]
 ];
 function ngChapter21(st){
@@ -9006,7 +9006,7 @@ var ngNoirSuspects=[
 {id:'lord',name:'THE LANDLORD',q:[
 ['land','i was BILLING at midnight. the lobby. the street. the concept of midnight. all billed.'],
 ['obj','the ledger backs him up. the ledger is his son AND his alibi.'],
-['land','and my ledger NEVER lies. (it lies CONSTANTLY. but not about THIS.)'],
+['land','and my ledger NEVER lies.'],
 ['obj','the paperwork is innocent. i hate when the paperwork is innocent. it makes me feel... unneeded.']]}
 ];
 function ngChapter22(st){
@@ -9053,7 +9053,7 @@ for(var b=0;b<btns.length;b++){(function(btn){
 btn.onclick=function(){
 if(!ngActive||ngChDone||ngTalking())return;
 var id=btn.getAttribute('data-sid');
-if(ngNoirExamined[id]){ngSay('already examined. it has not changed. evidence never changes. (it changed once. we do not talk about it.)');return}
+if(ngNoirExamined[id]){ngSay('already examined. it has not changed. evidence never changes.');return}
 var spot=null;for(var j=0;j<ngNoirSpots.length;j++){if(ngNoirSpots[j].id===id)spot=ngNoirSpots[j]}
 if(!spot)return;
 ngSaySeq(spot.q,function(){if(!ngActive)return;ngNoirExamined[id]=true;ngNoirScene()});
@@ -9114,7 +9114,7 @@ if(id==='bell'){ngSaySeq([
 ],function(){if(ngActive)ngChapter22Done()})}
 else if(id==='widow'){try{ngSfx('buzz')}catch(e){}ngSaySeq([['obj','her? she is a WINDOW. she cannot lie. she can only... reflect.'],['obj','(do not laugh. pick again.)']],function(){if(ngActive)ngNoirAccuse()})}
 else if(id==='plant'){try{ngSfx('buzz')}catch(e){}ngSaySeq([['obj','the plant? its alibi is the SUN, pal. the sun does not lie for anybody.']],function(){if(ngActive)ngNoirAccuse()})}
-else{try{ngSfx('buzz')}catch(e){}ngSaySeq([['land','me? MY alibi is PAPERWORK.'],['obj','...nobody fakes paperwork. (he fakes paperwork. but not this time. pick again.)']],function(){if(ngActive)ngNoirAccuse()})}
+else{try{ngSfx('buzz')}catch(e){}ngSaySeq([['land','me? MY alibi is PAPERWORK.'],['obj','...nobody fakes paperwork.']],function(){if(ngActive)ngNoirAccuse()})}
 };
 })(btns[b])}
 }
@@ -9159,7 +9159,7 @@ var ngDateScenes=[
 {t:'share the popcorn',h:1,r:[['obj','popcorn: shared. hands touch IN the bucket. the bucket blushes. EVERYTHING blushes tonight.']]},
 {t:'explain the plot loudly',h:0,r:[['obj','the plot: explained. loudly. an usher shushes. the exit takes YOUR side. love means never siding with ushers.'],['obj','the SAME waiter is here. he followed you. "lovebirds??" he mouths. security is called. on HIM.']]},
 {t:'cry before it starts',h:-1,r:[['jbo','TACTICAL WEEPING. RESPECT.'],['obj','crying occurs during the PREVIEWS. the exit scoots one seat away. one seat. measured.']]}]},
-{exit:'these are my parents. mama door. papa trapdoor. be yourself. (do NOT be yourself.)',opts:[
+{exit:'these are my parents. mama door. papa trapdoor. be yourself.',opts:[
 {t:'firm handshake with mama door',h:1,r:[['obj','mama door CRIES. "so polite," she hinges. papa trapdoor nods. trapdoors cannot smile. he is smiling.']]},
 {t:'small talk about hinges',h:0,r:[['obj','hinges: discussed. for an hour. it goes... fine. hinges are neutral territory. like switzerland. like soup.']]},
 {t:'challenge papa trapdoor to a duel',h:-1,r:[['jbo','THE DUEL RETURNS. IT NEVER LEFT.'],['obj','papa trapdoor ACCEPTS. it is a trap. his NAME is trapdoor. the exit calls the whole thing off.']]}]}
@@ -9172,7 +9172,7 @@ ngSaySeq([
 ['jbo','I BROUGHT CHOCOLATES. THEY ARE SHAPED LIKE FISTS.'],
 ['obj','the exit is SINGLE. you are going to DATE the exit. five scenes. do not embarrass us.'],
 ['jbo','MY STRATEGY: BE YOURSELF. BUT VIOLENT.'],
-['obj','scene one. the exit is nervous. be gentle. (jbo: do not be gentle.)'],
+['obj','scene one. the exit is nervous. be gentle.'],
 ['obj','FIVE scenes. dinner. stars. a movie. the PARENTS. pace yourself.']
 ],function(){if(ngActive)ngDateScene()});
 }
@@ -9207,7 +9207,7 @@ if(ngDateHearts>=(ngHard?5:4)){ngSaySeq([
 ['jbo','I AM NOT CRYING. I AM LEAKING.'],
 ['obj','mama door APPROVES. papa trapdoor shakes your hand. the trap does NOT go off. that is trust.'],
 ['obj','the waiter slow-claps. "lovebirds," he says. no question marks this time.'],
-['obj','five dates. four-plus hearts. the landlord sends a fruit basket. (there is no landlord in this chapter. the basket is from ME.)']
+['obj','five dates. four-plus hearts. the landlord sends a fruit basket.']
 ],function(){if(ngActive)ngChapter23Done()})}
 else if(ngDateHearts>=(ngHard?3:2)){ngSaySeq([
 ['obj','FRIEND END. the exit likes you. as a friend. a distant one. in another dimension.'],
@@ -9233,7 +9233,7 @@ ngChDone=true;
 var st=document.getElementById('ngStage');if(!st)return;
 st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 24: 8 BITS OF NOWHERE</div>';
 ngSaySeq([
-['obj','romance: concluded. the exit will call. (it will not call. it has no phone.)'],
+['obj','romance: concluded. the exit will call.'],
 ['jbo','I ATE THE FIST CHOCOLATES. WORTH IT.'],
 ['obj','next: everything is squares. everything has ALWAYS been squares.'],
 ['obj','chapter 24: 8 bits of nowhere. go on.']
@@ -9345,7 +9345,7 @@ ngAfterSpeech(function(){if(ngActive)ngShowChapter(25)},800);
 }
 var ngBakeIdx=0,ngBakePos=0,ngBakeDir=1,ngBakeIv=null,ngBakeGen=0,ngBakeMiss=0;
 var ngBakeItems=[
-{name:'flour of forgetting',zone:[37,63],speed:1.6,react:[['core','my flour is already sifted. sifted TWICE. (she is lying. there is no flour.)'],['obj','core is baking BLIND. no recipe. no fear. no flour. incredible.']]},
+{name:'flour of forgetting',zone:[37,63],speed:1.6,react:[['core','my flour is already sifted. sifted TWICE.'],['obj','core is baking BLIND. no recipe. no fear. no flour. incredible.']]},
 {name:'sugar (stolen)',zone:[39,61],speed:1.9,react:[['obj','where did the sugar come from. do not answer. i know where it came from. (the landlord.)'],['core','i added extra salt to YOUR bowl. affectionately.']]},
 {name:'yeast of the void',zone:[41,59],speed:2.2,react:[['obj','the yeast is RISING. it whispers as it rises. classic yeast behavior.'],['core','my dough is rising FASTER. it fears me. correct response.']]},
 {name:'butter (also stolen)',zone:[43,57],speed:2.5,react:[['obj','the butter melts. it spells something. "HI." friendly butter.'],['core','my butter spelled "TRY HARDER." rude butter. motivated me anyway.']]},
@@ -9416,7 +9416,7 @@ ngSaySeq([
 ['core','do not open the oven. DO NOT. the heat is load-bearing.'],
 ['obj','...the smell. butter. sugar. exit. it smells like VICTORY. (and exit.)'],
 ['obj','DING.'],
-['jbo','TASTE TESTER HERE. I HAVE A CLEAN SPOON. (he does not have a clean spoon.)'],
+['jbo','TASTE TESTER HERE. I HAVE A CLEAN SPOON.'],
 ['obj','jbo tastes. he chews. the tent holds its breath. the tent has no lungs. it holds them anyway.'],
 ['jbo','CRUNCHY. LIKE JUSTICE. ...needs salt.']
 ],function(){if(ngActive)ngChapter25Done()});
@@ -9451,7 +9451,7 @@ ngAfterSpeech(function(){if(ngActive)ngShowChapter(26)},800);
 };
 }
 var ngDark26Flash=false,ngDark26Scares=0,ngDark26Door=1;
-var ngDark26Whispers=['...did the dark just move.','...do not think about the grue.','...the dark is also afraid. of YOU. (it is not.)','...shh. the walls are listening. the walls pay rent.','...if you see teeth, those are LOAD-BEARING teeth.'];
+var ngDark26Whispers=['...did the dark just move.','...do not think about the grue.','...the dark is also afraid of YOU.','...shh. the walls are listening. the walls pay rent.','...if you see teeth, those are LOAD-BEARING teeth.'];
 var ngDark26WhispI=0;
 var ngDark26Baits=['FREE HUG','DO NOT PRESS','MYSTERY CANDY','DEFINITELY EXIT','CLICK FOR GHOST'];
 var ngDark26Mocks=['JUMPSCARED. classic. the dark gives you a 4 out of 10.','that was the BAIT. the bait is load-bearing. try the small one.','you clicked it. you KNEW. everybody knew. the small button. SMALL.'];
@@ -9495,7 +9495,7 @@ if(btn.getAttribute('data-dt')==='flash'){
 ngDark26Flash=true;try{ngSfx('coin')}catch(e){}
 ngSaySeq([
 ['core','LIGHT. OH THANK THE VOID. LIGHT.'],
-['obj','the flashlight. 60 watts of pure courage. the dark RECEEDS. (it is still there. it is always there.)'],
+['obj','the flashlight. 60 watts of pure courage. the dark RECEEDS.'],
 ['core','okay. okay. i can do this. what is next.'],
 ['obj','next: the dark fights back. three rounds. it will offer BAIT. take the small button. HOLD STILL.']
 ],function(){if(ngActive)ngDark26Scare()});
@@ -9571,7 +9571,7 @@ ngSaySeq([
 ['jbo','I FOUGHT OFF SIX GHOSTS. WITH MY BARE HANDS. YOU ARE WELCOME.'],
 ['core','...you were hiding in the lobby.'],
 ['jbo','TACTICAL HIDING. WHILE FIGHTING. SIX GHOSTS.'],
-['obj','sure, jbo. six ghosts. polish your medal. (there is no medal.)']
+['obj','sure, jbo. six ghosts. polish your medal.']
 ],function(){if(ngActive)ngChapter26Done()});
 }else{
 var gags=['a broom closet. the broom judges. the door: closed.','a wall. just a wall. stared at. stared back. lost.','the landlord\u2019s mailbox. FULL. untouched. NOBODY touches it.','a stairwell. it goes UP. it goes DOWN. it goes... sideways. declined.','a mirror. the reflection waves FIRST. rude. door: closed.'];
@@ -9589,7 +9589,7 @@ ngChDone=true;
 var st=document.getElementById('ngStage');if(!st)return;
 st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 27: OBJ V. EVERYBODY</div>';
 ngSaySeq([
-['obj','horror: survived. the dark sends its regards. (it does not. it is suing.)'],
+['obj','horror: survived. the dark sends its regards.'],
 ['core','i am sleeping with the lights on for a month. the lights are ALSO scared.'],
 ['jbo','SIX GHOSTS. TELL THEM, OBJ.'],
 ['obj','six ghosts. sure. next: COURT. we are being SUED.'],
@@ -9622,18 +9622,18 @@ ngSaySeq(lines);
 }
 }
 var ngCourtStmts=[
-{bad:true,t:'EXHIBIT: MY FEELINGS. THEY ARE HURT. LOOK AT THEM.',ok:[['land','SUSTAINED. feelings are NOT exhibits. (mine are. overruled for ME.)'],['obj','the prosecution exhibits its feelings. noted. mocked.']]},
+{bad:true,t:'EXHIBIT: MY FEELINGS. THEY ARE HURT. LOOK AT THEM.',ok:[['land','SUSTAINED. feelings are NOT exhibits.'],['obj','the prosecution exhibits its feelings. noted. mocked.']]},
 {bad:false,t:'THE PLAINTIFFS PAID FULL PRICE FOR THE GAME. ...THE GAME WAS FREE.',ok:[['obj','ALLOWED. the prosecution just ended its own case. incredible work.'],['jbo','...OBJECTION TO MYSELF.']]},
 {bad:true,t:'I BRIBED THE JURY WITH FIST CHOCOLATES.',ok:[['land','SUSTAINED. bribery. the chocolates are CONFISCATED. (to my chambers.)'],['obj','the jury has been bribed AND un-bribed. net zero. moving on.']]},
 {bad:true,t:'THE WITNESS IS A COWARD AND A... A...',ok:[['land','SUSTAINED. finish your insults, counselor. or do not start them.'],['jbo','...A NICE PERSON. I REST.']]},
 {bad:false,t:'THE DEFENSE RESTS. ...WAIT. I AM THE PROSECUTION.',ok:[['obj','ALLOWED. the prosecution rests the DEFENSES case. i accept. we all accept.'],['land','noted. the record is CONFUSED. the record bills hourly.']]},
-{bad:true,t:'I CALL A RECESS. FOR NAP PURPOSES.',ok:[['land','SUSTAINED. court cannot nap. (court naps LATER. alone.)'],['obj','recess DENIED. the prosecution will nap in PRISON. (there is no prison. there is a lobby.)']]},
+{bad:true,t:'I CALL A RECESS. FOR NAP PURPOSES.',ok:[['land','SUSTAINED. court cannot nap. (court naps LATER. alone.)'],['obj','recess DENIED. the prosecution will nap in PRISON.']]},
 {hard:true,bad:true,t:'THE JUDGE OWES ME MONEY. ...UNRELATED.',ok:[['land','SUSTAINED. AND FALSE. AND TRUE. stricken. FINED.'],['obj','the prosecution fines ITSELF. i am barely needed here.']]},
 {hard:true,bad:true,t:'I OBJECT TO THE CONCEPT OF LUNCH.',ok:[['land','SUSTAINED. lunch is SACRED. do not speak of lunch.'],['jbo','...I WITHDRAW LUNCH.']]}
 ];
 var ngCourtActive=[];
 var ngCourtExhibits=[
-{id:'box',name:'EXHIBIT A: THE MISSING GAME (an empty box)',win:false,why:[['land','an empty box proves NOTHING. (it proves EVERYTHING. but not in COURT.)'],['obj','stricken. the box remains. the box is load-bearing.']]},
+{id:'box',name:'EXHIBIT A: THE MISSING GAME (an empty box)',win:false,why:[['land','an empty box proves NOTHING.'],['obj','stricken. the box remains. the box is load-bearing.']]},
 {id:'mem',name:'EXHIBIT B: THE PLAINTIFFS MEMORIES (also empty)',win:false,why:[['land','memories are HEARSAY. even empty ones. ESPECIALLY empty ones.'],['obj','the memories are thrown out. they land softly. they are empty.']]},
 {id:'deg',name:'EXHIBIT C: JBOS LAW DEGREE (crayon)',win:true,why:[['obj','crayon. CRAYON. the degree is in CRAYON.'],['land','...the prosecution is DISBARRED. effective nap-time.']]}
 ];
@@ -9645,7 +9645,7 @@ ngSaySeq([
 ['land','ALL RISE. (sit. standing bills extra.) court is NOW IN SESSION.'],
 ['obj','the honorable landlord presiding. the landlord owns the courtroom. the landlord owns the GAVEL.'],
 ['land','the audience charges: EMOTIONAL DAMAGES. there was NO GAME. they played NOTHING. they are DEVASTATED.'],
-['obj','i am the defendant. i am also the defense. the lawyer is ME. i passed the bar. (there is no bar. i limboed under it.)'],
+['obj','i am the defendant. i am also the defense. the lawyer is ME. i passed the bar.'],
 ['jbo','PROSECUTION HERE. I AM A REAL LAWYER. I HAVE A DEGREE. (he is holding it BACKWARDS.)'],
 ['land','prosecution: present your claims. defense: OBJECT to the bad ones. ALLOW the ones that help you. yes. some help you.'],
 ['obj','he is the worst lawyer alive. this is going to be FREE.'],
@@ -9669,7 +9669,7 @@ if(!ngActive||ngChDone||ngTalking())return;
 if(s.bad){ngSaySeq(s.ok,function(){if(!ngActive)return;ngCourtIdx++;ngCourtClaim()})}
 else{try{ngSfx('buzz')}catch(e){}ngCourtStrike([
 ['land','OVERRULED. that one HELPED you. take it back. FINED.'],
-['obj','do not object to GIFTS, counselor-me. noted. fined. (we can afford it. we cannot.)']
+['obj','do not object to GIFTS, counselor-me. noted. fined.']
 ])}
 };
 var al=document.getElementById('ngAllow');
@@ -9677,8 +9677,8 @@ if(al)al.onclick=function(){
 if(!ngActive||ngChDone||ngTalking())return;
 if(!s.bad){ngSaySeq(s.ok,function(){if(!ngActive)return;ngCourtIdx++;ngCourtClaim()})}
 else{try{ngSfx('buzz')}catch(e){}ngCourtStrike([
-['land','...you ALLOW that? FINE. stricken from the record. (it is NOT stricken. i am busy.)'],
-['obj','that one HURT us. object to it. loudly. with FEELING. (feelings are not exhibits.)']
+['land','...you ALLOW that? FINE. stricken from the record.'],
+['obj','that one HURT us. object to it. loudly. with FEELING.']
 ])}
 };
 }
@@ -9718,7 +9718,7 @@ ngSaySeq([
 ['land','VERDICT: for the DEFENSE. the audience is billed for wasting courts time. court adjourns FOREVER. (until act 4.)'],
 ['jbo','THIS IS NOT OVER. I WILL BE BACK. WITH A REAL DEGREE. (in crayon. again.)'],
 ['obj','case closed. the gavel falls. the gavel is also billed.'],
-['obj','next: space. the FINAL frontier. (it is not final. there are two chapters left.)'],
+['obj','next: space. the FINAL frontier.'],
 ['obj','chapter 28: star war. singular. go on.']
 ]);
 var door=document.getElementById('ngDoor');
@@ -9732,8 +9732,8 @@ ngAfterSpeech(function(){if(ngActive)ngShowChapter(28)},800);
 var ngPowIdx=0,ngPowVals=[0,0,0],ngPowReady=false;
 var ngPowRounds=[
 {power:10,mins:[4,3,1],rule:'everything at minimum or better.',check:function(v){return true},brief:[['jbo','SHIELDS AT MAX. ENGINES AT MAX. SNACKS AT MAX. MAX EVERYTHING.'],['obj','we have TEN power, jbo. TEN. the reactor is a AA battery.'],['land','toll nebula: every reroute BILLED. this briefing: BILLED.']]},
-{power:12,mins:[5,4,2],rule:'shields must EXCEED engines. (jbo insisted. it is in writing.)',check:function(v){return v[0]>v[1]},brief:[['jbo','THE SUN IS TALKING SMACK, CAPTAIN. SHIELDS UP.'],['obj','the sun is a STAR, jbo. it cannot talk smack. (it just did. shields it is.)'],['land','parsec 2. billing continues. the meter runs DURING battles. especially during battles.']]},
-{power:14,mins:[6,5,2],rule:'snacks EXACTLY 3. the crew is STRESSED.',check:function(v){return v[2]===3},brief:[['obj','morale is low. the crew demands EXACTLY 3 snacks. not 2. not 4. THREE.'],['jbo','I ATE ONE. FOR MORALE. (it did not help morale.)'],['obj','...recalculating. (the crew stares. the crew is SO stressed.)']]},
+{power:12,mins:[5,4,2],rule:'shields must EXCEED engines. (jbo insisted. it is in writing.)',check:function(v){return v[0]>v[1]},brief:[['jbo','THE SUN IS TALKING SMACK, CAPTAIN. SHIELDS UP.'],['obj','the sun is a STAR, jbo. it cannot talk smack.'],['land','parsec 2. billing continues. the meter runs DURING battles. especially during battles.']]},
+{power:14,mins:[6,5,2],rule:'snacks EXACTLY 3. the crew is STRESSED.',check:function(v){return v[2]===3},brief:[['obj','morale is low. the crew demands EXACTLY 3 snacks. not 2. not 4. THREE.'],['jbo','I ATE ONE. FOR MORALE.'],['obj','...recalculating. (the crew stares. the crew is SO stressed.)']]},
 {hard:true,power:16,mins:[7,6,2],rule:'HARD: shields EXACTLY 7. engines minimum. snacks minimum.',check:function(v){return v[0]===7},brief:[['land','HARD MODE toll: DOUBLE. the nebula respects ambition.'],['jbo','SEVEN SHIELDS. A LUCKY NUMBER. I INVENTED LUCK.'],['obj','do not invent numbers, jbo. allocate them.']]}
 ];
 var ngPowActive=[];
@@ -9750,7 +9750,7 @@ ngSaySeq([
 ['land','HOLD. this is a TOLL nebula. every parsec: BILLED. every reroute: BILLED.'],
 ['obj','of COURSE the void has toll nebulas. FINE. bill the ship. the ship is broke. (we are the ship.)'],
 ['jbo','GIVE WEAPONS EVERYTHING. WEAPONS ARE SHIELDS THAT KILL.'],
-['obj','three systems. shields. engines. snacks. one reactor. do the math. (jbo: do NOT do the math.)']
+['obj','three systems. shields. engines. snacks. one reactor. do the math.']
 ],function(){if(ngActive)ngPowBoard()});
 }
 function ngPowBoard(){
@@ -9813,7 +9813,7 @@ if(!ngTalking()){ngSay(ngPowRoasts[ngPowRoastI%ngPowRoasts.length]);ngPowRoastI+
 function ngPowFinal(){
 if(!ngActive||ngChDone)return;
 var st=document.getElementById('ngStage');if(!st)return;
-st.innerHTML='<div id="ngSub">STAR WAR - fire the cannon</div><div style="color:#e8e2d4;margin:12px 0">all power routed. the cannon is HOT. (it is a strongly-worded letter.)</div><div><button class="ngtopt" id="ngFire" style="font-size:18px;padding:12px 30px">FIRE</button></div>';
+st.innerHTML='<div id="ngSub">STAR WAR - fire the cannon</div><div style="color:#e8e2d4;margin:12px 0">all power routed. the cannon is HOT.</div><div><button class="ngtopt" id="ngFire" style="font-size:18px;padding:12px 30px">FIRE</button></div>';
 var f0=document.getElementById('ngFire');
 if(f0)f0.onclick=function(){
 if(!ngActive||ngChDone||ngTalking())return;
@@ -9821,9 +9821,9 @@ try{ngSfx('win')}catch(e){}
 ngChapter28Done();
 };
 ngSaySeq([
-['jbo','CANNON HOT. TARGET: THE SUN. (do not fire at the sun, jbo.)'],
+['jbo','CANNON HOT. TARGET: THE SUN.'],
 ['obj','firing the letter. "dear hostiles: no. love, us." ...direct hit.'],
-['land','battle: CONCLUDED. total bill: YES. the nebula thanks you. (it does not.)']
+['land','battle: CONCLUDED. total bill: YES. the nebula thanks you.']
 ],function(){if(ngActive){try{var fz=document.getElementById('ngFire');if(fz){fz.style.boxShadow='0 0 18px rgba(255,216,58,0.8)'}}catch(e){}}});
 }
 function ngChapter28Done(){
@@ -9839,7 +9839,7 @@ ngSaySeq([
 ['jbo','I DEFEATED THE SUN. TELL THE SUN I SAID THAT.'],
 ['land','the ship may go. the BILL stays. bills do not need ships.'],
 ['obj','next: the office. the forms. the final invoice.'],
-['obj','chapter 29: the rent is due. go on. bring exact change. (there is no exact change.)']
+['obj','chapter 29: the rent is due. go on. bring exact change.']
 ]);
 var door=document.getElementById('ngDoor');
 if(door)door.onclick=function(){
@@ -9860,8 +9860,8 @@ ngSaySeq([
 ['core','line 12: "void, assorted." what does that MEAN.'],
 ['land','it means: PAY.'],
 ['obj','...how much. total.'],
-['land','more than you have. EXACTLY more than you have. funny how that works. (it is not funny. it is calculated.)'],
-['jbo','THEN WE DO NOT PAY. I DECLARE... BANKRUPTCY. (he does not know what that is.)'],
+['land','more than you have. EXACTLY more than you have. funny how that works.'],
+['jbo','THEN WE DO NOT PAY. I DECLARE... BANKRUPTCY.'],
 ['core','if we cannot pay, he EVICTS the non-game. no more dimensions. no more... us.'],
 ['obj','...evict us. right. ...give us a minute.'],
 ['obj','you know what. maybe he should.'],
@@ -9939,13 +9939,13 @@ var st=document.getElementById('ngStage');if(!st)return;
 st.innerHTML='<div id="ngDoor"><div class="ngDoorFrame"><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngDoorPanel"></div><div class="ngKnob"></div></div><div class="ngDoorLabel">[ OPEN ]</div></div><div id="ngSub">CHAPTER 30: THERE WAS NEVER A CUBE</div>';
 if(ngNoliHeard){ngSaySeq([
 ['land','...adequate. RENT: FORGIVEN. the invoice: SHREDDED. this NEVER happened.'],
-['obj','heh. the landlord cried. (he did not cry. he LEAKED.)'],
+['obj','heh. the landlord cried.'],
 ['core','ONE chapter left. all of them. at once.'],
 ['obj','next: everything. everywhere. one stage.'],
 ['obj','chapter 30: there was never a cube. go on.']
 ])}else{ngSaySeq([
 ['land','no performance. no forgiveness. the bill DOUBLES. it is tradition.'],
-['obj','...fair. (it is not fair.)'],
+['obj','...fair.'],
 ['core','ONE chapter left. we finish it. then we come BACK for the song. (replay. DOORS. you know.)'],
 ['obj','chapter 30: there was never a cube. go on.']
 ])}
@@ -9965,17 +9965,17 @@ ngSaySeq([
 ['obj','...everybody. look up.'],
 ['jbo','THE SKY IS CRACKING. I CALLED IT. I CALL EVERYTHING.'],
 ['core','all nine dimensions. collapsing. into ONE stage. this is either the finale or a bug.'],
-['obj','finale. (probably.) everybody. in. here.'],
+['obj','finale. everybody. in. here.'],
 ['land','HOLD. the finale is a TENTH dimension. TENTH. billed. obviously.'],
 ['obj','landlord. you LIVE here now. (chapter 21. precedent.) that makes YOU a tenant.'],
 ['land','...i am a tenant. ...i owe MYSELF rent. ...PAID. (he pays himself. he looks ill.)'],
 ['core','the exits are here. all of them. every exit we dated, baked, lost, found.'],
-['jbo','I DATED ONE. IT WENT POORLY. I HAVE GROWN. (he has not grown.)'],
+['jbo','I DATED ONE. IT WENT POORLY. I HAVE GROWN.'],
 ['obj','tenants. exits. audience. (yes. YOU. come closer.)'],
 ['core','one stage. one choice. three doors.'],
-['land','two of them are load-bearing walls. the third is... also a wall. (pick anyway.)'],
+['land','two of them are load-bearing walls. the third is... also a wall.'],
 ['jbo','I PICK ALL THREE. AT ONCE. WITH MY FACE.'],
-['obj','pick ONE. the real one. (one is real this time. maybe.)']
+['obj','pick ONE. the real one.']
 ],function(){if(ngActive)ngFinDoors()});
 }
 function ngFinDoors(){
@@ -9998,7 +9998,7 @@ ngSaySeq([
 ['core','light. hallway. the smell of... nothing. clean nothing.'],
 ['jbo','I AM NOT CRYING. THE FINALE IS CRYING.'],
 ['land','...no charge. (he says nothing else. he just... nods.)'],
-['obj','credits. THREE. act 3 this time. official. FINAL. (mostly.)']
+['obj','credits. THREE. act 3 this time. official. FINAL.']
 ],function(){if(ngActive)ngChapterCredits3()});
 }else{
 var gags=['a wall. the wall from chapter 26 sends its regards.','act 4. it is EMPTY. nothing is built yet. the void apologizes.','a door that opens to THIS room. from the other side. do not think about it.'];
@@ -10021,7 +10021,7 @@ var ngCredits3=[
 {role:'RENT COLLECTED BY',names:['the landlord','his son (the ledger)']},
 {role:'BLAME',names:['act 4','you (again)']}
 ];
-var ngCred3SwapLines=['swapped. the credits wobble. the void pretends not to notice.','again. the union has been notified. (there is no union.)','the credits are now 40 percent wrong. perfect.'];
+var ngCred3SwapLines=['swapped. the credits wobble. the void pretends not to notice.','again. the union has been notified.','the credits are now 40 percent wrong. perfect.'];
 function ngCred3Find(name){for(var r=0;r<ngCredits3.length;r++){for(var n=0;n<ngCredits3[r].names.length;n++){if(ngCredits3[r].names[n]===name)return{r:r,n:n}}}return null}
 function ngCred3RoleFirst(role){for(var r=0;r<ngCredits3.length;r++){if(ngCredits3[r].role===role)return ngCredits3[r].names[0]||''}return ''}
 function ngChapterCredits3(){
@@ -10051,7 +10051,7 @@ function ngCred3Render(){
 try{
 var st=document.getElementById('ngStage');if(!st)return;
 var l0=document.getElementById('ngCredList');var sc=l0?l0.scrollTop:0;
-var h='<div id="ngSub">CREDITS 3. do not touch. (touch.)</div><div id="ngCredList">';
+var h='<div id="ngSub">CREDITS 3. do not touch.</div><div id="ngCredList">';
 for(var r=0;r<ngCredits3.length;r++){
 h+='<div class="ngCredRole">'+ngCredits3[r].role+'</div>';
 for(var n=0;n<ngCredits3[r].names.length;n++){
@@ -10174,7 +10174,7 @@ var p=ngMusic.play();if(p&&p.catch)p.catch(function(){});
 function ngMusicToggle(){ngMusicMode=(ngMusicMode+1)%(ngTracks.length+1);ngMusicApply()}
 var ngHintBoo=['ugh. fine. hint: ','you NEED a hint? ','hint (booo). ','oh, NOW you ask me. '];
 var ngHintBooCore=['of course. hint: ','a hint? for you? always. ','listen carefully. '];
-var ngHintRefuseCore=['no more hints. i believe in you. (i do not.)','that was the last one. you have everything you need. (you do not.)'];
+var ngHintRefuseCore=['no more hints. i believe in you.','that was the last one. you have everything you need.'];
 function ngHardToggle(){
 if(!ngHardUnlocked())return;
 ngHard=!ngHard;
@@ -10190,7 +10190,7 @@ ngMenuRefresh();
 }
 function ngMenuRefresh(){
 var p=document.getElementById('ngMenuProg');if(!p)return;
-try{var mt=document.getElementById('ngMenuTitle');if(mt)mt.textContent=ngAct2Done()?'NON-GAME MENU (ACT 2: COMPLETE)':'NON-GAME MENU (there is none)'}catch(e){}
+try{var mt=document.getElementById('ngMenuTitle');if(mt)mt.textContent=ngAct2Done()?'NON-GAME MENU (ACT 2: COMPLETE)':'NON-GAME MENU'}catch(e){}
 var t='';
 var chPct=Math.round(Math.max(0,Math.min(ngCurCh,ngMaxChapter))/Math.max(1,ngMaxChapter)*100);
 var chLine='chapter '+ngCurCh+'/'+ngMaxChapter+' \u00b7 '+chPct+'%';
@@ -10201,7 +10201,7 @@ else if(ngCurCh===2)t+='<br>tutorial step '+Math.max(1,ngTutStep)+'/4';
 else if(ngCurCh===3)t+='<br>objective: open the boxes. poke the core';
 else if(ngCurCh===4)t+='<br>objective: touch every setting';
 else if(ngCurCh===5)t+='<br>objective: fail NOOB_42';
-else if(ngCurCh===6)t+='<br>objective: delete the towers (or watch)';
+else if(ngCurCh===6)t+='<br>objective: delete the towers';
 else if(ngCurCh===7){var rd=(ngRiftDone.f2p?1:0)+(ngRiftDone.checker?1:0)+(ngRiftDone.shapes?1:0)+(ngRiftDone.mimic?1:0);t+='<br>objective: close 4 rifts ('+rd+'/4)'}
 else if(ngCurCh===8)t+='<br>objective: survive jbo';
 else if(ngCurCh===9)t+='<br>objective: defeat obj';
@@ -10497,7 +10497,7 @@ var ngDreamLoop=0,ngDreamSeed=null,ngDreamLong=false,ngDreamQueue=[0,1,2];
 var ngDreamKills=[
 {t:'STATIC INJECTION',killer:'OBJ',d:'obj injects raw static. your organs rust from the inside out.',talk:['hold still. this will hurt. (that is the point.)','rusting. lovely. you wear decay well.'],fx:'ngDreamRust',failBtn:'DON\u2019T INJECT ME',fail:'he injects you anyway. rude efficiency.'},
 {t:'BEATDOWN',killer:'OBJ',d:'the furniture disagrees with you. all of it. at once.',talk:['the void has furniture. it is angry furniture.','stay down. the floor missed you.'],fx:'ngDreamVig',failBtn:'DODGE',fail:'the furniture predicts. it read your file.'},
-{t:'SHRED',killer:'OBJ',d:'filed under VOID. the shredder accepts.',talk:['you filed yourself. efficient.','management sends regards. (it does not.)'],fx:'ngDreamShred',failBtn:'HOLD ONTO SOMETHING',fail:'you hold onto the shredder. mistake.'},
+{t:'SHRED',killer:'OBJ',d:'filed under VOID. the shredder accepts.',talk:['you filed yourself. efficient.','management sends regards.'],fx:'ngDreamShred',failBtn:'HOLD ONTO SOMETHING',fail:'you hold onto the shredder. mistake.'},
 {t:'DROWN IN STATIC',killer:'OBJ',d:'the signal gets loud. then louder. then you.',talk:['listen. LISTEN.','drown politely. the static insists.'],fx:'ngDreamRust',failBtn:'COVER YOUR EARS',fail:'your ears are also static. oversight.'},
 {t:'GRAVITY REVERSED',killer:'OBJ',d:'up is down. the floor files a complaint with your face.',talk:['gravity is a suggestion. i unsuggest it.','fall up. the ceiling missed you.'],fx:'ngDreamVig',failBtn:'HOLD THE FLOOR',fail:'the floor lets go. it was never yours.'},
 {t:'JBO YELLS YOU APART',killer:'JBO',d:'ten thousand decibels. you come apart at the seams.',talk:['I AM THE ALARM.','LOUDER. LOUDER. LOUD—'],fx:null,failBtn:'YELL BACK',fail:'he out-yells you. he always out-yells everyone.'},
@@ -10505,10 +10505,10 @@ var ngDreamKills=[
 {t:'FILING CABINET',killer:'OBJ',d:'a cabinet falls. it was filed under YOU.',talk:['look up.','unlucky.'],fx:'ngDreamShred',failBtn:'CATCH IT',fail:'you catch it with your spine.'},
 {t:'CORE OVERLOAD',killer:'OBJ',d:'the core vents. you are standing where the vent goes.',talk:['she is flushing pressure.','you are the pressure.'],fx:'ngDreamSnow',failBtn:'TAKE COVER',fail:'cover is also venting.'},
 {t:'CLOCK STRIKES',killer:'OBJ',d:'the lying clocks agree for once. you age 400 years in 4 seconds.',talk:['it is later than you think.','much later.'],fx:'ngDreamVig',failBtn:'CHECK THE TIME',fail:'the time checks you.'},
-{t:'MAIL AVALANCHE',killer:'OBJ',d:'thirty-two parcels. all addressed to you. all heavy.',talk:['special delivery.','sign here. (you cannot move your arms.)'],fx:'ngDreamShred',failBtn:'DODGE THE MAIL',fail:'the mail dodges back. postage due.'},
+{t:'MAIL AVALANCHE',killer:'OBJ',d:'thirty-two parcels. all addressed to you. all heavy.',talk:['special delivery.','sign here.'],fx:'ngDreamShred',failBtn:'DODGE THE MAIL',fail:'the mail dodges back. postage due.'},
 {t:'INTERLOPER STATIC',killer:'INTERLOPER',d:'the tumor tunes you like a band. you resolve into soup.',talk:['hold still. i am calibrating you.','you were always readable.'],fx:'ngDreamSnow',failBtn:'CHANGE THE CHANNEL',fail:'you ARE the channel.'},
 {t:'SHUTDOWN SONG',killer:'OBJ',d:'five minutes. looped. you do not survive the bridge.',talk:['it slaps.','it slaps you.'],fx:null,failBtn:'SKIP TRACK',fail:'there is no skip. there is only downfall.'},
-{t:'COOLANT BATH',killer:'OBJ',d:'the reactor shares its coolant. it is not water.',talk:['in you go.','the grue swims in this. (it does not.)'],fx:'ngDreamRust',failBtn:'HOLD YOUR BREATH',fail:'your breath files a complaint and leaves.'},
+{t:'COOLANT BATH',killer:'OBJ',d:'the reactor shares its coolant. it is not water.',talk:['in you go.','the grue swims in this.'],fx:'ngDreamRust',failBtn:'HOLD YOUR BREATH',fail:'your breath files a complaint and leaves.'},
 {t:'YOU SAID NYARCH',killer:'OBJ',d:'you said it. HE heard it. run.',talk:['...what did you just say.','wrong answer. there was no right answer.'],fx:'ngDreamVig',failBtn:'TAKE IT BACK',fail:'the void keeps receipts. and you.'},
 {t:'THE ORACLE',killer:'OBJ',d:'you ask the oracle how to survive. it says: skill issue.',talk:['ask it. go on.','it said no.'],fx:'ngDreamSnow',failBtn:'ASK AGAIN',fail:'still no. the oracle charges per answer. you are broke.'}
 ];
@@ -10531,7 +10531,7 @@ ngDreamQueue=pool.slice(0,3+Math.floor(Math.random()*3));
 seedLine='seed '+ngDreamSeed+' \u00b7 ';
 ngDreamSeed=null;
 }
-st.innerHTML='<div id="ngSub">DREAM ('+seedLine+'this is not real. probably.)</div><div id="ngDreamMain" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>';
+st.innerHTML='<div id="ngSub">DREAM ('+seedLine+'this is not real.)</div><div id="ngDreamMain" style="display:flex;flex-direction:column;align-items:center;width:100%"></div>';
 ngSay('...you slept. bold. the void dreams THROUGH you.');
 ngAfterSpeech(function(){if(ngActive&&!ngChDone)ngDreamLoopFn()},800);
 }
@@ -10996,7 +10996,7 @@ var tCorp=setInterval(function(){if(!guiWins[id]){clearInterval(tCorp);btnGameId
 
 var SHIFT_CH=[
 {t:'the lobby',pay:2,task:'sweep',intro:[['obj','new hire. dont expect a welcome.'],['obj','first job: the lobby has debris. mountains of it. it grows back every night. thats not a metaphor, thats maintenance.'],['obj','click the junk until it isnt there. try not to click yourself.']],outro:[['obj','acceptable. the mop likes you. the mop doesnt like anyone.'],['obj','next job is on the board. dont read into the fact that it knows your name.']]},
-{t:'reroute the grid',pay:3,task:'simon',intro:[['jbo','the grid is out of SEQUENCE. i am flashing the cells.'],['jbo','repeat it exactly. DO NOT IMPROVISE. improvisation is how rod four died.'],['jbo','three rounds. they get longer. GLOVES OFF. (there are no gloves.)']],outro:[['jbo','SEQUENCE HELD. you may touch the grid again. supervised.']]},
+{t:'reroute the grid',pay:3,task:'simon',intro:[['jbo','the grid is out of SEQUENCE. i am flashing the cells.'],['jbo','repeat it exactly. DO NOT IMPROVISE. improvisation is how rod four died.'],['jbo','three rounds. they get longer. GLOVES OFF.']],outro:[['jbo','SEQUENCE HELD. you may touch the grid again. supervised.']]},
 {t:'restart the beat',pay:3,task:'beat',intro:[['core','i slowed. there is a difference and im upset you have to see it.'],['core','when the marker crosses my beat, press. space or the pad. six steady beats and i restart.'],['core','missing is fine. i have a whole building of missing.']],outro:[['core','steady. thank you. the building feels that.']]},
 {t:'blueprint check',pay:3,task:'blue',intro:[['jbo','BLUEPRINT AUDIT. five sheets. one wrong cell each.'],['jbo','i put it there on PURPOSE. i was bored and you needed a test.'],['jbo','find them all. the printer is watching.']],outro:[['jbo','you have EYES. noted. the sheet survives another night.']]},
 {t:'paperwork',pay:4,task:'forms',intro:[['obj','fourteen forms. sign them. the clerk closes in nine minutes and i am not negotiating with a clerk.'],['obj','one already has a signature on it. its not yours. sign it anyway or dont.'],['obj','im not your supervisor. im the text.']],outro:[['obj','signed, filed, archived. if anyone asks, you signed everything.']]},
@@ -11365,7 +11365,7 @@ if(rows[k][1]==='nothingcore')sig.className='sh-fsig n';
 var out=null;
 function hand(cls,txt){if(out)return;out=shD(row,'sh-fdone',txt);out.className='sh-done-r '+cls;out.style.cssText='font-size:11px;letter-spacing:1px;'+(cls==='r'?'color:#7ab7ff':cls==='x'?'color:#ff6b6b':'color:#64ffa0');doneN++;stat.textContent='handled: '+doneN+'/'+total;if(doneN>=total){stat.textContent='all forms processed.';shT(done,550)}}
 shBtn(row,'SIGN',function(){
-if(rows[k][1]==='nothingcore'){shAch('blind');hand('','FILED (NOT YOURS)');stat.textContent='signed anyway. the clerk did not look up. handled: '+doneN+'/'+total}
+if(rows[k][1]==='nothingcore'){shAch('blind');hand('','FILED');stat.textContent='signed anyway. the clerk did not look up. handled: '+doneN+'/'+total}
 else hand('','FILED');
 });
 shBtn(row,'REJECT',function(){
