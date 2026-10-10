@@ -44,7 +44,10 @@ function grCss(){
     '#grOverlay{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#020304;color:#cfe3ff;font-family:Consolas,monospace;overflow:hidden}'+
     '#grCanvas{position:absolute;inset:0;width:100%;height:100%}'+
     '#grTitle{position:relative;font-size:15px;letter-spacing:8px;color:#7fa8c9;margin-bottom:4px;text-shadow:0 0 12px #000,0 0 4px #000}'+
-    '#grBody{position:relative;max-width:680px;text-align:center;font-size:15px;line-height:1.7;color:#dcebf9;background:rgba(2,8,14,.72);border:1px solid rgba(43,74,104,.5);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);text-shadow:0 1px 2px #000,0 0 3px #000;padding:14px 24px;min-height:180px}'+
+    '#grBody{position:relative;max-width:680px;width:min(680px,92vw);max-height:68vh;overflow-y:auto;text-align:center;font-size:15px;line-height:1.7;color:#dcebf9;background:rgba(2,8,14,.72);border:1px solid rgba(43,74,104,.5);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);text-shadow:0 1px 2px #000,0 0 3px #000;padding:14px 24px;min-height:180px;scrollbar-width:thin;scrollbar-color:#2b4a68 transparent}'+
+    '#grBody::-webkit-scrollbar{width:8px}'+
+    '#grBody::-webkit-scrollbar-thumb{background:#2b4a68;border-radius:4px}'+
+    '#grBody::-webkit-scrollbar-track{background:transparent}'+
     '#grBody .dim{color:#5f7d99}'+
     '#grNav{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;justify-content:center;position:relative}'+
     '#grMap{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);display:grid;grid-template-columns:1fr 1fr;gap:8px;background:rgba(4,14,20,.96);border:1px solid rgba(96,145,235,.35);border-radius:12px;padding:12px;z-index:20;box-shadow:0 14px 40px rgba(0,0,0,.6);cursor:grab;user-select:none}'+
@@ -1508,10 +1511,10 @@ function grExtHtml(){
   for(var k=0;k<order.length;k++){
     var t=order[k],td=GR_EXT_TYPES[t];
     h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">';
-    h+='<b>'+t+'</b> <span style="color:#5f7d99">'+td.icon+' digs '+(t==='drill'?'glow':(t==='apiary'?'plorts':'deep'))+'</span><br>';
+    h+='<b>'+t+'</b> <span style="color:#5f7d99">'+td.icon+' digs '+(t==='drill'?'glow':(t==='apiary'?'plorts':'deep'))+'</span>';
     for(var r=0;r<3;r++){
       var c=GR_EXT_COST[t][r];
-      h+='<span style="white-space:nowrap">'+GR_EXT_TIERS[r].name+' '+c[0]+'p+'+c[1]+'g <button class="grBtn" data-extfab="'+t+':'+r+'" style="padding:2px 8px;font-size:11px">dig</button></span> ';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin:3px 0;max-width:100%;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+GR_EXT_TIERS[r].name+' · '+c[0]+'p + '+c[1]+'g</span><button class="grBtn" data-extfab="'+t+':'+r+'" style="padding:2px 8px;font-size:11px;flex-shrink:0">dig</button></div>';
     }
     h+='<br><span style="color:#5f7d99">'+GR_EXT_TIERS[0].cycles+'/'+GR_EXT_TIERS[1].cycles+'/'+GR_EXT_TIERS[2].cycles+' cycles · 90s each · richer per tier</span></div>';
   }
