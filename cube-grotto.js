@@ -1119,7 +1119,7 @@ var GR_KILL_CREDITS=[
   '...','...','(he is still gone.)','',
   'sit through it all. something unlocks. (probably.)','',
   '— credits —','',
-  'creator: lux','vibe coder: opencode','music: men, susie, and the void itself','',
+  'creator: lux','vibe coder: opencode','music: men and the void itself','',
   'starring: obj, the void, jbo, chism,','men, landlord, core, nothingcore','',
   'tester: men and the discord server','',
   'thank you for playing','goodbye','',
