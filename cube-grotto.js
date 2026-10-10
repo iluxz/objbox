@@ -193,9 +193,11 @@ var GR_ROOMS={
     var h='<div style="transform:translateY(-46px)">';
     h+='rows of glow under the rock. one seed per plot. gardens, not pots — plant once, it multiplies.<br><span style="font-size:12px;color:#5f7d99">soil dries. water it, or point the dripworks valve here. first plot is on the house.</span><div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;max-width:640px;margin-left:auto;margin-right:auto">';
     for(var i=0;i<6;i++){
-      var p=plots[i];
-      h+='<div style="border:1px solid #2b4a68;background:rgba(4,12,18,.93);border-radius:8px;padding:5px;font-size:11px;text-align:left">';
-      h+='<b>plot '+(i+1)+'</b> ';
+      var p=plots[i],mc=p.mach||0;
+      var mcB=mc>=2?'#8a7433':(mc===1?'#2b6a9a':'#2b4a68');
+      var mcG=mc>=2?'rgba(24,20,10,.93)':(mc===1?'rgba(6,18,28,.93)':'rgba(4,12,18,.93)');
+      h+='<div style="border:1px solid '+mcB+';background:'+mcG+';border-radius:8px;padding:5px;font-size:11px;text-align:left">';
+      h+='<b>plot '+(i+1)+'</b>'+(mc===1?'<span style="color:#5fa8d8" title="sprinklered"> ●</span>':(mc>=2?'<span style="color:#ffd770" title="sprinklered + overclocked"> ●●</span>':''))+' ';
       if(!p.own){
         h+='<span style="color:#5f7d99">for sale</span><br><button class="grBtn" data-plotbuy="'+i+'" style="padding:3px 8px;font-size:11px;margin-top:4px">buy — '+GR_PLOT_PRICES[i]+' glow</button>';
       }else if(!p.seed){
@@ -211,7 +213,7 @@ var GR_ROOMS={
         h+='<button class="grBtn" data-water="'+i+'" style="padding:2px 6px;font-size:11px">water</button> ';
         if(p.growth>=100)h+='<button class="grBtn" data-harvest="'+i+'" style="padding:2px 6px;font-size:11px">harvest</button> ';
         if(p.mach<2)h+='<button class="grBtn" data-mach="'+i+'" style="padding:2px 6px;font-size:11px">'+(p.mach===0?'sprinkler 200g':'2x growth 400g')+'</button>';
-        else h+='<span style="color:#5f7d99">⚙max</span>';
+        else h+='<span style="color:#ffd770">⚙MAX</span>';
         h+=' <button class="grBtn" data-dig="'+i+'" style="padding:2px 6px;font-size:11px">dig up</button>';
       }
       h+='</div>';
@@ -2532,6 +2534,14 @@ function grFrame(ts){
         x.fillRect(pmx-bedHW,bedTop,bedHW*2,4*rsc);
         x.fillStyle='rgba(0,0,0,0.35)';
         for(var fr=0;fr<3;fr++){x.fillRect(pmx-bedHW+10*rsc,bedTop+(12+fr*10)*rsc,bedHW*2-20*rsc,2);}
+        if(pp.own&&pp.mach>=1){
+          x.fillStyle='rgba(140,180,210,0.9)';
+          x.fillRect(pmx-bedHW+6*rsc,bedTop-14*rsc,2.5*rsc,14*rsc);
+          x.fillRect(pmx+bedHW-8*rsc,bedTop-14*rsc,2.5*rsc,14*rsc);
+          x.fillStyle='rgba(150,210,255,'+(0.35+0.2*Math.sin(grT*3+pi2)).toFixed(3)+')';
+          for(var dr=0;dr<3;dr++){var fall=(grT*22+dr*9+pi2*13)%12;x.fillRect(pmx-bedHW+(10+dr*7)*rsc,bedTop-(6+fall)*rsc,2*rsc,2*rsc);x.fillRect(pmx+bedHW-(14-dr*7)*rsc,bedTop-(6+fall)*rsc,2*rsc,2*rsc)}
+        }
+        if(pp.own&&pp.mach>=2){x.fillStyle='rgba(255,210,120,0.55)';x.fillRect(pmx-bedHW,bedTop,bedHW*2,2.5*rsc)}
         if(pp.own&&pp.seed){
           var sd=GR_SEEDS[pp.seed];
           var col=(sd.kind==='tool')?(pp.seed==='hushroot'?'190,150,255':(pp.seed==='goldcap'?'255,210,120':'150,230,255')):(pp.seed==='glowbloom'?'140,245,205':'150,220,150');
