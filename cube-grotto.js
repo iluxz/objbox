@@ -10,9 +10,10 @@ var grRoom='mouth';
 // admin-only + grotto's own (no circular gate). nothing else is
 // physically impossible, just rude. extend this list if that changes.
 var GROTTO_EXCLUDE=['godmode','chism100','gr_lorekeeper','gr_gauntlet','gr_warden','gr_spare','gr_kill','gr_noskip','gr_chismfriend'];
-// the five: one from each corner. epilogue with rock, 100 visits,
-// 100 dial nudges, the long walk out, the rare thing. no substitutes.
-var GROTTO_NEED_IDS=['off_r_epilogue','resident','fiddlesticks','shutdown_walkout','btn_myth'];
+// the four: 100 visits, 100 dial nudges, the long walk out, the rare thing.
+// (the epilogue-with-rock proof was retired: the timekeeper is broken and
+// lux is done asking. no substitutes for the remaining four.)
+var GROTTO_NEED_IDS=['resident','fiddlesticks','shutdown_walkout','btn_myth'];
 function grEl(id){try{return document.getElementById(id)}catch(e){return null}}
 function grSay(t){try{if(typeof cubePrint==='function')cubePrint(t)}catch(e){}}
 function grSave(){try{return JSON.parse(localStorage.getItem('cube_grotto')||'{}')}catch(e){return{}}}
@@ -103,6 +104,8 @@ function grCss(){
     '.grChime:hover{border-color:#5fa8d3}'+
     '.grChime.hit{border-color:#cfe9ff;color:#fff;box-shadow:0 0 22px 4px rgba(150,210,255,.5)}'+
     '.grDot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#1c2f45;margin:0 4px}'+
+    '.grDance{animation:grDanceA .6s ease-in-out infinite}'+
+    '@keyframes grDanceA{0%,100%{transform:rotate(-14deg) translateY(0)}25%{transform:rotate(12deg) translateY(-5px)}50%{transform:rotate(-9deg) translateY(0)}75%{transform:rotate(13deg) translateY(-5px)}}'+
     '.grDot.on{background:#9fd4ff;box-shadow:0 0 8px 2px rgba(150,210,255,.7)}'+
     '.grFar{position:absolute;z-index:5;pointer-events:none;font-style:italic;color:#8fa8c8;opacity:0;filter:blur(1px);text-shadow:0 0 14px rgba(140,180,230,.6);animation:grWob 5s ease-in-out,grFarIn 6s ease-in-out forwards}'+
     '@keyframes grWob{0%,100%{transform:translateY(0) skewX(0)}25%{transform:translateY(-4px) skewX(1.5deg)}50%{transform:translateY(3px) skewX(0)}75%{transform:translateY(-2px) skewX(-1.5deg)}}'+
@@ -270,7 +273,7 @@ var grSkillDefs={
   {id:'bloom',name:'phosphor bloom',desc:'FINAL: gold worth 10, stays longer',cost:200,req:'fever',final:true}
  ],
  depths:[
-  {id:'lantern',name:'lantern',desc:'a brighter shaft. prettier. that is all. (mostly.)',cost:80},
+  {id:'lantern',name:'lantern',desc:'a brighter shaft. prettier. that is all.',cost:80},
   {id:'rain',name:'soft rain',desc:'drips fall twice as often',cost:110,req:'lantern'},
   {id:'longing',name:'his longing',desc:'he calls more. sometimes he drops plorts.',cost:140,req:'rain'},
   {id:'heart',name:'heart of the grotto',desc:'FINAL: market never below 5, drips drop plorts',cost:200,req:'longing',final:true}
@@ -443,7 +446,7 @@ function grSeaBite(){
   if(lucky?r<0.10:r<0.05){
     if(!s.hush){
       s.hush=true;
-      got='something vast brushes the line. it does NOT pull. it WHISPERS. you do not understand it yet. (it will be important. it said so. probably.)';
+      got='something vast brushes the line. it does NOT pull. it WHISPERS. you do not understand it yet.';
       pop={t:'IT WHISPERS',c:'#c9a8ff'};
       grShakeDo();grFlashDo('rgba(120,90,220,0.5)',500);
     }else{
@@ -456,7 +459,7 @@ function grSeaBite(){
     grSeaRipple(0.5,10,true);
   }else if(lucky?r<0.28:r<0.20){
     s.plorts=(s.plorts||0)+5;
-    got='deep plorts. five. they glow wrong. (a good wrong.)';
+    got='deep plorts. five. they glow wrong.';
     pop={t:'+5 plorts',c:'#9fd4ff'};
     grSeaRipple(0.5,7,true);
   }else if(r<0.42){
@@ -731,7 +734,7 @@ function grTermRun(raw){
       grSideSay(it4.name+' — '+(it4.cur==='p'?it4.cost+'p':it4.cost+' glow'));
     }
   }else if(c==='who'){
-    grSideSay('you are the intruder. this terminal is not on any map. obj cannot hear it. (he can hear almost everything else.)');
+    grSideSay('you are the intruder. this terminal is not on any map. obj cannot hear it.');
   }else if(c==='obj'){
     grSideSay('shh. he is looking for you right now. type quietly.');
     try{grFarSay()}catch(e){}
@@ -949,7 +952,7 @@ var GR_FAR_SOFT=[
  'the drips sound different when you are down there. better.',
  'thank you. (for the thing. you know the thing.)',
  'i counted your plorts. that is not surveillance. that is pride.',
- 'come up when you want. the busywork misses you. i do not. (i do.)',
+ 'come up when you want. the busywork misses you. i do not.',
  'the slimes asked about you. i told them you are busy being merciful.'
 ];
 function grFarSay(){
@@ -1106,27 +1109,27 @@ var GR_KILL_CREDITS=[
   'no one clocked in','no one clocked out','the ranch bell rang itself','the slimes unionized','',
   'i would rather sit back and relax','where i can go to your mom and crack','',
   'my manager paged me at 3am','i fed his message to the warden','the warden ate it. the warden gets it.','',
-  'overtime? over my dead body','(it was over his. rip obj.)','',
+  'overtime? over my dead body','it was over his. rip obj.','',
   'monday: frozen','tuesday: normal','wednesday: THE FURNACE','thursday: normal','friday: landscaping','saturday: the friendly faith plate','sunday: on little cat feet','',
   'the void parable was a warning','the grotto was the resignation letter','',
   'jbo screamed the dress code down','the reactor melted the timeclock','hr filed a complaint. hr is load-bearing.','',
   'Chism sold packets during the funeral','rancher\u2019s blessing. golden hat. no refunds.','',
   'the landlord raised the rent mid-credits','the core pretended the glass was frosted','nothingcore watched. it does that.','',
   'i hate employment','i hate employment','a job is for people','who are a big disappointment','',
-  'no managers were harmed','(one was. you know the one.)','',
+  'no managers were harmed','one manager was harmed. you know the one.','',
   'deleted scenes:','obj takes a vacation day','the slimes file for benefits','the whale gets a parking spot','all cut. all better.','',
-  'bloopers:','obj missed his cue (he is gone)','the gunshot was late (it was not)','Chism laughed for 40 seconds straight','kept it in.','',
-  'directed by no one','produced by drips','catering by Chism (plort tree, mostly)','',
+  'bloopers:','obj missed his cue (he is gone)','the gunshot was late','Chism laughed for 40 seconds straight','kept it in.','',
+  'directed by no one','produced by drips','catering by Chism','',
   'in memory of obj','he counted everything','he remembers everything','that was the problem with him','',
-  '...','...','(he is still gone.)','',
-  'sit through it all. something unlocks. (probably.)','',
+  '...','...','he is still gone.','',
+  'sit through it all. something unlocks.','',
   '— credits —','',
   'creator: lux','vibe coder: opencode','music: men and the void itself','',
   'starring: obj, the void, jbo, chism,','men, landlord, core, nothingcore','',
   'tester: men and the discord server','',
   'thank you for playing','goodbye','',
-  '(or dont leave. the cave inhales behind you.)','',
-  'p.s. the complete text of ulysses scrolled past while you blinked.','you missed it. it was beautiful. (probably.)'
+  'the cave inhales behind you.','',
+  'p.s. the complete text of ulysses scrolled past while you blinked.','you missed it. it was beautiful.'
 ];
 function grKillCredits(){
   if(!grActive)return;
@@ -1178,8 +1181,8 @@ function grKillCredits(){
         try{localStorage.setItem('cube_employment_unlocked','1')}catch(e){}
         grAch('gr_noskip');
         try{if(typeof achScan==='function')achScan()}catch(e){}
-        grNote('sat through all 3:42 without skipping. bgm employment unlocked. (employment hates you back.)');
-        try{grSideSay('bgm employment unlocked. type: bgm employment. (you earned this. somehow.)')}catch(e){}
+        grNote('sat through all 3:42 without skipping. bgm employment unlocked.');
+        try{grSideSay('bgm employment unlocked. type: bgm employment.')}catch(e){}
         try{if(typeof cubeOk==='function')cubeOk('bgm: employment unlocked — bgm employment')}catch(e){}
       }
       try{if(grRoom==='below')grRender()}catch(e){}
@@ -1269,7 +1272,7 @@ function grQuestClaim(){
   if(q+1>3){
     s=grSave();s.blessing=true;s.goldHat=true;grStore(s);
     grAch('gr_chismfriend');
-    grNote('questline complete. rancher\u2019s blessing (+1 glow/unit), a GOLDEN hat, and his respect. (the hat is the real reward.)');
+    grNote('questline complete. rancher\u2019s blessing (+1 glow/unit), a GOLDEN hat, and his respect.');
   }else grNote('turned in: '+GR_QUESTS[q].name+'. next: '+GR_QUESTS[q+1].name+'. ('+GR_QUESTS[q+1].desc+')');
   grRender();
 }
@@ -1416,7 +1419,116 @@ function grLabHtml(){
     h+=(got?'✓ <b>'+mx.name+'</b>':'<b>'+mx.name+'</b> — '+mx.costP+'p + '+mx.costG+' glow <button class="grBtn" data-mix="'+mx.id+'" style="padding:2px 8px;font-size:11px">mix</button>');
     h+='<br><span style="color:#5f7d99">'+mx.desc+'</span></div>';
   }
+  h+='</div><br><span style="color:#5f7d99">EXTRACTORS (dig sites dug: pick one, it works while you aren\u2019t looking)</span><div style="margin-top:6px">'+grExtHtml()+'</div>';
   return h+'</div>';
+}
+// EXTRACTORS: SR1-canon drills/apiaries/pumps. fabricate in the lab, each takes
+// one of 3 dig sites. one cycle = 90s for every tier (like home: tiers buy more
+// cycles + richer yields, not speed). finished cycle = DANCE until harvested.
+// demolish anytime, no refund. the void keeps tips.
+var GR_EXT_TYPES={
+  drill:{name:'drill',verb:'digging',icon:'▼'},
+  apiary:{name:'apiary',verb:'buzzing',icon:'⬢'},
+  pump:{name:'pump',verb:'pumping',icon:'◉'}
+};
+var GR_EXT_TIERS=[
+  {name:'novice',cycles:1,mult:1},
+  {name:'advanced',cycles:3,mult:1.5},
+  {name:'master',cycles:6,mult:2}
+];
+var GR_EXT_TIME=90;
+var GR_EXT_COST={drill:[[20,0],[40,60],[80,150]],apiary:[[25,0],[45,60],[90,150]],pump:[[20,20],[40,80],[80,180]]};
+function grExtSites(){var s=grSave(),dirty=false;if(!(s.ext instanceof Array)||s.ext.length!==3){s.ext=[null,null,null];dirty=true}if(dirty)grStore(s);return s.ext}
+function grExtFab(type,tier){
+  if(!grActive)return;
+  if(!GR_EXT_TYPES[type]||!GR_EXT_TIERS[tier])return;
+  var s=grSave(),sites=grExtSites(),slot=-1;
+  for(var i=0;i<3;i++)if(!sites[i]){slot=i;break}
+  if(slot<0){grNote('no open dig sites. demolish one first. (the rock decides where holes go.)');return}
+  var c=GR_EXT_COST[type][tier];
+  if((s.plorts||0)<c[0]||(s.glow||0)<c[1]){grNote('needs '+c[0]+'p + '+c[1]+' glow. the fabricator does not haggle.');return}
+  s=grSave();s.plorts-=c[0];s.glow-=c[1];
+  s.ext=grExtSites();s.ext[slot]={t:type,r:tier,left:GR_EXT_TIME,cycles:GR_EXT_TIERS[tier].cycles,ready:false};
+  grStore(s);
+  grNote('fabricated: '+GR_EXT_TIERS[tier].name+' '+type+' in site '+(slot+1)+'. it burrows. see you in '+GR_EXT_TIME+'s.');
+  grRender();
+}
+function grExtDemo(slot){
+  if(!grActive)return;
+  var s=grSave();
+  if(!(s.ext instanceof Array)||s.ext.length!==3)s.ext=[null,null,null];
+  if(!s.ext[slot])return;
+  s.ext[slot]=null;grStore(s);
+  grNote('demolished site '+(slot+1)+'. no refund. the hole stays.');
+  grRender();
+}
+function grExtYield(site){
+  var mult=GR_EXT_TIERS[site.r].mult,tier=GR_EXT_TIERS[site.r].name+' '+site.t;
+  var s=grSave(),got='';
+  if(site.t==='drill'){var g=Math.round(30*mult);s.glow=(s.glow||0)+g;got='+'+g+' glow'}
+  else if(site.t==='apiary'){var p=Math.round(12*mult);s.plorts=(s.plorts||0)+p;got='+'+p+' plorts'}
+  else{var d=Math.round(3*mult);s.deep=(s.deep||0)+d;got='+'+d+' deep'}
+  return {s:s,got:got,tier:tier};
+}
+function grExtHarvest(slot){
+  if(!grActive)return;
+  var s=grSave();
+  if(!(s.ext instanceof Array)||s.ext.length!==3)s.ext=[null,null,null];
+  var site=s.ext[slot];
+  if(!site)return;
+  if(!site.ready){grNote('still '+GR_EXT_TYPES[site.t].verb+'. ('+site.left+'s left. patience is a crop too.)');return}
+  var r=grExtYield(site);
+  s=r.s;site.cycles--;
+  if(site.cycles<=0){s.ext[slot]=null;grStore(s);grNote('harvested '+r.got+' ('+r.tier+'). final cycle — it despawns. (it waved. with the drill bit.)')}
+  else{s.ext[slot]={t:site.t,r:site.r,left:GR_EXT_TIME,cycles:site.cycles,ready:false};grStore(s);grNote('harvested '+r.got+' ('+r.tier+'). back down it goes. '+site.cycles+' cycles left.')}
+  grPop(50,42,r.got,'#ffd770');
+  grSideHead();grRender();
+}
+function grExtTick(){
+  if(!grActive)return;
+  var s=grSave();
+  if(!(s.ext instanceof Array)||s.ext.length!==3)s.ext=[null,null,null];
+  var sites=s.ext,dirty=false;
+  for(var i=0;i<3;i++){
+    var site=sites[i];
+    if(!site||site.ready)continue;
+    site.left--;
+    if(site.left<=0){
+      site.ready=true;dirty=true;
+      grNote('the '+GR_EXT_TIERS[site.r].name+' '+site.t+' pops up and DANCES. (site '+(i+1)+'. harvest it.)');
+      grPop(50,40,'DANCE','#ffd770');
+      try{grFlashDo('rgba(255,210,120,0.3)',300)}catch(e){}
+    }else dirty=true;
+  }
+  if(dirty)grStore(s);
+}
+function grExtHtml(){
+  var s=grSave(),sites=grExtSites(),h='';
+  var order=['drill','apiary','pump'];
+  for(var k=0;k<order.length;k++){
+    var t=order[k],td=GR_EXT_TYPES[t];
+    h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">';
+    h+='<b>'+t+'</b> <span style="color:#5f7d99">'+td.icon+' digs '+(t==='drill'?'glow':(t==='apiary'?'plorts':'deep'))+'</span><br>';
+    for(var r=0;r<3;r++){
+      var c=GR_EXT_COST[t][r];
+      h+='<span style="white-space:nowrap">'+GR_EXT_TIERS[r].name+' '+c[0]+'p+'+c[1]+'g <button class="grBtn" data-extfab="'+t+':'+r+'" style="padding:2px 8px;font-size:11px">dig</button></span> ';
+    }
+    h+='<br><span style="color:#5f7d99">'+GR_EXT_TIERS[0].cycles+'/'+GR_EXT_TIERS[1].cycles+'/'+GR_EXT_TIERS[2].cycles+' cycles · 90s each · richer per tier</span></div>';
+  }
+  h+='<div style="margin-top:6px;font-size:12px;color:#5f7d99">— DIG SITES —</div>';
+  for(var i=0;i<3;i++){
+    var site=sites[i];
+    h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">';
+    if(!site)h+='<b>site '+(i+1)+'</b> <span style="color:#5f7d99">empty dirt. potential dirt.</span>';
+    else{
+      var nm=GR_EXT_TIERS[site.r].name+' '+site.t;
+      if(site.ready)h+='<b>site '+(i+1)+'</b> <span class="grDance" style="display:inline-block">'+GR_EXT_TYPES[site.t].icon+'</span> <b>'+nm+'</b> <span style="color:#ffd770">DANCING — harvest!</span><br><button class="grBtn" data-extharv="'+i+'" style="padding:2px 8px;font-size:11px">harvest</button> ';
+      else h+='<b>site '+(i+1)+'</b> '+GR_EXT_TYPES[site.t].icon+' <b>'+nm+'</b> <span style="color:#5f7d99">'+GR_EXT_TYPES[site.t].verb+' · '+site.left+'s · '+site.cycles+' cycles left</span>';
+      h+=' <button class="grBtn" data-extdemo="'+i+'" style="padding:2px 8px;font-size:11px">demolish</button>';
+    }
+    h+='</div>';
+  }
+  return h;
 }
 // travel map: one button instead of eight. popover grid, same gates.
 var grMapUp=false;
@@ -1916,7 +2028,7 @@ function grBell(){
   try{
     var sl=document.querySelectorAll('#grSlimePen .grSlime[data-s]');
     for(var i=0;i<sl.length;i++){sl[i].style.left=(38+Math.random()*14)+'%';sl[i].style.top=(30+Math.random()*20)+'%'}
-    grNote('rung. they come running. (they do not have legs. do not think about it.)');
+    grNote('rung. they come running.');
   }catch(e){}
 }
 // plort tycoon: fluctuating market, sell for skill points, buy upgrades.
@@ -1935,7 +2047,7 @@ function grSell(all){
   s.plorts=n-k;
   var pay=grCutPay(k*unit,all);
   s.glow=(s.glow||0)+pay;grStore(s);
-  grNote('sold '+k+' plort'+(k>1?'s':'')+' for '+pay+' glow. ('+unit+' each. the market is never fair.)');
+  grNote('sold '+k+' plort'+(k>1?'s':'')+' for '+pay+' glow. '+unit+' each.');
   grPop(50,45,'+'+pay+' glow','#9fd4ff');
   var pn=grEl('grPlortN');if(pn)pn.textContent=s.plorts;
   grSideHead();
@@ -1967,7 +2079,7 @@ function grTick(){
     // whale: surfaces every few minutes for 60s, pays 2x (3x monopoly)
     if(s.whale&&s.whale.until<Date.now()){
       s.whale=null;dirty=true;
-      grSideSay('the whale sounds... gone. (it will be back.)');
+      grSideSay('the whale sounds... gone.');
     }else if(!s.whale){
       var wrate=(s.gup&&s.gup.song)?0.004:0.002;
       var chummed=false;
@@ -2015,6 +2127,7 @@ function grTick(){
     }
     try{grStore(s)}catch(e){}
     try{grFarmTick()}catch(e){}
+    try{grExtTick()}catch(e){}
     if(grRoom!=='phosphor')return;
     var sl=document.querySelectorAll('#grSlimePen .grSlime[data-s]');
     for(var i=0;i<sl.length;i++){
@@ -2152,6 +2265,18 @@ function grRender(){
     for(var m2=0;m2<mx2.length;m2++)(function(el){
       el.onclick=function(){grMix(el.getAttribute('data-mix'))};
     })(mx2[m2]);
+    var ef=b.querySelectorAll('[data-extfab]');
+    for(var ef2=0;ef2<ef.length;ef2++)(function(el){
+      el.onclick=function(){var v=el.getAttribute('data-extfab').split(':');grExtFab(v[0],parseInt(v[1],10)||0)};
+    })(ef[ef2]);
+    var eh=b.querySelectorAll('[data-extharv]');
+    for(var eh2=0;eh2<eh.length;eh2++)(function(el){
+      el.onclick=function(){grExtHarvest(parseInt(el.getAttribute('data-extharv'),10)||0)};
+    })(eh[eh2]);
+    var ed=b.querySelectorAll('[data-extdemo]');
+    for(var ed2=0;ed2<ed.length;ed2++)(function(el){
+      el.onclick=function(){grExtDemo(parseInt(el.getAttribute('data-extdemo'),10)||0)};
+    })(ed[ed2]);
     var vv=b.querySelectorAll('[data-valve]');
     for(var v2=0;v2<vv.length;v2++)(function(el){
       el.onclick=function(){
@@ -2679,7 +2804,7 @@ function grEnter(force){
     var names=[];
     for(var mi=0;mi<p.missing.length;mi++)names.push(grNeedName(p.missing[mi]));
     grSay('grotto: the cave is not here.');
-    grSay('grotto: '+p.got+'/5 proven. still missing: '+names.join(' · ')+'.');
+    grSay('grotto: '+p.got+'/'+p.total+' proven. still missing: '+names.join(' · ')+'.');
     return false;
   }
   grActive=true;

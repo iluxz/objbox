@@ -677,7 +677,7 @@ onRemove:function(){delete pkgEffects.interloper;var p=document.getElementById('
 'dark-matter':{name:'dark-matter',desc:'adds dark matter to the cube',size:'0KB (literally nothing)',
 onInstall:function(){pkgEffects.darkMatter=true;document.body.style.filter='brightness(0.6)'},
 onRemove:function(){delete pkgEffects.darkMatter;document.body.style.filter=''}},
-'cube-dance':{name:'cube-dance',desc:'teaches the cube how to dance (it fails)',size:'128KB',
+'cube-dance':{name:'cube-dance',desc:'teaches the cube how to dance',size:'128KB',
 onInstall:function(){pkgEffects.cubeDance=true;cubePrint('the cube is trying to dance...')},
 onRemove:function(){delete pkgEffects.cubeDance}},
 'paranoia':{name:'paranoia',desc:'makes the particles track your cursor harder',size:'69KB',
@@ -965,9 +965,9 @@ return true}},
 'daily':{help:'daily - crack the daily void code. streak counts.',fn:function(){voidDaily();return true}},
 'cubecheck':{help:'cubecheck [on|off] - toggle the auto-demo graffiti scan (the void generates demos while you idle)',fn:function(a){var st=(a&&a.length)?String(a[0]).trim().toLowerCase():'';if(st==='on'||st==='enable'){localStorage.setItem('cube_cubecheck','on');cubePrint('cubecheck: auto scan on. the void keeps watching the walls.');return true}if(st==='off'||st==='disable'){localStorage.setItem('cube_cubecheck','off');cubePrint('cubecheck: auto scan off. no unasked demos. (manual scan: void run /void/pkgs/cubecheck.vsc)');return true}cubePrint('cubecheck: auto scan is '+(localStorage.getItem('cube_cubecheck')==='off'?'off':'on')+'.');cubePrint('  cubecheck on    resume the auto scan');cubePrint('  cubecheck off   stop auto demos while you idle');return true}},
 'button':{help:'button - contain the button. it has moods. (a non-game)',fn:function(){buttonGame();return true}},
-'office':{help:'office - clock in. obj narrates. 83 endings. (a non-game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof stEnter!=='function'){cubeError('office: the office is not built yet. (the man waits.)');return true}cubePrint('you clock in. obj clears his throat. (he does not have one.)');setTimeout(function(){try{stEnter()}catch(e){cubeError('office: '+e)}},1200);return true}},
+'office':{help:'office - clock in. obj narrates. 83 endings. (a non-game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof stEnter!=='function'){cubeError('office: the office is not built yet. (the man waits.)');return true}cubePrint('you clock in. obj clears his throat.');setTimeout(function(){try{stEnter()}catch(e){cubeError('office: '+e)}},1200);return true}},
  'greyhall':{help:'greyhall - descend. 6 wings, 1 open. (a hard game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof ghEnter!=='function'){cubeError('greyhall: the hall is not built yet. (the man waits.)');return true}cubePrint('you descend. the PA crackles. (it never stops.)');setTimeout(function(){try{ghEnter()}catch(e){cubeError('greyhall: '+e)}},1200);return true}},
- 'tbb':{help:'tbb - DEAD AIR. send signals. break the static. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof tbEnter!=='function'){cubeError('tbb: the frequency is not built yet. (the signals wait.)');return true}cubePrint('you go live. obj adjusts his headset. (he does not have one.)');setTimeout(function(){try{tbEnter()}catch(e){cubeError('tbb: '+e)}},1200);return true}},
+ 'tbb':{help:'tbb - DEAD AIR. send signals. break the static. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof tbEnter!=='function'){cubeError('tbb: the frequency is not built yet. (the signals wait.)');return true}cubePrint('you go live. obj adjusts his headset.');setTimeout(function(){try{tbEnter()}catch(e){cubeError('tbb: '+e)}},1200);return true}},
  'buffs':{help:'buffs - obj wants to know your state. geography buffs. (no scam)',fn:function(a){if(typeof geoCmd!=='function'){cubeError('buffs: obj forgot the forms.');return true}try{geoCmd(a)}catch(e){cubeError('buffs: '+e)}return true}},
  'cove':{help:'cove - watch the curtain. do not blink. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof fxEnter!=='function'){cubeError('cove: the curtain is not hung yet.');return true}cubePrint('you take the night shift. the cove is already watching.');setTimeout(function(){try{fxEnter()}catch(e){cubeError('cove: '+e)}},1200);return true}},
  'trailer':{help:'trailer - ghost plays cube for the camera. (ESC stops)',fn:function(a){if(typeof trailerEnter!=='function'){cubeError('trailer: no camera crew.');return true}try{trailerEnter()}catch(e){cubeError('trailer: '+e)}return true}},
@@ -977,7 +977,7 @@ return true}},
 'phone':{help:'phone - check obj\u2019s phone. he texted. again.',fn:function(){voidPhone();return true}},
 'dial':{help:'dial [1|1.5|2|3] - dialogue speed. query or set.',fn:function(a){var arg=(a&&a[0])?String(a[0]).toLowerCase():'';if(arg){var v=parseFloat(arg);if(!(v>0&&v<=4)||[1,1.5,2,3,4].indexOf(v)===-1){cubePrint('dial: pick 1, 1.5, 2, 3 or 4. this is dialogue, not a mixing desk.');return true}dialSet(v);cubePrint('dialogue speed: '+dialLabel()+'. obj will keep up. probably.')}else{cubePrint('dialogue speed: '+dialLabel()+'. set: dial 1|1.5|2|3|4')}return true}},
 'jedec':{help:'jedec [off|on] - query or change timing control status',fn:function(a){var arg=(a&&a[0])?String(a[0]).toLowerCase():'';if(arg==='off'||arg==='disable'){if(jedecOff()){cubePrint('JEDEC TIMING CONTROL: already DISABLED. already fast. already regrettable.')}else{try{localStorage.setItem('cube_jedec','0')}catch(e){}cubePrint('JEDEC TIMING CONTROL: DISABLED. everything runs 1.25x now. stability not guaranteed.');try{if(typeof achScan==='function')achScan()}catch(e){}}return true}if(arg==='on'||arg==='enable'){if(!jedecOff()){cubePrint('JEDEC TIMING CONTROL: already ENFORCED. the void is stable. you are slow.')}else{try{localStorage.setItem('cube_jedec','1')}catch(e){}cubePrint('JEDEC TIMING CONTROL: ENFORCED. 1.0x. you will miss the speed.')}return true}cubePrint('JEDEC TIMING CONTROL: '+(jedecOff()?'DISABLED. everything runs 1.25x. stability not guaranteed.':'ENFORCED. timings optimal. the void is stable because JEDEC holds it still.'));return true}},
-'dream':{help:'dream - fall asleep in the void',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}var seeded=false;try{seeded=localStorage.getItem('cube_pwned')==='1'}catch(e){}cubePrint(seeded?'you sleep. the void shuffles tonight\u2019s loop.':'you sleep. the void tucks you in. (it does not.)');setTimeout(function(){try{ngDreamSeed=seeded?(Date.now()%2147483647):null}catch(e){}ngForceCh=21;ngEnter()},1500);return true}},
+'dream':{help:'dream - fall asleep in the void',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}var seeded=false;try{seeded=localStorage.getItem('cube_pwned')==='1'}catch(e){}cubePrint(seeded?'you sleep. the void shuffles tonight\u2019s loop.':'you sleep. the void tucks you in.');setTimeout(function(){try{ngDreamSeed=seeded?(Date.now()%2147483647):null}catch(e){}ngForceCh=21;ngEnter()},1500);return true}},
 'override':{help:'override theme <1-8> — access hidden themes',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
 if(!a.length||a[0].toLowerCase()!=='theme'){cubeError('usage: override theme <1-8>');return true}
@@ -1370,7 +1370,7 @@ if(d.isMonday)return 'mondays are rough. even for voids.';
 if(d.isWeekend&&d.day===6)return 'saturday. the void relaxes.';
 if(d.isWeekend&&d.day===0)return 'sundays. the void reflects.';
 if(d.month===3&&d.date===1)return 'april fools. trust nothing.';
-if(d.month===5&&d.date===18)return 'happy birthday, void. (it was born today. probably.)';
+if(d.month===5&&d.date===18)return 'happy birthday, void.';
 if(d.season==='winter')return 'the cold seeps through the geometry.';
 if(d.season==='summer')return 'the void is overheating.';
 return null;
@@ -2807,7 +2807,7 @@ var zenResponses=[
 'yo obj aint here rn hes on break or smth, zen got the aux now',
 'ayy what it do, egg gang represent, we out here',
 'sup homie, void looking different today on god',
-'yo tell obj zen said his cube mid (dont actually tell him i aint tryna die)',
+'yo tell obj zen said his cube mid',
 'gang gang, zen holding it down in the void rn, obj dont know',
 'ayy my boy out here with the transmissions, zen sees you real talk',
 'yo the void hit different at night no kizzy',
@@ -2902,7 +2902,7 @@ cubePrint('  '+installed[i]+' ('+p.size+') — '+p.desc);
 cubePrint('void repository:');
 if(window._skillBonusPkgs&&!pkgs['rootshell']){
   pkgs['rootshell']={name:'rootshell',desc:'cached root tools',size:(window._skillBonusPkgs)+'KB',
-    onInstall:function(){pkgEffects.rootshell=true;cubePrint('rootshell: uid=0. you feel powerful. (you are not.)');cubePrint('rootshell: whoami/id respond as root. eval stays admin.')},
+    onInstall:function(){pkgEffects.rootshell=true;cubePrint('rootshell: uid=0. you feel powerful.');cubePrint('rootshell: whoami/id respond as root. eval stays admin.')},
     onRemove:function(){delete pkgEffects.rootshell;cubePrint('rootshell: dropped. you are an intruder again.')}};
   pkgs['signal-sniffer']={name:'signal-sniffer',desc:'hidden channel decoder',size:(window._skillBonusPkgs*3)+'KB',
     onInstall:function(){pkgEffects.signalSniffer=true;cubePrint('signal-sniffer: decoding... 3 channels found. all of them are obj.');cubePrint('signal-sniffer: transmissions now carry decoded channel tags.')},
@@ -3183,7 +3183,7 @@ var patchLog=[
 'fixes: terminal no longer hides under the nav arrows, and boot checks run quiet again.'
 ]},
 {date:'2026-10-03',tier:'major update',title:'harmony, wisdom, and understanding',notes:[
-'act 3 of the non-game has begun: 9 new chapters (21-29), each in a dimension of its own. no further details. (there are details. you are not getting them.)',
+'act 3 of the non-game has begun: 9 new chapters (21-29), each in a dimension of its own. no further details.',
 'meet the landlord. he owns every dimension. rent is due. per dimension.',
 'cube shift (type shift): every job got longer. new tracks in the break room. one of them is locked.',
 'obj has learned a song. you will know it when you hear it. some songs are locked behind story now.',
@@ -3207,7 +3207,7 @@ var patchLog=[
 'a sequel leaked in from the expo. tiny men included. the epilogue is earned, not given.',
 ]},
 {date:'2026-10-10',tier:'major update',title:'I HATE EMPLOYMENT I HATE EMPLOYMENT A JOB IS FOR PEOPLE WHO ARE A BIG DISSAPOINTMENT',notes:[
-'there is a tenth place. it is not a zone. it opens on five proofs, one from each corner: the epilogue with the rock, 100 visits, 100 dial nudges, the long walk out, the rare thing. type grotto. bring nothing.',
+'there is a tenth place. it is not a zone. it opens on four proofs: 100 visits, 100 dial nudges, the long walk out, the rare thing. type grotto. bring nothing.',
 'a cave: phosphor slimes, a vault door with no handle, truth files, something breathing below.',
 'slime tycoon: plorts, a fluctuating market, glow, whales, a secret terminal (tooth>) and two secret trees.',
 'someone lives down there. his name is Chism. first of his name. friend of the hollow.',
@@ -3218,7 +3218,7 @@ var patchLog=[
 'a new track haunts the radio: bgm employment. unlock: patience. (you will know it when you earn it.)',
 'the new track sings over the void now. captions included. they may be off. the singer is too fast.',
 'a new achievement for watching something all the way through. no skipping. you know what you did.',
-'the end credits got a real header and real credits. sit through them. (something unlocks. probably.)',
+'the end credits got a real header and real credits. sit through them. something unlocks.',
 'fixes: a song wearing the wrong file extension. new tracks playing silence on first switch. credits outrunning their own song. all dead.',
 ]},
 ];
