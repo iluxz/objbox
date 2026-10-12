@@ -582,7 +582,8 @@ var OP_MEMORY_BEATS=[
  {id:'lights',beat:[0,1,2,4],title:'eight little lights',text:'before the tower had a name, eight little lights woke inside a gray shell. one by one, they found their colors. obj kept the first tune they made.'},
  {id:'echo',beat:[4,2,1,0],title:'the answer below',text:'once, a sound came up from somewhere green and deep. obj rang the same four notes back. the echo answered. he still says he was not surprised.'},
  {id:'waiting',beat:[1,1,3,2],title:'the long quiet',text:'there was a long stretch when nobody came to the tower. obj played two notes, then two more, so the quiet would have something to do.'},
- {id:'skate',beat:[0,2,1,4],title:'the park with no skateboard',text:'a small concrete park behind the tower. no skateboard. obj went down the ramps anyway, picking up speed each time. he calls it skating. the ramps do not correct him.'}
+ {id:'skate',beat:[0,2,1,4],title:'the park with no skateboard',text:'a small concrete park behind the tower. no skateboard. obj went down the ramps anyway, picking up speed each time. he calls it skating. the ramps do not correct him.'},
+ {id:'playground',beat:[2,2,0,1],title:'recess',text:'there was a playground behind the tower with far too many walls. obj went through every single one. recess was short. recess was perfect.'}
 ];
 var opGnomes=[],opInWell=false,opInTrash=false;
 var opWellTrip=null,opWellHidden=false;
@@ -778,7 +779,7 @@ function opMemoryNote(note){
 // ══ courtyard (behind the left wall) ══
 // ══ memory dream scenes (playable cutscenes) ══
 function opDreamTitle(id){for(var i=0;i<OP_MEMORY_BEATS.length;i++)if(OP_MEMORY_BEATS[i].id===id)return OP_MEMORY_BEATS[i].title;return id}
-function opDreamCheckAll(){try{var d=opMeta.dreams||{};if(d.lights&&d.echo&&d.waiting&&d.skate)opTrophy('memories','op_memories','dreamed all four memories. seen everything.')}catch(e){}}
+function opDreamCheckAll(){try{var d=opMeta.dreams||{};if(d.lights&&d.echo&&d.waiting&&d.skate&&d.playground)opTrophy('memories','op_memories','dreamed all five memories. seen everything.')}catch(e){}}
 function opDreamColHex(i){var C=['47,212,212','124,92,255','255,95,162','255,159,69','255,225,77','87,224,122','77,163,255','255,93,93'];return C[i%8]}
 function opDreamColCss(i){var C=['#2fd4d4','#7c5cff','#ff5fa2','#ff9f45','#ffe14d','#57e07a','#4da3ff','#ff5d5d'];return C[i%8]}
 function opDreamLightPos(i){var cx=opW*0.5,cy=opH*0.44,R=Math.min(opW,opH)*0.27,a=(i/8)*Math.PI*2-Math.PI/2;return {x:cx+Math.cos(a)*R,y:cy+Math.sin(a)*R}}
@@ -786,12 +787,14 @@ function opEnterMemoryScene(memory){
  if(memory.id==='skate'){opEnterSkateMemory(memory);return}
  if(opDream||opSkateMemory||opWellTrip)return;
  opDream={id:memory.id,beat:memory.beat,t0:Date.now(),lit:0,litT:Date.now()+1200,tuneAt:0,tuneI:0,exitAt:0,echoT:Date.now()+2500,answered:false,rounds:0,roundT:Date.now()+3000,q:[]};
+ if(memory.id==='playground'){opDream.fx=[0.15,0.32,0.5,0.68,0.85];opDream.segs=[{broken:false,dents:0},{broken:false,dents:0},{broken:false,dents:0},{broken:false,dents:0},{broken:false,dents:0}];opDream.smashed=0}
  try{var main=document.getElementById('opMain');if(main){main.classList.remove('memory-open');main.classList.add('dream-open')}}catch(e){}
  try{var back=document.getElementById('opSkateBack');if(back)back.style.display='block'}catch(e){}
  try{opObjP.x=opW*0.5;opObjP.y=(memory.id==='echo'?opH*0.22:opH*0.80);opObjP.vx=0;opObjP.vy=0;if(!opObjP.init)opObjP.init=true}catch(e){}
  opSfx('discover');opFlash=Date.now()+500;
- opNarr('memory — '+memory.title+'. '+memory.text+' move with WASD or arrows. BACK leaves.');
- opLogLine('dreaming: '+memory.title+'. WASD / arrows to wander.','st');
+ var how=memory.id==='playground'?'fling obj through every wall. BACK leaves.':'move with WASD or arrows. BACK leaves.';
+ opNarr('memory — '+memory.title+'. '+memory.text+' '+how);
+ opLogLine('dreaming: '+memory.title+'. '+how,'st');
  setTimeout(function(){try{opResize()}catch(e){}},80);
 }
 function opExitDream(manual){
@@ -917,7 +920,86 @@ function opDrawDream(g,t){
  if(!opDream)return;
  if(opDream.id==='lights')opDrawDreamLights(g,t);
  else if(opDream.id==='echo')opDrawDreamEcho(g,t);
+ else if(opDream.id==='playground')opDrawDreamPlayground(g,t);
  else opDrawDreamWaiting(g,t);
+}
+function opPlaygroundPhys(dt){
+ if(!opObjP.init){opObjP.x=opW*0.5;opObjP.y=opH*0.5;opObjP.vx=0;opObjP.vy=0;opObjP.init=true}
+ var rr=OP_COLR*opObjScale;
+ opObjP.vy+=OP_GRAV*dt;opObjP.vx*=0.999;
+ var sp0=Math.sqrt(opObjP.vx*opObjP.vx+opObjP.vy*opObjP.vy);
+ if(sp0>1800){opObjP.vx*=1800/sp0;opObjP.vy*=1800/sp0}
+ opObjP.x+=opObjP.vx*dt;opObjP.y+=opObjP.vy*dt;
+ var sp=Math.sqrt(opObjP.vx*opObjP.vx+opObjP.vy*opObjP.vy);
+ if(opObjP.x<rr){opObjP.x=rr;opObjP.vx=Math.abs(opObjP.vx)*OP_REST;if(sp>250)opSfx('thud')}
+ if(opObjP.x>opW-rr){opObjP.x=opW-rr;opObjP.vx=-Math.abs(opObjP.vx)*OP_REST;if(sp>250)opSfx('thud')}
+ if(opObjP.y<rr){opObjP.y=rr;opObjP.vy=Math.abs(opObjP.vy)*OP_REST}
+ if(opObjP.y>opH-rr){opObjP.y=opH-rr;opObjP.vy=-Math.abs(opObjP.vy)*OP_REST;if(sp>300)opSfx('thud')}
+ var sc=opDream;if(!sc||!sc.segs)return;
+ var top=opH*0.15;
+ for(var i=0;i<sc.segs.length;i++){
+  var sg=sc.segs[i];if(sg.broken)continue;
+  var sx=sc.fx[i]*opW,half=7;
+  if(opObjP.y+rr>top&&opObjP.y-rr<opH&&opObjP.x+rr>sx-half&&opObjP.x-rr<sx+half){
+   if(sp>OP_BREAKSPD){
+    sg.broken=true;sc.smashed++;
+    opSfx('crash');opShakeMain();opFlash=Date.now()+400;
+    try{opBurst(sx,opObjP.y,26,'255,200,120',260);opRing(sx,opObjP.y,'255,210,140',130)}catch(e){}
+    opObjP.vx*=0.82;opObjP.vy*=0.82;
+    if(sc.smashed>=sc.segs.length){
+     opLogLine('recess: every wall down. perfect.','st');
+     opNarr(opPick(['every wall. down. recess is complete. best day.','all five walls. smashed. the playground surrenders.']));
+     try{for(var k=0;k<3;k++)opBurst(opW*(0.25+0.25*k),opH*0.4,20,'255,220,150',240)}catch(e){}
+     opSfx('discover');
+     sc.exitAt=Date.now()+2500;
+    }else opLogLine('wall down. '+sc.smashed+' / '+sc.segs.length+' smashed.','st');
+   }else{
+    sg.dents++;
+    if(opObjP.x<sx){opObjP.x=sx-half-rr;opObjP.vx=-Math.abs(opObjP.vx)*OP_REST}
+    else{opObjP.x=sx+half+rr;opObjP.vx=Math.abs(opObjP.vx)*OP_REST}
+    if(sp>250)opSfx('thud');
+   }
+  }
+ }
+}
+function opDrawDreamPlayground(g,t){
+ var sc=opDream;
+ var sky=g.createLinearGradient(0,0,0,opH);
+ sky.addColorStop(0,'#1a2340');sky.addColorStop(0.6,'#2b2a4a');sky.addColorStop(1,'#3a3040');
+ g.fillStyle=sky;g.fillRect(0,0,opW,opH);
+ g.fillStyle='rgba(255,200,130,0.9)';g.beginPath();g.arc(opW*0.82,opH*0.2,26,0,7);g.fill();
+ g.fillStyle='rgba(255,200,130,0.18)';g.beginPath();g.arc(opW*0.82,opH*0.2,44,0,7);g.fill();
+ g.fillStyle='rgba(220,220,240,0.16)';
+ for(var c=0;c<3;c++){var cx=((c*0.37+t*0.004)%1.2-0.1)*opW,cy=opH*(0.12+0.09*c);g.beginPath();g.arc(cx,cy,22,0,7);g.arc(cx+20,cy+4,16,0,7);g.arc(cx-20,cy+5,14,0,7);g.fill()}
+ var gy=opH*0.88;
+ g.fillStyle='#2c4a2e';g.fillRect(0,gy,opW,opH-gy);
+ g.fillStyle='#3a5f38';g.fillRect(0,gy,opW,3);
+ var sx=opW*0.08;
+ g.strokeStyle='rgba(150,160,190,0.5)';g.lineWidth=5;
+ g.beginPath();g.moveTo(sx,gy);g.lineTo(sx+opW*0.09,opH*0.45);g.stroke();
+ g.beginPath();g.moveTo(sx+opW*0.09,opH*0.45);g.lineTo(sx+opW*0.09,gy);g.stroke();
+ var wx=opW*0.90;
+ g.strokeStyle='rgba(150,160,190,0.45)';g.lineWidth=4;
+ g.beginPath();g.moveTo(wx-24,gy);g.lineTo(wx,opH*0.5);g.lineTo(wx+24,gy);g.stroke();
+ var sw=Math.sin(t*1.2)*10;
+ g.lineWidth=2;g.beginPath();g.moveTo(wx,opH*0.5);g.lineTo(wx-8+sw,gy-40);g.stroke();
+ var top=opH*0.15;
+ if(sc&&sc.segs)for(var i=0;i<sc.segs.length;i++){
+  var sg=sc.segs[i];if(sg.broken)continue;
+  var bx=sc.fx[i]*opW;
+  g.fillStyle='#6b4a35';g.fillRect(bx-7,top,14,gy-top);
+  g.fillStyle='#7d5a42';g.fillRect(bx-7,top,14,5);
+  g.strokeStyle='rgba(0,0,0,0.35)';g.lineWidth=1;
+  for(var b=top+18;b<gy;b+=22){g.beginPath();g.moveTo(bx-7,b);g.lineTo(bx+7,b);g.stroke()}
+  var dn=Math.min(3,sg.dents);
+  g.strokeStyle='rgba(20,10,5,0.8)';g.lineWidth=1.5;
+  for(var k=0;k<dn;k++){
+   var ky=top+30+k*37+((i*53+k*29)%40);
+   g.beginPath();g.moveTo(bx-6,ky);g.lineTo(bx+1,ky+9);g.lineTo(bx-3,ky+18);g.stroke();
+  }
+ }
+ var left=sc?(sc.segs.length-sc.smashed):5;
+ opDreamHeader(g,'DREAM / RECESS',left>0?left+' walls standing. smash them.':'playground: cleared.');
 }
 function opYardAlpha(){return opYardOpen?Math.min(1,(Date.now()-opYardT)/500):0}
 function opWellPos(){return {x:opYardW*0.42,y:opH*0.55,r:30}}
@@ -1354,7 +1436,7 @@ function opPhys(dt){
  if(!opObjP.init){opObjP.x=opYardW+opPaneW*0.5;opObjP.y=opH*0.30;opObjP.vx=0;opObjP.vy=0;opObjP.init=true}
  if(opGrab.on)return;
  if(opWellTrip){opWellTripTick(dt);return}
- if(opDream){opDreamPhys(dt);opDreamTick();return}
+ if(opDream){if(opDream.id==='playground'){opPlaygroundPhys(dt)}else{opDreamPhys(dt)}opDreamTick();return}
  var now=Date.now();
  if(now>opScaleT)opObjScale=1;
  if(now<opFreezeT){opObjP.vx=0;opObjP.vy=0;return}

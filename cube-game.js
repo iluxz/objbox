@@ -2135,7 +2135,7 @@ var ACH=[
 {id:'op_catch',h:'safe hands.',n:'caught clean',d:'catch obj mid-air 5 times.',c:false},
 {id:'op_seek',h:'seeker certified.',n:'found him',d:'find hidden obj 3 times.',c:false},
 {id:'op_dream',h:'spaced out.',n:'daydream believer',d:'complete a tower memory dream.',c:false},
-{id:'op_memories',h:'seen everything.',n:'full recall',d:'dream all four tower memories.',c:false},
+{id:'op_memories',h:'seen everything.',n:'full recall',d:'dream all five tower memories.',c:false},
 {sec:'THE CASINO'},
 {id:'ca_first',h:'paid. do not get used to it.',n:'first payout',d:'win anything at the void casino.',c:false},
 {id:'ca_jackpot',h:'three sevens. or green.',n:'house funds you',d:'hit a casino jackpot (slots sevens or spin green).',c:false},
