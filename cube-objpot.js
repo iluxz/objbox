@@ -1680,6 +1680,21 @@ function opPotNameList(){
 function opUpdateCount(){
  try{var el=document.getElementById('opPotCount');if(el)el.textContent=(opPot.length?('in the pot: '+opPotNameList()):'the pot is empty')}catch(e){}
 }
+function opResetWalls(){
+ if(opSkateMemory||opDream){opNarr('wake up first. the walls can wait. they are patient. they are walls.');return}
+ opWallBroken=false;opCracks=[];
+ opYardOpen=false;opYardT=0;opYardCracks=[];opYardGateBroken=[false,false];opYardGateCracks=[[],[]];
+ opMemoryOpen=false;opMemoryBeat=[];opMemoryCracks=[];
+ try{var yp=document.getElementById('opYardPane');if(yp)yp.classList.remove('open')}catch(e){}
+ try{var mp=document.getElementById('opMemoryPane');if(mp)mp.classList.remove('open');var mn=document.getElementById('opMain');if(mn)mn.classList.remove('memory-open','skate-open','dream-open');var sb=document.getElementById('opSkateBack');if(sb)sb.style.display='none'}catch(e){}
+ try{var pp=document.getElementById('opPotPane');if(pp)pp.classList.remove('broken')}catch(e){}
+ try{opObjP.x=opYardW+opPaneW*0.5;opObjP.y=opH*0.30;opObjP.vx=0;opObjP.vy=0;opGrab.on=false;opDropArmed=false;opHideT=0;opWellHidden=false;opWellTrip=null}catch(e){}
+ opSfx('pop');opFlash=Date.now()+400;
+ opNarr(opPick(['walls: rebuilt. the tower heals fast. break them again. you know you want to.','everything is load-bearing again. allegedly. go nuts. (gently.)']));
+ opLogLine('all walls rebuilt. ingredients walled. courtyard sealed. quiet room quiet.','st');
+ setTimeout(function(){try{opResize()}catch(e){}},80);
+ setTimeout(function(){try{opResize()}catch(e){}},600);
+}
 function opSubmit(str){
  if(!opActive)return;
  var raw=String(str||'').trim();if(!raw)return;
@@ -1712,6 +1727,7 @@ function opSubmit(str){
  if(cmd==='trade'||cmd==='swap'||cmd==='deal'){opTrade();return}
  if(cmd==='drop'){opDrop();return}
  if(cmd==='hide'){opHide();return}
+ if(cmd==='walls'||cmd==='rebuild'||cmd==='repair'){opResetWalls();return}
  if(cmd==='crank'||cmd==='handle'){opCrankCmd();return}
  if(cmd==='take'||cmd==='get'||cmd==='pickup'){if(rest.indexOf('crank')!==-1){opCrankCmd()}else{opAdd(rest)}return}
  if(cmd==='fix'||cmd==='mend'||((cmd==='use'||cmd==='give')&&rest.indexOf('crank')!==-1)){opFixWellCmd();return}
@@ -2038,7 +2054,7 @@ function opCast(name){
  if(all)opTrophy('repertoire','op_repertoire','cast every orb at least once. full repertoire.');
 }
 function opHelp(){
- opLogLine('commands: add <ingredient> · mix · empty · shelf · book · cast <spell> · talk · hint · poke/tickle/dunk/toss · launch · drop · hide · tower · mute/unmute · leave','hi');
+ opLogLine('commands: add <ingredient> · mix · empty · shelf · book · cast <spell> · talk · hint · poke/tickle/dunk/toss · launch · drop · hide · walls · tower · mute/unmute · leave','hi');
  opNarr('add things, mix them, discover orbs, cast them at me, bother me. that is the loop. the loop is all there is.');
 }
 

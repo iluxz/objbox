@@ -433,6 +433,7 @@ var extHelp={
 'void.import':'void.import <pkg> — import a package',
 'void.help':'void.help — what you are reading, but in the void\'s voice',
 'ping':'ping <host> — ping the void (try: ping cube.sb)',
+'men':'men — summon men. obj has words for him. (he called the update goop.)',
 'obj':'obj — caught obj in 4k. take the gift.',
 'pull':'pull [box.objbox.pull:51072|1-9] — the pull ritual (procedural void demo)',
 'cubecheck':'cubecheck — [on|off] toggle the auto-demo graffiti scan. cubecheck off stops unasked demos while you idle',
@@ -1998,7 +1999,8 @@ var secs=[
 ['void-mute','silence void transmissions'],
 ['void-unmute','let the void talk again'],
 ['weather <type>','rain, snow, off, or auto'],
-['pet','pet the cube'],
+ ['pet','pet the cube'],
+ ['men','summon men. obj has words.'],
 ['forecast','tomorrow weather, plus bribes'],
 ['title','wear an achievement title'],
 ['stargaze','chart the bright stars'],
@@ -2233,6 +2235,7 @@ if(skillAllFinals())cubePrint('  upgrade           open upgrade tree');
 else cubeDim('  upgrade           upgrade tree (locked — buy every skill)');
 cubePrint('  weather <type>    rain, snow, off, auto');
 cubePrint('  pet               pet the cube');
+cubePrint('  men               summon men. obj has words.');
 cubePrint('  forecast          tomorrow weather, plus bribes');
 cubePrint('  title             wear an achievement title');
 cubePrint('  stargaze          chart the bright stars');
@@ -2782,8 +2785,9 @@ var match2=raw2.match(/^"([^"]+)"\s+"([^"]+)"$/);
 if(match2){obj=match2[1];msg=match2[2]}
 else{obj=raw2.replace(/"/g,'');msg=''}
 }
-if(!obj){cubeError('usage: transmit "object" "message"');cubePrint('or: transmit object: message');return}
-cubePrint(obj+': '+msg);
+ if(!obj){cubeError('usage: transmit "object" "message"');cubePrint('or: transmit object: message');return}
+ if(String(obj).toLowerCase()==='men'){var menR=['oh. men. transmitting. bold, for someone who called my update goop.','men is using transmit. everybody act natural. do not mention the goop thing. (the goop thing.)','incoming transmission from men. screening for complaints... complaint detected. proceeding anyway.','men. you get one transmission. make it an apology for the goop comment.'];cubePrint('obj: '+menR[Math.floor(Math.random()*menR.length)]);try{triggerGlitch()}catch(e){}}
+ cubePrint(obj+': '+msg);
 cubePrint('');
 // find matching response
 var response=null;

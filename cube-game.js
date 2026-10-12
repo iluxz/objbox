@@ -2570,8 +2570,32 @@ voidScriptLang['pet']={help:'pet - pet the cube',fn:function(){
 var n=0;try{n=parseInt(localStorage.getItem('cube_pets')||'0',10)||0;n++;localStorage.setItem('cube_pets',String(n))}catch(e){}
 var lines=['...purring detected. disgusting.','the cube leans into it. the cube has no lean. it leans.','static rises 4 percent. scientists are baffled.','core: noted. the cube likes you. do not let it go to your head.'];
 cubePrint(lines[(n-1)%lines.length]+(n>=100?' (100. soft hands.)':' ('+n+'/100)'));
-if(n>=100){try{if(typeof ach==='function')ach('pet100')}catch(e){}}
-return true}};
+ if(n>=100){try{if(typeof ach==='function')ach('pet100')}catch(e){}}
+ return true}};
+voidScriptLang['men']={help:'men - summon men. obj has words for him.',fn:function(){
+ try{
+  var n=0;try{n=parseInt(localStorage.getItem('cube_men_summoned')||'0',10)||0;n++;localStorage.setItem('cube_men_summoned',String(n))}catch(e){}
+  cubePrint('a wild men appears. he called the best update goop.');
+  var lines=[
+   'men. the update critic. he called five updates in a trench coat "goop" and then playtested it for 20 minutes. pick a lane.',
+   'men is here. everybody pretend the update is goop so he feels included.',
+   'keys obj was cute, men. the bunny in balenciaga remains unexplained. the court demands answers.',
+   'retrobj is NOT yours, men. the plaque says so. read the plaque. lick the plaque.',
+   'men fears the number 18. this is roast... never mind. you are safe. for now.',
+   'men complained about the school exam so hard it got deleted. congratulations. your whining is now canon.',
+   'men forks the repo but still plays on my link. the leash is invisible. the leash is real.',
+   'men says source is not interesting. source is him in 3 months. old and dusty.',
+   'the ban threat is over, men. you won with logic. enjoy your eternal roast instead. it is worse.',
+   'summoning men again. the torture schedule is full. he booked every slot. with complaints.'
+  ];
+  cubePrint('obj: '+lines[Math.floor(Math.random()*lines.length)]);
+  try{triggerGlitch()}catch(e){}
+  try{triggerGlitch()}catch(e){}
+  setTimeout(function(){try{triggerGlitch()}catch(e){}},400);
+  if(n<=1)cubePrint('obj: first summoning. men has been noticed. this will not stop.');
+  else cubePrint('obj: summoning #'+n+'. he keeps coming back. the torture continues.');
+ }catch(e){}
+ return true}};
 voidScriptLang['forecast']={help:'forecast - tomorrow weather, plus bribes',fn:function(a){
 function wtype(dt){
 try{
