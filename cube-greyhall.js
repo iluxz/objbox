@@ -34,8 +34,8 @@ if(talking)r.classList.add('talking');else r.classList.remove('talking');
 }catch(e){}
 }
 function ghSave(){try{return JSON.parse(localStorage.getItem('cube_greyhall')||'{}')}catch(e){return{}}}
-function ghLoad(){try{var s=ghSave();if(typeof s.hp==='number')ghHp=s.hp;if(s.ammo)ghAmmo=s.ammo;if(s.guns)ghGuns=s.guns;if(s.inv)ghInv=s.inv;if(s.cards)ghCards=s.cards;if(typeof s.deaths==='number')ghDeaths=s.deaths;if(s.diff)ghDiff=s.diff;if(s.station)ghStation=s.station;if(s.gun)ghGun=s.gun;if(s.moss)ghMossOpen=true;if(s.plate1)ghPlate1=true;if(s.rust)ghRustOpen=true;if(s.ammo&&typeof s.ammo.smg!=='number')ghAmmo.smg=0}catch(e){}}
-function ghPersist(){try{localStorage.setItem('cube_greyhall',JSON.stringify({hp:ghHp,ammo:ghAmmo,guns:ghGuns,gun:ghGun,inv:ghInv,cards:ghCards,deaths:ghDeaths,diff:ghDiff,station:ghStation,moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0}))}catch(e){}}
+function ghLoad(){try{var s=ghSave();if(typeof s.hp==='number')ghHp=s.hp;if(s.ammo)ghAmmo=s.ammo;if(s.guns)ghGuns=s.guns;if(s.inv)ghInv=s.inv;if(s.cards)ghCards=s.cards;if(typeof s.deaths==='number')ghDeaths=s.deaths;if(s.diff)ghDiff=s.diff;if(s.station)ghStation=s.station;if(s.gun)ghGun=s.gun;if(s.moss)ghMossOpen=true;if(s.plate1)ghPlate1=true;if(s.rust)ghRustOpen=true;if(s.amber)ghAmberOpen=true;if(s.ammo&&typeof s.ammo.smg!=='number')ghAmmo.smg=0}catch(e){}}
+function ghPersist(){try{localStorage.setItem('cube_greyhall',JSON.stringify({hp:ghHp,ammo:ghAmmo,guns:ghGuns,gun:ghGun,inv:ghInv,cards:ghCards,deaths:ghDeaths,diff:ghDiff,station:ghStation,moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0,amber:ghAmberOpen?1:0}))}catch(e){}}
 function ghHas(id){return ghInv.indexOf(id)!==-1}
 function ghInvFree(){return ghInv.length<9}
 
@@ -383,6 +383,9 @@ if(st.id==='magnum'&&ghGuns.indexOf('magnum')!==-1)st.taken=true;
 if(st.id==='magammo'&&ghRunFlags.magammo)st.taken=true;
 if(st.id==='medkit2'&&ghRunFlags.medkit2)st.taken=true;
 if(st.id==='greenkey'&&ghCards.indexOf('green')!==-1)st.taken=true;
+if(st.id==='yellowkey'&&ghCards.indexOf('yellow')!==-1)st.taken=true;
+if(st.id==='bluekey'&&ghCards.indexOf('blue')!==-1)st.taken=true;
+if(st.id==='mask'&&ghHas('mask'))st.taken=true;
 }
 }catch(e){}
 if(ghRunFlags.lumberDead){ghLumber.alive=false}
@@ -452,7 +455,7 @@ while(stash.firstChild)document.body.insertBefore(stash.firstChild,keep);
 }
 window.ghEnter=ghEnter;
 window.ghExit=ghExit;
-window.ghDbg=function(){try{return {x:Math.round(ghP.x*10)/10,z:Math.round(ghP.z*10)/10,hp:ghHp,ammo:ghAmmo.pistol,smg:ghAmmo.smg,magnum:ghAmmo.magnum,guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),lumber:ghLumber.hp,lumberAlive:ghLumber.alive,lumber3:ghLumber3.hp,l3alive:ghLumber3.alive,l3x:Math.round(ghLumber3.x*10)/10,l3z:Math.round(ghLumber3.z*10)/10,rust:ghRustOpen,skAlive:(function(){var n=0;for(var i=0;i<ghSkitters.length;i++)if(ghSkitters[i].alive)n++;return n})(),mode3d:ghMode3d,gl:!!ghGL,deaths:ghDeaths}}catch(e){return {err:String(e)}}};
+window.ghDbg=function(){try{return {x:Math.round(ghP.x*10)/10,z:Math.round(ghP.z*10)/10,hp:ghHp,ammo:ghAmmo.pistol,smg:ghAmmo.smg,magnum:ghAmmo.magnum,guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),lumber:ghLumber.hp,lumberAlive:ghLumber.alive,lumber3:ghLumber3.hp,l3alive:ghLumber3.alive,l3x:Math.round(ghLumber3.x*10)/10,l3z:Math.round(ghLumber3.z*10)/10,lumber4:ghLumber4.hp,l4alive:ghLumber4.alive,mask:ghHas('mask'),rust:ghRustOpen,amber:ghAmberOpen,rects:ghLevel.rects.length,walls:ghLevel.walls.length,gas:ghInGas(),skAlive:(function(){var n=0;for(var i=0;i<ghSkitters.length;i++)if(ghSkitters[i].alive)n++;return n})(),mode3d:ghMode3d,gl:!!ghGL,deaths:ghDeaths}}catch(e){return {err:String(e)}}};
 window.ghDbg2=function(){try{return {frame:ghFrame,keysW:!!ghKeys['w'],keysSp:!!ghKeys[' ']}}catch(e){return {err:String(e)}}};
 window.ghAim=function(v){try{ghAiming=!!v;return ghAiming}catch(e){return false}};
 window.ghDbg3=function(){try{return {y:Math.round((ghP.y||0)*100)/100,cam:[Math.round(ghCamPos[0]*10)/10,Math.round(ghCamPos[2]*10)/10],prompt:document.getElementById('ghPrompt').textContent,narr:document.getElementById('ghNarrText').textContent}}catch(e){return {err:String(e)}}};
@@ -639,18 +642,23 @@ var ghLevel={
 rects:[
 {x0:0,z0:0,x1:10,z1:6},{x0:10,z0:0,x1:20,z1:6},{x0:20,z0:0,x1:30,z1:6},
 {x0:20,z0:-6,x1:26,z1:0},{x0:30,z0:0,x1:40,z1:6},{x0:40,z0:0,x1:52,z1:6},
-// ── MOSS (phase 2) ──
+// ── MOSS (phase 2): ATRIUM — two great halls split by the seal-gate ──
 {x0:52,z0:2,x1:58,z1:4},
-{x0:58,z0:0,x1:68,z1:6},
-{x0:68,z0:0,x1:78,z1:6},
-{x0:78,z0:0,x1:86,z1:6},
-{x0:68,z0:6,x1:78,z1:11},
-// ── RUST (phase 3) ──
+{x0:58,z0:-6,x1:80,z1:6},
+{x0:58,z0:6,x1:80,z1:14},
+{x0:80,z0:2,x1:86,z1:4},
+// ── RUST (phase 3): RING — loop around a central block ──
 {x0:86,z0:2,x1:92,z1:4},
-{x0:92,z0:0,x1:102,z1:6},
-{x0:102,z0:0,x1:112,z1:6},
-{x0:92,z0:6,x1:102,z1:11}
-],
+{x0:92,z0:0,x1:112,z1:14},
+// ── AMBER (phase 4): VAULT LABYRINTH — branching complex ──
+{x0:112,z0:2,x1:118,z1:4},
+{x0:118,z0:0,x1:140,z1:6},
+{x0:124,z0:6,x1:134,z1:13},
+{x0:134,z0:6,x1:144,z1:13},
+{x0:140,z0:0,x1:156,z1:6},
+{x0:146,z0:-6,x1:156,z1:0},
+{x0:156,z0:0,x1:164,z1:6}
+ ],
 walls:[
 [5,-0.3,10.6,0.6],[5,6.3,10.6,0.6],[-0.3,3,0.6,6.6],
 [15,-0.3,10.6,0.6],[15,6.3,10.6,0.6],
@@ -663,38 +671,53 @@ walls:[
 [23,0,2,0.6],[24,0,2,0.6],
 [30,1.2,0.6,2.4],[30,4.8,0.6,2.4],
 [40,1.2,0.6,2.4],[40,4.8,0.6,2.4],
-// corridor + moss
+// ── MOSS: atrium — two great halls split by the seal-gate ──
 [55,1.7,6.6,0.6],[55,4.3,6.6,0.6],
-[63,-0.3,10.6,0.6],[63,6.3,10.6,0.6],
-[57.7,1,0.6,2],[57.7,5,0.6,2],
-[68.3,1,0.6,2],[68.3,5,0.6,2],
-[73,-0.3,10.6,0.6],
-[69.5,6.3,3.6,0.6],[76,6.3,4.6,0.6],
-[78.3,1,0.6,2],[78.3,5,0.6,2],
-[82,-0.3,8.6,0.6],[82,6.3,8.6,0.6],[86.3,3,0.6,6.6],
-[73,11.3,10.6,0.6],[67.7,8.5,0.6,5.6],[78.3,8.5,0.6,5.6],
-// moss gate (plate1 opens; zeroed at runtime)
+[58,-2,0.6,8],[58,9,0.6,10],
+[80,-2,0.6,8],[80,9,0.6,10],
+[69,-6.3,22.6,0.6],[69,14.3,22.6,0.6],
+[64.4,6.3,12.8,0.6],[77.1,6.3,5.8,0.6],
 [72.5,6.3,3.4,0.6],
-// ── RUST (phase 3) ──
+[64,-2,1,1],[74,-2,1,1],[64,2,1,1],[74,2,1,1],
+[83,1.7,6.6,0.6],[83,4.3,6.6,0.6],
+// ── RUST: ring corridor around a central core block ──
 [89,1.7,6.6,0.6],[89,4.3,6.6,0.6],
-[97,-0.3,10.6,0.6],
-[93.5,6.3,3.6,0.6],[100,6.3,4.6,0.6],
-[91.7,1,0.6,2],[91.7,5,0.6,2],
-[101.7,1,0.6,2],[101.7,5,0.6,2],
-[107,-0.3,10.6,0.6],[107,6.3,10.6,0.6],[112.3,3,0.6,6.6],
-[91.7,8.5,0.6,5.6],[102.3,8.5,0.6,5.6],[97,11.3,10.6,0.6]
-],
-floorC:[0.16,0.16,0.19],wallC:[0.75,0.75,0.78],chalkC:[0.85,0.85,0.88],mossC:[0.45,0.62,0.4],rustC:[0.55,0.35,0.22],rustWallC:[0.72,0.5,0.35]
+[92,1,0.6,2],[92,9,0.6,10],
+[112,1,0.6,2],[112,9,0.6,10],
+[102,-0.3,20.6,0.6],[102,14.3,20.6,0.6],
+[112.3,3,0.6,6.6],
+[98,7,0.6,6],[108,7,0.6,6],[103,3.7,10.6,0.6],[103,10.3,10.6,0.6],
+// ── AMBER: branching vault labyrinth ──
+[115,1.7,6.6,0.6],[115,4.3,6.6,0.6],
+[118,1,0.6,2],[118,5,0.6,2],
+[140,1,0.6,2],[140,5,0.6,2],
+[122.5,6.3,9,0.6],[135,6.3,10,0.6],
+[134,7,0.6,2],[134,12,0.6,2],
+[124,9.5,0.6,7],[144,9.5,0.6,7],[134,13.3,20.6,0.6],
+[129,-0.3,22,0.6],
+[148,6.3,16.6,0.6],
+[143,-0.3,6.6,0.6],[154,-0.3,4.6,0.6],
+[146,-3,0.6,6.6],[156,-3,0.6,6.6],[151,-6.3,10.6,0.6],
+[156,1,0.6,2],[156,5,0.6,2],
+[160,6.3,8.6,0.6],[160,-0.3,8.6,0.6],[164.3,3,0.6,6.6]
+ ],
+floorC:[0.16,0.16,0.19],wallC:[0.75,0.75,0.78],chalkC:[0.85,0.85,0.88],mossC:[0.45,0.62,0.4],rustC:[0.55,0.35,0.22],rustWallC:[0.72,0.5,0.35],amberC:[0.55,0.48,0.25],amberWallC:[0.75,0.62,0.35]
 };
-var ghDarkRect={x0:78,z0:0,x1:86,z1:6};
-// rect zones: 0-5 chalk, 6-10 moss, 11+ rust
-function ghZoneOf(i){return i<=5?0:(i<=10?1:2)}
+var ghDarkRect={x0:58,z0:6,x1:80,z1:14};
+// rect zones: 0-5 chalk, 6-9 moss, 10-11 rust, 12+ amber
+function ghZoneOf(i){return i<=5?0:(i<=9?1:(i<=11?2:3))}
 function ghOpenRust(){
 ghRustOpen=true;ghPersist();
 for(var j=0;j<ghLevel.walls.length;j++){var W=ghLevel.walls[j];
 if(Math.abs(W[0]-86.3)<0.01&&Math.abs(W[1]-3)<0.01){W[2]=0;W[3]=0}}
 }
 var ghRustOpen=false;
+function ghOpenAmber(){
+ghAmberOpen=true;ghPersist();
+for(var j=0;j<ghLevel.walls.length;j++){var W=ghLevel.walls[j];
+if(Math.abs(W[0]-112.3)<0.01&&Math.abs(W[1]-3)<0.01){W[2]=0;W[3]=0}}
+}
+var ghAmberOpen=false;
 function ghOpenSeal(){
 ghMossOpen=true;ghPersist();
 for(var j=0;j<ghLevel.walls.length;j++){var W=ghLevel.walls[j];
@@ -709,6 +732,7 @@ function ghApplyOpened(){
 if(ghMossOpen)for(var a=0;a<ghLevel.walls.length;a++){var A=ghLevel.walls[a];if(Math.abs(A[0]-52.3)<0.01&&Math.abs(A[1]-3)<0.01){A[2]=0;A[3]=0}}
 if(ghPlate1)for(var b=0;b<ghLevel.walls.length;b++){var B=ghLevel.walls[b];if(Math.abs(B[0]-72.5)<0.01&&Math.abs(B[1]-6.3)<0.01){B[2]=0;B[3]=0}}
 if(ghRustOpen)for(var c=0;c<ghLevel.walls.length;c++){var C=ghLevel.walls[c];if(Math.abs(C[0]-86.3)<0.01&&Math.abs(C[1]-3)<0.01){C[2]=0;C[3]=0}}
+if(ghAmberOpen)for(var d=0;d<ghLevel.walls.length;d++){var D=ghLevel.walls[d];if(Math.abs(D[0]-112.3)<0.01&&Math.abs(D[1]-3)<0.01){D[2]=0;D[3]=0}}
 }
 function ghWalkOK(x,z,r){
 for(var i=0;i<ghLevel.rects.length;i++){var R=ghLevel.rects[i];
@@ -755,7 +779,7 @@ gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 // floors
 for(var i=0;i<ghLevel.rects.length;i++){var R=ghLevel.rects[i];
 var zn=ghZoneOf(i);
-var fc=i===0?ghLevel.floorC:(zn===1?ghLevel.mossC:(zn===2?ghLevel.rustC:ghLevel.chalkC));
+var fc=i===0?ghLevel.floorC:(zn===1?ghLevel.mossC:(zn===2?ghLevel.rustC:(zn===3?ghLevel.amberC:ghLevel.chalkC)));
 var ft=i===0?ghTexFloorD:ghTexTile;
 ghBox((R.x0+R.x1)/2,-0.25,(R.z0+R.z1)/2,R.x1-R.x0,0.5,R.z1-R.z0,fc,0,ft,Math.max(R.x1-R.x0,R.z1-R.z0)/2)}
 // ceilings (roof slabs, one per room)
@@ -763,7 +787,7 @@ for(var ci=0;ci<ghLevel.rects.length;ci++){var CR=ghLevel.rects[ci];
 ghBox((CR.x0+CR.x1)/2,3.3,(CR.z0+CR.z1)/2,CR.x1-CR.x0,0.5,CR.z1-CR.z0,[0.1,0.1,0.13],0,ghTexDark,4)}
 // walls
 for(var j=0;j<ghLevel.walls.length;j++){var W=ghLevel.walls[j];
-var wc=W[0]>87?ghLevel.rustWallC:ghLevel.wallC;
+var wc=W[0]>113?ghLevel.amberWallC:(W[0]>87?ghLevel.rustWallC:ghLevel.wallC);
 ghBox(W[0],1.5,W[1],W[2],3,W[3],wc,0,ghTexPanel,Math.max(W[2],W[3])/2)}
 // player: legs, torso, arms, head, visor, gun. bobs when moving.
 var px=ghP.x,pz=ghP.z;
@@ -904,33 +928,49 @@ ghThings=[
 {id:'whitekey',x:49,z:3,c:[0.95,0.95,0.95],s:0.4,taken:false,hidden:true},
 {id:'station',x:23,z:-4,c:[0.2,0.6,0.9],s:1.0,taken:false,prop:true},
 {id:'seal',x:50.5,z:3,c:[0.5,0.8,0.4],s:1.2,taken:false,prop:true},
-// ── MOSS (phase 2) ──
-{id:'visor',x:60,z:1,c:[0.3,0.9,0.5],s:0.5,taken:false},
+// ── MOSS (phase 2): south hall + gated dark north hall ──
+{id:'visor',x:62,z:-2,c:[0.3,0.9,0.5],s:0.5,taken:false},
 {id:'plate1',x:60,z:5,c:[0.7,0.7,0.2],s:0.9,taken:false,prop:true,plate:true},
-{id:'magnum',x:72,z:2,c:[0.5,0.3,0.15],s:0.6,taken:false},
-{id:'magammo',x:74,z:4,c:[0.9,0.6,0.2],s:0.5,taken:false},
-{id:'station2',x:70,z:9,c:[0.2,0.6,0.9],s:1.0,taken:false,prop:true},
-{id:'medkit2',x:76,z:9,c:[0.9,0.25,0.25],s:0.5,taken:false},
-{id:'greenkey',x:82,z:3,c:[0.4,1,0.4],s:0.4,taken:false,hidden:true},
-// ── RUST (phase 3) ──
+{id:'magnum',x:76,z:-3,c:[0.5,0.3,0.15],s:0.6,taken:false},
+{id:'magammo',x:68,z:-4,c:[0.9,0.6,0.2],s:0.5,taken:false},
+{id:'station2',x:62,z:10,c:[0.2,0.6,0.9],s:1.0,taken:false,prop:true},
+{id:'medkit2',x:77,z:11,c:[0.9,0.25,0.25],s:0.5,taken:false},
+{id:'greenkey',x:83,z:3,c:[0.4,1,0.4],s:0.4,taken:false,hidden:true},
+// ── RUST (phase 3): ring around the core block ──
 {id:'rustseal',x:84.5,z:3,c:[0.8,0.4,0.2],s:1.2,taken:false,prop:true},
-{id:'floppy3',x:94,z:1,c:[0.9,0.7,0.2],s:0.5,taken:false},
-{id:'smg',x:97,z:2,c:[0.6,0.4,0.2],s:0.6,taken:false},
-{id:'smgammo',x:108,z:4,c:[0.9,0.7,0.3],s:0.5,taken:false},
-{id:'medkit3',x:109,z:1,c:[0.9,0.25,0.25],s:0.5,taken:false},
-{id:'station3',x:97,z:9,c:[0.9,0.5,0.2],s:1.0,taken:false,prop:true}
-];
+{id:'floppy3',x:96,z:2,c:[0.9,0.7,0.2],s:0.5,taken:false},
+{id:'smg',x:100,z:2,c:[0.6,0.4,0.2],s:0.6,taken:false},
+{id:'smgammo',x:96,z:12,c:[0.9,0.7,0.3],s:0.5,taken:false},
+{id:'medkit3',x:110,z:12,c:[0.9,0.25,0.25],s:0.5,taken:false},
+{id:'station3',x:108,z:2,c:[0.9,0.5,0.2],s:1.0,taken:false,prop:true},
+// ── AMBER (phase 4): branching vault labyrinth ──
+{id:'ambersel',x:110,z:3,c:[0.9,0.7,0.2],s:1.2,taken:false,prop:true},
+{id:'yellowkey',x:106,z:12,c:[1,0.9,0.2],s:0.4,taken:false,hidden:true},
+{id:'mask',x:122,z:2,c:[0.85,0.7,0.3],s:0.5,taken:false},
+{id:'floppy4',x:136,z:9,c:[0.9,0.7,0.2],s:0.5,taken:false},
+{id:'pammo4',x:128,z:9,c:[0.85,0.75,0.3],s:0.5,taken:false},
+{id:'magammo4',x:150,z:-3,c:[0.9,0.6,0.2],s:0.5,taken:false},
+{id:'station4',x:130,z:3,c:[0.9,0.6,0.15],s:1.0,taken:false,prop:true},
+{id:'medkit4',x:139,z:11,c:[0.9,0.25,0.25],s:0.5,taken:false},
+{id:'smgammo4',x:160,z:3,c:[0.9,0.7,0.3],s:0.5,taken:false},
+{id:'bluekey',x:162,z:3,c:[0.3,0.6,1],s:0.4,taken:false,hidden:true}
+ ];
 }
 var ghSkitters=[
-{x:64,z:4,hp:2,alive:true,cd:0,wob:0},
-{x:70,z:1,hp:2,alive:false,cd:0,wob:2},
+{x:66,z:-3,hp:2,alive:true,cd:0,wob:0},
+{x:70,z:-4,hp:2,alive:false,cd:0,wob:2},
 {x:76,z:5,hp:2,alive:false,cd:0,wob:4},
 // ── RUST (phase 3, wake on SMG pickup) ──
-{x:97,z:5,hp:3,alive:false,cd:0,wob:6},
-{x:105,z:1,hp:3,alive:false,cd:0,wob:8}
+{x:96,z:10,hp:3,alive:false,cd:0,wob:6},
+{x:104,z:12,hp:3,alive:false,cd:0,wob:8},
+// ── AMBER (phase 4: entry wakes on mask pickup, vault pair stands guard) ──
+{x:122,z:4,hp:3,alive:false,cd:0,wob:10},
+{x:158,z:2,hp:3,alive:true,cd:0,wob:12},
+{x:160,z:4,hp:3,alive:true,cd:0,wob:14}
 ];
-var ghLumber2={x:73,z:8,hp:6,alive:true,cd:0,sw:2};
-var ghLumber3={x:99,z:4,hp:10,alive:true,cd:0,sw:4};
+var ghLumber2={x:72,z:10,hp:6,alive:true,cd:0,sw:2};
+var ghLumber3={x:102,z:12,hp:10,alive:true,cd:0,sw:4};
+var ghLumber4={x:159,z:3,hp:14,alive:true,cd:0,sw:6};
 var ghLumber={x:45,z:3,hp:6,alive:true,cd:0};
 var ghPrevF=false,ghPrevSp=false,ghPrevJ=false,ghPrev1=false,ghPrev2=false,ghFrame=0,ghLandT=0;
 function ghDrawThingsReal(){
@@ -939,6 +979,8 @@ for(var i=0;i<ghThings.length;i++){var th=ghThings[i];
 if(th.taken)continue;
 if(th.hidden){
 if(th.id==='whitekey'&&!ghRunFlags.lumberDead)continue;
+if(th.id==='yellowkey'&&!ghRunFlags.lumber3Dead)continue;
+if(th.id==='bluekey'&&!ghRunFlags.lumber4Dead)continue;
 }
 var bob=th.prop?0:Math.sin(t*3+i)*0.15;
 ghBox(th.x,0.6+bob,th.z,th.s,th.s,th.s,th.c,t*0.8,ghTexPlain,1);
@@ -996,6 +1038,8 @@ ghBox(sk.x-0.15,0.3,sk.z+0.48,0.08,0.12,0.14,[0.4,0.36,0.25],0,ghTexDark,1);
 if(ghLumber2.alive)ghDrawLumber(ghLumber2,[0.18,0.14,0.14],[1,0.5,0.1]);
 // lumber 3 (rust guardian)
 if(typeof ghLumber3!=='undefined'&&ghLumber3.alive)ghDrawLumber(ghLumber3,[0.24,0.13,0.08],[1,0.3,0.05]);
+// lumber 4 (amber warden, mini-boss)
+if(typeof ghLumber4!=='undefined'&&ghLumber4.alive)ghDrawLumber(ghLumber4,[0.45,0.32,0.1],[1,0.8,0.1]);
 }
 function ghDist(ax,az,bx,bz){var dx=ax-bx,dz=az-bz;return Math.sqrt(dx*dx+dz*dz)}
 function ghNearestInteract(){
@@ -1004,7 +1048,8 @@ for(var i=0;i<ghThings.length;i++){var th=ghThings[i];
 if(th.taken)continue;
 if(th.id==='whitekey'&&!ghRunFlags.lumberDead)continue;
 if(th.id==='greenkey'&&!ghHas('visor'))continue;
-if(th.id==='greenkey'&&!ghHas('visor'))continue;
+if(th.id==='yellowkey'&&!ghRunFlags.lumber3Dead)continue;
+if(th.id==='bluekey'&&!ghRunFlags.lumber4Dead)continue;
 var d=ghDist(ghP.x,ghP.z,th.x,th.z);
 if(d<bd){bd=d;best=th}
 }
@@ -1031,6 +1076,16 @@ if(th.id==='smgammo')return '[F] take SMG rounds';
 if(th.id==='medkit3')return '[F] take medkit';
 if(th.id==='floppy3')return '[F] take floppy';
 if(th.id==='station3')return '[F] use save station';
+if(th.id==='ambersel')return '[F] touch the amber seal';
+if(th.id==='yellowkey')return '[F] take yellow keycard';
+if(th.id==='mask')return '[F] take gas mask';
+if(th.id==='floppy4')return '[F] take floppy';
+if(th.id==='pammo4')return '[F] take pistol rounds';
+if(th.id==='magammo4')return '[F] take magnum rounds';
+if(th.id==='station4')return '[F] use save station';
+if(th.id==='medkit4')return '[F] take medkit';
+if(th.id==='smgammo4')return '[F] take SMG rounds';
+if(th.id==='bluekey')return '[F] take blue keycard';
 return '';
 }
 function ghDoInteract(th){
@@ -1083,6 +1138,28 @@ ghInv.splice(ghInv.indexOf('floppy'),1);
 ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0,room:'rust_up'};
 ghPersist();ghSay(['floppy inserted. remembered.','die now, wake orange.']);
 }
+else if(th.id==='ambersel'){
+if(ghCards.indexOf('yellow')!==-1){
+if(!ghAmberOpen){try{ghOpenAmber()}catch(e){}ghSay(['the amber seal drinks the yellow keycard.','heat. resin. the smell of old flowers. AMBER is open.','mask on. the far rooms are gassy.'])}
+else ghSay(['the amber corridor. open. waiting. (it smells like resin.)']);
+}else ghSay(['sealed. AMBER.','it wants a yellow keycard. the rust warden carries one. wardens always carry.']);
+}
+else if(th.id==='yellowkey'){th.taken=true;ghCards.push('yellow');ghInv.push('yellowkey');ghPersist();ghSay(['a yellow keycard. warm to the touch.','it opens AMBER. east, past the rust, past the smell.'])}
+else if(th.id==='mask'){if(!ghInvFree()){ghSay(['inventory full.']);return}th.taken=true;ghInv.push('mask');ghPersist();
+if(!ghRunFlags.maskAmbush){ghRunFlags.maskAmbush=true;ghSkitters[5].alive=true}
+ghSay(['a gas mask. straps still good. smells like someone else\u2019s shift.','wear it. the amber wing is gassy.','...scratching. in the vents.'])}
+else if(th.id==='floppy4'){if(!ghInvFree()){ghSay(['inventory full. 9 slots.']);return}th.taken=true;ghInv.push('floppy');ghPersist();ghSay(['the man took the floppy.','save stations eat these. (the yellow one is hungrier.)'])}
+else if(th.id==='pammo4'){th.taken=true;ghRunFlags.pammo4=true;ghAmmo.pistol+=12;ghPersist();ghSay(['+12 pistol rounds.','amber caches count. this one counts twelve.'])}
+else if(th.id==='magammo4'){th.taken=true;ghRunFlags.magammo4=true;ghAmmo.magnum=(ghAmmo.magnum||0)+6;ghPersist();ghSay(['+6 magnum rounds. fished from the sump.','they still work. everything down here still works.'])}
+else if(th.id==='medkit4'){if(!ghInvFree()){ghSay(['inventory full.']);return}th.taken=true;ghRunFlags.medkit4=true;ghInv.push('medkit');ghPersist();ghSay(['medkit. +50. (H. amber hurts. be ready.)'])}
+else if(th.id==='smgammo4'){th.taken=true;ghRunFlags.smgammo4=true;ghAmmo.smg=(ghAmmo.smg||0)+18;ghPersist();ghSay(['+18 SMG rounds.','spend them on the warden. (the warden disagrees.)'])}
+else if(th.id==='bluekey'){th.taken=true;ghCards.push('blue');ghInv.push('bluekey');ghPersist();ghSay(['a blue keycard. cold. humming faintly.','it opens TIDE. there is no tide seal yet. there will be.'])}
+else if(th.id==='station4'){
+if(ghInv.indexOf('floppy')===-1){ghSay(['the station wants a floppy.']);return}
+ghInv.splice(ghInv.indexOf('floppy'),1);
+ghStation={hp:ghHp,ammo:JSON.parse(JSON.stringify(ghAmmo)),guns:ghGuns.slice(),gun:ghGun,inv:ghInv.slice(),cards:ghCards.slice(),moss:ghMossOpen?1:0,plate1:ghPlate1?1:0,rust:ghRustOpen?1:0,amber:ghAmberOpen?1:0,room:'amber_loft'};
+ghPersist();ghSay(['floppy inserted. remembered.','die now, wake amber.']);
+}
 }
 function ghShoot(){
 var now=0;try{now=Date.now()}catch(e){}
@@ -1094,7 +1171,7 @@ if((ghAmmo[ghGun]||0)<=0){ghSay(['click. no rounds.']);return}
 var dx=Math.sin(ghP.yaw),dz=Math.cos(ghP.yaw);
 // nearest hittable enemy in cone
 var best=null,bd=14;
-var foes=[{o:ghLumber,r:1.0},{o:ghLumber2,r:1.0},{o:ghLumber3,r:1.0}];
+var foes=[{o:ghLumber,r:1.0},{o:ghLumber2,r:1.0},{o:ghLumber3,r:1.0},{o:ghLumber4,r:1.0}];
 for(var si=0;si<ghSkitters.length;si++)foes.push({o:ghSkitters[si],r:0.7});
 for(var fi=0;fi<foes.length;fi++){var fo=foes[fi].o;
 if(!fo.alive)continue;
@@ -1113,9 +1190,10 @@ best.alive=false;
 if(best===ghLumber){ghRunFlags.lumberDead=true;ghAmmo.pistol+=6;ghSay(['the LUMBER falls. slowly.','+6 rounds from its pockets. (it had a white keycard behind it.)'])}
 else if(best===ghLumber2){ghRunFlags.lumber2Dead=true;ghAmmo.pistol+=6;ghSay(['the moss LUMBER falls.','+6 rounds. (it guarded a station. stations need guards.)'])}
 else if(best===ghLumber3){ghRunFlags.lumber3Dead=true;ghAmmo.smg=(ghAmmo.smg||0)+8;ghSay(['the rust LUMBER falls. orange dust settles.','+8 SMG rounds from its bandolier. (it wore one. fashion.)'])}
+else if(best===ghLumber4){ghRunFlags.lumber4Dead=true;ghAmmo.smg=(ghAmmo.smg||0)+12;ghSay(['the amber warden falls. resin cracks. dust settles.','+12 SMG rounds from its bandolier. it wore two.','the vault behind it glints blue. take the card.'])}
 else{ghAmmo.pistol+=4;ghSay(['SKITTER down.','+4 rounds. (it ate them. skitters eat rounds.)'])}
 }else{
-var nm=(best===ghLumber||best===ghLumber2||best===ghLumber3)?'LUMBER':'SKITTER';
+var nm=(best===ghLumber||best===ghLumber2||best===ghLumber3||best===ghLumber4)?'LUMBER':'SKITTER';
 ghSay(['hit. '+nm+' HP: '+best.hp+'.']);
 }
 ghPersist();
@@ -1165,7 +1243,8 @@ function ghEnemyHome(){
 ghLumber.x=45;ghLumber.z=3;
 ghLumber2.x=73;ghLumber2.z=8;
 ghLumber3.x=99;ghLumber3.z=4;
-var homes=[[64,4],[70,1],[76,5],[97,5],[105,1]];
+ghLumber4.x=143;ghLumber4.z=3;
+var homes=[[64,4],[70,1],[76,5],[97,5],[105,1],[123,4],[152,2],[154,4]];
 for(var i=0;i<ghSkitters.length&&i<homes.length;i++){ghSkitters[i].x=homes[i][0];ghSkitters[i].z=homes[i][1];ghSkitters[i].cd=0}
 }
 function ghDie3D(){
@@ -1177,6 +1256,7 @@ ghHp=ghStation.hp;ghAmmo=JSON.parse(JSON.stringify(ghStation.ammo));ghGuns=ghSta
 if(ghStation.moss&&!ghMossOpen){ghMossOpen=true;try{ghApplyOpened()}catch(e){}}
 if(ghStation.plate1&&!ghPlate1){ghPlate1=true;try{ghApplyOpened()}catch(e){}}
 if(ghStation.rust&&!ghRustOpen){ghRustOpen=true;try{ghApplyOpened()}catch(e){}}
+if(ghStation.amber&&!ghAmberOpen){ghAmberOpen=true;try{ghApplyOpened()}catch(e){}}
 }else{
 ghHp=ghMaxHp;
 }
@@ -1187,9 +1267,12 @@ ghLumber2.x=73;ghLumber2.z=8;
 if(!ghRunFlags.lumber2Dead){ghLumber2.hp=6;ghLumber2.alive=true}
 ghLumber3.x=99;ghLumber3.z=4;
 if(!ghRunFlags.lumber3Dead){ghLumber3.hp=10;ghLumber3.alive=true}
+ghLumber4.x=143;ghLumber4.z=3;
+if(!ghRunFlags.lumber4Dead){ghLumber4.hp=14;ghLumber4.alive=true}
 for(var si=0;si<ghSkitters.length;si++){var sk0=ghSkitters[si];sk0.hp=si<3?2:3;sk0.alive=true;sk0.cd=0}
 if(ghRunFlags.ambush){ghSkitters[1].alive=false;ghSkitters[2].alive=false}
 if(ghRunFlags.rustAmbush){ghSkitters[3].alive=false;ghSkitters[4].alive=false}
+if(ghRunFlags.maskAmbush){ghSkitters[5].alive=false}
 ghPersist();
 ghSay([line,'wake up at the landing. (stations are earned.)']);
 }
@@ -1202,7 +1285,23 @@ else if(inDark){dk.style.background='#0a3a1a';dk.style.opacity='0.14'}
 else dk.style.opacity='0';
 }
 var ghInvOpen=false;
-var ghItemNames={floppy:'FLOPPY',medkit:'MEDKIT',whitekey:'WHITE KEYCARD',greenkey:'GREEN KEYCARD',visor:'NIGHT VISOR'};
+// ── AMBER gas (phase 4): the hall and the sump breathe. the mask helps. ──
+var ghGasRects=[{x0:140,z0:0,x1:156,z1:6},{x0:146,z0:-6,x1:156,z1:0}];
+var ghGasMsgT=0;
+function ghInGas(){
+for(var i=0;i<ghGasRects.length;i++){var G=ghGasRects[i];
+if(ghP.x>G.x0&&ghP.x<G.x1&&ghP.z>G.z0&&ghP.z<G.z1)return true}
+return false;
+}
+function ghGasTick(dt){
+if(ghHas('mask'))return;
+if(!ghInGas())return;
+ghHp-=(ghDiff==='hard'?9:6)*dt;
+var now=0;try{now=Date.now()}catch(e){}
+if(now>ghGasMsgT){ghGasMsgT=now+4000;ghSay(['amber gas. it itches going in.','HP '+Math.ceil(ghHp)+'. the mask hangs back in the entry. masks help.'])}
+if(ghHp<=0)ghDie3D();
+}
+var ghItemNames={floppy:'FLOPPY',medkit:'MEDKIT',whitekey:'WHITE KEYCARD',greenkey:'GREEN KEYCARD',yellowkey:'YELLOW KEYCARD',bluekey:'BLUE KEYCARD',visor:'NIGHT VISOR',mask:'GAS MASK'};
 function ghRenderInv(){
 try{
 var iv=document.getElementById('ghInv');if(!iv)return;
@@ -1211,7 +1310,7 @@ iv.style.display='block';
 var counts={};
 for(var i=0;i<ghInv.length;i++){counts[ghInv[i]]=(counts[ghInv[i]]||0)+1}
 var html='<div style="color:#9ab8d8;font-size:13px;letter-spacing:3px;margin-bottom:10px">INVENTORY '+ghInv.length+'/9 · [TAB] close</div>';
-var order=['floppy','medkit','whitekey','greenkey','visor'];
+var order=['floppy','medkit','whitekey','greenkey','yellowkey','bluekey','visor','mask'];
 for(var o=0;o<order.length;o++){var id=order[o];
 if(counts[id])html+='<div style="color:#c8c8d0;font-size:13px;padding:3px 0">'+(ghItemNames[id]||id)+' ×'+counts[id]+(id==='medkit'?' <span style="color:#5a7a9a">[H] use</span>':'')+'</div>'}
 for(var gi=0;gi<ghGuns.length;gi++){var g=ghGuns[gi];
@@ -1234,6 +1333,7 @@ var lurk=ghDiff==='hard'?20:12;
 if(ghLumber.alive)ghChase(ghLumber,1.3,lurk,1.1,dt);
 if(ghLumber2.alive)ghChase(ghLumber2,1.3,lurk,1.1,dt);
 if(ghLumber3.alive)ghChase(ghLumber3,1.5,lurk,1.1,dt);
+if(typeof ghLumber4!=='undefined'&&ghLumber4.alive)ghChase(ghLumber4,1.5,lurk,1.1,dt);
 for(var qi=0;qi<ghSkitters.length;qi++){if(ghSkitters[qi].alive)ghChase(ghSkitters[qi],3.0,ghDiff==='hard'?14:8,0.8,dt)}
 // gun switching 1/2
 if(ghKeys['1']){ghKeys['1']=false;if(ghGuns.indexOf('pistol')!==-1&&ghGun!=='pistol'){ghGun='pistol';ghPersist()}}
@@ -1243,6 +1343,8 @@ if(ghKeys['3']){ghKeys['3']=false;if(ghGuns.indexOf('smg')!==-1&&ghGun!=='smg'){
 if(!ghPlate1&&ghDist(ghP.x,ghP.z,60,5)<1.3){try{ghOpenGate()}catch(e){}ghSay(['CLUNK. somewhere, a gate gives up.','(moss lower. past the second room. it is open now.)'])}
 // dark overlay
 try{ghDarkTick()}catch(e){}
+// amber gas
+try{ghGasTick(dt)}catch(e){}
 // medkit key H
 if(ghKeys['h']){ghKeys['h']=false;
 if(ghUseMedkit())ghSay(['+50.']);
@@ -1273,7 +1375,7 @@ var near=ghNearestInteract();
 var pr='';
 if(Date.now()<ghMsgUntil&&ghMsgTxt)pr=ghMsgTxt;
 else if(near)pr=ghInteractLabel(near);
-else if((function(){var anyE=null,anyD=14;var es=[ghLumber,ghLumber2,ghLumber3];for(var ei=0;ei<ghSkitters.length;ei++)es.push(ghSkitters[ei]);for(var ej=0;ej<es.length;ej++){if(!es[ej].alive)continue;var ed=ghDist(ghP.x,ghP.z,es[ej].x,es[ej].z);if(ed<anyD){anyD=ed;anyE=es[ej]}}if(anyE&&ghGuns.length){pr='[RMB] aim · [LMB] shoot ('+anyE.hp+' HP)';return true}return false})()){}
+else if((function(){var anyE=null,anyD=14;var es=[ghLumber,ghLumber2,ghLumber3,ghLumber4];for(var ei=0;ei<ghSkitters.length;ei++)es.push(ghSkitters[ei]);for(var ej=0;ej<es.length;ej++){if(!es[ej].alive)continue;var ed=ghDist(ghP.x,ghP.z,es[ej].x,es[ej].z);if(ed<anyD){anyD=ed;anyE=es[ej]}}if(anyE&&ghGuns.length){pr='[RMB] aim · [LMB] shoot ('+anyE.hp+' HP)';return true}return false})()){}
 if(!pr){try{var lcv=document.getElementById('ghCanvas');if(!lcv||document.pointerLockElement!==lcv)pr='[click] look · WASD move · SPACE jump - 1/2/3 guns - TAB inv'}catch(e){}}
 ghPrompt(pr);
 ghFrame++;

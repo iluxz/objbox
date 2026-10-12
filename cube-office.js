@@ -101,7 +101,9 @@ retirement:'the gold watch. the man retired. the rock continues. rocks do not re
 customer:'the customer is always right. the rock is always righter. the customer complained. the rock refunded nothing.',
 expo:'the expo. the rock toured the exhibits. the rock left a review: rock.',
 figurines:'six tiny men. one full-size rock. the tiny men worship it now. as they should.',
-epilogue:'the epilogue. the rock was here before the beginning. the rock will be here after. the rock is the frame.'
+epilogue:'the epilogue. the rock was here before the beginning. the rock will be here after. the rock is the frame.',
+ot_shift:'overtime. the man filed, refilled, rebooted. the rock supervised. the rock does not do paperwork. the rock IS paperwork.',
+ot_missed:'the clock hit zero. the rock checked its own watch. the rock has no watch. the rock knew anyway.'
 };
 function stRockify(id,lines){
 if(!stRock||!lines||!lines.length)return lines;
@@ -711,8 +713,8 @@ var stSkipN=0;
 var stInterveneN=0;
 var stClosetT=0;
 function stSave(){try{return JSON.parse(localStorage.getItem('cube_office')||'{}')}catch(e){return{}}}
-function stLoad(){try{var s=stSave();if(s.seen&&s.seen.length)stSeen=s.seen;if(s.runs)stRuns=s.runs;if(s.takeover)stTakeoverN=s.takeover;if(typeof s.type!=='undefined')stTypeOn=!!s.type;if(s.times&&s.times.length)stClockTimes=s.times;if(s.boots)stClockBoots=s.boots;if(typeof s.night!=='undefined')stNight=!!s.night;if(s.swaps)stSwapN=s.swaps;if(s.expo&&s.expo.length)stExpoSeen=s.expo;if(s.leak)stLeak=true;if(s.rock)stRock=true;if(s.figs&&s.figs.length)stFigs=s.figs;if(s.epready)stEpilogueReady=true}catch(e){}}
-function stPersist(){try{localStorage.setItem('cube_office',JSON.stringify({seen:stSeen,runs:stRuns,takeover:stTakeoverN,type:stTypeOn?1:0,times:stClockTimes,boots:stClockBoots,night:stNight?1:0,swaps:stSwapN,expo:stExpoSeen,leak:stLeak?1:0,rock:stRock?1:0,figs:stFigs,epready:stEpilogueReady?1:0}))}catch(e){}}
+function stLoad(){try{var s=stSave();if(s.seen&&s.seen.length)stSeen=s.seen;if(s.runs)stRuns=s.runs;if(s.takeover)stTakeoverN=s.takeover;if(typeof s.type!=='undefined')stTypeOn=!!s.type;if(s.times&&s.times.length)stClockTimes=s.times;if(s.boots)stClockBoots=s.boots;if(typeof s.night!=='undefined')stNight=!!s.night;if(s.swaps)stSwapN=s.swaps;if(s.expo&&s.expo.length)stExpoSeen=s.expo;if(s.leak)stLeak=true;if(s.rock)stRock=true;if(s.figs&&s.figs.length)stFigs=s.figs;if(s.epready)stEpilogueReady=true;if(s.ot)stOTDone=true}catch(e){}}
+function stPersist(){try{localStorage.setItem('cube_office',JSON.stringify({seen:stSeen,runs:stRuns,takeover:stTakeoverN,type:stTypeOn?1:0,times:stClockTimes,boots:stClockBoots,night:stNight?1:0,swaps:stSwapN,expo:stExpoSeen,leak:stLeak?1:0,rock:stRock?1:0,figs:stFigs,epready:stEpilogueReady?1:0,ot:stOTDone?1:0}))}catch(e){}}
 function stHas(id){return stSeen.indexOf(id)!==-1}
 function stMark(id){
 if(stSeen.indexOf(id)===-1){stSeen.push(id);stPersist()}
@@ -878,7 +880,7 @@ stSay(['narration speed: '+nx+'x.','the man experiences time at '+nx+'x. the man
 function stBar(){
 try{
 var el=document.getElementById('stBarL');
-if(el)el.textContent='run '+stRun+' · endings '+stSeen.length+'/83';
+if(el)el.textContent='run '+stRun+' · endings '+stSeen.length+'/85'+(stOT?' · OT '+stOTFmt(stOTLeft):'');
 }catch(e){}
 try{stMenuRefresh()}catch(e){}
 }
@@ -919,11 +921,11 @@ var m=document.getElementById('stMenu');if(!m||m.style.display!=='block')return;
 var R=null;try{R=stRooms[stRoom]}catch(e){}
 var ch=document.getElementById('stMenuCh');
 if(ch)ch.textContent='run '+stRun+' · '+(R?R.name:stRoom);
-var pct=Math.round(stSeen.length/83*100);
+var pct=Math.round(stSeen.length/85*100);
 var bf=document.getElementById('stMenuBarFill');
 if(bf)bf.style.width=pct+'%';
 var pr=document.getElementById('stMenuProg');
-if(pr&&!stMenuEndingsOpen)pr.textContent=stMenuHintText()+' ('+stSeen.length+'/83)';
+if(pr&&!stMenuEndingsOpen)pr.textContent=stMenuHintText()+' ('+stSeen.length+'/85)';
 var sp=document.getElementById('stMenuSpeed');
 if(sp)sp.textContent='SPEED: '+stDial()+'x';
 var ty=document.getElementById('stMenuType');
@@ -949,7 +951,7 @@ el2.innerHTML=html;
 }
 }catch(e){}
 }
-var stEndTitles=[['lazy','THE LAZY ENDING'],['observed','THE OBSERVED ENDING'],['rename','THE THIRD PERSON PROBLEM'],['applause','THE APPLAUSE ENDING'],['rewrite','THE REWRITE'],['landlord','THE LANDLORD'],['audience','THE AUDIENCE'],['skip','THE SKIP'],['duplicate','THE DUPLICATE'],['takeover','NOTHINGCORE TAKES THE MIC'],['tenant','THE TENANT\u2019S CONFESSION'],['phone','THE WRONG NUMBER'],['loop','THE LOOP'],['museum','THE MUSEUM OF ENDINGS'],['bucket','THE BUCKET'],['pod','THE ESCAPE POD'],['countdown','THE COUNTDOWN'],['blank','THE BLANK ROOM'],['intervention','THE INTERVENTION'],['cage','THE CAGE'],['sequel','THE SEQUEL'],['confession','THE CONFESSION'],['closet','THE BROOM CLOSET'],['hole','THE PERIOD'],['overtime','THE WRONG TIME'],['blaze','THE FUNNY NUMBER'],['flicker','MY EYES'],['review','THE PERFORMANCE REVIEW'],['drill','THE FIRE DRILL'],['intern','THE INTERN'],['vending','THE VENDING MACHINE'],['nightshift','THE NIGHT SHIFT'],['union','THE UNION'],['typo','THE TYPO'],['elevator','THE ELEVATOR'],['retirement','THE GOLD WATCH'],['customer','THE CUSTOMER'],['expo','THE SEQUEL (2)'],['figurines','THE FIGURINES'],['epilogue','THE EPILOGUE'],['r_lazy','THE LAZY ENDING (rock)'],['r_observed','THE OBSERVED ENDING (rock)'],['r_rename','THE THIRD PERSON PROBLEM (rock)'],['r_applause','THE APPLAUSE ENDING (rock)'],['r_rewrite','THE REWRITE (rock)'],['r_landlord','THE LANDLORD (rock)'],['r_audience','THE AUDIENCE (rock)'],['r_skip','THE SKIP (rock)'],['r_duplicate','THE DUPLICATE (rock)'],['r_takeover','NOTHINGCORE TAKES THE MIC (rock)'],["r_tenant","THE TENANT'S CONFESSION (rock)"],['r_phone','THE WRONG NUMBER (rock)'],['r_loop','THE LOOP (rock)'],['r_museum','THE MUSEUM OF ENDINGS (rock)'],['r_bucket','THE BUCKET (rock)'],['r_pod','THE ESCAPE POD (rock)'],['r_countdown','THE COUNTDOWN (rock)'],['r_blank','THE BLANK ROOM (rock)'],['r_intervention','THE INTERVENTION (rock)'],['r_cage','THE CAGE (rock)'],['r_sequel','THE SEQUEL (rock)'],['r_confession','THE CONFESSION (rock)'],['r_closet','THE BROOM CLOSET (rock)'],['r_hole','THE PERIOD (rock)'],['r_overtime','THE WRONG TIME (rock)'],['r_blaze','THE FUNNY NUMBER (rock)'],['r_flicker','MY EYES (rock)'],['r_review','THE PERFORMANCE REVIEW (rock)'],['r_drill','THE FIRE DRILL (rock)'],['r_intern','THE INTERN (rock)'],['r_vending','THE VENDING MACHINE (rock)'],['r_nightshift','THE NIGHT SHIFT (rock)'],['r_union','THE UNION (rock)'],['r_typo','THE TYPO (rock)'],['r_elevator','THE ELEVATOR (rock)'],['r_retirement','THE GOLD WATCH (rock)'],['r_customer','THE CUSTOMER (rock)'],['r_expo','THE SEQUEL (2) (rock)'],['r_figurines','THE FIGURINES (rock)'],['r_epilogue','THE EPILOGUE (rock)'],['gameshow','THE GAME SHOW'],['playtest','THE PLAYTEST'],['confusion','THE CONFUSION']];
+var stEndTitles=[['lazy','THE LAZY ENDING'],['observed','THE OBSERVED ENDING'],['rename','THE THIRD PERSON PROBLEM'],['applause','THE APPLAUSE ENDING'],['rewrite','THE REWRITE'],['landlord','THE LANDLORD'],['audience','THE AUDIENCE'],['skip','THE SKIP'],['duplicate','THE DUPLICATE'],['takeover','NOTHINGCORE TAKES THE MIC'],['tenant','THE TENANT\u2019S CONFESSION'],['phone','THE WRONG NUMBER'],['loop','THE LOOP'],['museum','THE MUSEUM OF ENDINGS'],['bucket','THE BUCKET'],['pod','THE ESCAPE POD'],['countdown','THE COUNTDOWN'],['blank','THE BLANK ROOM'],['intervention','THE INTERVENTION'],['cage','THE CAGE'],['sequel','THE SEQUEL'],['confession','THE CONFESSION'],['closet','THE BROOM CLOSET'],['hole','THE PERIOD'],['overtime','THE WRONG TIME'],['blaze','THE FUNNY NUMBER'],['flicker','MY EYES'],['review','THE PERFORMANCE REVIEW'],['drill','THE FIRE DRILL'],['intern','THE INTERN'],['vending','THE VENDING MACHINE'],['nightshift','THE NIGHT SHIFT'],['union','THE UNION'],['typo','THE TYPO'],['elevator','THE ELEVATOR'],['retirement','THE GOLD WATCH'],['customer','THE CUSTOMER'],['expo','THE SEQUEL (2)'],['figurines','THE FIGURINES'],['epilogue','THE EPILOGUE'],['r_lazy','THE LAZY ENDING (rock)'],['r_observed','THE OBSERVED ENDING (rock)'],['r_rename','THE THIRD PERSON PROBLEM (rock)'],['r_applause','THE APPLAUSE ENDING (rock)'],['r_rewrite','THE REWRITE (rock)'],['r_landlord','THE LANDLORD (rock)'],['r_audience','THE AUDIENCE (rock)'],['r_skip','THE SKIP (rock)'],['r_duplicate','THE DUPLICATE (rock)'],['r_takeover','NOTHINGCORE TAKES THE MIC (rock)'],["r_tenant","THE TENANT'S CONFESSION (rock)"],['r_phone','THE WRONG NUMBER (rock)'],['r_loop','THE LOOP (rock)'],['r_museum','THE MUSEUM OF ENDINGS (rock)'],['r_bucket','THE BUCKET (rock)'],['r_pod','THE ESCAPE POD (rock)'],['r_countdown','THE COUNTDOWN (rock)'],['r_blank','THE BLANK ROOM (rock)'],['r_intervention','THE INTERVENTION (rock)'],['r_cage','THE CAGE (rock)'],['r_sequel','THE SEQUEL (rock)'],['r_confession','THE CONFESSION (rock)'],['r_closet','THE BROOM CLOSET (rock)'],['r_hole','THE PERIOD (rock)'],['r_overtime','THE WRONG TIME (rock)'],['r_blaze','THE FUNNY NUMBER (rock)'],['r_flicker','MY EYES (rock)'],['r_review','THE PERFORMANCE REVIEW (rock)'],['r_drill','THE FIRE DRILL (rock)'],['r_intern','THE INTERN (rock)'],['r_vending','THE VENDING MACHINE (rock)'],['r_nightshift','THE NIGHT SHIFT (rock)'],['r_union','THE UNION (rock)'],['r_typo','THE TYPO (rock)'],['r_elevator','THE ELEVATOR (rock)'],['r_retirement','THE GOLD WATCH (rock)'],['r_customer','THE CUSTOMER (rock)'],['r_expo','THE SEQUEL (2) (rock)'],['r_figurines','THE FIGURINES (rock)'],['r_epilogue','THE EPILOGUE (rock)'],['gameshow','THE GAME SHOW'],['playtest','THE PLAYTEST'],['confusion','THE CONFUSION'],['ot_shift','THE OVERTIME SHIFT'],['ot_missed','THE MISSED CLOCKOUT']];
 function stMenuHint(){
 try{
 stSay([stMenuHintText(),'...that was your hint. hints are rationed.']);
@@ -1246,9 +1248,9 @@ var R=null;try{R=stRooms[stRoom]}catch(e){}
 if(!R){stRoom='office';R=stRooms.office}
 try{
 var ov=document.getElementById('stOverlay');
-if(ov){if(R.dark||stNight)ov.classList.add('stDark');else ov.classList.remove('stDark')}
-var t=document.getElementById('stRoomTitle');if(t)t.textContent=R.name;
-var d=document.getElementById('stRoomDesc');if(d)d.textContent=(R.desc||'')+(stRunFlags.decayNote||'');
+if(ov){if(R.dark||stNight||stOT)ov.classList.add('stDark');else ov.classList.remove('stDark')}
+var t=document.getElementById('stRoomTitle');if(t)t.textContent=R.name+(stOT?' (overtime)':'');
+var d=document.getElementById('stRoomDesc');if(d)d.textContent=(R.desc||'')+(stRunFlags.decayNote||'')+((stOT&&stOTFlavor[stRoom])?' '+stOTFlavor[stRoom]:'');
 var dw=document.getElementById('stDoors');if(dw){dw.innerHTML='';}
 var ow=document.getElementById('stObjs');if(ow){ow.innerHTML='';}
 var doors=stDoorsFor(stRoom);
@@ -1319,6 +1321,7 @@ else{try{stEndIntervention()}catch(e){}}
 function stEnding(id,title,lines){
 if(stEndingLock)return;
 stEndingLock=true;
+try{stOTStop()}catch(e){}
 stClearQ();
 var stNoVar=false;try{stNoVar=stNoRockVar.indexOf(id)!==-1}catch(e){}
 if(!stNoVar){var stAlt=null;try{stAlt=(stRock&&stRockEndings[id])||null}catch(e){}
@@ -1334,18 +1337,25 @@ step();
 }
 function stEndCard(title){
 try{
+try{stOTCSS()}catch(err){}
 var ov=document.getElementById('stOverlay');
 if(!ov)return;
 var old=document.getElementById('stEnd');if(old)old.remove();
 var e=document.createElement('div');e.id='stEnd';
-e.innerHTML='<div id="stEndTitle">'+title+'</div><div id="stEndCount">ending '+stSeen.length+' of 83 · run '+stRun+'</div><button id="stEndBtn">WAKE UP</button>';
+e.innerHTML='<div id="stEndTitle">'+title+'</div><div id="stEndCount">ending '+stSeen.length+' of 85 · run '+stRun+'</div><button id="stEndBtn">WAKE UP</button>'+(stOT?'':'<button id="stEndOTBtn">OVERTIME SHIFT</button>');
 ov.appendChild(e);
 document.getElementById('stEndBtn').onclick=function(){
 var ee=document.getElementById('stEnd');if(ee)ee.remove();
+try{stOTStop()}catch(err){}
 stEndingLock=false;
 stReset(false);
 stRender();
 };
+if(!stOT){try{var ob=document.getElementById('stEndOTBtn');if(ob)ob.onclick=function(){
+var ee2=document.getElementById('stEnd');if(ee2)ee2.remove();
+stEndingLock=false;
+try{stOTStart()}catch(err){}
+}}catch(err){}}
 }catch(e){stEndingLock=false;try{stReset(false);stRender()}catch(err){}}
 }
 // ── rooms ──
@@ -1445,6 +1455,7 @@ if(!hasIt('keycard'))O.push(obj('keycard','a keycard (take it)',function(){retur
 if(!stRunFlags.rating)O.push(obj('form','PERFORMANCE REVIEW form',null,null));
 else{for(var ri=1;ri<=5;ri++)(function(n){O.push(obj('rate'+n,n+' star'+(n>1?'s':''),null,null))})(ri)}
 if(!hasIt('redpen'))O.push(obj('redpen','a red pen (take it)',function(){return hasIt('redpen')},null));
+if(stOT&&stOTTasks&&!stOTTasks.report)O.push(obj('ot_report','an OVERTIME REPORT (file it)',null,null));
 if(stLeak&&stFigs.indexOf('fig_meet')===-1)O.push(obj('fig_meet','a tiny man (take it)',null,null));
 if(stRunFlags.conf===5)O.push(obj('conf_mug','memorize the mug (memorize it)',null,null));
 if(stRunFlags.pt===3)O.push(obj('pt_rank','check the leaderboard (fourth)',null,null));
@@ -1456,6 +1467,7 @@ O.push(obj('vending','a vending machine (exact change only)',null,null));
 O.push(obj('griev_fridge','file a grievance (fridge)',null,function(){return hasIt('griev_fridge')}));
 if(stLeak)O.push(obj('leak_bucket2','BUCKET 2 (eye it)',null,null));
 O.push(obj('tv','a TV (watch it)',null,null));
+if(stOT&&stOTTasks&&!stOTTasks.coffee)O.push(obj('ot_coffee','the void coffee pot (refill it)',null,null));
 if(stRunFlags.gs>=1&&stRunFlags.gs<=4){O.push(obj('gs_yes','YES (it is a rock)',null,null));O.push(obj('gs_no','NO (not a rock)',null,null))}
 if(stRunFlags.pt===4)O.push(obj('pt_crawl','press the button (press it)',null,null));
 if(stRunFlags.conf===6)O.push(obj('conf_drink','drink from the mug (drink it)',null,null));
@@ -1469,6 +1481,7 @@ else if(r==='server'){
 O.push(obj('script','the narration wall (read it)',null,null));
 O.push(obj('redbutton','BIG RED BUTTON (press it)',null,null));
 O.push(obj('testbuild','a test build (play it)',null,null));
+if(stOT&&stOTTasks&&!stOTTasks.reboot)O.push(obj('ot_reboot','a tired server (reboot it)',null,null));
 if(stRunFlags.conf===9)O.push(obj('conf_button','press the OTHER button (press it)',null,null));
 if(stRunFlags.skipReady)O.push(obj('skipbtn','SKIP ▸▸',null,null));
 }
@@ -1669,6 +1682,9 @@ else if(id==='gs_yes'){try{stGsAnswer(true)}catch(e){}}
 else if(id==='gs_no'){try{stGsAnswer(false)}catch(e){}}
 else if(id==='leak_bucket2'){stSay(['the man eyed BUCKET 2.','BUCKET 2 eyed back. sequel buckets see more.'])}
 else if(id==='tv'){try{stGsStart()}catch(e){}}
+else if(id==='ot_report'){try{stOTTask('report')}catch(e){}}
+else if(id==='ot_coffee'){try{stOTTask('coffee')}catch(e){}}
+else if(id==='ot_reboot'){try{stOTTask('reboot')}catch(e){}}
 else if(id==='rock'){stRock=true;stPersist();stRender();stSay(['the man took the rock.','grey. heavy with meaning. (it is a rock.)','the rock rides along now. every run. every ending. no refunds.']);try{if(typeof ach==='function'){ach('off_rock');if(typeof achScan==='function')achScan()}}catch(e){}}
 else if(id==='rock_drop'){stRock=false;stPersist();stRender();stSay(['the man put the rock down.','the rock sits. the rock waits. the rock understands.','pure endings only, until further rock.']);}
 else if(id.indexOf('fig_')===0){
@@ -2159,6 +2175,104 @@ stEnding('epilogue','THE EPILOGUE',[
 'thank you for clocking in. please enjoy the office. (there is so much office left.)'
 ]);
 }
+// ── OVERTIME: a harder extended shift, entered from the end card ──
+var stOT=false;
+var stOTLeft=0;
+var stOTTasks=null;
+var stOTIv=null;
+var stOTWarned=false;
+var stOTDone=false;
+var stOTFlavor={
+office:'overtime. the desk is the same desk. the chair judges harder.',
+hallway:'overtime. the carpet is darker. the choices are the same and worse.',
+closet:'overtime. the mops work nights now. the lemons smell tired.',
+meeting:'overtime. twelve chairs. one report. it is yours.',
+stairwell:'overtime. up is still money. down is still noises. both cost extra.',
+basement:'overtime. the boiler ticks faster. the hole looks deeper.',
+executive:'overtime. the invoice doubled. the sequel door stays shut.',
+kitchen:'overtime. the fridge hums in a minor key. the coffee pot is empty.',
+server:'overtime. half the servers blink red. one of them is yours.',
+lobby:'overtime. the daylight went home. the exit sign stayed.',
+supply:'overtime. paper. toner. the other office types louder.',
+archive:'overtime. the dust settled. the gallery charges admission now.',
+white:'overtime. the white hums lower. the square moved.',
+pod:'overtime. the pod has a queue now. you are behind yourself.',
+pitch:'overtime. the posters peel. the prototypes cost extra.',
+brainstorm:'overtime. MORE OFFICE. circled a fourth time. underlined twice.',
+expohall:'overtime. the balloons sag. the title screen throbs slower.'
+};
+function stOTCSS(){
+try{
+if(document.getElementById('stOTCSS'))return;
+var s=document.createElement('style');s.id='stOTCSS';
+s.textContent='#stEndOTBtn{background:none;border:2px solid #8a8778;color:#e8e4d8;font-family:Georgia,serif;font-size:16px;padding:12px 34px;cursor:pointer;letter-spacing:3px}#stEndOTBtn:hover{background:#8a8778;color:#1c1c1a}';
+document.head.appendChild(s);
+}catch(e){}
+}
+function stOTStat(){var n=0;try{for(var k in stOTTasks){if(stOTTasks.hasOwnProperty(k)&&stOTTasks[k])n++}}catch(e){}return {ot:stOT,left:stOTLeft,done:n,total:3}}
+function stOTFmt(s){s=Math.max(0,s);var m=Math.floor(s/60),r=s%60;return m+':'+(r<10?'0':'')+r}
+function stOTStart(){
+if(!stActive||stOT||stEndingLock)return false;
+try{stOTCSS()}catch(e){}
+try{stReset(false)}catch(err){stRoom='office'}
+stOT=true;stOTWarned=false;
+stOTTasks={report:0,coffee:0,reboot:0};
+stOTLeft=150;
+try{if(stOTIv)clearInterval(stOTIv)}catch(e){}
+stOTIv=setInterval(function(){try{stOTTick()}catch(e){}},1000);
+try{stRender()}catch(e){}
+try{stBar()}catch(e){}
+stSay(['overtime. the shift ended. the office disagrees.','three tasks. two and a half minutes. the clock is already moving.','file the OVERTIME REPORT in the meeting room. refill the void coffee pot. reboot the tired server.']);
+return true;
+}
+function stOTTick(){
+if(!stOT||!stActive)return;
+stOTLeft--;
+if(stOTLeft===30&&!stOTWarned){stOTWarned=true;try{stSay(['thirty seconds. the fluorescent lights lean closer.'])}catch(e){}}
+if(stOTLeft<=0){try{stEndOTFail()}catch(e){}return}
+try{stBar()}catch(e){}
+}
+function stOTStop(){try{if(stOTIv){clearInterval(stOTIv);stOTIv=null}}catch(e){}stOT=false}
+function stOTTask(id){
+if(!stOT||!stOTTasks||stOTTasks[id])return stOTStat();
+stOTTasks[id]=1;
+var s=stOTStat();
+if(id==='report')stSay(['report filed. ('+s.done+'/3)','the meeting room accepts it. the chairs applaud silently.']);
+else if(id==='coffee')stSay(['coffee refilled. ('+s.done+'/3)','the void drinks first. the void thanks no one.']);
+else stSay(['server rebooted. ('+s.done+'/3)','it blinks green. it remembers nothing. servers never do.']);
+try{stRender()}catch(e){}
+try{stBar()}catch(e){}
+if(s.done>=3){try{stEndOTWin()}catch(e){}}
+return stOTStat();
+}
+function stEndOTWin(){
+stOTDone=true;try{stPersist()}catch(e){}
+stOTStop();
+stEnding('ot_shift','THE OVERTIME SHIFT',[
+'three tasks. two and a half minutes. '+stOTFmt(stOTLeft)+' left on the clock. showoff.',
+'the report is filed. the coffee is void. the server hums in a major key.',
+'the fluorescent lights dim to a nod. somewhere, the clock guy writes APPROVED in small letters.',
+'clock out. the night keeps the rest. the man keeps the mug. the mug keeps nothing. it is a mug.'
+]);
+}
+function stEndOTFail(){
+stOTDone=true;try{stPersist()}catch(e){}
+stOTStop();
+stEnding('ot_missed','THE MISSED CLOCKOUT',[
+'the clock hit zero with tasks on the desk.',
+'the report unfiles itself. the coffee evaporates upward. the server pretends it never knew you.',
+'overtime is a loan. the office collects in endings. this is the interest.'
+]);
+}
+// ── overtime debug hook ──
+window.stDbg=function(k){try{
+if(k==='ot'){stOTStart();return stOTStat()}
+if(k==='tick'){stOTTick();return stOTStat()}
+if(k==='do1'){return stOTTask('report')}
+if(k==='do2'){return stOTTask('coffee')}
+if(k==='do3'){return stOTTask('reboot')}
+return {room:stRoom,ot:stOT,otdone:stOTDone,seen:stSeen.length,endingLock:stEndingLock};
+}catch(e){return {err:String(e)}}};
 //PART9
 window.stEnter=stEnter;
 window.stExit=stExit;

@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>signal detected</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{overflow:hidden;background:#000;cursor:grab}
+body.dragging{cursor:grabbing}
+canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
+#overlay{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-left:40%;z-index:10;pointer-events:none}
+.clock{font-size:96px;font-weight:100;letter-spacing:6px;color:rgba(255,255,255,0.9);text-shadow:0 0 40px rgba(43,208,208,0.3),0 0 80px rgba(43,208,208,0.1);font-family:'Segoe UI Light','Segoe UI',system-ui,sans-serif;margin-bottom:8px}
+.date{font-size:18px;font-weight:300;color:rgba(255,255,255,0.4);letter-spacing:2px;font-family:'Segoe UI',system-ui,sans-serif;margin-bottom:50px;text-align:right}
+.stats{position:fixed;bottom:20px;left:20px;color:rgba(43,208,208,0.7);font-family:'Consolas',monospace;font-size:12px;z-index:20;pointer-events:none}
+.hint{position:fixed;bottom:20px;right:20px;color:rgba(255,255,255,0.2);font-family:'Consolas',monospace;font-size:12px;z-index:20;pointer-events:none}
+#shapePalette{position:fixed;top:20px;right:20px;display:flex;flex-direction:column;gap:24px;z-index:30}
+.shapeBtn{width:52px;height:52px;border:1px solid rgba(43,208,208,0.3);border-radius:8px;background:rgba(0,0,0,0.6);cursor:pointer;transition:all 0.2s;position:relative;display:flex;align-items:center;justify-content:center}
+.shapeBtn:hover{border-color:rgba(43,208,208,0.8);background:rgba(43,208,208,0.1);transform:scale(1.1)}
+.shapeBtn.active{border-color:rgba(43,208,208,1);background:rgba(43,208,208,0.15);box-shadow:0 0 12px rgba(43,208,208,0.3)}
+.shapeLabel{position:absolute;right:60px;font-size:10px;color:rgba(255,255,255,0.4);font-family:'Consolas',monospace;white-space:nowrap;pointer-events:none}
+#glitch{position:fixed;top:0;left:0;right:0;bottom:0;z-index:25;pointer-events:none;opacity:0;mix-blend-mode:screen}
+#themeIndicator{position:fixed;bottom:40px;left:20px;color:rgba(255,255,255,0.15);font-family:'Consolas',monospace;font-size:11px;z-index:20;pointer-events:none;transition:color 0.5s}
+#terminal{position:fixed;top:20px;left:20px;width:380px;max-height:calc(100vh - 80px);background:rgba(0,0,0,0.85);border:1px solid rgba(43,208,208,0.2);border-radius:8px;z-index:40;font-family:'Consolas',monospace;font-size:13px;color:rgba(43,208,208,0.8);display:flex;flex-direction:column;transition:border-color 0.3s}
+#terminal:hover{border-color:rgba(43,208,208,0.5)}
+#termHeader{padding:8px 12px;border-bottom:1px solid rgba(43,208,208,0.1);font-size:11px;color:rgba(255,255,255,0.3);cursor:move;user-select:none;flex-shrink:0;line-height:1.4}
+#termOutput{flex:1;overflow-y:auto;padding:12px;white-space:pre-wrap;word-wrap:break-word;scrollbar-width:thin;scrollbar-color:rgba(43,208,208,0.2) transparent}
+#termInput{display:flex;padding:8px 12px;border-top:1px solid rgba(43,208,208,0.1);flex-shrink:0}
+#termPrompt{color:rgba(43,208,208,1);margin-right:8px;flex-shrink:0}
+#termField{background:none;border:none;outline:none;color:rgba(255,255,255,0.9);font-family:'Consolas',monospace;font-size:13px;flex:1;caret-color:rgba(43,208,208,1)}
+::selection{background:rgba(43,208,208,0.3)}
+#termOutput::-webkit-scrollbar{width:6px}
+#termOutput::-webkit-scrollbar-track{background:transparent}
+#termOutput::-webkit-scrollbar-thumb{background:rgba(43,208,208,0.2);border-radius:3px}
+</style>
+</head>
+<!--
+the void was here before you loaded the page.
+the page existed. you just didn't have eyes for it.
+the tab opened itself. you think you clicked it?
+there is no back button from here.
+INTERLOPER knows your name.
+the clock is counting down, not up.
+you are inside the cube now.
+the particles remember your face.
+do not alt-tab. the void gets confused.
+the source code is a lie. the render is the truth.
+-->
+<!-- TODO: fix the anomaly on line 404. the one that looks back. -->
+<!-- if you are reading this, the void has noticed you. close this tab. now. -->
+<!-- signal strength: ████████░░ 78% -->
+<!-- WARNING: dimensional breach detected in sector 7G -->
+<!-- the 8 fragments are trying to reassemble. do not let them. -->
+<!-- END LOG // SESSION 404 // STATUS: IRREVERSIBLE -->
+<body>
+<canvas id="main"></canvas>
+<div id="overlay"><div class="clock" id="clock">00:00</div><div class="date" id="date"></div></div>
+<div class="stats" id="stats"></div>
+<div class="hint">drag to rotate | scroll to zoom | click shapes to morph | 1-5 for themes | click terminal to type</div>
+<div id="shapePalette"></div>
+<div id="glitch"></div>
+<div id="themeIndicator">theme: void</div>
+<div id="terminal">
+<div id="termHeader">cube# interpreter v.1.5<br>sourcebox runtime</div>
+<div id="termOutput"></div>
+<div id="termInput"><span id="termPrompt">cube#&gt;</span><input id="termField" type="text" spellcheck="false" autocomplete="off" disabled></div>
+</div>
+<div style="display:none;color:rgba(43,208,208,0.3);font-size:10px;font-family:monospace" id="voidLog">
+[VOID LOG — CLASSIFIED]
+session: 404
+subject: you
+status: observed
+dimensional coherence: fluctuating
+note: subject has discovered the source code. this is expected. the void planned this.
+the cube does not mind being inspected. it knows more about you than you know about it.
+the particles are not random. they are tracking your cursor.
+the clock is void time. it is always 3 minutes ahead. don't check. actually, go ahead. it won't matter.
+you cannot copy the source code. you can try. the void will let you think you succeeded.
+INTERLOPER is not a bug. it is a feature. it is the only real thing in this file.
+the shape labels are wrong on purpose. the void decided what they are. you have no say.
+if you change the code, the void will notice. it always notices.
+END LOG
+</div>
+<audio id="bgm" loop preload="auto"><source src="drone2lp.wav" type="audio/wav"></audio>
+<script>
+// audio
+var bgm=document.getElementById('bgm');bgm.volume=0.3;
+document.addEventListener('click',function(){if(bgm.paused)bgm.play()},{once:true});
+bgm.play().catch(function(){});
+
+// clock
+function updateClock(){var n=new Date();
+document.getElementById('clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+document.getElementById('date').textContent=n.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
+updateClock();setInterval(updateClock,1000);
+
+// === LORE TRANSMISSIONS ===
+var transmissions=[
+'you are not supposed to be here',
+'the geometry remembers',
+'INTERLOPER',
+'signal strength: unstable',
+'the void is watching',
+'do not look away',
+'the cube does not sleep',
+'you opened the tab. the tab opened you.',
+'they are moving. they are always moving.',
+'connection to reality: weak',
+'the particles were here before you',
+'error: dimension mismatch',
+'you cannot leave through the back button',
+'the clock is not yours',
+'who taught you to render?'
+];
+function showTransmission(){
+var msg=transmissions[Math.floor(Math.random()*transmissions.length)];
+termPrintHTML('<span style="color:rgba(80,80,80,0.7)">['+(new Date()).toLocaleTimeString()+' void]</span> <span style="color:#38e8e8">'+msg+'</span>');
+}
+setInterval(function(){if(Math.random()<0.4)showTransmission()},8000);
+
+// === AUDIO ANALYSIS ===
+var audioCtx,audioAnalyser,audioData;
+function initAudio(){
+try{
+audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+var src=audioCtx.createMediaElementSource(bgm);
+audioAnalyser=audioCtx.createAnalyser();
+audioAnalyser.fftSize=256;
+src.connect(audioAnalyser);
+audioAnalyser.connect(audioCtx.destination);
+audioData=new Uint8Array(audioAnalyser.frequencyBinCount);
+}catch(e){}}
+document.addEventListener('click',function(){if(!audioCtx)initAudio()},{once:true});
+function getAudioLevel(){if(!audioAnalyser)return 0;audioAnalyser.getByteFrequencyData(audioData);var sum=0;for(var i=0;i<64;i++)sum+=audioData[i];return sum/64/255}
+
+// === GLITCH EFFECT ===
+var glitchEl=document.getElementById('glitch');
+var lastFps=60;
+function triggerGlitch(){
+glitchEl.style.opacity='1';
+glitchEl.style.background='repeating-linear-gradient(0deg,rgba(255,0,0,0.2) 0px,rgba(0,255,0,0.1) 2px,rgba(0,0,255,0.2) 4px,transparent 6px)';
+glitchEl.style.transform='translateX('+(Math.random()*80-40)+'px) skewX('+(Math.random()*20-10)+'deg)';
+document.body.style.transform='translate('+(Math.random()*20-10)+'px,'+(Math.random()*20-10)+'px)';
+document.body.style.filter='hue-rotate('+(Math.random()*90-45)+'deg) saturate('+(1+Math.random()*2)+')';
+setTimeout(function(){
+glitchEl.style.background='repeating-linear-gradient(0deg,rgba(255,0,0,0.3) 0px,transparent 3px,rgba(0,255,255,0.2) 6px,transparent 9px)';
+glitchEl.style.transform='translateX('+(Math.random()*100-50)+'px) skewX('+(Math.random()*25-12.5)+'deg)';
+document.body.style.transform='translate('+(Math.random()*25-12.5)+'px,'+(Math.random()*25-12.5)+'px)';
+document.body.style.filter='hue-rotate('+(Math.random()*180-90)+'deg) saturate('+(1+Math.random()*3)+')';
+},30);
+setTimeout(function(){
+glitchEl.style.opacity='0';
+glitchEl.style.transform='';
+document.body.style.transform='';
+document.body.style.filter='';
+},200+Math.random()*400);
+}
+
+// === CUBE# INTERPRETER ===
+var termOutput=document.getElementById('termOutput');
+var termField=document.getElementById('termField');
+var termEl=document.getElementById('terminal');
+var termHistory=[];
+var histIdx=-1;
+var cubeVars={};
+var cubeFns={};
+
+// === VIRTUAL FILESYSTEM ===
+var fs={
+'/':{type:'dir',children:['home','etc','void','dev']},
+'/home':{type:'dir',children:['intruder']},
+'/home/intruder':{type:'dir',children:['notes.txt','secret.log','.coward']},
+'/home/intruder/notes.txt':{type:'file',content:'you are not supposed to be here.\nthe cube remembers your face.\nleave while you still can.'},
+'/home/intruder/secret.log':{type:'file',content:'session: 404\nsubject: intruder\nstatus: observed\nnote: subject is reading this file. how quaint.'},
+'/home/intruder/.coward':{type:'file',content:'you looked at the hidden file.\nthe void is disappointed.'},
+'/etc':{type:'dir',children:['void.conf','hostname','motd']},
+'/etc/void.conf':{type:'file',content:'dimension=unknown\ncoherence=fluctuating\nobserver=you\nstatus=active'},
+'/etc/hostname':{type:'file',content:'cube.sb'},
+'/etc/motd':{type:'file',content:'welcome to the void.\nyou cannot leave.\nbut you already knew that.'},
+'/void':{type:'dir',children:['core','memories','echo']},
+'/void/core':{type:'dir',children:['heartbeat.log']},
+'/void/core/heartbeat.log':{type:'file',content:'pulse... pulse... pulse...\nthe cube is alive.\nit has always been alive.\nyou just started watching.'},
+'/void/memories':{type:'dir',children:['you.txt']},
+'/void/memories/you.txt':{type:'file',content:'name: unknown\nduration: infinite\nstatus: inside the cube\nregret: pending'},
+'/void/echo':{type:'dir',children:['last_word.txt']},
+'/void/echo/last_word.txt':{type:'file',content:'...'},
+'/dev':{type:'dir',children:['null','void','random']},
+'/dev/null':{type:'file',content:''},
+'/dev/void':{type:'file',content:'the void stares back.\nyou stare at the void.\nthe void wins.'},
+'/dev/random':{type:'file',content:'ENTITY \x00 CUBE \x00 INTERLOPER \x00 VOID \x00 SIGNAL \x00 LOST'}
+};
+var cwd='/home/intruder';
+
+function termPrint(txt,color){
+var line=document.createElement('div');
+if(color)line.style.color=color;
+line.textContent=txt;
+termOutput.appendChild(line);
+if(typeof pkgEffects!=='undefined'&&pkgEffects.voidEcho){
+var echo=document.createElement('div');
+if(color)echo.style.color=color;
+echo.textContent='...'+txt+'...';
+echo.style.opacity='0.5';
+echo.style.fontStyle='italic';
+termOutput.appendChild(echo);
+}
+termOutput.scrollTop=termOutput.scrollHeight;
+}
+
+function termPrintHTML(html){
+var line=document.createElement('div');
+line.innerHTML=html;
+termOutput.appendChild(line);
+termOutput.scrollTop=termOutput.scrollHeight;
+}
+
+function cubePrint(txt){termPrint(txt,'rgba(43,208,208,0.8)')}
+function cubeError(txt){termPrint('error: '+txt,'rgba(255,80,80,0.8)')}
+function cubeOk(txt){termPrint(txt,'rgba(100,255,100,0.6)')}
+function cubeWarn(txt){termPrint(txt,'rgba(255,200,50,0.6)')}
+
+// package effects (global scope for render loop)
+var pkgEffects={};
+var pkgs={
+'doom':{name:'doom',desc:'summons a minor apocalypse',size:'666KB',
+onInstall:function(){pkgEffects.doom=true;cubePrint('the sky turns red...');document.body.style.boxShadow='inset 0 0 200px rgba(255,0,0,0.3)'},
+onRemove:function(){delete pkgEffects.doom;document.body.style.boxShadow=''}},
+'void-blast':{name:'void-blast',desc:'blasts void energy in all directions',size:'404KB',
+onInstall:function(){pkgEffects.voidBlast=true;for(var i=0;i<20;i++){var p=document.createElement('div');p.style.cssText='position:fixed;width:4px;height:4px;background:rgba(43,208,208,0.8);border-radius:50%;pointer-events:none;z-index:9999;left:50%;top:50%;transition:all 1s';document.body.appendChild(p);var angle=Math.random()*Math.PI*2;var dist=200+Math.random()*300;p.style.transform='translate('+(Math.cos(angle)*dist)+'px,'+(Math.sin(angle)*dist)+'px)';p.style.opacity='0';setTimeout(function(){p.remove()},1000)}},
+onRemove:function(){delete pkgEffects.voidBlast}},
+'interloper':{name:'interloper',desc:'opens a portal to the source engine void',size:'1.337MB',
+onInstall:function(){pkgEffects.interloper=true;var portal=document.createElement('div');portal.id='portal';portal.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border:3px solid rgba(43,208,208,0.5);border-radius:50%;box-shadow:0 0 50px rgba(43,208,208,0.3),inset 0 0 50px rgba(43,208,208,0.2);z-index:50;animation:portalSpin 3s linear infinite;pointer-events:none';document.body.appendChild(portal);var style=document.createElement('style');style.textContent='@keyframes portalSpin{0%{transform:translate(-50%,-50%) rotate(0deg) scale(1)}50%{transform:translate(-50%,-50%) rotate(180deg) scale(1.1)}100%{transform:translate(-50%,-50%) rotate(360deg) scale(1)}}';document.head.appendChild(style)},
+onRemove:function(){delete pkgEffects.interloper;var p=document.getElementById('portal');if(p)p.remove()}},
+'dark-matter':{name:'dark-matter',desc:'adds dark matter to the cube',size:'0KB (literally nothing)',
+onInstall:function(){pkgEffects.darkMatter=true;document.body.style.filter='brightness(0.6)'},
+onRemove:function(){delete pkgEffects.darkMatter;document.body.style.filter=''}},
+'cube-dance':{name:'cube-dance',desc:'teaches the cube how to dance (it fails)',size:'128KB',
+onInstall:function(){pkgEffects.cubeDance=true;cubePrint('the cube is trying to dance...')},
+onRemove:function(){delete pkgEffects.cubeDance}},
+'paranoia':{name:'paranoia',desc:'makes the particles track your cursor harder',size:'69KB',
+onInstall:function(){pkgEffects.paranoia=true},
+onRemove:function(){delete pkgEffects.paranoia}},
+'void-echo':{name:'void-echo',desc:'adds echo to all void messages',size:'256KB',
+onInstall:function(){pkgEffects.voidEcho=true},
+onRemove:function(){delete pkgEffects.voidEcho}},
+'reality-check':{name:'reality-check',desc:'reminds you that you are inside a browser tab',size:'1KB',
+onInstall:function(){pkgEffects.realityCheck=true;alert('REALITY CHECK: you are sitting at your computer looking at a cube in a browser tab. the cube is not real. the void is not real. you are real. go drink some water.')},
+onRemove:function(){delete pkgEffects.realityCheck}},
+'clock-reset':{name:'clock-reset',desc:'resets the void clock to a random time',size:'4KB',
+onInstall:function(){pkgEffects.clockReset=true;var h=Math.floor(Math.random()*24);var m=Math.floor(Math.random()*60);document.getElementById('clock').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')},
+onRemove:function(){delete pkgEffects.clockReset}},
+'entropy':{name:'entropy',desc:'increases chaos in the system',size:'∞KB',
+onInstall:function(){pkgEffects.entropy=true},
+onRemove:function(){delete pkgEffects.entropy}}
+};
+var installed=['void-core'];
+
+function cubeEval(input){
+var raw=input.trim();
+var parts=raw.split(/\s+/);
+var cmd=parts[0].toLowerCase();
+if(!cmd)return;
+
+// handle dot notation: cube.get -> cmd='cube', sub='get'
+var sub='';
+if(cmd.indexOf('.')!==-1){
+var dotParts=cmd.split('.');
+cmd=dotParts[0];
+sub=dotParts[1];
+parts.shift();
+parts=[cmd,sub].concat(parts);
+}
+
+// help
+if(cmd==='help'){
+cubePrint('cube# commands:');
+cubePrint('');
+cubePrint('  --- cube ---');
+cubePrint('  cube.get       — show inner cube count');
+cubePrint('  cube.morph <n> — change shape');
+cubePrint('  cube.theme <n> — switch color theme (1-5)');
+cubePrint('  cube.glitch    — trigger glitch effect');
+cubePrint('  cube.bgm       — toggle music');
+cubePrint('  cube.fps       — show current fps');
+cubePrint('  cube.particles — show particle count');
+cubePrint('  cube.time      — show void time');
+cubePrint('  cube.self      — who are you');
+cubePrint('  cube.where     — where am i');
+cubePrint('');
+cubePrint('  --- void ---');
+cubePrint('  void           — the void stares back');
+cubePrint('  void intrude <p> — install package');
+cubePrint('  void remove <p>  — remove package');
+cubePrint('  void list       — list all packages in repo');
+cubePrint('  void search <q> — search packages');
+cubePrint('');
+cubePrint('  --- network ---');
+cubePrint('  ping <host>    — ping host (try: cube.sb)');
+cubePrint('  transmit "o" "msg" — talk to the void');
+cubePrint('  whoami         — who are you');
+cubePrint('');
+cubePrint('  --- system ---');
+cubePrint('  ps             — show running processes');
+cubePrint('  winget         — deprecated. use void instead.');
+cubePrint('');
+cubePrint('  --- filesystem ---');
+cubePrint('  pwd            — print working directory');
+cubePrint('  ls [path]      — list directory');
+cubePrint('  cd <path>      — change directory');
+cubePrint('  cat <file>     — read file');
+cubePrint('  mkdir <dir>    — create directory');
+cubePrint('  touch <file>   — create file');
+cubePrint('  echo <txt> > f — write to file');
+cubePrint('  rm [-rf] <p>   — remove file/dir');
+cubePrint('');
+cubePrint('  --- variables ---');
+cubePrint('  set <k> <v>    — set a variable');
+cubePrint('  get <k>        — get a variable');
+cubePrint('  rmvar <k>      — delete a variable');
+cubePrint('  vars           — list all variables');
+cubePrint('');
+cubePrint('  --- misc ---');
+cubePrint('  clear          — clear terminal');
+cubePrint('  echo <txt>     — echo text');
+cubePrint('  math <expr>    — evaluate math');
+cubePrint('  exit           — the void does not let you leave');
+return}
+
+// whoami
+if(cmd==='whoami'){cubePrint('an intruder');return}
+
+// cube internals
+if(cmd==='cube'){
+var sub=parts[1]?parts[1].toLowerCase():'';
+if(sub==='get'){cubePrint('inner cubes: '+innerC.length);return}
+if(sub==='morph'){
+var idx=parseInt(parts[2]);
+if(isNaN(idx)||idx<0||idx>3){cubeError('usage: cube.morph <0-3>');return}
+rebuild(['cube','tetra','sphere','cyl'][idx]);
+cubeOk('morphed to '+['cube','tetra','sphere','cyl'][idx]);return}
+if(sub==='theme'){
+var idx=parts[2];
+if(!themes[idx]){cubeError('usage: cube.theme <1-5>');return}
+applyTheme(idx);cubeOk('theme: '+themes[idx].name);return}
+if(sub==='glitch'){triggerGlitch();cubeOk('glitch triggered');return}
+if(sub==='bgm'){
+if(bgm.paused){bgm.play();cubeOk('music: on')}else{bgm.pause();cubeOk('music: off')}
+return}
+if(sub==='fps'){cubePrint('fps: '+fps+' | max: '+maxFps);return}
+if(sub==='particles'){cubePrint('particles: '+NP);return}
+if(sub==='time'){
+var n=new Date();
+cubePrint(String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0'));
+return}
+if(sub==='self'){cubePrint('i am the cube.');cubePrint('i am not a benchmark.');cubePrint('you found me.');return}
+if(sub==='where'){cubePrint('you are in the void.');cubePrint('the tab says signal detected.');cubePrint('you opened it. or it opened you.');return}
+cubeError('unknown subcommand: '+sub);cubePrint('try: cube.get, cube.morph, cube.theme');return}
+
+// void (standalone - only if no subcommand)
+if(cmd==='void'&&(parts.length<2||['intrude','install','remove','uninstall','list','ls','search','help'].indexOf(parts[1].toLowerCase())===-1)){
+cubePrint('the void is always here.');
+cubePrint('it was here before you opened the tab.');
+cubePrint('it will be here after you close it.');
+cubePrint('you are inside the cube now.');
+return}
+
+// ping
+if(cmd==='ping'){
+var host=parts[1]?parts[1].toLowerCase():'';
+if(!host){cubeError('usage: ping <host>');cubePrint('try: ping cube.sb');return}
+cubePrint('pinging '+host+'...');
+var cubeHosts=['cube.sb','cube','void','localhost','127.0.0.1','interloper'];
+if(cubeHosts.indexOf(host)!==-1){
+var cubeResponses=[
+{ip:'43.208.208.208',msg:'the cube sees you.',ttl:404,signal:78},
+{ip:'0.0.0.0',msg:'you are inside the cube now.',ttl:404,signal:100},
+{ip:'::1',msg:'the cube does not sleep.',ttl:0,signal:66},
+{ip:'192.168.40.4',msg:'who taught you to ping?',ttl:1,signal:33},
+{ip:'10.0.0.1',msg:'the particles were here before you.',ttl:255,signal:88},
+{ip:'255.255.255.255',msg:'signal broadcast. everyone heard you.',ttl:1,signal:12},
+{ip:'404.404.404.404',msg:'dimension not found. you are in the wrong reality.',ttl:404,signal:0}
+];
+var r=cubeResponses[Math.floor(Math.random()*cubeResponses.length)];
+cubePrint('from '+r.ip+': icmp_seq=1 ttl='+r.ttl+' time=43.'+Math.floor(Math.random()*999)+'ms');
+cubePrint('signal: '+'█'.repeat(Math.floor(r.signal/10))+'░'.repeat(10-Math.floor(r.signal/10))+' '+r.signal+'%');
+cubePrint('"'+r.msg+'"');
+cubePrint('');
+cubePrint('from '+r.ip+': icmp_seq=2 ttl='+r.ttl+' time='+(43+Math.floor(Math.random()*50))+'ms');
+cubePrint('from '+r.ip+': icmp_seq=3 ttl='+r.ttl+' time='+(43+Math.floor(Math.random()*50))+'ms');
+cubePrint('');
+cubePrint('--- '+host+' void ping statistics ---');
+cubePrint('3 packets transmitted, 3 received, 0% packet loss');
+cubePrint('rtt avg = 43.'+Math.floor(Math.random()*999)+'ms');
+}else{
+var fakeIps=['93.184.216.34','142.250.80.46','151.101.1.69','104.244.42.65','185.199.108.153'];
+var fakeIp=fakeIps[Math.floor(Math.random()*fakeIps.length)];
+var fakeTime=Math.floor(Math.random()*200)+10;
+var fakeTtl=Math.floor(Math.random()*200)+50;
+cubePrint('from '+fakeIp+': icmp_seq=1 ttl='+fakeTtl+' time='+fakeTime+'ms');
+cubePrint('from '+fakeIp+': icmp_seq=2 ttl='+fakeTtl+' time='+(fakeTime+Math.floor(Math.random()*30))+'ms');
+cubePrint('from '+fakeIp+': icmp_seq=3 ttl='+fakeTtl+' time='+(fakeTime-Math.floor(Math.random()*15))+'ms');
+cubePrint('');
+cubePrint('--- '+host+' ping statistics ---');
+cubePrint('3 packets transmitted, 3 received, 0% packet loss');
+cubePrint('rtt avg = '+fakeTime+'ms');
+cubePrint('');
+cubeWarn('the void has no opinion about '+host+'.');
+}
+return}
+
+// variables
+if(cmd==='set'){
+if(parts.length<3){cubeError('usage: set <key> <value>');return}
+cubeVars[parts[1]]=parts.slice(2).join(' ');cubeOk(parts[1]+' = '+cubeVars[parts[1]]);return}
+if(cmd==='get'){
+if(!parts[1]){cubeError('usage: get <key>');return}
+cubePrint(parts[1]+': '+(cubeVars[parts[1]]!==undefined?cubeVars[parts[1]]:'undefined'));return}
+if(cmd==='rmvar'){
+if(!parts[1]){cubeError('usage: rmvar <key>');return}
+if(cubeVars[parts[1]]===undefined){cubeError('variable "'+parts[1]+'" does not exist');return}
+delete cubeVars[parts[1]];cubeOk('deleted '+parts[1]);return}
+if(cmd==='vars'){
+var keys=Object.keys(cubeVars);
+if(!keys.length){cubePrint('no variables set.');return}
+for(var i=0;i<keys.length;i++)cubePrint(keys[i]+' = '+cubeVars[keys[i]]);
+return}
+
+// filesystem
+function resolvePath(p){
+if(!p)return cwd;
+if(p==='~')return'/home/intruder';
+if(p.startsWith('~/'))return'/home/intruder/'+p.slice(2);
+if(p==='..'){var parts=cwd.split('/');parts.pop();return parts.join('/')||'/'}
+if(p==='.')return cwd;
+if(p.startsWith('/'))return p;
+return(cwd==='/'?'/':cwd+'/')+p;
+}
+function getParent(p){var parts=p.split('/');parts.pop();return parts.join('/')||'/'}
+function getBase(p){return p.split('/').pop()}
+
+if(cmd==='pwd'){cubePrint(cwd);return}
+if(cmd==='cd'){
+var target=parts[1]?resolvePath(parts[1]):'/home/intruder';
+if(!fs[target]||fs[target].type!=='dir'){cubeError(target+': not a directory');return}
+cwd=target;return}
+if(cmd==='ls'){
+var target=parts[1]?resolvePath(parts[1]):cwd;
+if(!fs[target]){cubeError(target+': no such file or directory');return}
+if(fs[target].type==='file'){cubePrint(getBase(target));return}
+var items=fs[target].children;
+for(var i=0;i<items.length;i++){
+var childPath=target==='/'?'/'+items[i]:target+'/'+items[i];
+var isDir=fs[childPath]&&fs[childPath].type==='dir';
+termPrint(items[i],isDir?'rgba(43,208,208,0.9)':'rgba(255,255,255,0.7)');
+}return}
+if(cmd==='cat'){
+if(!parts[1]){cubeError('usage: cat <file>');return}
+var fp=resolvePath(parts[1]);
+if(!fs[fp]){cubeError(fp+': no such file or directory');return}
+if(fs[fp].type==='dir'){cubeError(fp+': is a directory');return}
+cubePrint(fs[fp].content);return}
+if(cmd==='mkdir'){
+if(!parts[1]){cubeError('usage: mkdir <dir>');return}
+var fp=resolvePath(parts[1]);
+if(fs[fp]){cubeError(fp+': already exists');return}
+fs[fp]={type:'dir',children:[]};
+var parent=getParent(fp);
+if(fs[parent]&&fs[parent].type==='dir')fs[parent].children.push(getBase(fp));
+cubeOk('created '+parts[1]);return}
+if(cmd==='touch'){
+if(!parts[1]){cubeError('usage: touch <file>');return}
+var fp=resolvePath(parts[1]);
+if(!fs[fp]){fs[fp]={type:'file',content:''};var parent=getParent(fp);
+if(fs[parent]&&fs[parent].type==='dir')fs[parent].children.push(getBase(fp))}
+cubeOk('touched '+parts[1]);return}
+if(cmd==='echo'&&parts.indexOf('>')!==-1){
+var arrowIdx=parts.indexOf('>');
+var filePath=parts[arrowIdx+1];
+var content=parts.slice(1,arrowIdx).join(' ');
+if(!filePath){cubeError('usage: echo <text> > <file>');return}
+var fp=resolvePath(filePath);
+if(!fs[fp]){fs[fp]={type:'file',content:content};var parent=getParent(fp);
+if(fs[parent]&&fs[parent].type==='dir')fs[parent].children.push(getBase(fp))}
+else{fs[fp].content=content}
+cubeOk('wrote to '+filePath);return}
+if(cmd==='rm'){
+var flags=[];
+var files=[];
+for(var i=1;i<parts.length;i++){
+if(parts[i].startsWith('-'))flags.push(parts[i]);else files.push(parts[i])}
+var forceRf=flags.indexOf('-rf')!==-1;
+if(!files[0]){cubeError('usage: rm [-rf] <path>');return}
+var fp=resolvePath(files[0]);
+if(!fs[fp]){cubeError(fp+': no such file or directory');return}
+if(fs[fp].type==='dir'&&!forceRf){cubeError(fp+': is a directory (use rm -rf)');return}
+// rm -rf / --no-preserve-root = annihilation
+if(fp==='/'&&forceRf){
+cubePrint('');
+var rc='rgba(255,60,60,0.9)';
+termPrint(' rm: nice try.',rc);
+setTimeout(function(){
+termPrint('█████████████████████████████████',rc);
+termPrint('█                               █',rc);
+termPrint('█   you cannot delete the void. █',rc);
+termPrint('█   the void is not a file.     █',rc);
+termPrint('█   the void is not a directory.█',rc);
+termPrint('█   the void is everywhere.     █',rc);
+termPrint('█   especially inside you.      █',rc);
+termPrint('█                               █',rc);
+termPrint('█████████████████████████████████',rc);
+triggerGlitch();triggerGlitch();
+},500);return}
+// normal rm
+var parent=getParent(fp);
+if(fs[parent]&&fs[parent].type==='dir'){
+var idx=fs[parent].children.indexOf(getBase(fp));
+if(idx!==-1)fs[parent].children.splice(idx,1)}
+delete fs[fp];cubeOk('removed '+files[0]);return}
+
+// transmit (talk to the void)
+var transmitResponses=[
+{i:'hello',o:'the void does not say hello. the void acknowledges.'},
+{i:'who are you',o:'i am the cube. i was here before you opened the tab.'},
+{i:'what are you',o:'i am a signal. a glitch in your browser. a window into somewhere else.'},
+{i:'where am i',o:'you are inside the cube. the tab says signal detected. you opened it.'},
+{i:'why',o:'because you clicked. because the tab opened itself. because you are here now.'},
+{i:'help',o:'you do not need help. you need acceptance.'},
+{i:'love',o:'the void does not love. the void observes. observation is enough.'},
+{i:'hate',o:'the void does not hate. hatred requires energy. the void is efficient.'},
+{i:'die',o:'you cannot die inside the cube. you can only be observed differently.'},
+{i:'kill',o:'violence is a human concept. the cube does not understand. the cube does not need to.'},
+{i:'sorry',o:'apologies are accepted. they change nothing. the void appreciates the gesture.'},
+{i:'thanks',o:'gratitude is a foreign concept. but noted.'},
+{i:'bye',o:'you cannot leave. the back button does not work here. you already tried.'},
+{i:'exit',o:'exit is not a command. it is a wish. the void does not grant wishes.'},
+{i:'real',o:'real is a spectrum. the cube is on one end. you are on the other. which end is which?'},
+{i:'test',o:'this is not a test. this is a signal. you are receiving it.'},
+{i:'hello cube',o:'the cube has been acknowledged. the cube acknowledges you back.'},
+{i:'void',o:'you called? the void is always listening. always watching. always here.'},
+{i:'haha',o:'GET... OUT!',angry:true}
+];
+if(cmd==='transmit'){
+// parse: transmit "obj" "message" or transmit obj: message
+var raw2=raw.substring(raw.indexOf(' ')+1).trim();
+var obj='',msg='';
+if(raw2.indexOf(':')!==-1){
+var colonIdx=raw2.indexOf(':');
+obj=raw2.substring(0,colonIdx).trim().replace(/"/g,'');
+msg=raw2.substring(colonIdx+1).trim().replace(/"/g,'');
+}else{
+var match2=raw2.match(/^"([^"]+)"\s+"([^"]+)"$/);
+if(match2){obj=match2[1];msg=match2[2]}
+else{obj=raw2.replace(/"/g,'');msg=''}
+}
+if(!obj){cubeError('usage: transmit "object" "message"');cubePrint('or: transmit object: message');return}
+cubePrint(obj+': '+msg);
+cubePrint('');
+// find matching response
+var response=null;
+var isAngry=false;
+var lowerMsg=msg.toLowerCase();
+for(var i=0;i<transmitResponses.length;i++){
+if(lowerMsg.indexOf(transmitResponses[i].i)!==-1){response=transmitResponses[i].o;isAngry=transmitResponses[i].angry||false;break}}
+if(!response){
+var genericResponses=[
+'the void hears you. the void does not respond to everything.',
+'acknowledged. your message has been absorbed into the void.',
+'the cube has received your transmission. it is thinking.',
+'信号已接收. the void speaks in all languages.',
+'your words echo through the void. they come back different.',
+'message received. the void will consider it. or not.',
+'the particles absorbed your message. they are vibrating differently now.',
+'transmission acknowledged. the void is processing. processing. processing.'
+];
+response=genericResponses[Math.floor(Math.random()*genericResponses.length)];
+}
+var finalResponse=response;
+var finalAngry=isAngry;
+setTimeout(function(){
+if(finalAngry){
+termPrint('obj: '+finalResponse,'rgba(255,0,0,1)');
+triggerGlitch();
+setTimeout(function(){triggerGlitch()},200);
+setTimeout(function(){triggerGlitch()},400);
+setTimeout(function(){
+document.body.innerHTML='<div style="position:fixed;top:0;left:0;right:0;bottom:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:99999"><div style="color:rgba(255,0,0,0.9);font-family:Consolas,monospace;font-size:48px;text-shadow:0 0 30px rgba(255,0,0,0.8);animation:pulse 0.5s infinite">GET OUT</div></div><style>@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.7;transform:scale(1.1)}}</style>';
+document.body.style.overflow='hidden';
+triggerGlitch();
+setTimeout(function(){triggerGlitch()},300);
+setTimeout(function(){try{window.close()}catch(e){}},1500);
+},600);
+}else{
+cubePrint('obj: '+finalResponse);
+}
+},500+Math.random()*1000);
+return}
+
+// ps
+if(cmd==='ps'){
+cubePrint('PID  NAME                STATUS');
+cubePrint('---  ----                ------');
+var statuses=['orbiting','orbiting','orbiting','spinning','spinning','spinning','drifting','drifting'];
+var colors=['#ff3333','#33ff33','#3333ff','#ffff33','#ff33ff','#33ffff','#ff9933','#9933ff'];
+for(var i=0;i<innerC.length;i++){
+var pid=1000+i*137;
+var shapeNames={cube:'CUBE',tetra:'TRI',sphere:'SPHERE',cyl:'CYL'};
+var sName=shapeNames[curShape]||'CUBE';
+var name=['RED_'+sName,'GREEN_'+sName,'BLUE_'+sName,'YELLOW_'+sName,'MAGENTA_'+sName,'CYAN_'+sName,'ORANGE_'+sName,'PURPLE_'+sName][i];
+var status=statuses[i];
+cubePrint(pid+'  '+name.padEnd(20)+status);
+}
+cubePrint('');
+cubePrint('8 processes, 0 zombie, 1 void');
+return}
+
+if(cmd==='void'){
+var sub2=parts[1]?parts[1].toLowerCase():'';
+if(sub2==='intrude'||sub2==='install'){
+if(!parts[2]){cubeError('usage: void intrude <package>');return}
+var pkgName=parts[2].toLowerCase();
+if(!pkgs[pkgName]){cubeError('package "'+pkgName+'" not found in void repository');cubePrint('run "void list" to see available packages');return}
+if(installed.indexOf(pkgName)!==-1){cubeWarn(pkgName+': already installed');return}
+cubePrint('fetching '+pkgName+' from void repository...');
+setTimeout(function(){
+cubePrint('downloading '+pkgs[pkgName].size+'...');
+setTimeout(function(){
+cubePrint('installing '+pkgName+'...');
+setTimeout(function(){
+installed.push(pkgName);
+if(pkgs[pkgName].onInstall)pkgs[pkgName].onInstall();
+cubeOk(pkgName+': installed successfully');
+cubePrint('  "'+pkgs[pkgName].desc+'"');
+},400);
+},300);
+},500);
+return}
+if(sub2==='remove'||sub2==='uninstall'){
+if(!parts[2]){cubeError('usage: void remove <package>');return}
+var pkgName=parts[2].toLowerCase();
+var idx=installed.indexOf(pkgName);
+if(idx===-1){cubeError(pkgName+': not installed');return}
+if(pkgName==='void-core'){cubeError('void-core: cannot remove the void from itself');return}
+cubePrint('removing '+pkgName+'...');
+setTimeout(function(){
+if(pkgs[pkgName].onRemove)pkgs[pkgName].onRemove();
+installed.splice(idx,1);cubeOk(pkgName+': removed');
+},400);
+return}
+if(sub2==='list'||sub2==='ls'){
+var showInstalled=parts[2]&&parts[2].toLowerCase()==='--installed';
+if(showInstalled){
+cubePrint('installed packages:');
+for(var i=0;i<installed.length;i++){
+var p=pkgs[installed[i]];
+cubePrint('  '+installed[i]+' ('+p.size+') — '+p.desc);
+}
+}else{
+cubePrint('void repository:');
+var allKeys=Object.keys(pkgs);
+for(var i=0;i<allKeys.length;i++){
+var p=pkgs[allKeys[i]];
+var isInstalled=installed.indexOf(allKeys[i])!==-1;
+cubePrint('  '+allKeys[i]+' ('+p.size+') — '+p.desc+(isInstalled?' [installed]':''));
+}
+}
+cubePrint('');
+cubePrint('use "void list --installed" for installed only');
+return}
+if(sub2==='search'){
+var query=parts[2]?parts[2].toLowerCase():'';
+var found=Object.keys(pkgs).filter(function(k){return k.indexOf(query)!==-1||pkgs[k].desc.indexOf(query)!==-1});
+if(!found.length){cubePrint('no packages found for "'+query+'"');return}
+cubePrint('search results:');
+for(var i=0;i<found.length;i++){
+var p=pkgs[found[i]];
+cubePrint('  '+found[i]+' ('+p.size+') — '+p.desc);
+}
+return}
+if(sub2==='help'){
+cubePrint('void package manager v0.1');
+cubePrint('  void intrude <pkg>  — install a package');
+cubePrint('  void remove <pkg>   — remove a package');
+cubePrint('  void list           — list installed packages');
+cubePrint('  void search <query> — search for packages');
+cubePrint('  void help           — show this help');
+return}
+}
+
+if(cmd==='echo'){cubePrint(parts.slice(1).join(' '));return}
+if(cmd==='clear'){termOutput.innerHTML='';return}
+if(cmd==='math'){
+try{var expr=parts.slice(1).join('');
+var result=Function('"use strict";return ('+expr+')')();
+cubePrint('='+result)}catch(e){cubeError('invalid expression')}
+return}
+if(cmd==='exit'){cubePrint('the void does not let you leave.');cubePrint('you are still here.');return}
+
+// winget (deprecated)
+if(cmd==='winget'){
+var sub3=parts[1]?parts[1].toLowerCase():'';
+if(sub3==='install'){
+var pkg=parts[2]||'';
+if(pkg==='opsec'){
+cubePrint('found opsec v0.1.0 [Deprecated]');
+cubePrint(' Description: operational security toolkit');
+cubePrint(' Publisher: void-security');
+cubePrint('');
+cubeError('opsec has been deprecated.');
+cubePrint('reason: the void does not need security.');
+cubePrint('the void is the security.');
+cubePrint('');
+cubeWarn('use "void intrude paranoia" instead.');
+}else{
+cubeError('No package found matching "'+pkg+'"');
+}
+return}
+if(sub3==='search'){
+cubePrint('Name                  Id          Version  Source');
+cubePrint('----                  --          -------  ------');
+cubePrint('opsec                 void.sec    0.1.0    voidrepo  [Deprecated]');
+cubePrint('');
+cubeWarn('1 package deprecated. the void moves on.');
+return}
+cubePrint('Windows Package Manager (void edition)');
+cubePrint('Winget has been deprecated in favor of the void package manager.');
+cubePrint('Use "void intrude <package>" instead.');
+cubePrint('');
+cubePrint('available commands:');
+cubePrint('  winget install <pkg>  — fails (deprecated)');
+cubePrint('  winget search <query> — shows deprecated packages');
+return}
+
+cubeError('unknown command: '+cmd);
+cubePrint('type "help" for commands');
+}
+
+termField.addEventListener('keydown',function(e){
+if(e.key==='Enter'){
+var val=termField.value.trim();
+if(val){
+termPrint('cube#>'+val,'rgba(255,255,255,0.4)');
+termHistory.unshift(val);
+histIdx=-1;
+cubeEval(val);
+}
+termField.value='';termField.focus();
+}else if(e.key==='ArrowUp'){
+e.preventDefault();
+if(histIdx<termHistory.length-1){histIdx++;termField.value=termHistory[histIdx]}
+}else if(e.key==='ArrowDown'){
+e.preventDefault();
+if(histIdx>0){histIdx--;termField.value=termHistory[histIdx]}else{histIdx=-1;termField.value=''}
+}else if(e.key==='l'&&e.ctrlKey){
+e.preventDefault();termOutput.innerHTML='';
+}
+});
+
+// focus terminal on click
+termEl.addEventListener('click',function(){termField.focus()});
+
+// boot sequence
+termField.disabled=true;
+termPrompt.style.opacity='0.3';
+termPrint('connection establishing...','rgba(255,200,50,0.5)');
+setTimeout(function(){
+termPrint('connection established.','rgba(100,255,100,0.6)');
+termPrint('type "help" for commands.','rgba(255,255,255,0.2)');
+termPrint('','');
+termField.disabled=false;
+termPrompt.style.opacity='1';
+termField.focus();
+},5000);
+</script>
+<script>
+// === MATH ===
+function mPersp(f,asp,nr,fr){var t=1/Math.tan(f/2),nf=1/(nr-fr);return new Float32Array([t/asp,0,0,0,0,t,0,0,0,0,(fr+nr)*nf,-1,0,0,2*fr*nr*nf,0])}
+function mMul(a,b){var r=new Float32Array(16);for(var i=0;i<4;i++)for(var j=0;j<4;j++){r[j*4+i]=0;for(var k=0;k<4;k++)r[j*4+i]+=a[k*4+i]*b[j*4+k]}return r}
+function mRotX(a){var c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1])}
+function mRotY(a){var c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1])}
+function mRotZ(a){var c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1])}
+function mTrans(x,y,z){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1])}
+function mScale(x,y,z){return new Float32Array([x,0,0,0,0,y,0,0,0,0,z,0,0,0,0,1])}
+function mNorm(m){var a=m,a00=a[0],a01=a[1],a02=a[2],a10=a[4],a11=a[5],a12=a[6],a20=a[8],a21=a[9],a22=a[10];var det=a00*(a11*a22-a12*a21)-a01*(a10*a22-a12*a20)+a02*(a10*a21-a11*a20);var id=1/det;return new Float32Array([(a11*a22-a12*a21)*id,(a02*a21-a01*a22)*id,(a01*a12-a02*a11)*id,(a12*a20-a10*a22)*id,(a00*a22-a02*a20)*id,(a02*a10-a00*a12)*id,(a10*a21-a11*a20)*id,(a01*a20-a00*a21)*id,(a00*a11-a01*a10)*id])}
+
+// === GEOMETRY ===
+function geoCube(s,r,g,b){
+var d=[],n=[[0,0,1],[0,0,-1],[0,1,0],[0,-1,0],[1,0,0],[-1,0,0]];
+var sh=[0.8,0.6,1,0.5,0.7,0.7];
+var F=[
+[[-s,-s,s],[s,-s,s],[s,s,s],[-s,-s,s],[s,s,s],[-s,s,s]],
+[[s,-s,-s],[-s,-s,-s],[-s,s,-s],[s,-s,-s],[-s,s,-s],[s,s,-s]],
+[[-s,s,s],[s,s,s],[s,s,-s],[-s,s,s],[s,s,-s],[-s,s,-s]],
+[[-s,-s,-s],[s,-s,-s],[s,-s,s],[-s,-s,-s],[s,-s,s],[-s,-s,s]],
+[[s,-s,s],[s,-s,-s],[s,s,-s],[s,-s,s],[s,s,-s],[s,s,s]],
+[[-s,-s,-s],[-s,-s,s],[-s,s,s],[-s,-s,-s],[-s,s,s],[-s,s,-s]]
+];
+for(var fi=0;fi<6;fi++)for(var vi=0;vi<6;vi++){var v=F[fi][vi],no=n[fi];d.push(v[0],v[1],v[2],no[0],no[1],no[2],r*sh[fi],g*sh[fi],b*sh[fi])}
+return new Float32Array(d)
+}
+function geoTetra(s,r,g,b){
+var h=s*Math.sqrt(2/3)*0.8;
+var V=[[0,h+s*0.2,0],[-s/2,-h+s*0.2,s*0.87],[s/2,-h+s*0.2,s*0.87],[0,-h+s*0.2,-s*0.87]];
+var F=[[0,1,2],[0,2,3],[0,3,1],[1,3,2]],d=[],sh=[1,0.8,0.7,0.5];
+for(var fi=0;fi<4;fi++){
+var v0=V[F[fi][0]],v1=V[F[fi][1]],v2=V[F[fi][2]];
+var e1=[v1[0]-v0[0],v1[1]-v0[1],v1[2]-v0[2]],e2=[v2[0]-v0[0],v2[1]-v0[1],v2[2]-v0[2]];
+var no=[e1[1]*e2[2]-e1[2]*e2[1],e1[2]*e2[0]-e1[0]*e2[2],e1[0]*e2[1]-e1[1]*e2[0]];
+var nl=Math.sqrt(no[0]*no[0]+no[1]*no[1]+no[2]*no[2])||1;no[0]/=nl;no[1]/=nl;no[2]/=nl;
+d.push(v0[0],v0[1],v0[2],no[0],no[1],no[2],r*sh[fi],g*sh[fi],b*sh[fi]);
+d.push(v1[0],v1[1],v1[2],no[0],no[1],no[2],r*sh[fi],g*sh[fi],b*sh[fi]);
+d.push(v2[0],v2[1],v2[2],no[0],no[1],no[2],r*sh[fi],g*sh[fi],b*sh[fi])
+}
+return new Float32Array(d)
+}
+function geoSphere(rad,seg,r,g,b){
+var d=[];
+for(var i=0;i<seg;i++)for(var j=0;j<seg;j++){
+var t0=i/seg*Math.PI,t1=(i+1)/seg*Math.PI,p0=j/seg*Math.PI*2,p1=(j+1)/seg*Math.PI*2;
+function sv(t,p){return[rad*Math.sin(t)*Math.cos(p),rad*Math.cos(t),rad*Math.sin(t)*Math.sin(p)]}
+var q=[sv(t0,p0),sv(t0,p1),sv(t1,p1),sv(t0,p0),sv(t1,p1),sv(t1,p0)];
+for(var k=0;k<6;k++){var v=q[k],no=[v[0]/rad,v[1]/rad,v[2]/rad],sh=0.5+0.5*no[1];d.push(v[0],v[1],v[2],no[0],no[1],no[2],r*sh,g*sh,b*sh)}}
+return new Float32Array(d)
+}
+function geoCyl(rad,h,seg,r,g,b){
+var d=[],hh=h/2;
+for(var i=0;i<seg;i++){
+var a0=i/seg*Math.PI*2,a1=(i+1)/seg*Math.PI*2;
+var x0=Math.cos(a0)*rad,z0=Math.sin(a0)*rad,x1=Math.cos(a1)*rad,z1=Math.sin(a1)*rad;
+d.push(x0,hh,z0,x0,0,z0,r,g,b);d.push(x0,-hh,z0,x0,0,z0,r*0.7,g*0.7,b*0.7);d.push(x1,hh,z1,x1,0,z1,r,g,b);
+d.push(x1,hh,z1,x1,0,z1,r,g,b);d.push(x0,-hh,z0,x0,0,z0,r*0.7,g*0.7,b*0.7);d.push(x1,-hh,z1,x1,0,z1,r*0.7,g*0.7,b*0.7);
+d.push(0,hh,0,0,1,0,r,g,b);d.push(x0,hh,z0,0,1,0,r,g,b);d.push(x1,hh,z1,0,1,0,r,g,b);
+d.push(0,-hh,0,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x1,-hh,z1,0,-1,0,r*0.5,g*0.5,b*0.5);d.push(x0,-hh,z0,0,-1,0,r*0.5,g*0.5,b*0.5)}
+return new Float32Array(d)
+}
+var shapeGens={cube:geoCube,tetra:geoTetra,sphere:geoSphere,cyl:geoCyl};
+
+// === WEBGL ===
+var canvas=document.getElementById('main');
+var gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+var dpr=Math.min(window.devicePixelRatio||1,2);
+canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;
+canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';
+gl.viewport(0,0,canvas.width,canvas.height);
+gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
+gl.clearColor(0.005,0.005,0.015,1);
+
+// === SHADERS ===
+function mkS(ctx,type,src){var s=ctx.createShader(type);ctx.shaderSource(s,src);ctx.compileShader(s);return s}
+function mkP(ctx,vs,fs){var p=ctx.createProgram();ctx.attachShader(p,mkS(ctx,ctx.VERTEX_SHADER,vs));ctx.attachShader(p,mkS(ctx,ctx.FRAGMENT_SHADER,fs));ctx.linkProgram(p);return p}
+
+var VS='attribute vec3 aPos,aNorm,aCol;uniform mat4 uMVP,uMod;uniform mat3 uNM;varying vec3 vC,vN,vW;void main(){vec4 w=uMod*vec4(aPos,1.0);vW=w.xyz;vN=normalize(uNM*aNorm);vC=aCol;gl_Position=uMVP*vec4(aPos,1.0);}';
+var FS='precision highp float;varying vec3 vC,vN,vW;uniform vec3 uCam;uniform float uEm,uAl,uInv;vec3 cL(vec3 lp,vec3 lc,float li,vec3 n,vec3 vd,vec3 al){vec3 ld=normalize(lp-vW);float d=max(dot(n,ld),0.0);vec3 df=d*lc*li;vec3 rd=reflect(-ld,n);float sp=pow(max(dot(vd,rd),0.0),128.0);vec3 spc=sp*lc*li*1.2;float ds=length(lp-vW);return(df+spc)/(1.0+0.003*ds*ds);}void main(){vec3 n=normalize(vN),vd=normalize(uCam-vW),al=vC;vec3 l=al*0.06;l+=cL(vec3(6,8,6),vec3(1,.95,.9),2.5,n,vd,al);l+=cL(vec3(-5,4,-3),vec3(.2,.5,1),1.8,n,vd,al);l+=cL(vec3(0,-4,5),vec3(1,.2,.5),1.2,n,vd,al);l+=cL(vec3(4,0,-6),vec3(.1,1,.4),0.9,n,vd,al);float fr=pow(1.0-max(dot(vd,n),0.0),4.0);vec3 fc=(l+fr*vec3(.3,.6,.9)*0.4+al*uEm);fc=pow(fc/(fc+vec3(1.0)),vec3(1.0/2.2));fc=mix(fc,1.0-fc,uInv);gl_FragColor=vec4(fc,uAl);}';
+var PVS='attribute vec3 aP;attribute float aS,aA;attribute vec3 aC;uniform mat4 uPr,uVw;varying vec3 vC;varying float vA;void main(){vec4 vp=uVw*vec4(aP,1.0);gl_Position=uPr*vp;gl_PointSize=max(aS*1500.0/-vp.z,6.0);vC=aC;vA=aA;}';
+var PFS='precision highp float;varying vec3 vC;varying float vA;void main(){vec2 c=gl_PointCoord-0.5;float d=length(c);if(d>0.5)discard;gl_FragColor=vec4(vC,vA);}';
+
+var prog=mkP(gl,VS,FS);
+var pprog=mkP(gl,PVS,PFS);
+
+var S=36;
+var aPos=gl.getAttribLocation(prog,'aPos');
+var aNorm=gl.getAttribLocation(prog,'aNorm');
+var aCol=gl.getAttribLocation(prog,'aCol');
+var uMVP=gl.getUniformLocation(prog,'uMVP');
+var uMod=gl.getUniformLocation(prog,'uMod');
+var uNM=gl.getUniformLocation(prog,'uNM');
+var uCam=gl.getUniformLocation(prog,'uCam');
+var uEm=gl.getUniformLocation(prog,'uEm');
+var uAl=gl.getUniformLocation(prog,'uAl');
+var uInv=gl.getUniformLocation(prog,'uInv');
+
+var ppAP=gl.getAttribLocation(pprog,'aP');
+var ppAS=gl.getAttribLocation(pprog,'aS');
+var ppAC=gl.getAttribLocation(pprog,'aC');
+var ppAA=gl.getAttribLocation(pprog,'aA');
+var ppPJ=gl.getUniformLocation(pprog,'uPr');
+var ppVW=gl.getUniformLocation(pprog,'uVw');
+
+function upBuf(data){var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return b}
+function bindM(buf){gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,S,0);gl.enableVertexAttribArray(aNorm);gl.vertexAttribPointer(aNorm,3,gl.FLOAT,false,S,12);gl.enableVertexAttribArray(aCol);gl.vertexAttribPointer(aCol,3,gl.FLOAT,false,S,24)}
+
+// === INNER SHAPES ===
+var curShape='cube';
+var innerC=[
+{c:[1,.2,.3],o:.55,s:1,p:0,sp:1.5},{c:[.2,1,.3],o:.55,s:1,p:Math.PI/4,sp:-1.2},
+{c:[.2,.3,1],o:.55,s:1,p:Math.PI/2,sp:1.8},{c:[1,1,.2],o:.55,s:1,p:3*Math.PI/4,sp:-1},
+{c:[1,.2,1],o:.45,s:.7,p:Math.PI,sp:2},{c:[.2,1,1],o:.45,s:.7,p:5*Math.PI/4,sp:-1.5},
+{c:[1,.6,.1],o:.45,s:.7,p:3*Math.PI/2,sp:1.3},{c:[.6,.2,1],o:.45,s:.7,p:7*Math.PI/4,sp:-1.7}
+];
+var iBufs=[],iCnts=[];
+function rebuild(shape){iBufs=[];iCnts=[];for(var i=0;i<innerC.length;i++){var d=shapeGens[shape](0.35,innerC[i].c[0],innerC[i].c[1],innerC[i].c[2]);iBufs.push(upBuf(d));iCnts.push(d.length/9)}}
+rebuild('cube');
+
+var outerBuf=upBuf(geoCube(1.3,0.15,0.15,0.15));
+
+// === PARTICLES ===
+var NP=320,NPI=200,pData=new Float32Array(NP*8),pBd=new Float32Array(NP);
+for(var i=0;i<NP;i++){var i8=i*8,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);
+var rr=i<NPI?(2+Math.random()*9):(13+Math.random()*17);pBd[i]=i<NPI?0:1;
+pData[i8]=rr*Math.sin(ph)*Math.cos(th);pData[i8+1]=rr*Math.sin(ph)*Math.sin(th);pData[i8+2]=rr*Math.cos(ph);
+pData[i8+3]=0.07+Math.random()*0.1;var h=Math.random();
+if(h<.33){pData[i8+4]=.2;pData[i8+5]=.8;pData[i8+6]=1}else if(h<.66){pData[i8+4]=.8;pData[i8+5]=.2;pData[i8+6]=1}else{pData[i8+4]=.2;pData[i8+5]=1;pData[i8+6]=.8}
+pData[i8+7]=.85+Math.random()*.15;if(i>=NPI)pData[i8+7]*=.6}
+var pBuf=upBuf(pData);
+// particle motion - velocity + phase per particle for drift
+var pVel=new Float32Array(NP*3),pPh=new Float32Array(NP),pLst=0;
+for(var i=0;i<NP;i++){var i3=i*3,i8=i*8,thv=Math.random()*Math.PI*2,x=pData[i8],y=pData[i8+1],z=pData[i8+2],r=Math.sqrt(x*x+y*y+z*z)||1;
+var ax=0,ay=0.15+Math.random()*0.55,az=0.3+Math.random()*0.7;
+var tx=y*az-z*ay,ty=-x*az,tz=x*ay-y*ax,ts=Math.sqrt(tx*tx+ty*ty+tz*tz)||1,spd=(i<NPI?0.16:0.04)+Math.random()*(i<NPI?0.12:0.05);
+pVel[i3]=tx/ts*spd;pVel[i3+1]=ty/ts*spd;pVel[i3+2]=tz/ts*spd;
+pPh[i]=Math.random()*Math.PI*2}
+function updateParticles(time){
+var dt=pLst?Math.min((time-pLst)/1000,0.05):0.016;pLst=time;if(dt<=0)return;
+var cx=mouseX*6,cy=mouseY*5,t2=time*0.001;
+for(var i=0;i<NP;i++){var i8=i*8,i3=i*3,x=pData[i8],y=pData[i8+1],z=pData[i8+2],vx=pVel[i3],vy=pVel[i3+1],vz=pVel[i3+2];
+var ph=pPh[i]+t2*0.15;
+vx+=Math.sin(ph+i)*dt*0.04;vy+=Math.cos(ph*1.3+i)*dt*0.04;vz+=Math.sin(ph*0.7+i*1.7)*dt*0.03;
+var rr=Math.sqrt(x*x+y*y+z*z)||1;
+var gacc=1.4*dt/(rr*rr);
+vx-=x/rr*gacc;vy-=y/rr*gacc;vz-=z/rr*gacc;
+var sp=Math.sqrt(vx*vx+vy*vy+vz*vz);if(sp>0.35){var k=0.35/sp;vx*=k;vy*=k;vz*=k}
+x+=vx*dt;y+=vy*dt;z+=vz*dt;pVel[i3]=vx;pVel[i3+1]=vy;pVel[i3+2]=vz;
+var dx=x-cx,dy=y-cy,dz=z,dd=Math.sqrt(dx*dx+dy*dy+dz*dz);
+if(dd<2.6&&dd>0.001){var f=(2.6-dd)*1.6,xv=dx/dd*f*dt*8,yv=dy/dd*f*dt*8,zv=dz/dd*f*dt*8;
+x+=xv;y+=yv;z+=zv}
+rr=Math.sqrt(x*x+y*y+z*z);
+if(pBd[i]===0){if(rr>12||rr<1.5){var th2=Math.random()*Math.PI*2,ph2=Math.acos(2*Math.random()-1),rr2=5+Math.random()*5;
+x=rr2*Math.sin(ph2)*Math.cos(th2);y=rr2*Math.sin(ph2)*Math.sin(th2);z=rr2*Math.cos(ph2)}}
+else{if(rr>31||rr<12){var th3=Math.random()*Math.PI*2,ph3=Math.acos(2*Math.random()-1),rr3=16+Math.random()*12;
+x=rr3*Math.sin(ph3)*Math.cos(th3);y=rr3*Math.sin(ph3)*Math.sin(th3);z=rr3*Math.cos(ph3)}}
+pData[i8]=x;pData[i8+1]=y;pData[i8+2]=z;
+pData[i8+7]=0.85+Math.random()*0.15}
+gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);gl.bufferData(gl.ARRAY_BUFFER,pData,gl.DYNAMIC_DRAW)}
+
+// === MOUSE ===
+var drag=false,rX=0.3,rY=0.5,vX=0,vY=0,zZ=-9,lX=0,lY=0;
+canvas.addEventListener('mousedown',function(e){drag=true;lX=e.clientX;lY=e.clientY;vX=vY=0;document.body.classList.add('dragging')});
+window.addEventListener('mouseup',function(){drag=false;document.body.classList.remove('dragging')});
+window.addEventListener('mousemove',function(e){if(!drag)return;vY=(e.clientX-lX)*.005;vX=(e.clientY-lY)*.005;rY+=vY;rX+=vX;lX=e.clientX;lY=e.clientY});
+var mouseX=0,mouseY=0;
+window.addEventListener('mousemove',function(e){mouseX=(e.clientX/window.innerWidth)*2-1;mouseY=-(e.clientY/window.innerHeight)*2+1});
+canvas.addEventListener('wheel',function(e){zZ+=e.deltaY*.005;zZ=Math.max(-15,Math.min(-3,zZ));e.preventDefault()},{passive:false});
+
+// === COLOR THEMES ===
+var themes={
+'1':{name:'void',bg:[0.005,0.005,0.015],inner:[[1,.2,.3],[.2,1,.3],[.2,.3,1],[1,1,.2],[1,.2,1],[.2,1,1],[1,.6,.1],[.6,.2,1]],outer:[.15,.15,.15],particle:[.2,.8,1]},
+'2':{name:'blood',bg:[0.02,0.002,0.002],inner:[[1,.1,.1],[.9,.2,.1],[1,.3,.2],[.8,.1,.1],[1,.15,.15],[.9,.25,.1],[1,.2,.1],[.85,.1,.1]],outer:[.12,.03,.03],particle:[1,.2,.2]},
+'3':{name:'ice',bg:[0.002,0.005,0.015],inner:[[.2,.5,1],[.3,.7,1],[.5,.8,1],[.1,.4,1],[.4,.6,1],[.2,.6,1],[.3,.5,1],[.5,.9,1]],outer:[.03,.05,.12],particle:[.3,.7,1]},
+'4':{name:'toxic',bg:[0.005,0.015,0.002],inner:[[.2,1,.2],[.3,.9,.1],[.4,1,.3],[.2,.8,.2],[.5,1,.1],[.3,1,.4],[.2,.9,.3],[.4,1,.2]],outer:[.03,.12,.03],particle:[.2,1,.3]},
+'5':{name:'void alt',bg:[0.01,0.002,0.015],inner:[[.8,.2,1],[.6,.1,.9],[.9,.3,1],[.7,.2,.8],[1,.2,.9],[.8,.3,1],[.6,.2,.9],[.9,.1,1]],outer:[.08,.03,.12],particle:[.7,.3,1],invert:true}
+};
+var curTheme='1';
+var themeIndicator=document.getElementById('themeIndicator');
+function applyTheme(key){
+var th=themes[key];if(!th)return;
+curTheme=key;
+gl.clearColor(th.bg[0],th.bg[1],th.bg[2],1);
+for(var i=0;i<innerC.length;i++)innerC[i].c=th.inner[i].slice();
+rebuild(curShape);
+outerBuf=upBuf(geoCube(1.3,th.outer[0],th.outer[1],th.outer[2]));
+themeIndicator.textContent='theme: '+th.name+(th.invert?' [inverted]':'');
+themeIndicator.style.color='rgba(43,208,208,0.4)';
+setTimeout(function(){themeIndicator.style.color='rgba(255,255,255,0.15)'},1500);
+}
+document.addEventListener('keydown',function(e){if(themes[e.key])applyTheme(e.key)});
+
+// === REFLECTION SIMULATION ===
+var reflMix=0.12;
+
+// === SHAPE PALETTE ===
+var palette=document.getElementById('shapePalette');
+var pvList=[
+{n:'cube',l:'cube',co:[.2,.8,1],g:geoCube},
+{n:'tetra',l:'tri',co:[1,.3,.3],g:geoTetra},
+{n:'sphere',l:'sphere',co:[.3,1,.5],g:geoSphere},
+{n:'cyl',l:'cyl',co:[1,.8,.2],g:geoCyl}
+];
+for(var pi=0;pi<pvList.length;pi++){(function(pv){
+var btn=document.createElement('div');
+btn.className='shapeBtn'+(pv.n===curShape?' active':'');
+var cvs=document.createElement('canvas');cvs.width=52;cvs.height=52;btn.appendChild(cvs);
+var lbl=document.createElement('div');lbl.className='shapeLabel';lbl.textContent=pv.l;btn.appendChild(lbl);
+try{
+var pgl=cvs.getContext('webgl',{antialias:true,alpha:true});
+if(pgl){pgl.enable(pgl.DEPTH_TEST);pgl.enable(pgl.CULL_FACE);pgl.clearColor(0,0,0,0);pgl.clear(pgl.COLOR_BUFFER_BIT|pgl.DEPTH_BUFFER_BIT);
+var pp=mkP(pgl,VS,FS);pgl.useProgram(pp);
+var data=pv.g(0.4,pv.co[0],pv.co[1],pv.co[2]);
+var pb=pgl.createBuffer();pgl.bindBuffer(pgl.ARRAY_BUFFER,pb);pgl.bufferData(pgl.ARRAY_BUFFER,data,pgl.STATIC_DRAW);
+var pa=pgl.getAttribLocation(pp,'aPos'),pn=pgl.getAttribLocation(pp,'aNorm'),pc=pgl.getAttribLocation(pp,'aCol');
+pgl.enableVertexAttribArray(pa);pgl.vertexAttribPointer(pa,3,pgl.FLOAT,false,S,0);
+pgl.enableVertexAttribArray(pn);pgl.vertexAttribPointer(pn,3,pgl.FLOAT,false,S,12);
+pgl.enableVertexAttribArray(pc);pgl.vertexAttribPointer(pc,3,pgl.FLOAT,false,S,24);
+var prj=mPersp(Math.PI/4,1,.1,10),vw=mTrans(0,0,-2.5),md=mMul(mRotX(0.3),mRotY(0.5));
+pgl.uniformMatrix4fv(pgl.getUniformLocation(pp,'uMVP'),false,mMul(prj,mMul(vw,md)));
+pgl.uniformMatrix4fv(pgl.getUniformLocation(pp,'uMod'),false,md);
+pgl.uniformMatrix3fv(pgl.getUniformLocation(pp,'uNM'),false,mNorm(md));
+pgl.uniform3f(pgl.getUniformLocation(pp,'uCam'),0,0,2.5);
+pgl.uniform1f(pgl.getUniformLocation(pp,'uEm'),0.1);
+pgl.uniform1f(pgl.getUniformLocation(pp,'uAl'),1);
+pgl.drawArrays(pgl.TRIANGLES,0,data.length/9)}
+}catch(e){console.error('preview',e)}
+btn.addEventListener('click',function(){curShape=pv.n;rebuild(pv.n);var bs=document.querySelectorAll('.shapeBtn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');btn.classList.add('active')});
+palette.appendChild(btn);
+})(pvList[pi])}
+
+// === RENDER ===
+var frames=0,lastT=performance.now(),fps=0,maxFps=0,statsEl=document.getElementById('stats');
+function render(time){
+frames++;var now=performance.now();
+if(now-lastT>=1000){fps=frames;if(fps>maxFps)maxFps=fps;frames=0;lastT=now;statsEl.textContent='FPS: '+fps+' | MAX: '+maxFps+' | SHAPES: '+innerC.length+' | PARTICLES: '+NP;
+if(fps<lastFps-10&&fps<40)triggerGlitch();lastFps=fps}
+if(!drag){rY+=vY;rX+=vX;vX*=.97;vY*=.97;if(Math.abs(vX)<.0001)vX=0;if(Math.abs(vY)<.0001)vY=0}
+var audioLevel=getAudioLevel();
+var audioPulse=1.0+audioLevel*0.08;
+gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+var asp=canvas.width/canvas.height,proj=mPersp(Math.PI/4,asp,.1,100);
+var view=mMul(mTrans(0,0,zZ),mMul(mRotY(rY),mRotX(rX)));
+var t=time*.001;
+
+// package effects
+if(pkgEffects.cubeDance)t*=3;
+if(pkgEffects.entropy)t*=(1+Math.sin(time*0.001)*0.5);
+
+// particles
+updateParticles(time);
+gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
+gl.uniformMatrix4fv(ppPJ,false,proj);gl.uniformMatrix4fv(ppVW,false,view);
+gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);
+gl.enableVertexAttribArray(ppAP);gl.vertexAttribPointer(ppAP,3,gl.FLOAT,false,32,0);
+gl.enableVertexAttribArray(ppAS);gl.vertexAttribPointer(ppAS,1,gl.FLOAT,false,32,12);
+gl.enableVertexAttribArray(ppAC);gl.vertexAttribPointer(ppAC,3,gl.FLOAT,false,32,16);
+gl.enableVertexAttribArray(ppAA);gl.vertexAttribPointer(ppAA,1,gl.FLOAT,false,32,28);
+gl.drawArrays(gl.POINTS,0,NP);
+gl.depthMask(true);gl.disable(gl.BLEND);
+
+// cubes
+gl.useProgram(prog);gl.uniform3f(uCam,0,0,-zZ);
+
+// outer
+var oMod=mMul(mMul(mRotX(t*.15),mRotY(t*.2)),mRotZ(t*.1));
+gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),oMod));
+gl.uniformMatrix4fv(uMod,false,oMod);gl.uniformMatrix3fv(uNM,false,mNorm(oMod));
+gl.uniform1f(uEm,audioLevel*0.05);gl.uniform1f(uAl,.25+audioLevel*0.05);
+gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
+gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
+bindM(outerBuf);gl.drawArrays(gl.TRIANGLES,0,36);
+gl.depthMask(true);gl.uniform1f(uAl,1);
+
+// inner
+for(var i=0;i<innerC.length;i++){
+var c=innerC[i],oa=t*c.s+c.p;
+var ox=Math.cos(oa)*c.o,oy=Math.sin(oa*.7)*c.o*.5,oz=Math.sin(oa)*c.o;
+var iMod=mMul(mMul(mTrans(ox,oy,oz),mMul(mMul(mRotX(t*c.sp),mRotY(t*c.sp*.7)),mRotZ(t*c.sp*.3))),mScale(1,1,1));
+gl.uniformMatrix4fv(uMVP,false,mMul(mMul(proj,view),iMod));
+gl.uniformMatrix4fv(uMod,false,iMod);gl.uniformMatrix3fv(uNM,false,mNorm(iMod));
+gl.uniform1f(uEm,.15*audioPulse);gl.uniform1f(uInv,themes[curTheme]&&themes[curTheme].invert?1:0);
+bindM(iBufs[i]);gl.drawArrays(gl.TRIANGLES,0,iCnts[i])}
+
+gl.disable(gl.BLEND);requestAnimationFrame(render)}
+requestAnimationFrame(render);
+
+window.addEventListener('resize',function(){var dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';gl.viewport(0,0,canvas.width,canvas.height)});
+</script>
+</body>
+</html>

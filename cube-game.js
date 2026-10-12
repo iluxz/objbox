@@ -241,7 +241,7 @@ function mkP(ctx,vs,fs){var p=ctx.createProgram();ctx.attachShader(p,mkS(ctx,ctx
 var VS='attribute vec3 aPos,aNorm,aCol;uniform mat4 uMVP,uMod;uniform mat3 uNM;varying vec3 vC,vN,vW;void main(){vec4 w=uMod*vec4(aPos,1.0);vW=w.xyz;vN=normalize(uNM*aNorm);vC=aCol;gl_Position=uMVP*vec4(aPos,1.0);}';
 var FS='precision highp float;varying vec3 vC,vN,vW;uniform vec3 uCam;uniform float uEm,uAl,uInv,uFr;float cL(vec3 lp,float li,vec3 n){vec3 ld=normalize(lp-vW);float d=max(dot(n,ld),0.0);float ds=length(lp-vW);return d*li/(1.0+0.003*ds*ds);}void main(){vec3 n=normalize(vN),vd=normalize(uCam-vW),al=vC;float light=.32+cL(vec3(6,8,6),1.0,n)+cL(vec3(-5,4,-3),.7,n)+cL(vec3(0,-4,5),.5,n);vec3 l=al*(light+uEm);vec3 h=normalize(normalize(vec3(6,8,6)-vW)+vd);float spec=pow(max(dot(n,h),0.0),64.0)*0.12;float ndv=max(dot(vd,n),0.0);float fr=pow(1.0-ndv,3.0)*0.12+pow(1.0-ndv,6.0)*0.45;vec3 fc=l+al*uEm+fr*al*.3*uFr+vec3(spec)*(0.25+0.45*uFr);fc=pow(fc/(fc+vec3(1.0)),vec3(1.0/2.2));fc=mix(fc,1.0-fc,uInv);gl_FragColor=vec4(fc,uAl);}';
 var PVS='attribute vec3 aP;attribute float aS,aA;attribute vec3 aC;uniform mat4 uPr,uVw;varying vec3 vC;varying float vA;void main(){vec4 vp=uVw*vec4(aP,1.0);gl_Position=uPr*vp;gl_PointSize=max(aS*1500.0/-vp.z,6.0);vC=aC;vA=aA;}';
-var PFS='precision highp float;varying vec3 vC;varying float vA;void main(){vec2 c=gl_PointCoord-0.5;float d=length(c);if(d>0.5)discard;gl_FragColor=vec4(vC,vA*(1.0-smoothstep(0.08,0.5,d)));}';
+var PFS='precision highp float;varying vec3 vC;varying float vA;uniform float uSoft;void main(){vec2 c=gl_PointCoord-0.5;float d=length(c);if(d>0.5)discard;gl_FragColor=vec4(vC,vA*mix(1.0,1.0-smoothstep(0.08,0.5,d),uSoft));}';
 
 var prog=mkP(gl,VS,FS);
 var pprog=mkP(gl,PVS,PFS);
@@ -272,6 +272,7 @@ var ppAC=gl.getAttribLocation(pprog,'aC');
 var ppAA=gl.getAttribLocation(pprog,'aA');
 var ppPJ=gl.getUniformLocation(pprog,'uPr');
 var ppVW=gl.getUniformLocation(pprog,'uVw');
+var ppSoft=gl.getUniformLocation(pprog,'uSoft');
 
 function upBuf(data){var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return b}
 function bindM(buf){gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,S,0);gl.enableVertexAttribArray(aNorm);gl.vertexAttribPointer(aNorm,3,gl.FLOAT,false,S,12);gl.enableVertexAttribArray(aCol);gl.vertexAttribPointer(aCol,3,gl.FLOAT,false,S,24)}
@@ -354,24 +355,25 @@ pPh[i]=Math.random()*Math.PI*2}
 function updateParticles(time){
 if(window._timeFrozen){pLst=time;return}
 var dt=pLst?Math.min((time-pLst)/1000,0.05):0.016;try{dt*=tsMul()}catch(e){}pLst=time;if(dt<=0)return;
+var _src=(typeof currentZone!=='undefined'&&currentZone==='source');
 var cx=mouseX*6,cy=mouseY*5,t2=time*0.001;
 for(var i=0;i<NP;i++){var i8=i*8,i3=i*3,x=pData[i8],y=pData[i8+1],z=pData[i8+2],vx=pVel[i3],vy=pVel[i3+1],vz=pVel[i3+2];
 var ph=pPh[i]+t2*0.15;
 vx+=Math.sin(ph+i)*dt*0.04;vy+=Math.cos(ph*1.3+i)*dt*0.04;vz+=Math.sin(ph*0.7+i*1.7)*dt*0.03;
 var rr=Math.sqrt(x*x+y*y+z*z)||1;
-var gacc=1.4*dt/(rr*rr);
-vx-=x/rr*gacc;vy-=y/rr*gacc;vz-=z/rr*gacc;
+if(!_src){var gacc=1.4*dt/(rr*rr);vx-=x/rr*gacc;vy-=y/rr*gacc;vz-=z/rr*gacc}
 var sp=Math.sqrt(vx*vx+vy*vy+vz*vz);if(sp>0.35){var k=0.35/sp;vx*=k;vy*=k;vz*=k}
 x+=vx*dt;y+=vy*dt;z+=vz*dt;pVel[i3]=vx;pVel[i3+1]=vy;pVel[i3+2]=vz;
-var dx=x-cx,dy=y-cy,dz=z,dd=Math.sqrt(dx*dx+dy*dy+dz*dz);
+if(!_src){var dx=x-cx,dy=y-cy,dz=z,dd=Math.sqrt(dx*dx+dy*dy+dz*dz);
 if(dd<2.6&&dd>0.001){var f=(2.6-dd)*1.6,xv=dx/dd*f*dt*8,yv=dy/dd*f*dt*8,zv=dz/dd*f*dt*8;
-x+=xv;y+=yv;z+=zv}
+x+=xv;y+=yv;z+=zv}}
 rr=Math.sqrt(x*x+y*y+z*z);
 if(pBd[i]===0){if(rr>12||rr<1.5){var th2=Math.random()*Math.PI*2,ph2=Math.acos(2*Math.random()-1),rr2=5+Math.random()*5;
 x=rr2*Math.sin(ph2)*Math.cos(th2);y=rr2*Math.sin(ph2)*Math.sin(th2);z=rr2*Math.cos(ph2)}}
 else{if(rr>31||rr<12){var th3=Math.random()*Math.PI*2,ph3=Math.acos(2*Math.random()-1),rr3=16+Math.random()*12;
 x=rr3*Math.sin(ph3)*Math.cos(th3);y=rr3*Math.sin(ph3)*Math.sin(th3);z=rr3*Math.cos(ph3)}}
 pData[i8]=x;pData[i8+1]=y;pData[i8+2]=z;
+if(_src){if(i%2===0){pData[i8+4]=1;pData[i8+5]=0.42;pData[i8+6]=0.88}else{pData[i8+4]=0.35;pData[i8+5]=0.92;pData[i8+6]=1}}
 pData[i8+7]=0.85+Math.random()*0.15}
 gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);gl.bufferData(gl.ARRAY_BUFFER,pData,gl.DYNAMIC_DRAW)}
 
@@ -437,6 +439,7 @@ if(studioOpen)return;
 if(wasDrag)return;
 if(typeof demoPlaying!=='undefined'&&demoPlaying)return;
 if(typeof ngActive!=='undefined'&&ngActive)return;
+if(window._grActive||window._folkActive)return;
 try{if(typeof starTryClick==='function'&&starTryClick(e.clientX,e.clientY))return}catch(err){}
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
@@ -452,6 +455,7 @@ var fn=clickActions[Math.floor(Math.random()*clickActions.length)];fn()
 // └──────────────────────────────────────────────────────────────┘
 var hoverCubeEl=null;
 canvas.addEventListener('mousemove',function(e){
+if(window._grActive||window._folkActive){if(hoverCubeEl)hoverCubeEl.style.opacity='0';return}
 var ndcX=(e.clientX/window.innerWidth)*2-1;
 var ndcY=-(e.clientY/window.innerHeight)*2+1;
 var hoverTime=performance.now()*0.001;
@@ -581,7 +585,7 @@ refreshShapeLocks();
 // └──────────────────────────────────────────────────────────────┘
 var currentZone='void';
 var zones={
-source:{name:'source',desc:'the original page — before the void took over',bg:[0.90,0.86,0.74,1],particleAlpha:0.55,particleSpeed:0.25,cubeJitter:0,glitchIntensity:0,filter:'sepia(0.35) brightness(1.03)',renderOverride:false},
+source:{name:'source',desc:'the original page — before the void took over',bg:[0.90,0.86,0.74,1],particleAlpha:0.8,particleSpeed:0.25,cubeJitter:0,glitchIntensity:0,filter:'brightness(1.04)',renderOverride:false},
 void:{name:'void',desc:'the void — where obj waits',bg:null,particleAlpha:1,particleSpeed:1,cubeJitter:0,glitchIntensity:0,filter:'',renderOverride:false},
 cb_menu:{name:'cb_menu',desc:'the void keeps a menu here. checkerboard floor, dark fog. the edges fall into nothing — watch your step.',bg:[0.03,0.03,0.05,1],particleAlpha:0.4,particleSpeed:0.4,cubeJitter:0.05,glitchIntensity:0.1,filter:'grayscale(0.35) contrast(1.15)',renderOverride:false},
 farlands:{name:'farlands',desc:'the farlands — floating point starts to decay',bg:null,particleAlpha:1,particleSpeed:1.5,cubeJitter:0.15,glitchIntensity:0,filter:'',renderOverride:false},
@@ -697,6 +701,19 @@ cubePrint(zones[travelTo_zone].desc);
 function applyZoneEffects(zone){
 try{var _zv=achZonesSeen();if(_zv.indexOf(zone)===-1){_zv.push(zone);try{localStorage.setItem('cube_zones_seen',JSON.stringify(_zv))}catch(e){}if(_zv.length>=9){try{ach('globe_trotter')}catch(e){}}}}catch(e){}
 var z=zones[zone];
+var _lf=document.getElementById('legacyFrame'),_lr=document.getElementById('legacyReturn');
+if(_lf){
+if(zone==='source'){
+if(_lf.getAttribute('src')!=='cube-legacy.html'){try{_lf.setAttribute('src','cube-legacy.html')}catch(e){}}
+_lf.style.display='block';if(_lr)_lr.style.display='block';
+try{if(typeof bgm!=='undefined'&&bgm&&!bgm.paused){_srcPrevBgm=true;bgm.pause()}}catch(e){}
+setTimeout(function(){try{_lf.contentWindow.focus()}catch(e){}try{var _a=_lf.contentDocument&&_lf.contentDocument.getElementById('bgm');if(_a){var _p=_a.play();if(_p&&_p.catch)_p.catch(function(){})}}catch(e){}},300);
+}else{
+_lf.style.display='none';if(_lr)_lr.style.display='none';
+try{if(_lf.getAttribute('src')&&_lf.getAttribute('src')!=='about:blank')_lf.setAttribute('src','about:blank')}catch(e){}
+if(_srcPrevBgm===true){_srcPrevBgm=false;try{bgm.play().catch(function(){})}catch(e){}}
+}
+}
 var mainC=document.getElementById('main');
 if(z.filter){mainC.style.filter=z.filter}
 else if(zone==='void'){mainC.style.filter=''}
@@ -729,6 +746,7 @@ if(pb){try{bgm.play().catch(function(){})}catch(e){}}
 }
 }
 var _ngBoxPrevMode=-1,_ngBoxPrevBgm=false,_ngBoxWasOn=false;
+var _srcPrevBgm=false;
 var _zoneXTimer=null;
 var _zoneXLines=[
 'the terminal is the only thing X cannot delete.',
@@ -1027,8 +1045,9 @@ updateParticles((window._timeFrozen&&window._frozenT!==undefined)?window._frozen
 if(zr.zone==='geometry'){
 drawGeometryVoid(proj,view,(window._timeFrozen&&window._frozenT!==undefined)?window._frozenT*1000:time);
 }else if(!zr.renderOff){
-gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
+gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,(typeof currentZone!=='undefined'&&currentZone==='source')?gl.ONE_MINUS_SRC_ALPHA:gl.ONE);gl.depthMask(false);
 gl.uniformMatrix4fv(ppPJ,false,proj);gl.uniformMatrix4fv(ppVW,false,view);
+if(ppSoft)gl.uniform1f(ppSoft,(typeof currentZone!=='undefined'&&currentZone==='source')?0.0:1.0);
 gl.bindBuffer(gl.ARRAY_BUFFER,pBuf);
 gl.enableVertexAttribArray(ppAP);gl.vertexAttribPointer(ppAP,3,gl.FLOAT,false,32,0);
 gl.enableVertexAttribArray(ppAS);gl.vertexAttribPointer(ppAS,1,gl.FLOAT,false,32,12);
@@ -1038,7 +1057,7 @@ gl.drawArrays(gl.POINTS,0,NP);
 }
 
 gl.depthMask(true);gl.disable(gl.BLEND);
-if(!zr.renderOff&&zr.zone!=='geometry')drawVoidExtras(proj,view,t,zr);
+if(!zr.renderOff&&zr.zone!=='geometry'&&zr.zone!=='source')drawVoidExtras(proj,view,t,zr);
 if(zr.renderOff)drawDarkStars(proj,view);
 
 // cubes
@@ -1801,7 +1820,7 @@ var l2='';
 try{if(typeof currentZone!=='undefined'&&currentZone)l2+='<span class="hudZone">ZONE '+String(currentZone).toUpperCase()+'</span>'}catch(e){}
 if(hard)l2+='<span class="hudSep">&middot;</span><span style="color:#ff8a5a">HARD</span>';
 l2+='<span class="hudSep">&middot;</span><span>'+(active?'non-game':'idle')+'</span>';
-try{var _tw=titleWorn();if(_tw)l2+='<span class="hudSep">&middot;</span><span style="color:#c878ff">['+_tw+']</span>'}catch(e){}
+try{var _tw=titleWorn();if(_tw)l2+='<span class="hudSep">&middot;</span><span style="color:'+titleColor(_tw)+'">['+_tw+']</span>'}catch(e){}
 h.innerHTML='<div class="hudLine"><span>SESSION '+getUptime()+'</span><span class="hudSep">&middot;</span><span style="color:'+rc+'">'+rt+'</span>'+extra+'<span class="hudToggle" title="collapse hud">\u25be</span></div><div class="hudLine hudLine2">'+l2+'</div>';
 }catch(e){}
 }
@@ -2033,7 +2052,95 @@ var ACH=[
 {id:'gr_kill',h:'pull it.',n:'the trigger',d:'kill obj at the heart of the grotto.',c:false},
 {id:'gr_noskip',h:'sit through it.',n:'unskippable',d:'watch the entire kill credits reel without skipping. (all 3:42. unlocks bgm employment.)',c:false},
 {id:'chism100',h:'???',n:'Chism',d:'speak the complicated code.',c:false},
-{id:'gr_chismfriend',h:'feed the ranch.',n:'friend of the hollow',d:'finish Chism\u2019s questline in the grotto.',c:false}
+{id:'gr_chismfriend',h:'feed the ranch.',n:'friend of the hollow',d:'finish Chism\u2019s questline in the grotto.',c:false},
+{id:'gr_firstdance',h:'it dances.',n:'dance break',d:'finish an extractor cycle in the grotto. it danced.',c:false},
+{id:'gr_titan',h:'go big.',n:'titan dug',d:'fabricate a titan extractor in the grotto.',c:false},
+{id:'gr_despawn',h:'wave back.',n:'final cycle',d:'harvest an extractor on its last cycle. it waved.',c:false},
+{id:'gr_drillmaster',h:'the full set.',n:'drill sergeant',d:'fabricate all 12 extractor packets in the grotto.',c:false},
+{id:'gr_lorekeeper2',h:'do not look for file_07.',n:'restocked shelves',d:'read all three restocked truth files in the grotto vault (after the gauntlet).',c:false},
+{id:'gr_oath',h:'one oath. forever.',n:'oathbound',d:'swear one of Chism\u2019s oaths in the grotto.',c:false},
+{id:'gr_baker',h:'the cave smells incredible.',n:'pie day',d:'bake fruit into pies in the grotto.',c:false},
+{id:'gr_gauntlet2',h:'the stones are awake.',n:'remembrance run',d:'replay the grotto gauntlet after clearing it.',c:false},
+{id:'gr_rockcameo',h:'it waited so long for details.',n:'the rock was here',d:'find the rock in the grotto meadow.',c:false},
+{id:'gr_eventful',h:'the market raised its voice.',n:'market weather',d:'live through a grotto market event (crash, surge, bloom, or low tide).',c:false},
+{id:'gr_tacklebox',h:'it remembers being useful.',n:'fully rebuilt',d:'rebuild the grotto tacklebox to max tier.',c:false},
+{id:'gr_petpal',h:'it follows you.',n:'take-home slime',d:'buy a pet slime from Chism. it follows you across the void.',c:false},
+{id:'gr_menagerie',h:'all six. penned.',n:'full menagerie',d:'pen all 6 ranch slime types in the grotto.',c:false},
+{id:'gr_roundup',h:'got em.',n:'lost and found',d:'round up escaped ranch slimes in the grotto.',c:false},
+{sec:'FOLK VALLEY'},
+{id:'folk_first',h:'go to the valley.',n:'folk visitor',d:'get transported to folk valley by telling obj.',c:false},
+{id:'folk_regular',h:'hang around.',n:'valley regular',d:'wander folk valley 25 times.',c:false},
+{id:'folk_omen',h:'witness it.',n:'treatment witness',d:'be there when someone gets the folk valley treatment.',c:false},
+{id:'folk_sorted',h:'all three.',n:'incorrectly sorted',d:'collect GOOD, BROKEN and PURE EVIL stamps in folk valley.',c:false},
+{id:'folk_golden',h:'shiny witness.',n:'golden hour',d:'find a golden encounter while wandering folk valley. (+5 folk points.)',c:false},
+{id:'folk_barber',h:'full head. full regret.',n:'ten chairs',d:'collect all 10 barbershop haircuts in folk valley.',c:false},
+{id:'folk_wall',h:'the valley pretends not to cry.',n:'chiseled',d:'leave 5 epitaphs on the folk valley memorial wall.',c:false},
+{id:'folk_fried',h:'-1 artery.',n:'legacy in grease',d:'claim the daily fry from uncle ekber 3 times.',c:false},
+{id:'folk_rich',h:'spend them before they hatch.',n:'folk points mogul',d:'hold 100 folk points at once in folk valley.',c:false},
+{id:'folk_pogo',h:'gravity taking notes.',n:'century bounce',d:'bounce 100m+ on the folk valley pogo highways.',c:false},
+{id:'folk_sailor',h:'doctor status pending.',n:'sea seasoned',d:'drink the folkral sea 5 times. do not drink it.',c:false},
+{id:'folk_huss',h:'treason tastes like bread.',n:'other valley',d:'sneak over to huss valley.',c:false},
+{id:'folk_evil',h:'pen is permanent.',n:'certified associate',d:'become a certified associate of the EVIL folk.',c:false},
+{id:'folk_anthem',h:'off-key is the official key.',n:'folkistan weeps',d:'recover and perform all 4 pieces of the folkistan anthem.',c:false},
+{id:'folk_press',h:'ink on thumbs.',n:'paper boy',d:'read the folk post 10 times.',c:false},
+{id:'folk_headline',h:'witnesses nod.',n:'front page',d:'get headlined in the folk post late edition.',c:false},
+{id:'folk_stamped',h:'the ink never dries.',n:'paperwork-proof',d:'finish the stamp office questline in folk valley.',c:false},
+{id:'folk_permit',h:'flaunt it quietly.',n:'fully permitted',d:'own all 3 valley permits in folk valley.',c:false},
+{id:'folk_acquitted',h:'do not push it.',n:'not guilty',d:'get acquitted in folk court.',c:false},
+{id:'folk_jailbird',h:'nice window.',n:'minimum security',d:'go to folk jail (too broke for fines).',c:false},
+{id:'folk_festive',h:'sorry.',n:'festival regular',d:'attend 3 different folk valley festivals.',c:false},
+{id:'folk_afterdark',h:'congrats-ish.',n:'one of them now',d:'meet the night folk 5 times.',c:false},
+{id:'folk_dj',h:'the visitor with the shoes.',n:'request line',d:'request 5 songs on FOLK FM.',c:false},
+{id:'folk_penpal',h:'pigeons are slow.',n:'postage due',d:'send 5 letters from the valley mail.',c:false},
+{id:'folk_diploma',h:'slightly greasy.',n:'graduated',d:'pass the folk school final exam.',c:false},
+{id:'folk_detention',h:'the printer is loud.',n:'chronic wobbler',d:'collect 3 detention slips at folk school.',c:false},
+{id:'folk_weatherman',h:'the clouds remember.',n:'sky decider',d:'order weather from the machine 5 times.',c:false},
+{id:'folk_backlash',h:'too much hubris.',n:'seized sky',d:'trigger the weather machine backlash.',c:false},
+{id:'folk_forgery',h:'the police can tell.',n:'flex anyway',d:'buy a forged permit from shady shuck.',c:false},
+{id:'folk_bribe',h:'(he saw something.)',n:'subtle. loud.',d:'bribe your heat down at the black market.',c:false},
+{id:'folk_peace',h:'eternal-ish.',n:'treaty table',d:'end the huss situation with a treaty.',c:false},
+{id:'folk_victory',h:'won-ish.',n:'war plaque',d:'win the huss war.',c:false},
+{id:'folk_mayor',h:'sash incoming.',n:'mayor you',d:'win a valley election.',c:false},
+{id:'folk_sewers',h:'smells like lore.',n:'clog beater',d:'beat THE CLOG at sewer level 5.',c:false},
+{id:'folk_champion',h:'parade was 4 guys.',n:'called it',d:'back the season winner in bounceball.',c:false},
+{id:'folk_bettor',h:'the bookie weeps.',n:'degenerate (folk)',d:'win 5 bounceball bets.',c:false},
+{id:'folk_mvp',h:'underdog pays more. trust.',n:'valuable player',d:'win a bounceball bet at x3+ odds.',c:false},
+{id:'folk_pet',h:'it already judges you.',n:'new roommate',d:'adopt a folk pet.',c:false},
+{id:'folk_bestinshow',h:'rivals wept.',n:'best in show',d:'win the weekly pet show.',c:false},
+{id:'folk_archivist',h:'(it is. by you.)',n:'dust included',d:'read all 7 founders archive pages.',c:false},
+{id:'folk_homeowner',h:'damp. cozy. damp.',n:'property folk',d:'buy a hut in folk valley.',c:false},
+{id:'folk_decorator',h:'very hut.',n:'feng shui',d:'fully furnish your hut.',c:false},
+{id:'folk_chef',h:'ekber nods.',n:'stained. trusted.',d:'cook 10 meals from the fry cookbook.',c:false},
+{id:'folk_gourmet',h:'ekber weeps a little.',n:'it shines',d:'cook the golden fry-up.',c:false},
+{id:'folk_verity',h:'it knows everything.',n:'^^',d:'meet the real verity in folk valley. (not the roller one.)',c:false},
+{id:'folk_gypsy',h:'do not clap. do not run.',n:'ai dai dili dili dai',d:'witness gypsy verity dance.',c:false},
+{sec:'THE TOWER'},
+{id:'op_first',h:'it glows now.',n:'tower lit',d:'light your first spell orb in obj\'s tower.',c:false},
+{id:'op_book',h:'all fifteen. shelved.',n:'tower finished',d:'fill the whole spellbook in obj\'s tower (15 orbs).',c:false},
+{id:'op_wall',h:'it was load-bearing. was.',n:'structural mischief',d:'break the ingredients wall in obj\'s tower.',c:false},
+{id:'op_riddle',h:'he approves. allegedly.',n:'approval earned',d:'solve obj\'s riddle in the tower.',c:false},
+{id:'op_riddle2',h:'hired. unpaid.',n:'basically staff',d:'solve obj\'s second riddle in the tower.',c:false},
+{id:'op_mixes',h:'25. the pot is tired.',n:'mixologist',d:'stir 25 mixes in obj\'s tower.',c:false},
+{id:'op_repertoire',h:'encore. no encore.',n:'full repertoire',d:'cast every tower orb at least once.',c:false},
+{id:'op_yard',h:'fresh air. allegedly.',n:'side yard',d:'break the left wall and find the courtyard.',c:false},
+{id:'op_launch',h:'spectacular failure.',n:'rocket club',d:'launch obj off the courtyard rocket pad.',c:false},
+{id:'op_crank',h:'the crank fits.',n:'well mechanic',d:'fix the courtyard well with the missing crank.',c:false},
+{id:'op_gnome',h:'golden hats.',n:'associate gnome',d:'befriend the courtyard gnomes. slowly.',c:false},
+{id:'op_trash',h:'waste allocation complete.',n:'filed away',d:'file 25 trash in the courtyard trashcan.',c:false},
+{id:'op_hoop',h:'nothing but air.',n:'hoop ace',d:'fly obj through the courtyard hoop.',c:false},
+{id:'op_orbit',h:'ceiling platinum.',n:'ten flights',d:'launch obj off the rocket pad 10 times.',c:false},
+{id:'op_combo',h:'double cast.',n:'fusion cuisine',d:'fuse two tower orbs into a combo.',c:false},
+{id:'op_floors',h:'upstairsdownstairs.',n:'both floors',d:'visit the tower cellar and roof.',c:false},
+{id:'op_trade',h:'the union approves.',n:'yard sale',d:'trade trash to the courtyard gnomes.',c:false},
+{id:'op_catch',h:'safe hands.',n:'caught clean',d:'catch obj mid-air 5 times.',c:false},
+{id:'op_seek',h:'seeker certified.',n:'found him',d:'find hidden obj 3 times.',c:false},
+{id:'op_dream',h:'spaced out.',n:'daydream believer',d:'complete a tower memory dream.',c:false},
+{id:'op_memories',h:'seen everything.',n:'full recall',d:'dream all four tower memories.',c:false},
+{sec:'THE CASINO'},
+{id:'ca_first',h:'paid. do not get used to it.',n:'first payout',d:'win anything at the void casino.',c:false},
+{id:'ca_jackpot',h:'three sevens. or green.',n:'house funds you',d:'hit a casino jackpot (slots sevens or spin green).',c:false},
+{id:'ca_streak',h:'five in a row.',n:'card counter',d:'win 5 higher/lower rounds in a row.',c:false},
+{id:'ca_bankrupt',h:'zero chips.',n:'lint rich',d:'lose every chip at the void casino.',c:false}
 ];
 function ngCh(){try{return ngLoad().ch||0}catch(e){return 0}}
 function ngAct2Done(){try{return localStorage.getItem('cube_act2')==='1'}catch(e){return false}}
@@ -2048,7 +2155,8 @@ function offSeenN(){try{var s=JSON.parse(localStorage.getItem('cube_office')||'{
 function offRock(){try{var s=JSON.parse(localStorage.getItem('cube_office')||'{}');return !!(s&&s.rock)}catch(e){return false}}
 function achSet(){try{var v=JSON.parse(localStorage.getItem('cube_ach')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achSave(s){try{localStorage.setItem('cube_ach',JSON.stringify(s))}catch(e){}}
-var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10},pet100:{s:10},gone_fishing:{s:10},the_big_one:{s:15},full_box:{s:20},gr_lorekeeper:{s:15},gr_gauntlet:{s:20,u:5},gr_warden:{s:25,u:10},gr_spare:{s:25},gr_kill:{s:25},gr_noskip:{s:20,u:5},chism100:{s:25,u:10},gr_chismfriend:{s:25,u:10}};
+var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10},pet100:{s:10},gone_fishing:{s:10},the_big_one:{s:15},full_box:{s:20},gr_lorekeeper:{s:15},gr_gauntlet:{s:20,u:5},gr_warden:{s:25,u:10},gr_spare:{s:25},gr_kill:{s:25},gr_noskip:{s:20,u:5},chism100:{s:25,u:10},gr_chismfriend:{s:25,u:10},gr_firstdance:{s:15},gr_titan:{s:20},gr_despawn:{s:15},gr_drillmaster:{s:25,u:10},gr_lorekeeper2:{s:15},gr_oath:{s:20,u:5},gr_baker:{s:15},gr_gauntlet2:{s:20,u:5},gr_rockcameo:{s:10},gr_eventful:{s:15},gr_tacklebox:{s:20},gr_petpal:{s:15},folk_first:{s:10},folk_regular:{s:15},folk_omen:{s:20},folk_sorted:{s:15},folk_golden:{s:15},folk_barber:{s:20},folk_wall:{s:15},folk_fried:{s:15},folk_rich:{s:20},folk_pogo:{s:20},folk_sailor:{s:15},folk_huss:{s:15},folk_evil:{s:20,u:5},folk_anthem:{s:20,u:5},folk_press:{s:15},folk_headline:{s:15},folk_stamped:{s:20,u:5},folk_permit:{s:20},folk_acquitted:{s:15},folk_jailbird:{s:15},folk_festive:{s:15},folk_afterdark:{s:15},folk_dj:{s:15},folk_penpal:{s:15},folk_diploma:{s:20,u:5},folk_detention:{s:10},folk_weatherman:{s:15},folk_backlash:{s:15},folk_forgery:{s:15},folk_bribe:{s:15},folk_peace:{s:20,u:5},folk_victory:{s:25,u:10},folk_mayor:{s:20,u:5},folk_sewers:{s:20,u:5},folk_champion:{s:25,u:10},folk_bettor:{s:15},folk_mvp:{s:20},folk_pet:{s:15},folk_bestinshow:{s:20},folk_archivist:{s:20},folk_homeowner:{s:20},folk_decorator:{s:15},folk_chef:{s:15},folk_gourmet:{s:20,u:5},folk_verity:{s:15},folk_gypsy:{s:20,u:5}};
+try{achRW.op_first={s:0};achRW.op_book={s:0};achRW.op_wall={s:0};achRW.op_riddle={s:0};achRW.op_riddle2={s:0};achRW.op_mixes={s:0};achRW.op_repertoire={s:0};achRW.op_yard={s:0};achRW.op_launch={s:0};achRW.op_crank={s:0};achRW.op_gnome={s:0};achRW.op_trash={s:0};achRW.op_hoop={s:0};achRW.op_orbit={s:0};achRW.op_combo={s:0};achRW.ca_first={s:0};achRW.ca_jackpot={s:0};achRW.ca_streak={s:0};achRW.ca_bankrupt={s:0};achRW.gr_menagerie={s:0};achRW.gr_roundup={s:0};achRW.op_floors={s:0};achRW.op_trade={s:0};achRW.op_catch={s:0};achRW.op_seek={s:0};achRW.op_dream={s:0};achRW.op_memories={s:0}}catch(e){}
 function achPaid(){try{var v=JSON.parse(localStorage.getItem('cube_ach_paid')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achPaidSave(s){try{localStorage.setItem('cube_ach_paid',JSON.stringify(s))}catch(e){}}
 function achRwOf(id){try{if(typeof achRW!=='undefined'&&achRW[id])return achRW[id]}catch(e){}return{s:5}}
@@ -2320,7 +2428,9 @@ var t=(a[0]||'').toLowerCase();
 if(t==='auto'){weatherType='off';weatherDrops=[];weatherManual=false;autoWeather();return true}
 if(t!=='rain'&&t!=='snow'&&t!=='off'){cubeError('weather: use rain, snow, off, or auto');return true}
 initWeather(t);weatherManual=true;return true}};
-var TITLE_MAP={intruder:null,stargazer:'stargazer',cartographer:'cartographer',elegant:'elegant',brute:'brute',tenant:'act3_done',listener:'noli_full',employee:'shift_all',soft:'pet100',merciless:'mercy',spoiled:'brat'};
+var TITLE_MAP={intruder:null,stargazer:'stargazer',cartographer:'cartographer',elegant:'elegant',brute:'brute',tenant:'act3_done',listener:'noli_full',employee:'shift_all',soft:'pet100',merciless:'mercy',spoiled:'brat',folk:'folk_regular',highroller:'ca_jackpot'};
+var TITLE_COLORS={folk:'#64ffa0'};
+function titleColor(t){try{if(TITLE_COLORS[t])return TITLE_COLORS[t]}catch(e){}return '#c878ff'}
 function titleUnlocked(t){try{if(t==='intruder')return true;var id=TITLE_MAP[t];if(!id)return false;var s=achSet();return s.indexOf(id)!==-1}catch(e){return false}}
 function titleWorn(){try{return localStorage.getItem('cube_title')||''}catch(e){return ''}}
 var FISH_TABLE=[
@@ -2338,22 +2448,8 @@ var FISH_TABLE=[
 var fishState=null;
 function fishRarity(n){try{var c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');return c[n]||0}catch(e){return 0}}
 function fishAdd(n){try{var c=JSON.parse(localStorage.getItem('cube_fishbox')||'{}');c[n]=(c[n]||0)+1;localStorage.setItem('cube_fishbox',JSON.stringify(c))}catch(e){}}
-voidScriptLang['fish']={help:'fish - cast into nothing',fn:function(){
-if(fishState){cubePrint('line already out. (patience.)');return true}
-fishState={phase:'wait'};
-var wait=4000+Math.random()*5000;
-cubePrint('cast. the line sinks into nothing. wait for it...');
-fishState.timer=setTimeout(function(){
-if(!fishState)return;
-fishState.phase='bite';
-cubePrint('BITE! type "hook" - NOW!');
-fishState.timer=setTimeout(function(){
-if(!fishState)return;
-fishState=null;
-cubePrint('...gone. it took the bait. it took the concept of bait.');
-},3000);
-},wait);
-return true}};
+voidScriptLang['fish']={help:'fish - retired (the rod lives in the grotto)',fn:function(){
+cubePrint('the rod moved. it lives in the grotto now, sea room. go be near water.');return true}};
 voidScriptLang['hook']={help:'hook - yank it',fn:function(){
 if(!fishState||fishState.phase!=='bite'){cubePrint('nothing biting. (the void judges your timing.)');return true}
 try{clearTimeout(fishState.timer)}catch(e){}
@@ -2464,7 +2560,7 @@ for(var i=0;i<keys.length;i++)cubePrint('  '+keys[i]+' x'+c[keys[i]]);
 return true}};
 voidScriptLang['title']={help:'title - wear an achievement title',fn:function(a){
 var want=String((a&&a[0])||'').toLowerCase();
-if(!want){var un=[];for(var t in TITLE_MAP){if(titleUnlocked(t))un.push(t)}cubePrint('titles: '+un.join(', ')+'. (title <name> to wear.)');return true}
+if(!want){var un=[],lk=[];for(var t in TITLE_MAP){if(titleUnlocked(t))un.push(t);else lk.push(t+' ('+TITLE_MAP[t]+')')}cubePrint('titles: '+un.join(', ')+'. (title <name> to wear.)');if(lk.length)cubeDim('locked: '+lk.join(', ')+'.');return true}
 if(!TITLE_MAP.hasOwnProperty(want)){cubeError('no such title. (title with no args lists yours.)');return true}
 if(!titleUnlocked(want)){cubeError('locked. earn it first.');return true}
 try{localStorage.setItem('cube_title',want)}catch(e){}
@@ -2506,7 +2602,7 @@ voidScriptLang['stargaze']={help:'stargaze - chart the bright stars',fn:function
 var starGridBuf=null;
 function drawDarkStars(proj,view){
 try{
-gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE);gl.depthMask(false);
+gl.useProgram(pprog);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,(typeof currentZone!=='undefined'&&currentZone==='source')?gl.ONE_MINUS_SRC_ALPHA:gl.ONE);gl.depthMask(false);
 gl.uniformMatrix4fv(ppPJ,false,proj);gl.uniformMatrix4fv(ppVW,false,view);
 if(currentZone==='x'){
 if(!starGridBuf){
@@ -3689,7 +3785,7 @@ el.innerHTML=
 'nothing core&nbsp; '+(nothingGazing()?'GAZING (income x1.25)':(skillState&&skillState.nothingCore?'held':'absent'))+'<br>'+
 'skill points &nbsp; '+skillState.points;
 }
-setInterval(function(){if(currentView==='core')updateCorePanel()},1000);
+setInterval(function(){if(currentView==='core'&&!cubeMinigameOpen())updateCorePanel()},1000);
 function switchView(dir){
 if(dir==='right'){
 if(currentView==='void'){
@@ -4314,7 +4410,8 @@ ckDrawEKG(time,flash);
 }
 
 // start reactor tick loop (only runs when in reactor view)
-setInterval(function(){if(currentView==='reactor')reactorTick()},50);
+setInterval(function(){if(currentView==='reactor'&&!cubeMinigameOpen())reactorTick()},50);
+function cubeMinigameOpen(){try{var ids=['opOverlay','caOverlay','grOverlay','ghOverlay','tbOverlay','folkOverlay','stOverlay'];for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&el.style.display!=='none')return true}}catch(e){}return false}
 
 // patch render for reactor view — always reschedule RAF or the loop dies
 var _prevRender=render;
@@ -4339,6 +4436,7 @@ requestAnimationFrame(render);
 // │  KEYBOARD SHORTCUTS                                        │
 // └──────────────────────────────────────────────────────────────┘
 document.addEventListener('keydown',function(e){
+try{if(cubeMinigameOpen())return}catch(err){}
 if(e.key==='F3'){
 e.preventDefault();
 if(currentView==='void')switchView('right');
@@ -10144,7 +10242,7 @@ var ngMornAudSrc=null;
 var ngWasBgmPlaying=false;
 function ngMusicStart(){ngMusicApply()}
 function ngMusicStop(){try{if(ngMusic){ngMusic.pause();ngMusic.currentTime=0}}catch(e){}}
-var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'},{f:'oneshot_trap.mp4',n:'ONESHOT'},{f:'sciences_downfall.webm',n:'downfall'},{f:'noli.webm',n:'NOLI'},{f:'lordverity.webm',n:'VERITY'},{f:'vestige.mp3',n:'VESTIGE'},{f:'artisticswimming.webm',n:'SWIM'},{f:'coffee.mp3',n:'COFFEE'}];
+var ngTracks=[{f:'Wakeupstanley.mp3',n:'STANLEY'},{f:'bro is in a box lmao imagine.mp3',n:'BOX'},{f:'drone2lp.wav',n:'VOID'},{f:'the_furnace.mp3',n:'FURNACE'},{f:'friday.mp3',n:'FRIDAY'},{f:'friendly_faith_plate.mp3',n:'FAITH'},{f:'little_cat_feet.mp3',n:'CAT'},{f:'moon_rot_1857.mp3',n:'MOON'},{f:'oneshot_trap.mp4',n:'ONESHOT'},{f:'sciences_downfall.webm',n:'downfall'},{f:'noli.webm',n:'NOLI'},{f:'lordverity.webm',n:'VERITY'},{f:'vestige.mp3',n:'VESTIGE'},{f:'artisticswimming.webm',n:'SWIM'},{f:'coffee.mp3',n:'COFFEE'},{f:'move.webm',n:'LET ME SEE YA MOVE'}];
 var ngMusicMode=0;
 function ngMusicLabel(){return ngMusicMode>=ngTracks.length?'MUSIC: OFF':'MUSIC: '+ngTracks[ngMusicMode].n}
 function ngMusicApply(){

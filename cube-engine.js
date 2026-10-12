@@ -3,7 +3,7 @@
 // └──────────────────────────────────────────────────────────────┘
 var bgm=document.getElementById('bgm');bgm.volume=0.3;
 window._cubeDay=new Date().getDay();window._cubeDayOverride=false;
-function loadDayBgm(){
+function loadDayBgm(force){
 if(activeTrack==='moon1857')return;
 var wasPlaying=!bgm.paused;
 var h=window._cubeSunHalf==='early'?0:(window._cubeSunHalf==='late'?13:new Date().getHours());
@@ -12,12 +12,22 @@ if(window._cubeDay===3)f='the_furnace.mp3';
 else if(window._cubeDay===5)f='friday.mp3';
 else if(window._cubeDay===6)f='friendly_faith_plate.mp3';
 else if(window._cubeDay===0&&h<12)f='little_cat_feet.mp3';
-if(!bgmFile().includes(f))bgmBlobLoad(f,wasPlaying);
+if(force||!bgmFile().includes(f))bgmBlobLoad(f,wasPlaying||!!force);
 }
 loadDayBgm();
-document.addEventListener('click',function(){if(bgm.paused&&activeTrack!=='moon1857')bgm.play()},{once:true});
+window._bgmStarted=false;
+// the boot fetch can die (cold load) leaving dataset.file claiming a track
+// whose src never arrived. poking play() then does nothing, and every later
+// loadDayBgm() skips because of the claim. so the click retry checks for a
+// dead element first and force-reloads instead of poking the corpse.
+function bgmDead(){try{if(!bgm.src)return true;if(bgm.networkState===3)return true;if(bgm.readyState===0&&bgm.networkState===0)return true}catch(e){return true}return false}
+document.addEventListener('click',function(){try{
+if(window._bgmStarted||activeTrack==='moon1857')return;
+if(bgmDead()){loadDayBgm(true);return}
+if(bgm.paused)bgm.play().catch(function(){});
+}catch(e){}});
 if(activeTrack!=='moon1857')bgm.play().catch(function(){});
-bgm.addEventListener('play',function(){if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'){bgm.pause();if(typeof ngMusicMode!=='undefined'&&ngMusicMode!==1){ngMusicMode=1;ngMusicApply()}}});
+bgm.addEventListener('play',function(){try{window._bgmStarted=true}catch(e){}if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'){bgm.pause();if(typeof ngMusicMode!=='undefined'&&ngMusicMode!==1){ngMusicMode=1;ngMusicApply()}}});
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  CLOCK                                                     │
@@ -323,15 +333,23 @@ return{bass:Math.min(1,bass*_ag),mid:Math.min(1,mid*_ag),high:Math.min(1,high*_a
 // zero call-site changes. falls back to direct src on any failure.
 var _bgmBlobUrl=null;
 var _bgmLoadGen=0;
+// media races (play-then-pause across track switches and room enters) reject
+// with AbortError. always benign, never actionable: keep it out of the console.
+try{window.addEventListener('unhandledrejection',function(e){try{if(e&&e.reason&&e.reason.name==='AbortError')e.preventDefault()}catch(err){}})}catch(e){}
 function bgmBlobLoad(f,autoplay){
   try{
     var gen=++_bgmLoadGen;
     try{bgm.dataset.file=f}catch(e){}
-    fetch(f).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){
+    fetch(f).then(function(r){if(!r.ok)throw 0;return r.blob()    }).then(function(b){
       if(gen!==_bgmLoadGen)return;
       try{
         if(_bgmBlobUrl){try{URL.revokeObjectURL(_bgmBlobUrl)}catch(e){}_bgmBlobUrl=null}
-        _bgmBlobUrl=URL.createObjectURL(b);
+        // explicit MIME: some hosts (githack) serve audio with a wrong or
+        // missing content-type, and the blob inherits it. decode then fails
+        // while fetch looked fine. tag it ourselves by extension.
+        var mime=null;
+        try{var lx=String(f).split('.').pop().toLowerCase();mime={wav:'audio/wav',mp3:'audio/mpeg',webm:'audio/webm',mp4:'audio/mp4',ogg:'audio/ogg'}[lx]||null}catch(e){}
+        _bgmBlobUrl=URL.createObjectURL(mime?(new Blob([b],{type:mime})):b);
         bgm.src=_bgmBlobUrl;
         try{bgm.load()}catch(e){}
         if(autoplay!==false){var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){})}
@@ -356,14 +374,14 @@ if(odActive)hideOdWarn(false);
 loadDayBgm();if(!bgm.paused||track==='auto')bgm.play().catch(function(){});
 }
 }
-var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4',noli:'noli.webm',quiet:'lordverity.webm',verity:'lordverity.webm',vestige:'vestige.mp3',coffee:'coffee.mp3',swim:'artisticswimming.webm',artistic:'artisticswimming.webm',soundosund:'soundosund.mp3',sund:'soundosund.mp3',foxy:'foxy.webm',cove:'foxy.webm'};
-var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'foxy.webm':"foxy's night",'IHateEmployment.webm':'i hate employment','noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee corner (napcast)','artisticswimming.webm':'artistic swimming','soundosund.mp3':'soundosund'};
+var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4',noli:'noli.webm',quiet:'lordverity.webm',verity:'lordverity.webm',vestige:'vestige.mp3',coffee:'coffee.mp3',swim:'artisticswimming.webm',artistic:'artisticswimming.webm',soundosund:'soundosund.mp3',sund:'soundosund.mp3',foxy:'foxy.webm',cove:'foxy.webm',noob:'noobalert.mp3',noobalert:'noobalert.mp3',move:'move.webm'};
+var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'foxy.webm':"foxy's night",'IHateEmployment.webm':'i hate employment','noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee corner (napcast)','noobalert.mp3':'noob alert (dead air theme)','artisticswimming.webm':'artistic swimming','soundosund.mp3':'soundosund','move.webm':'let me see ya move'};
 function bgmDownfallUnlocked(){try{return localStorage.getItem('cube_downfall_unlocked')==='1'}catch(e){return false}}
 function bgmFoxyUnlocked(){try{return localStorage.getItem('cube_foxy_unlocked')==='1'}catch(e){return false}}
 function bgmEmploymentUnlocked(){try{return localStorage.getItem('cube_employment_unlocked')==='1'}catch(e){return false}}
 function showBgmHelp(){
 cubePrint('bgm [track] — play a track, no arg toggles music on/off. bgm -h = this list.');
-var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['noli','noli'],['quiet | verity','i miss the quiet (lordverity cover)'],['vestige','vestige'],['coffee','coffee corner (napcast)'],['swim | artistic','artistic swimming'],['soundosund | sund','soundosund'],['off','silence']];
+var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['noob | noobalert','noob alert (dead air theme)'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['noli','noli'],['quiet | verity','i miss the quiet (lordverity cover)'],['vestige','vestige'],['coffee','coffee corner (napcast)'],['swim | artistic','artistic swimming'],['soundosund | sund','soundosund'],['move','let me see ya move'],['off','silence']];
 if(bgmDownfallUnlocked())rows.push(['downfall','science\'s downfall']);
 if(bgmFoxyUnlocked())rows.push(['foxy | cove','foxy\'s night']);
 if(bgmEmploymentUnlocked())rows.push(['employment | job','i hate employment [warning: captions are very off, the singer is too fast]']);
@@ -458,8 +476,8 @@ function playBgm(arg,say){
 var a=(arg||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 if(typeof currentZone!=='undefined'&&currentZone==='cb_menu')a='box';
 if(a==='moon'||a==='moon1857'||a==='moonrot1857'||a==='overdose'||a==='od'){switchTrack('moon1857');say('music: moon_rot_1857 [OVERDOSE]');return true}
-if(a==='stanley'||a==='wakeup'||a==='wakeupstanley'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=0;ngMusicApply()}catch(e){}say('music: Wakeupstanley');return true}
-if(a==='box'||a==='bro'||a==='boxlmao'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=1;ngMusicApply()}catch(e){}say('music: bro is in a box lmao imagine');return true}
+if(a==='stanley'||a==='wakeup'||a==='wakeupstanley'){try{window._bgmStarted=true}catch(e){}try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=0;ngMusicApply()}catch(e){}say('music: Wakeupstanley');return true}
+if(a==='box'||a==='bro'||a==='boxlmao'){try{window._bgmStarted=true}catch(e){}try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=1;ngMusicApply()}catch(e){}say('music: bro is in a box lmao imagine');return true}
 if(a==='off'){try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}stopGameMusic();try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}say('music: off');return true}
 if(a==='downfall'||a==='shutdown'||a==='sciencesdownfall'){
 if(!bgmDownfallUnlocked()){say('bgm: downfall is locked. (it plays during the shutdown — stay in the room, or leave it.)');return true}
@@ -507,7 +525,7 @@ bgmGo();return true}
 if(a===''){
 stopGameMusic();
 if(activeTrack==='moon1857'){try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}if(moonEl.paused){moonEl.play();say('music: on [moon1857]')}else{moonEl.pause();say('music: off [moon1857]')}return true}
-if(bgm.paused){bgm.play();say('music: on ['+bgmTrackName()+']')}else{bgm.pause();say('music: off ['+bgmTrackName()+']')}return true}
+if(bgm.paused){if(typeof bgmDead==='function'&&bgmDead()){loadDayBgm(true)}else{bgm.play()}say('music: on ['+bgmTrackName()+']')}else{bgm.pause();say('music: off ['+bgmTrackName()+']')}return true}
 return false;
 }
 function showOdWarn(){
@@ -867,6 +885,31 @@ return true}},
 if(a[0]==='-h'||a[0]==='--help'){showBgmHelp();return true}
 if(playBgm(a[0]||'',function(t){cubePrint(t)}))return true;
 cubeError('bgm: pick void, furnace, friday, faith, cat, oneshot, moon, stanley, box, downfall, off (or nothing to toggle) — bgm -h for the list');return true}},
+'bgmdiag':{help:'bgmdiag - diagnose why audio fails on this host (status, type, size, element state)',fn:function(a){
+try{
+var h=window._cubeSunHalf==='early'?0:(window._cubeSunHalf==='late'?13:new Date().getHours());
+var f='drone2lp.wav';
+if(window._cubeDay===3)f='the_furnace.mp3';
+else if(window._cubeDay===5)f='friday.mp3';
+else if(window._cubeDay===6)f='friendly_faith_plate.mp3';
+else if(window._cubeDay===0&&h<12)f='little_cat_feet.mp3';
+cubePrint('bgmdiag: fetching '+f+' ...');
+fetch(f).then(function(r){
+cubePrint('bgmdiag: status '+r.status+' '+(r.ok?'(ok)':'(FAILED)')+' · type: '+(r.headers.get('content-type')||'?')+' · ranges: '+(r.headers.get('accept-ranges')||'none'));
+if(!r.ok){cubePrint('bgmdiag: host refuses the file. that is the whole bug. (githack/cloudflare gatekeep media.)');return true}
+return r.blob();
+}).then(function(b){
+if(!b)return true;
+cubePrint('bgmdiag: got '+b.size+' bytes as '+(b.type||'unknown type')+'.');
+try{
+var el=document.getElementById('bgm');
+var ns=['empty','idle','loading','no-source'][el.networkState]||('?'+el.networkState);
+cubePrint('bgmdiag: element src '+(el.src?'present ('+el.src.slice(0,42)+'...)':'MISSING')+' · paused='+el.paused+' · readyState='+el.readyState+' · net='+ns+(el.error?' · ERROR '+el.error.code:''));
+}catch(e){cubePrint('bgmdiag: element unreadable. even better.')}
+return true;
+}).catch(function(e){cubePrint('bgmdiag: fetch threw: '+(e&&e.message||e)+'. host hates us.');return true});
+}catch(e){cubeError('bgmdiag: '+e)}
+return true}},
 'odkill':{help:'odkill - antidote: end overdose, clear screen filters, restore normal music',fn:function(){odKill();cubeOk('overdose cleared. the room stops ringing.');return true}},
 'skill':{help:'skill - open the skill tree',fn:function(){skillOpen();return true}},
 'slots':{help:'slots - open the floppy shelf (5 save disks, backup/restore to move browsers)',fn:function(){slotsOpen();return true}},
@@ -971,11 +1014,21 @@ return true}},
 'button':{help:'button - contain the button. it has moods. (a non-game)',fn:function(){buttonGame();return true}},
 'office':{help:'office - clock in. obj narrates. 83 endings. (a non-game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof stEnter!=='function'){cubeError('office: the office is not built yet. (the man waits.)');return true}cubePrint('you clock in. obj clears his throat.');setTimeout(function(){try{stEnter()}catch(e){cubeError('office: '+e)}},1200);return true}},
  'greyhall':{help:'greyhall - descend. 6 wings, 1 open. (a hard game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof ghEnter!=='function'){cubeError('greyhall: the hall is not built yet. (the man waits.)');return true}cubePrint('you descend. the PA crackles. (it never stops.)');setTimeout(function(){try{ghEnter()}catch(e){cubeError('greyhall: '+e)}},1200);return true}},
- 'tbb':{help:'tbb - DEAD AIR. send signals. break the static. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof tbEnter!=='function'){cubeError('tbb: the frequency is not built yet. (the signals wait.)');return true}cubePrint('you go live. obj adjusts his headset.');setTimeout(function(){try{tbEnter()}catch(e){cubeError('tbb: '+e)}},1200);return true}},
+ 'deadair':{help:'deadair - DEAD AIR. send signals. break the static. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof tbEnter!=='function'){cubeError('deadair: the frequency is not built yet. (the signals wait.)');return true}cubePrint('you go live. obj adjusts his headset.');setTimeout(function(){try{tbEnter()}catch(e){cubeError('deadair: '+e)}},1200);return true}},
+ 'tbb':{help:'tbb - alias for deadair.',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof tbEnter!=='function'){cubeError('deadair: the frequency is not built yet. (the signals wait.)');return true}cubePrint('you go live. obj adjusts his headset.');setTimeout(function(){try{tbEnter()}catch(e){cubeError('deadair: '+e)}},1200);return true}},
+ 'tbmax':{help:'tbmax — admin: everything in DEAD AIR. xp, levels, stages.',fn:function(a){
+if(!isAdmin){cubeError('admin access required');return true}
+if(typeof window.tbGiveAll!=='function'){cubeError('tbmax: dead air is not built yet.');return true}
+var r=window.tbGiveAll();
+if(r&&r.err){cubeError('tbmax: '+r.err);return true}
+cubePrint('tbmax: 1e+26 xp (literally infinite), all '+r.units+' signals AND base at lv1000, '+r.stages+' stages beaten (tumore too), 3 stars each, pedia complete. the static surrenders.');
+return true}},
  'buffs':{help:'buffs - obj wants to know your state. geography buffs. (no scam)',fn:function(a){if(typeof geoCmd!=='function'){cubeError('buffs: obj forgot the forms.');return true}try{geoCmd(a)}catch(e){cubeError('buffs: '+e)}return true}},
  'cove':{help:'cove - watch the curtain. do not blink. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof fxEnter!=='function'){cubeError('cove: the curtain is not hung yet.');return true}cubePrint('you take the night shift. the cove is already watching.');setTimeout(function(){try{fxEnter()}catch(e){cubeError('cove: '+e)}},1200);return true}},
  'trailer':{help:'trailer - ghost plays cube for the camera. (ESC stops)',fn:function(a){if(typeof trailerEnter!=='function'){cubeError('trailer: no camera crew.');return true}try{trailerEnter()}catch(e){cubeError('trailer: '+e)}return true}},
- 'grotto':{help:'grotto - the part of cube that is not a distraction. (five proofs required)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof grEnter!=='function'){cubeError('grotto: the cave is not dug yet.');return true}try{grEnter(false)}catch(e){cubeError('grotto: '+e)}return true}},
+  'grotto':{help:'grotto - the part of cube that is not a distraction. (five proofs required)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof grEnter!=='function'){cubeError('grotto: the cave is not dug yet.');return true}try{grEnter(false)}catch(e){cubeError('grotto: '+e)}return true}},
+ 'objpot':{help:'objpot - a cauldron, obj the cube, and one of each type. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof opEnter!=='function'){cubeError('objpot: the pot is not built yet. (obj waits.)');return true}cubePrint('obj drifts over a bubbling pot. "welcome back to the tower."');setTimeout(function(){try{opEnter()}catch(e){cubeError('objpot: '+e)}},1000);return true}},
+ 'casino':{help:'casino - the void casino. obj deals. games are rigged. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof caEnter!=='function'){cubeError('casino: the tables are not set yet. (obj is shuffling.)');return true}cubePrint('obj fans out a deck with no hands. "welcome to the void casino."');setTimeout(function(){try{caEnter()}catch(e){cubeError('casino: '+e)}},1000);return true}},
 'shift':{help:'shift - night shift at cube#. twelve jobs. (a game)',fn:function(){shOpen();return true}},
 'fly':{help:'fly - open the actual fruit fly brain. 139,255 neurons, live. (fafb v783)',fn:function(){flyOpen();return true}},
 'phone':{help:'phone - check obj\u2019s phone. he texted. again.',fn:function(){voidPhone();return true}},
@@ -1853,6 +1906,216 @@ if(typeof extHelp!=='undefined'&&printExtHelp(_bt))return;
 if(typeof voidScriptLang!=='undefined'&&voidScriptLang[_bt]&&voidScriptLang[_bt].help){cubePrint('  '+voidScriptLang[_bt].help);return}}
 cubePrint(_hn+': no extended help. try: help');return}
 
+// help book: the reference outgrew the terminal. gui book with section
+// pages, same chrome as the update log. bare `help` opens it.
+function buildHelpSections(){
+var secs=[
+{t:'cube',rows:[
+['cube.get','show inner cube count'],
+['cube.morph <n>','change shape (0-8: cube/tri/sphere/cyl/torus/knot/icosa/octa/tesseract)'],
+['cube.theme <n>','switch color theme (1-7)'],
+['cube.glitch','trigger glitch effect'],
+['cube.bgm [track]','play void|furnace|friday|faith|cat|oneshot|moon|stanley|box|noli|quiet|vestige|coffee|off, or toggle'],
+['skill','open the skill tree'],
+['upgrade','open upgrade tree'],
+['cube.fps','show current fps'],
+['cube.particles','show particle count'],
+['cube.time','show void time'],
+['cube.self','who are you'],
+['cube.where','where am i']]},
+{t:'void',rows:[
+['void','the void stares back'],
+['void intrude <p>','install package'],
+['void remove <p>','remove package'],
+['void list','list all packages in repo'],
+['void search <q>','search packages'],
+['void forge <n>','forge a package from voidscript'],
+['void run <file>','run a .vsc voidscript'],
+['void export <f>','export as shareable vsc1 packet'],
+['void import <p>','import a shared vsc1 packet'],
+['premhelp','list premium voidscript ops'],
+['techhelp','list technical voidscript ops'],
+['nothingcore','gaze through the nothing core'],
+['help voidscript','show sandboxed language ops'],
+['help void','show void package manager help']]},
+{t:'network',rows:[
+['ping <host>','ping host (try: cube.sb)'],
+['transmit "o" "msg"','talk to the void'],
+['whoami','who are you']]},
+{t:'system',rows:[
+['ps','show running processes'],
+['winget','deprecated. use void instead.']]},
+{t:'os bridge',rows:[
+['os.status','connection status'],
+['os.ls <path>','list directory on cube-os'],
+['os.cat <file>','read file from cube-os'],
+['os.write <f> <txt>','write file to cube-os'],
+['os.sh <cmd>','send command to cube-os'],
+['os.mount','mount disk at /bridge']]},
+{t:'filesystem',rows:[
+['pwd','print working directory'],
+['ls [path]','list directory'],
+['cd <path>','change directory'],
+['cat <file>','read file'],
+['mkdir <dir>','create directory'],
+['touch <file>','create file'],
+['echo <txt> > f','write to file'],
+['rm [-rf] <p>','remove file/dir'],
+['cp <src> <dst>','copy a virtual file'],
+['mv <src> <dst>','move or rename a file'],
+['tree [path]','show the virtual filesystem tree']]},
+{t:'variables',rows:[
+['set <k> <v>','set a variable'],
+['get <k>','get a variable'],
+['rmvar <k>','delete a variable'],
+['vars','list all variables']]},
+{t:'gui',rows:[
+['gui window "t" <w> <h>','create a window (+ random)'],
+['gui max [off]','maximize / restore window'],
+['gui label "txt" <x> <y>','add label'],
+['gui button "txt" <x> <y> "cmd"','add button'],
+['gui input "ph" <x> <y>','add text input'],
+['gui check "lbl" <x> <y>','add checkbox'],
+['gui image "url" <x> <y>','add image from URL (+ w h)'],
+['gui set <prop> <val>','set window property'],
+['gui close / destroy','close window'],
+['gui list','list open windows']]},
+{t:'misc',rows:[
+['loop <n> <cmd>','run a command n times'],
+['display <0-4>','change display mode'],
+['screenshot','toggle screenshot mode (F2)'],
+['perfmode','toggle performance mode'],
+['uptime','show how long page has been open'],
+['visits','show total visit count'],
+['ach','achievements (the void keeps score)'],
+['slots','open the floppy shelf (5 save disks)'],
+['play [-1|0-30]','there is no game. (bare=ch0, numbers unlock by progress)'],
+['obj','ask obj for pull access'],
+['pull','play a procedural void demo (needs obj)'],
+['demos','list saved void demos'],
+['cubecheck [on|off]','auto-demo graffiti scan on/off'],
+['replay <file>','replay a saved void demo'],
+['void-mute','silence void transmissions'],
+['void-unmute','let the void talk again'],
+['weather <type>','rain, snow, off, or auto'],
+['pet','pet the cube'],
+['forecast','tomorrow weather, plus bribes'],
+['title','wear an achievement title'],
+['stargaze','chart the bright stars'],
+['fish','cast into nothing'],
+['hook','yank it'],
+['tacklebox','admire the catch'],
+['bottlenet','link the shared void'],
+['board','read the leaders'],
+['bottle','throw a message in'],
+['bottleimg','throw a picture in'],
+['bottles','read what washed up'],
+['census','count the souls in the void'],
+['sort <algo> [n] [s]','sorting visualizer'],
+['sortstop','stop sort'],
+['travel <zone>','travel through the void'],
+['lorebook','read the void archives'],
+['updates','update log (gui book)'],
+['bgmdiag','diagnose why audio fails on this host'],
+['datawipe yes','wipe all local cube data'],
+['clear','clear terminal'],
+['studio','open voidscript studio'],
+['echo <txt>','echo text'],
+['math <expr>','evaluate math'],
+['exit','the void does not let you leave'],
+['dial [1-4]','dialogue speed (1, 1.5, 2, 3)'],
+['phone','obj texted. again.'],
+['daily','crack todays void code. streak counts.'],
+['button','containment button. (a non-game)'],
+['shift','night shift at cube#. (a game)'],
+['office','clock in. obj narrates. (a non-game)'],
+['objpot','a cauldron, obj the cube, one of each type. (a sandbox)'],
+['casino','rigged games, obj deals, chips are skill. (a sandbox)'],
+['fly','the actual fruit fly brain. (139,255 neurons, live)']]},
+{t:'admin',rows:[
+['alwaysontop <on|off>','keep window on top'],
+['godmode <on|off>','cube invulnerability'],
+['speed <0.1-10>','script execution speed'],
+['debug','show internal state'],
+['freeze <on|off>','freeze the cube'],
+['noclip <on|off>','drag windows offscreen'],
+['override theme <1-8>','access hidden themes'],
+['setday <day|reset>','override the day'],
+['setseason <s|reset>','override the season'],
+['eval <code>','run raw javascript'],
+['skillpoints [n]','set skill + upgrade points (99999)'],
+['pull <1-9>','force a demo script'],
+['danger list/run <name>','danger zone scripts'],
+['tbmax','everything in DEAD AIR (xp, lv1000, stages, stars, pedia)']]}
+];
+// live lock states, same as the terminal version had.
+function _hlock(rows,find,ok,note){for(var i=0;i<rows.length;i++)if(rows[i][0]===find&&!ok)rows[i][1]+='  '+note}
+for(var s2=0;s2<secs.length;s2++){
+var R=secs[s2].rows;
+_hlock(R,'upgrade',skillAllFinals(),'(locked — buy every skill)');
+_hlock(R,'premhelp',(window._skillPremium||isAdmin),'(locked — voidscript premium)');
+_hlock(R,'techhelp',techUnlocked(),'(locked — area 6)');
+_hlock(R,'nothingcore',((typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)||isAdmin),'(locked — max the nothing upgrade)');
+}
+if(window._skillRootHelp)secs.splice(4,0,{t:'root probing',rows:[
+['inject <hex>','inject data into the cube'],
+['observe','watch the inner cubes'],
+['unrender','ask the void to stop drawing'],
+['backdoor','a door that was not there before']]});
+return secs;
+}
+function openHelpBook(){
+try{
+var secs=buildHelpSections();
+var helpWin=guiCreateWin('cube# command reference',480,560,false);
+if(!helpWin)return;
+var hw=guiWins[helpWin];
+hw.content.style.cssText='background:#0d0d12;display:flex;flex-direction:column;padding:0;overflow:hidden;';
+hw.title.style.cssText='background:#0f1520;color:#5a8ab0;font-family:Georgia,serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border-bottom:1px solid #1a2a3a;';
+var hIdx=0;
+var hPage=document.createElement('div');
+hPage.style.cssText='color:#4a5a6a;font-size:9px;font-family:Georgia,serif;letter-spacing:3px;text-transform:uppercase;text-align:center;padding:10px 0 0;';
+hw.content.appendChild(hPage);
+var hDeco=document.createElement('div');
+hDeco.style.cssText='width:60px;height:1px;background:linear-gradient(90deg,transparent,#4a7090,transparent);margin:8px auto;';
+hw.content.appendChild(hDeco);
+var hTitle=document.createElement('div');
+hTitle.style.cssText='color:#c8d8e8;font-size:20px;font-family:Georgia,serif;font-weight:bold;text-align:center;padding:4px 20px 0;letter-spacing:1px;';
+hw.content.appendChild(hTitle);
+var hBody=document.createElement('div');
+hBody.style.cssText='color:#a0aab8;font-size:12px;font-family:Consolas,monospace;line-height:1.9;margin:0 24px;white-space:pre-wrap;overflow-y:auto;flex:1;min-height:0;padding:4px 0;';
+hw.content.appendChild(hBody);
+var hNav=document.createElement('div');
+hNav.style.cssText='display:flex;justify-content:space-between;padding:10px 20px 14px;';
+hw.content.appendChild(hNav);
+function hBtn(label){
+var b=document.createElement('button');b.textContent=label;
+b.style.cssText='background:transparent;color:#5a7a9a;border:1px solid #1a2a3a;padding:5px 16px;border-radius:3px;cursor:pointer;font-family:Georgia,serif;font-size:11px;letter-spacing:1px;';
+b.onmouseover=function(){b.style.borderColor='#4a7090';b.style.color='#c8d8e8'};
+b.onmouseout=function(){b.style.borderColor='#1a2a3a';b.style.color='#5a7a9a'};
+return b;
+}
+var hPrev=hBtn('◀  prev'),hNext=hBtn('next  ▶'),hClose=hBtn('close  ✕');
+hClose.style.color='#c878ff';hClose.style.borderColor='#6a4a8a';
+hNav.appendChild(hPrev);hNav.appendChild(hClose);hNav.appendChild(hNext);
+function padCmd(c){var s=String(c);while(s.length<24)s+=' ';return s}
+function renderHelpPage(){
+var s=secs[hIdx];
+hPage.textContent='section '+(hIdx+1)+' of '+secs.length+'  ·  '+s.t;
+hTitle.textContent=s.t;
+var lines=['tip: <command> -h shows extended help.',''];
+for(var i=0;i<s.rows.length;i++)lines.push(padCmd(s.rows[i][0])+s.rows[i][1]);
+hBody.textContent=lines.join('\n');hBody.scrollTop=0;
+hPrev.style.visibility=hIdx>0?'visible':'hidden';
+hNext.style.visibility=hIdx<secs.length-1?'visible':'hidden';
+}
+hPrev.onclick=function(){if(hIdx>0){hIdx--;renderHelpPage()}};
+hNext.onclick=function(){if(hIdx<secs.length-1){hIdx++;renderHelpPage()}};
+hClose.onclick=function(){hw.el.remove();delete guiWins[helpWin];if(activeWin===helpWin)activeWin=null};
+renderHelpPage();
+cubePrint('the reference has been opened. (it outgrew the terminal.)');
+}catch(e){}
+return}
 // help
 if(cmd==='help'){
 if(parts[1]&&parts[1].toLowerCase()==='voidscript'){
@@ -1877,185 +2140,7 @@ cubePrint('  void run <file.vsc>       run a script');
 cubePrint('  void export <file.vsc>    create a vsc1 packet');
 cubePrint('  void import <packet>      import a vsc1 packet');
 cubePrint('');return}
-cubePrint('');
-cubePrint('  ┌──────────────────────────────────────┐');
-cubePrint('  │         CUBE# COMMAND REFERENCE      │');
-cubePrint('  └──────────────────────────────────────┘');
-cubePrint('');
-cubePrint('  tip: <command> -h shows extended help for that command.');
-cubePrint('       e.g.  bgm -h   cube -h   void -h   play -h');
-cubePrint('');
-cubePrint('  ── cube ──────────────────────────────');
-cubePrint('');
-cubePrint('  cube.get            show inner cube count');
-cubePrint('  cube.morph <n>      change shape (0-8: cube/tri/sphere/cyl/torus/knot/icosa/octa/tesseract)');
-cubePrint('  cube.theme <n>      switch color theme (1-7)');
-cubePrint('  cube.glitch         trigger glitch effect');
-cubePrint('  cube.bgm [track]    play void|furnace|friday|faith|cat|oneshot|moon|stanley|box|noli|quiet|vestige|coffee|off, or toggle');
-cubePrint('  skill               open the skill tree');
-if(skillAllFinals())cubePrint('  upgrade             open upgrade tree');
-else cubeDim('  upgrade             upgrade tree (locked — buy every skill)');
-cubePrint('  cube.fps            show current fps');
-cubePrint('  cube.particles      show particle count');
-cubePrint('  cube.time           show void time');
-cubePrint('  cube.self           who are you');
-cubePrint('  cube.where          where am i');
-cubePrint('');
-cubePrint('  ── void ──────────────────────────────');
-cubePrint('');
-cubePrint('  void                the void stares back');
-cubePrint('  void intrude <p>    install package');
-cubePrint('  void remove <p>     remove package');
-cubePrint('  void list           list all packages in repo');
-cubePrint('  void search <q>     search packages');
-cubePrint('  void forge <n>      forge a package from voidscript');
-cubePrint('  void run <file>     run a .vsc voidscript');
-cubePrint('  void export <f>     export as shareable vsc1 packet');
-cubePrint('  void import <p>     import a shared vsc1 packet');
-if(window._skillPremium||isAdmin)cubePrint('  premhelp            list premium voidscript ops');
-else cubeDim('  premhelp            [locked — voidscript premium (anomaly final)]');
-if(techUnlocked())cubePrint('  techhelp            list technical voidscript ops');
-else cubeDim('  techhelp            [locked — Voidscript Technical (area 6)]');
-if((typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)||isAdmin)cubePrint('  nothingcore         gaze through the nothing core');
-else cubeDim('  nothingcore         [locked — max the upgrade that does nothing]');
-cubePrint('  help voidscript     show sandboxed language ops');
-cubePrint('  help void           show void package manager help');
-cubePrint('');
-cubePrint('  ── network ───────────────────────────');
-cubePrint('');
-cubePrint('  ping <host>         ping host (try: cube.sb)');
-cubePrint('  transmit "o" "msg"  talk to the void');
-cubePrint('  whoami              who are you');
-cubePrint('');
-cubePrint('  ── system ────────────────────────────');
-cubePrint('');
-cubePrint('  ps                  show running processes');
-cubePrint('  winget              deprecated. use void instead.');
-cubePrint('');
-if(window._skillRootHelp){
-cubePrint('  -- hidden commands (root probing) --');
-cubePrint('');
-cubePrint('  inject <hex>        inject data into the cube');
-cubePrint('  observe             watch the inner cubes');
-cubePrint('  unrender            ask the void to stop drawing');
-cubePrint('  backdoor            a door that was not there before');
-cubePrint('');
-}
-cubePrint('  ── os (cube-os bridge) ───────────────');
-cubePrint('');
-cubePrint('  os.status           connection status');
-cubePrint('  os.ls <path>        list directory on cube-os');
-cubePrint('  os.cat <file>       read file from cube-os');
-cubePrint('  os.write <f> <txt>  write file to cube-os');
-cubePrint('  os.sh <cmd>         send command to cube-os');
-cubePrint('  os.mount            mount disk at /bridge');
-cubePrint('');
-cubePrint('  ── filesystem ────────────────────────');
-cubePrint('');
-cubePrint('  pwd                 print working directory');
-cubePrint('  ls [path]           list directory');
-cubePrint('  cd <path>           change directory');
-cubePrint('  cat <file>          read file');
-cubePrint('  mkdir <dir>         create directory');
-cubePrint('  touch <file>        create file');
-cubePrint('  echo <txt> > f      write to file');
-cubePrint('  rm [-rf] <p>        remove file/dir');
-cubePrint('  cp <src> <dst>      copy a virtual file');
-cubePrint('  mv <src> <dst>      move or rename a file');
-cubePrint('  tree [path]         show the virtual filesystem tree');
-cubePrint('');
-cubePrint('  ── variables ─────────────────────────');
-cubePrint('');
-cubePrint('  set <k> <v>         set a variable');
-cubePrint('  get <k>             get a variable');
-cubePrint('  rmvar <k>           delete a variable');
-cubePrint('  vars                list all variables');
-cubePrint('');
-cubePrint('  ── gui ───────────────────────────────');
-cubePrint('');
-cubePrint('  gui window "t" <w> <h> [random]  create a window');
-cubePrint('  gui max [off]                    maximize / restore window');
-cubePrint('  gui label "txt" <x> <y>          add label');
-cubePrint('  gui button "txt" <x> <y> "cmd"   add button');
-cubePrint('  gui input "ph" <x> <y>           add text input');
-cubePrint('  gui check "lbl" <x> <y>          add checkbox');
-cubePrint('  gui image "url" <x> <y> [w] [h]  add image from URL');
-cubePrint('  gui set <prop> <val>              set window property');
-cubePrint('  gui close / destroy               close window');
-cubePrint('  gui list                          list open windows');
-cubePrint('');
-cubePrint('  ── misc ──────────────────────────────');
-cubePrint('');
-cubePrint('  loop <n> <cmd>      run a command n times');
-cubePrint('  display <0-4>       change display mode');
-cubePrint('  screenshot          toggle screenshot mode (F2)');
-cubePrint('  perfmode            toggle performance mode');
-cubePrint('  uptime              show how long page has been open');
-cubePrint('  visits              show total visit count');
-cubePrint('  ach                 achievements (the void keeps score)');
-cubePrint('  skill               open the skill tree');
-if(skillAllFinals())cubePrint('  upgrade             open upgrade tree');
-else cubeDim('  upgrade             upgrade tree (locked — buy every skill)');
-cubePrint('  slots               open the floppy shelf (5 save disks)');
-cubePrint('  play [-1|0-30]       there is no game. (bare=ch0, numbers unlock by progress)');
-cubePrint('  obj                 ask obj for pull access');
-cubePrint('  pull                play a procedural void demo (needs obj)');
-cubePrint('  demos               list saved void demos');
-cubePrint('  cubecheck [on|off]  auto-demo graffiti scan on/off');
-cubePrint('  replay <file>       replay a saved void demo');
-cubePrint('  void-mute           silence void transmissions');
-cubePrint('  void-unmute         let the void talk again');
-cubePrint('  weather <type>      rain, snow, off, or auto');
-cubePrint('  pet                 pet the cube');
-cubePrint('  forecast            tomorrow weather, plus bribes');
-cubePrint('  title               wear an achievement title');
-cubePrint('  stargaze            chart the bright stars');
-cubePrint('  fish                cast into nothing');
-cubePrint('  hook                yank it');
-cubePrint('  tacklebox           admire the catch');
-cubePrint('  bottlenet           link the shared void');
-cubePrint('  board               read the leaders');
-cubePrint('  bottle              throw a message in');
-cubePrint('  bottleimg           throw a picture in');
-cubePrint('  bottles             read what washed up');
-cubePrint('  census              count the souls in the void');
-cubePrint('  sort <algo> [n] [s] sorting visualizer');
-cubePrint('  sortstop            stop sort');
-  cubePrint('  travel <zone>       travel through the void');
-  cubePrint('  lorebook            read the void archives');
-  cubePrint('  updates             update log (gui book)');
-  cubePrint('  datawipe yes        wipe all local cube data');
-  cubePrint('  clear               clear terminal');
-cubePrint('  studio              open voidscript studio');
-cubePrint('  echo <txt>          echo text');
-cubePrint('  math <expr>         evaluate math');
-cubePrint('  exit                the void does not let you leave');
-cubePrint('  dial [1-4]          dialogue speed (1, 1.5, 2, 3)');
-cubePrint('  phone               obj texted. again.');
-cubePrint('  daily               crack todays void code. streak counts.');
-cubePrint('  button              containment button. (a non-game)');
-cubePrint('  shift               night shift at cube#. (a game)');
-cubePrint('  office              clock in. obj narrates. (a non-game)');
-cubePrint('  fly                 the actual fruit fly brain. (139,255 neurons, live)');
-cubePrint('');
-cubePrint('  ── admin (requires: admin <passphrase>) ──');
-cubePrint('');
-cubePrint('  alwaysontop <on|off>          keep window on top');
-cubePrint('  godmode <on|off>              cube invulnerability');
-cubePrint('  speed <0.1-10>                script execution speed');
-cubePrint('  debug                         show internal state');
-cubePrint('  freeze <on|off>               freeze the cube');
-cubePrint('  noclip <on|off>               drag windows offscreen');
-cubePrint('  override theme <1-8>          access hidden themes');
-cubePrint('  setday <day|reset>            override the day');
-cubePrint('  setseason <s|reset>           override the season');
-cubePrint('  eval <code>                   run raw javascript');
-cubePrint('  skillpoints [n]               set skill + upgrade points (99999)');
-cubePrint('  pull <1-9>                     force a demo script');
-cubePrint('  danger list/run <name>        danger zone scripts');
-cubePrint('');
-cubePrint('  running low? add -h to any command above for its extended help.');
-return}
+openHelpBook();return}
 if(cmd==='voidscript'){showVoidScriptHelp();return}
 function showVoidScriptHelp(){
 cubePrint('');
@@ -2393,8 +2478,7 @@ return}
 if(cmd==='os'){
 var osSub=parts[1].toLowerCase();
 if(osSub==='status'){
-if(osBridge&&osBridge.ok){cubeOk('cube-os bridge: connected')}
-else{cubeWarn('cube-os bridge: offline');cubePrint('this cube is in browser mode. no disk access.')}
+osBridgeEnsure(function(ok){if(ok){cubeOk('cube-os bridge: connected')}else{cubeWarn('cube-os bridge: offline');cubePrint('this cube is in browser mode. no disk access.')}});
 return}
 if(osSub==='ls'){
 if(!parts[2]){cubeError('usage: os.ls <path>');return}
@@ -2431,16 +2515,12 @@ cubePrint('make it real: it is already real.');
 return}
 }
 
-function osBridgeGet(p,cb){
-if(!osBridge||!osBridge.ok){cb({error:'bridge unreachable — not running under cube-os'});return}
-var x=new XMLHttpRequest();
-x.open('GET','/api/fs?path='+encodeURIComponent(p),true);
-x.onload=function(){try{cb(JSON.parse(x.responseText))}catch(e){cb({error:'bad bridge response'})}};
-x.onerror=function(){cb({error:'bridge unreachable'})};
-x.send();
-}
+osBridge={ok:false};osBridgeProbed=false;
 function osBridgeWrite(p,c,cb){
-if(!osBridge||!osBridge.ok){cb({error:'bridge unreachable — not running under cube-os'});return}
+osBridgeEnsure(function(ok){if(!ok){cb({error:'bridge unreachable — not running under cube-os'});return}osBridgeWriteLive(p,c,cb)});
+return;
+}
+function osBridgeWriteLive(p,c,cb){
 var x=new XMLHttpRequest();
 x.open('POST','/api/fs',true);
 x.setRequestHeader('Content-Type','application/json');
@@ -2448,14 +2528,28 @@ x.onload=function(){try{cb(JSON.parse(x.responseText))}catch(e){cb({error:'bad b
 x.onerror=function(){cb({error:'bridge unreachable'})};
 x.send(JSON.stringify({path:p,content:c}));
 }
-(function(){
-osBridge={ok:false};
-var x=new XMLHttpRequest();
-x.open('GET','/api/fs?path=/',true);
-x.onload=function(){if(x.status===200){osBridge={ok:true}}else{osBridge={ok:false}}};
-x.onerror=function(){osBridge={ok:false}};
-x.send();
-})();
+function osBridgeEnsure(cb){
+  if(osBridgeProbed){cb(osBridge.ok);return}
+  osBridgeProbed=true;
+  try{
+    var x=new XMLHttpRequest();
+    x.open('GET','/api/fs?path=/',true);
+    x.onload=function(){osBridge={ok:x.status===200};cb(osBridge.ok)};
+    x.onerror=function(){osBridge={ok:false};cb(false)};
+    x.send();
+  }catch(e){osBridge={ok:false};cb(false)}
+}
+function osBridgeGet(p,cb){
+  osBridgeEnsure(function(ok){if(!ok){cb({error:'bridge unreachable — not running under cube-os'});return}osBridgeGetLive(p,cb)});
+  return;
+}
+function osBridgeGetLive(p,cb){
+  var x=new XMLHttpRequest();
+  x.open('GET','/api/fs?path='+encodeURIComponent(p),true);
+  x.onload=function(){try{cb(JSON.parse(x.responseText))}catch(e){cb({error:'bad bridge response'})}};
+  x.onerror=function(){cb({error:'bridge unreachable'})};
+  x.send();
+}
 
 // void (standalone - only if no subcommand)
 if(cmd==='void'&&(parts.length<2||['intrude','install','remove','uninstall','list','ls','search','help','forge','run','export','import'].indexOf(parts[1].toLowerCase())===-1)){
@@ -2766,6 +2860,17 @@ for(var ni=0;ni<nyarchLines.length;ni++){
 setTimeout(function(){cubePrint('')},nyarchLines.length*120+100);
 return;
 }
+ // folk valley — say the words, go to the place
+ if(lowerMsg.indexOf('folk valley')!==-1||lowerMsg.indexOf('folkvalley')!==-1){
+  cubePrint('');
+  cubePrint('obj: ...what did you just say.');
+  cubePrint('obj: folk valley. you want to GO there. to the meme valley.');
+  cubePrint('obj: fine. the floor is moving. do not blame me for what boings.');
+  cubePrint('');
+  cubePrint('(the floor moves in 3 seconds. read first.)');
+  setTimeout(function(){try{if(typeof folkEnter==='function')folkEnter()}catch(e){cubePrint('obj: ...it did not move. the valley is full. try again later.')}},3000);
+  return;
+ }
 for(var i=0;i<transmitResponses.length;i++){
 if(lowerMsg.indexOf(transmitResponses[i].i)!==-1){response=transmitResponses[i].o;isAngry=transmitResponses[i].angry||false;break}}
 // load-bearing (the meme is canon; obj is tired of it)
@@ -3225,8 +3330,14 @@ var patchLog=[
 'the end credits got a real header and real credits. sit through them. something unlocks.',
 'fixes: a song wearing the wrong file extension. new tracks playing silence on first switch. credits outrunning their own song. all dead.',
 ]},
+{date:'2026-10-12',tier:'folk update',title:'five updates in a trench coat',notes:[
+'content update: new areas, features, and activities added across the game.',
+'progression update: new achievements and titles now available.',
+'stability update: improved background behavior during minigame sessions.',
+'bug fixes: fixed a bunch of things.',
+]},
 ];
-var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','game':'#8dff3c','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144','RELEASE':'#4ad8ff'};
+var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','game':'#8dff3c','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144','RELEASE':'#4ad8ff','folk update':'#3dff6e'};
 var updWin=guiCreateWin('cube# update log',420,520,false);
 if(!updWin)return;
 var uwin=guiWins[updWin];
