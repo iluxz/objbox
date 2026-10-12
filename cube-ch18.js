@@ -1,7 +1,7 @@
 // cube-ch18.js - CHAPTER 18 HELL (troll update).
 // shell + chapter yanked from pre-condemnation commit 5764235. era-accurate.
 // ONE LINE ACTIVATES IT:
-var CH18_HELL=true;
+var CH18_HELL=false;
 // false = dormant, game boots normal. true = boot fails into pre-condemnation ch18 on loop.
 // push with true, watch reactions, flip back to false. code stays for future redesigns.
 (function(){
