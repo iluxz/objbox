@@ -1455,8 +1455,8 @@ function folkSchoolPanel(){
   else h+=s.name+': not passed. <button class="folkBtn" data-lesson="'+s.id+'" style="padding:2px 8px;font-size:11px">take lesson</button><br>';
  }
  if(diploma)h+='<br>DIPLOMA. framed. slightly greasy.<br>the valley respects you. the floor fears you.<br>';
- else if(passed>=5)h+='<br>all lessons done. suspiciously smart.<br><button class="folkBtn" id="folkFinalExam" style="padding:3px 8px;font-size:11px">sit final exam</button><br>';
- else h+='<br>pass all 5 lessons to unlock the final exam. progress: '+passed+' / 5. the bell does not ring for you yet.<br>tip: wrong answers print detention slips. the printer is loud.<br>';
+ else if(passed>=5){try{localStorage.setItem('cube_folk_diploma','1')}catch(e){}folkSkillAdd(100);if(typeof ach==='function'){try{ach('folk_diploma')}catch(e){}}h+='<br>all lessons done. the final exam has been cancelled. (it was a guessing game. the principal apologizes.)<br>DIPLOMA. framed. slightly greasy. +100 skill.<br>the valley respects you. the floor fears you.<br>';}
+ else h+='<br>pass all 5 lessons to graduate. progress: '+passed+' / 5. the bell does not ring for you yet.<br>tip: wrong answers print detention slips. the printer is loud.<br>';
  h+='<br>detention slips: '+detention+'. collected. laminated.<br>';
  if(detention>=3)h+='record: chronic wobbler. the principal knows your name.<br>';
  return h;
@@ -1465,7 +1465,6 @@ function folkSchoolWire(){
  if(!folkActive)return;
  var btns=null;try{btns=document.querySelectorAll('[data-lesson]')}catch(e){}
  if(btns)for(var i=0;i<btns.length;i++)(function(b){b.onclick=function(){var id='';try{id=b.getAttribute('data-lesson')}catch(e){}folkLesson(id)}})(btns[i]);
- var ex=folkEl('folkFinalExam');if(ex)ex.onclick=function(){folkFinalExam()};
 }
 function folkSkillAdd(n){try{if(typeof skillState!=='undefined'&&skillState&&typeof skillSave==='function'){skillState.points=(skillState.points||0)+n;skillSave()}}catch(e){}}
 function folkLesson(id){
@@ -1501,55 +1500,6 @@ function folkAnswer(subj,qi,picked){
   if(det>=3&&typeof ach==='function'){try{ach('folk_detention')}catch(e){}}
  }
  try{folkPanelDraw()}catch(e){}
-}
-function folkFinalExam(){
- if(!folkActive)return;
- var grades=folkGrades(),subs=['bounce','nod','fry','stamp','sea'],ok=true,i;
- for(i=0;i<subs.length;i++)if(!grades[subs[i]])ok=false;
- var w=folkEl('folkWho'),body=folkEl('folkBody');
- if(!body)return;
- if(!ok){if(w)w.textContent='— folk school. final exam. —';body.textContent='finish your lessons first. the exam does not want you yet.';return}
- var qs=[];for(i=0;i<subs.length;i++)qs.push({subj:subs[i],qi:Math.floor(Math.random()*FOLK_QUIZ[subs[i]].length)});
- try{localStorage.setItem('cube_folk_exam',JSON.stringify({qs:qs,at:0,correct:0}))}catch(e){}
- folkExamShow();
-}
-function folkExamShow(){
- var exam=null;try{exam=JSON.parse(localStorage.getItem('cube_folk_exam')||'null')}catch(e){}
- if(!exam||!exam.qs||!exam.qs.length)return;
- var cur=exam.qs[exam.at||0],q=FOLK_QUIZ[cur.subj][cur.qi];
- var w=folkEl('folkWho'),body=folkEl('folkBody');if(!body)return;
- if(w)w.textContent='— final exam. question '+((exam.at||0)+1)+' of 5. so far so wobbly. —';
- var h='final exam. question '+((exam.at||0)+1)+' of 5. correct so far: '+(exam.correct||0)+'.<br><br>['+cur.subj+'] '+q.q+'<br><br>';
- for(var i=0;i<q.a.length;i++)h+='<button class="folkBtn" data-ans="'+i+'" style="padding:3px 8px;font-size:11px">'+q.a[i]+'</button> ';
- body.innerHTML=h+'<br><br>breathe. the paper can smell fear.';
- var btns=null;try{btns=body.querySelectorAll('[data-ans]')}catch(e){}
- if(btns)for(var j=0;j<btns.length;j++)(function(b){b.onclick=function(){var p=0;try{p=parseInt(b.getAttribute('data-ans'),10)||0}catch(e){}folkExamAnswer(p)}})(btns[j]);
-}
-function folkExamAnswer(picked){
- if(!folkActive)return;
- var exam=null;try{exam=JSON.parse(localStorage.getItem('cube_folk_exam')||'null')}catch(e){}
- if(!exam||!exam.qs||!exam.qs.length)return;
- var at=Math.max(0,Math.min(exam.qs.length-1,exam.at||0)),cur=exam.qs[at],q=FOLK_QUIZ[cur.subj][cur.qi];
- var correct=(exam.correct||0)+(picked===q.c?1:0);
- at++;
- var w=folkEl('folkWho'),body=folkEl('folkBody');if(!body)return;
- if(at>=exam.qs.length){
-  if(correct>=4){
-   try{localStorage.setItem('cube_folk_diploma','1')}catch(e){}
-   folkSkillAdd(100);
-   if(typeof ach==='function'){try{ach('folk_diploma')}catch(e){}}
-   if(w)w.textContent='— folk school. graduated. —';
-   body.textContent='passed '+correct+' / 5. DIPLOMA. framed. slightly greasy. +100 skill. the teacher cried. the ink smeared.';
-  }else{
-   if(w)w.textContent='— final exam. failed. —';
-   body.textContent='scored '+correct+' / 5. failed. the valley saw. retake whenever. the exam is patient.';
-  }
-  try{localStorage.setItem('cube_folk_exam',JSON.stringify({qs:exam.qs,at:0,correct:0}))}catch(e){}
-  try{folkPanelDraw()}catch(e){}
-  return;
- }
- try{localStorage.setItem('cube_folk_exam',JSON.stringify({qs:exam.qs,at:at,correct:correct}))}catch(e){}
- folkExamShow();
 }
 function folkWx(){
  if(!folkActive)return null;
