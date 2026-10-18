@@ -378,6 +378,8 @@ canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 #skillWorld{display:flex;flex-direction:row;align-items:flex-start;gap:280px;padding:28px 120px 64px;width:max-content;min-height:100%;will-change:transform;transform:translate(0px,0px)}
 .world-col{flex-shrink:0}
 #skillCol{width:1200px}
+#layerCol{width:min(860px,90vw);min-width:520px;margin-right:80px}
+#layerAreas{display:flex;flex-direction:column;gap:18px}
 #upCol{width:min(860px,90vw);min-width:520px;margin-left:80px}
 .world-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:14px;display:flex;align-items:center;gap:10px}
 .world-label:before,.world-label:after{content:'';height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)}
@@ -590,6 +592,10 @@ the source code is a lie. the render is the truth.
 <div id="skillTop"><span class="title">SKILL + UPGRADE TREE</span><span class="sub">objbox1 progressions</span><span class="panHint">drag empty space to pan → upgrades</span><span class="pts">skill pts: <span id="skillPts">0</span> | upgrade pts: <span id="upPts">0</span></span><button class="closeBtn" onclick="skillClose()">close</button></div>
 <div id="skillViewport">
 <div id="skillWorld">
+<div class="world-col" id="layerCol">
+<div class="world-label">layers</div>
+<div id="layerAreas"></div>
+</div>
 <div class="world-col" id="skillCol">
 <div class="world-label">skill tree</div>
 <button id="buyMaxToggle1" class="buymax-toggle locked" onclick="toggleBuyMax()">buy max: locked</button>
@@ -601,6 +607,7 @@ the source code is a lie. the render is the truth.
 <div id="areaNav"></div>
 <div id="upLock" class="up-lock" style="display:none">buy every skill<span class="sub">unlock all 5 final skills to open upgrade areas</span></div>
 <div id="upAreas"></div>
+</div>
 </div>
 </div>
 </div>
