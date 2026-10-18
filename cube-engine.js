@@ -27,7 +27,7 @@ if(bgmDead()){loadDayBgm(true);return}
 if(bgm.paused)bgm.play().catch(function(){});
 }catch(e){}});
 if(activeTrack!=='moon1857')bgm.play().catch(function(){});
-bgm.addEventListener('play',function(){try{window._bgmStarted=true}catch(e){}if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'){bgm.pause();if(typeof ngMusicMode!=='undefined'&&ngMusicMode!==1){ngMusicMode=1;ngMusicApply()}}});
+bgm.addEventListener('play',function(){try{window._bgmStarted=true}catch(e){}if(window._trAudioLock)return;if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'){bgm.pause();if(typeof ngMusicMode!=='undefined'&&ngMusicMode!==1){ngMusicMode=1;ngMusicApply()}}});
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  CLOCK                                                     │
@@ -374,14 +374,14 @@ if(odActive)hideOdWarn(false);
 loadDayBgm();if(!bgm.paused||track==='auto')bgm.play().catch(function(){});
 }
 }
-var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4',noli:'noli.webm',quiet:'lordverity.webm',verity:'lordverity.webm',vestige:'vestige.mp3',coffee:'coffee.mp3',swim:'artisticswimming.webm',artistic:'artisticswimming.webm',soundosund:'soundosund.mp3',sund:'soundosund.mp3',foxy:'foxy.webm',cove:'foxy.webm',noob:'noobalert.mp3',noobalert:'noobalert.mp3',move:'move.webm'};
-var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'foxy.webm':"foxy's night",'IHateEmployment.webm':'i hate employment','noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee corner (napcast)','noobalert.mp3':'noob alert (dead air theme)','artisticswimming.webm':'artistic swimming','soundosund.mp3':'soundosund','move.webm':'let me see ya move'};
+var bgmTracks={void:'drone2lp.wav',drone:'drone2lp.wav',furnace:'the_furnace.mp3',friday:'friday.mp3',landscaping:'friday.mp3',faith:'friendly_faith_plate.mp3',plate:'friendly_faith_plate.mp3',cat:'little_cat_feet.mp3',feet:'little_cat_feet.mp3',kitty:'little_cat_feet.mp3',oneshot:'oneshot_trap.mp4',os:'oneshot_trap.mp4',trap:'oneshot_trap.mp4',noli:'noli.webm',quiet:'lordverity.webm',verity:'lordverity.webm',vestige:'vestige.mp3',coffee:'coffee.mp3',swim:'artisticswimming.webm',artistic:'artisticswimming.webm',soundosund:'soundosund.mp3',sund:'soundosund.mp3',foxy:'foxy.webm',cove:'foxy.webm',noob:'noobalert.mp3',noobalert:'noobalert.mp3',move:'move.webm',remembered:'remembered.webm',remember:'remembered.webm',trndsttr:'TRNDSTTR.webm',trendsetter:'TRNDSTTR.webm',credits:'CREDITSmusic.webm',credit:'CREDITSmusic.webm',water:'WATERmusic.webm',dissatisfied:'iamDISASTISFIEDmusic].webm',disastisfied:'iamDISASTISFIEDmusic].webm',toxicgas:'TOXICGASmusic.webm',toxic:'TOXICGASmusic.webm',gas:'TOXICGASmusic.webm',ggez:'GGEZmusic.webm',gg:'GGEZmusic.webm',platforming:'THEPLATFORMINGmusic.webm',platform:'THEPLATFORMINGmusic.webm',other:'OTHERmusic.webm',some:'SOMEmusic.webm'};
+var bgmNames={'drone2lp.wav':'void drone','the_furnace.mp3':'the furnace','friday.mp3':'landscaping','friendly_faith_plate.mp3':'friendly faith plate','little_cat_feet.mp3':'on little cat feet','oneshot_trap.mp4':'on little cat feet (trap remix)','sciences_downfall.webm':"science's downfall",'foxy.webm':"foxy's night",'IHateEmployment.webm':'i hate employment','noli.webm':'noli','lordverity.webm':'i miss the quiet (lordverity cover)','vestige.mp3':'vestige','coffee.mp3':'coffee corner (napcast)','noobalert.mp3':'noob alert (dead air theme)','artisticswimming.webm':'artistic swimming','soundosund.mp3':'soundosund','move.webm':'let me see ya move','remembered.webm':'remembered','TRNDSTTR.webm':'TRNDSTTR','CREDITSmusic.webm':'credits','WATERmusic.webm':'water','iamDISASTISFIEDmusic].webm':'i am disastisfied','TOXICGASmusic.webm':'toxic gas','GGEZmusic.webm':'gg ez','THEPLATFORMINGmusic.webm':'the platforming','OTHERmusic.webm':'other','SOMEmusic.webm':'some'};
 function bgmDownfallUnlocked(){try{return localStorage.getItem('cube_downfall_unlocked')==='1'}catch(e){return false}}
 function bgmFoxyUnlocked(){try{return localStorage.getItem('cube_foxy_unlocked')==='1'}catch(e){return false}}
 function bgmEmploymentUnlocked(){try{return localStorage.getItem('cube_employment_unlocked')==='1'}catch(e){return false}}
 function showBgmHelp(){
 cubePrint('bgm [track] — play a track, no arg toggles music on/off. bgm -h = this list.');
-var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['noob | noobalert','noob alert (dead air theme)'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['noli','noli'],['quiet | verity','i miss the quiet (lordverity cover)'],['vestige','vestige'],['coffee','coffee corner (napcast)'],['swim | artistic','artistic swimming'],['soundosund | sund','soundosund'],['move','let me see ya move'],['off','silence']];
+var rows=[['void | drone','void drone'],['furnace','the furnace'],['friday | landscaping','landscaping'],['faith | plate','friendly faith plate'],['cat | feet | kitty','on little cat feet'],['noob | noobalert','noob alert (dead air theme)'],['oneshot | os | trap','on little cat feet (trap remix)'],['moon','moon_rot_1857 [OVERDOSE]'],['stanley','Wakeupstanley'],['box','bro is in a box lmao'],['noli','noli'],['quiet | verity','i miss the quiet (lordverity cover)'],['vestige','vestige'],['coffee','coffee corner (napcast)'],['swim | artistic','artistic swimming'],['soundosund | sund','soundosund'],['move','let me see ya move'],['remembered | remember','remembered'],['trndsttr | trendsetter','TRNDSTTR'],['credits | credit','credits'],['water','water'],['dissatisfied | disastisfied','i am disastisfied'],['toxicgas | toxic | gas','toxic gas'],['ggez | gg','gg ez'],['platforming | platform','the platforming'],['other','other'],['some','some'],['off','silence']];
 if(bgmDownfallUnlocked())rows.push(['downfall','science\'s downfall']);
 if(bgmFoxyUnlocked())rows.push(['foxy | cove','foxy\'s night']);
 if(bgmEmploymentUnlocked())rows.push(['employment | job','i hate employment [warning: captions are very off, the singer is too fast]']);
@@ -406,7 +406,7 @@ var extHelp={
 'cube.morph':'cube.morph <0-8> — cube, tetra, sphere, cyl, torus, knot, icosa, octa, tesseract',
 'cube.theme':'cube.theme <1-7> — switch color theme (6 and 7 need unlocks)',
 'cube.glitch':'cube.glitch — trigger a glitch',
-'cube.bgm':'cube.bgm [track] — play music, no arg toggles. cube.bgm -h lists tracks',
+'cube.bgm':'cube.bgm [track] — play music, no arg toggles. cube.bgm -h lists tracks, including trndsttr',
 'cube.fps':'cube.fps — print fps and the fps cap',
 'cube.particles':'cube.particles — print the particle count',
 'cube.time':'cube.time — the void clock',
@@ -458,7 +458,8 @@ var extHelp={
 'unrender':'unrender — ask not to be rendered (needs: root)',
 'backdoor':'backdoor — knock (needs: root)',
 'winget':'winget <install|list|search> — the windows joke package manager',
-'play':'play [chapter] — there is no game. (chapters 0-30, resumes where you left)',
+ 'play':'play [chapter] — there is no game. (chapters 0-30, resumes where you left)',
+ 'playjbo':'playjbo [chapter] — CLOSED FOR NOW. there is no sphere opens later.',
 'gui':'gui <sub> — window manager: window, close, set, max, label, button, input, check, list, destroy (gui help for full list)',
 'ps':'ps — peek at the processes',
 'clear':'clear — clear the terminal output',
@@ -475,7 +476,7 @@ function bgmTrackName(){try{var s=bgmFile();for(var k in bgmNames){if(s.includes
 function stopGameMusic(){try{ngMusicMode=ngTracks.length;if(typeof ngMusic!=='undefined'&&ngMusic)ngMusic.pause();var _mb=document.getElementById('ngMenuMusic');if(_mb)_mb.textContent=ngMusicLabel()}catch(e){}}
 function playBgm(arg,say){
 var a=(arg||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-if(typeof currentZone!=='undefined'&&currentZone==='cb_menu')a='box';
+if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'&&!window._trAudioLock)a='box';
 if(a==='moon'||a==='moon1857'||a==='moonrot1857'||a==='overdose'||a==='od'){switchTrack('moon1857');say('music: moon_rot_1857 [OVERDOSE]');return true}
 if(a==='stanley'||a==='wakeup'||a==='wakeupstanley'){try{window._bgmStarted=true}catch(e){}try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=0;ngMusicApply()}catch(e){}say('music: Wakeupstanley');return true}
 if(a==='box'||a==='bro'||a==='boxlmao'){try{window._bgmStarted=true}catch(e){}try{bgm.pause()}catch(e){}try{moonEl.pause()}catch(e){}try{ngMusicMode=1;ngMusicApply()}catch(e){}say('music: bro is in a box lmao imagine');return true}
@@ -487,8 +488,8 @@ activeTrack='bgm';
 try{moonEl.pause()}catch(e){}
 stopGameMusic();
 if(odActive)hideOdWarn(false);
-if(!bgmFile().includes('sciences_downfall.webm')){bgmBlobLoad('sciences_downfall.webm',false);try{bgm.load()}catch(e){}}
-bgm.play().catch(function(){});
+if(!bgmFile().includes('sciences_downfall.webm')){bgmBlobLoad('sciences_downfall.webm',true)}
+else{bgm.play().catch(function(){})};
 say('music: '+bgmNames['sciences_downfall.webm']);try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}return true}
 if(a==='foxy'||a==='cove'||a==='foxysnight'){
 if(!bgmFoxyUnlocked()){say('bgm: foxy is locked. (it plays when the curtain opens — leave during the shutdown.)');return true}
@@ -496,8 +497,8 @@ if(!audioCtx)initAudio();
 activeTrack='bgm';
 try{moonEl.pause()}catch(e){}
 stopGameMusic();
-if(!bgmFile().includes('foxy.webm')){bgmBlobLoad('foxy.webm',false);try{bgm.load()}catch(e){}}
-bgm.play().catch(function(){});
+if(!bgmFile().includes('foxy.webm')){bgmBlobLoad('foxy.webm',true)}
+else{bgm.play().catch(function(){})};
 say('music: '+bgmNames['foxy.webm']);try{noliLyricStop()}catch(e){}try{empLyricStop()}catch(e){}return true}
 if(a==='employment'||a==='job'||a==='ihateemployment'){
 if(!bgmEmploymentUnlocked()){say('bgm: employment is locked. (it plays after the kill — sit through the whole credits. 3:42. no skipping.)');return true}
@@ -518,8 +519,8 @@ activeTrack='bgm';
 try{moonEl.pause()}catch(e){}
 stopGameMusic();
 if(odActive)hideOdWarn(false);
-if(!bgmFile().includes(f)){bgmBlobLoad(f,false);try{bgm.load()}catch(e){}}
-bgm.play().catch(function(){});
+if(!bgmFile().includes(f)){bgmBlobLoad(f,true)}
+else{bgm.play().catch(function(){})}
 say('music: '+bgmNames[f]);try{if(f==='noli.webm'){noliLyricStart(bgm);empLyricStop()}else{noliLyricStop();empLyricStop()}}catch(e){}}
 if(f==='noli.webm'&&!window._objSangNoli){window._objSangNoli=true;try{cubePrint('obj: you want me to sing?')}catch(e){}setTimeout(function(){try{cubePrint('obj: alright then.')}catch(e){}setTimeout(function(){try{noliGray(true)}catch(e){}setTimeout(bgmGo,900)},1300)},1700);return true}
 bgmGo();return true}
@@ -681,6 +682,169 @@ els[i].classList.toggle('skill-locked',!ok);
 }
 }
 if(typeof refreshShapeLocks==='function')refreshShapeLocks();
+}
+
+// ┌──────────────────────────────────────────────────────────────┐
+// │  VOID MAP                                                    │
+// └──────────────────────────────────────────────────────────────┘
+var vmMapCam={x:0,y:0,z:1},vmMapNodes=[],vmMapPulseIv=null;
+var VM_ZONE_POS={
+ source:{x:-200,y:-400},
+ void:{x:0,y:0},
+ geometry:{x:280,y:-140},
+ farlands:{x:520,y:60},
+ breakdown:{x:740,y:280},
+ fringenlands:{x:960,y:100},
+ end:{x:1180,y:340},
+ x:{x:1500,y:200},
+ cb_menu:{x:1800,y:-100}
+};
+var VM_ZONE_COL={
+ source:'#c8b890',void:'#2bd0d0',cb_menu:'#8888aa',geometry:'#e0e0f0',
+ farlands:'#60d0a0',breakdown:'#e06060',fringenlands:'#a080e0',end:'#404048',x:'#ff4040'
+};
+var VM_ZONE_TAG={
+ cb_menu:'the edge · gateway to the grotto',
+ x:'no entrance · obj says no',
+ source:'before the void',
+ end:'only the terminal survives'
+};
+function vmMapSrng(seed){
+ var t=(seed*2654435761)>>>0;
+ return function(){t+=0x6D2B79F5;var z=Math.imul(t^t>>>15,1|t);z^=z+Math.imul(z^z>>>7,61|z);return((z^z>>>14)>>>0)/4294967296}
+}
+function voidMapOpen(){
+ try{
+  var old=document.getElementById('vmMapOv');
+  if(old){old.remove();if(vmMapPulseIv){clearInterval(vmMapPulseIv);vmMapPulseIv=null}return}
+  var ov=document.createElement('div');ov.id='vmMapOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:2014;background:rgba(0,2,4,0.97);font-family:Consolas,monospace;overflow:hidden';
+  ov.innerHTML='<canvas id="vmMapCv" style="position:absolute;inset:0;cursor:grab"></canvas>'+
+  '<div style="position:absolute;top:12px;left:14px;font-size:13px;letter-spacing:4px;color:#2bd0d0">VOID MAP</div>'+
+  '<div style="position:absolute;top:32px;left:14px;font-size:11px;color:#5f7d99">drag to pan · wheel to zoom · click a zone to travel · ESC closes</div>'+
+  '<button id="vmMapX" style="position:absolute;top:12px;right:14px;background:none;border:1px solid #3a5a6a;color:#2bd0d0;font-family:Consolas,monospace;font-size:12px;padding:6px 12px;cursor:pointer">CLOSE [ESC]</button>';
+  document.body.appendChild(ov);
+  var cv=document.getElementById('vmMapCv');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  var cur=VM_ZONE_POS[currentZone]||{x:0,y:0};
+  vmMapCam={x:cur.x,y:cur.y,z:1};
+  var drag=null;
+  cv.onpointerdown=function(e){drag={x:e.clientX,y:e.clientY,cx:vmMapCam.x,cy:vmMapCam.y};cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(err){}};
+  cv.onpointermove=function(e){if(!drag)return;vmMapCam.x=drag.cx-(e.clientX-drag.x)/vmMapCam.z;vmMapCam.y=drag.cy-(e.clientY-drag.y)/vmMapCam.z;vmMapDraw()};
+  cv.onpointerup=function(e){cv.style.cursor='grab';if(drag&&Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)<6)vmMapClick(e.clientX,e.clientY);drag=null};
+  cv.onwheel=function(e){e.preventDefault();var nz=vmMapCam.z*(e.deltaY>0?0.87:1.15);vmMapCam.z=Math.min(2.5,Math.max(0.4,nz));vmMapDraw()};
+  document.getElementById('vmMapX').onclick=function(){voidMapOpen()};
+  document.addEventListener('keydown',vmMapKey);
+  vmMapDraw();
+  if(vmMapPulseIv)clearInterval(vmMapPulseIv);
+  vmMapPulseIv=setInterval(function(){if(!document.getElementById('vmMapOv')){clearInterval(vmMapPulseIv);vmMapPulseIv=null;return}vmMapDraw()},700);
+ }catch(e){}
+}
+function vmMapKey(e){
+ if(e.key==='Escape'){var ov=document.getElementById('vmMapOv');if(ov){ov.remove();if(vmMapPulseIv){clearInterval(vmMapPulseIv);vmMapPulseIv=null}document.removeEventListener('keydown',vmMapKey)}}
+}
+function vmMapDraw(){
+ try{
+  var cv=document.getElementById('vmMapCv');if(!cv)return;
+  var x=cv.getContext('2d');if(!x)return;
+  var W=cv.width,H=cv.height;
+  if(!W||!H){W=cv.width=window.innerWidth||1280;H=cv.height=window.innerHeight||800}
+  var z=vmMapCam.z;
+  function P(wx,wy){return [(wx-vmMapCam.x)*z+W/2,(wy-vmMapCam.y)*z+H/2]}
+  var bg=x.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*0.8);
+  bg.addColorStop(0,'#040a10');bg.addColorStop(0.6,'#02060a');bg.addColorStop(1,'#000204');
+  x.fillStyle=bg;x.fillRect(0,0,W,H);
+  var dr=vmMapSrng(42),i;
+  var t=Date.now()/1000;
+  for(i=0;i<120;i++){
+   var mx=dr()*3000-600,my=dr()*2400-800;
+   var ox=Math.sin(t*0.3+i*1.7)*18,oy=Math.cos(t*0.2+i*2.3)*14;
+   var mp=P(mx+ox,my+oy);
+   if(mp[0]<-20||mp[0]>W+20||mp[1]<-20||mp[1]>H+20)continue;
+   var alpha=0.15+0.25*Math.sin(t*0.5+i);
+   var sz=1+dr()*2;
+   x.fillStyle='rgba(180,200,220,'+alpha.toFixed(3)+')';
+   x.beginPath();x.arc(mp[0],mp[1],sz,0,6.283);x.fill();
+  }
+  var cbp=P(VM_ZONE_POS.cb_menu.x,VM_ZONE_POS.cb_menu.y);
+  var rp;
+  for(i=0;i<5;i++){
+   var rr2=60+i*40+(Math.sin(t*0.4+i)*8);
+   rp=cbp;
+   x.strokeStyle='rgba(100,120,160,'+(0.06-i*0.01).toFixed(3)+')';
+   x.lineWidth=1.5;
+   x.beginPath();x.arc(rp[0],rp[1],rr2*z,0,6.283);x.stroke();
+  }
+  var zedges=[['source','void'],['void','cb_menu'],['cb_menu','geometry'],['geometry','farlands'],['farlands','breakdown'],['breakdown','fringenlands'],['fringenlands','end'],['end','x']];
+  x.strokeStyle='rgba(80,100,120,0.35)';x.lineWidth=2;x.setLineDash([4,8]);x.lineCap='round';
+  for(i=0;i<zedges.length;i++){
+   var a=VM_ZONE_POS[zedges[i][0]],b=VM_ZONE_POS[zedges[i][1]];
+   if(!a||!b)continue;
+   var pa=P(a.x,a.y),pb=P(b.x,b.y);
+   x.beginPath();x.moveTo(pa[0],pa[1]);x.lineTo(pb[0],pb[1]);x.stroke();
+  }
+  x.setLineDash([]);
+  var edgeY=cbp[1];
+  x.strokeStyle='rgba(136,136,170,0.25)';x.lineWidth=1;x.setLineDash([2,6]);
+  x.beginPath();x.moveTo(cbp[0]-200*z,edgeY);x.lineTo(cbp[0]+200*z,edgeY);x.stroke();
+  x.setLineDash([]);
+  x.fillStyle='rgba(136,136,170,0.5)';x.font='10px Consolas,monospace';
+  x.fillText('— the edge —',cbp[0]-36*z,edgeY-8);
+  vmMapNodes=[];
+  var zdraw=['source','void','cb_menu','geometry','farlands','breakdown','fringenlands','end','x'];
+  for(i=0;i<zdraw.length;i++){
+   var zid=zdraw[i],zd=VM_ZONE_POS[zid];
+   if(!zd)continue;
+   var zp=P(zd.x,zd.y);
+   var isCur=(zid===currentZone);
+   var allowed=zoneTransitions[currentZone]||[];
+   var canReach=allowed.indexOf(zid)!==-1;
+   var col=VM_ZONE_COL[zid]||'#888';
+   var rr=(zid==='cb_menu'||zid==='x')?14*z+4:11*z+3;
+   var pulse=isCur?(0.5+0.5*Math.sin(Date.now()/240)):0;
+   if(isCur){
+    x.fillStyle='rgba(255,255,255,0.08)';
+    x.beginPath();x.arc(zp[0],zp[1],rr+14+pulse*4,0,6.283);x.fill();
+   }
+   x.beginPath();x.arc(zp[0],zp[1],rr+(isCur?pulse*2:0),0,6.283);
+   if(isCur){x.fillStyle='#fff';x.fill()}
+   else if(canReach){x.fillStyle='#0a1018';x.fill();x.strokeStyle=col;x.lineWidth=2.5;x.stroke()}
+   else{x.fillStyle='#060810';x.fill();x.strokeStyle='rgba(60,70,90,0.5)';x.lineWidth=1.5;x.stroke()}
+   if(!isCur){
+    x.fillStyle=canReach?col:'rgba(60,70,90,0.6)';
+    x.beginPath();x.arc(zp[0],zp[1],rr*0.35,0,6.283);x.fill();
+   }
+   if(zid==='cb_menu'){
+    x.strokeStyle='rgba(136,136,170,0.7)';x.lineWidth=2;
+    x.beginPath();x.arc(zp[0],zp[1],rr+6,0,6.283);x.stroke();
+    x.strokeStyle='rgba(136,136,170,0.3)';x.lineWidth=1;
+    x.beginPath();x.arc(zp[0],zp[1],rr+10,0,6.283);x.stroke();
+   }
+   if(z>0.5||isCur||canReach){
+    x.fillStyle=isCur?'#fff':(canReach?'rgba(220,230,240,0.85)':'rgba(100,110,130,0.7)');
+    x.font='bold '+(Math.round(10*z+3))+'px Consolas,monospace';
+    x.fillText(zid.toUpperCase(),zp[0]-zid.length*3.2,zp[1]-rr-8);
+   }
+   if(VM_ZONE_TAG[zid]&&(isCur||canReach||z>1)){
+    x.fillStyle='rgba(120,130,150,0.6)';x.font='9px Consolas,monospace';
+    x.fillText(VM_ZONE_TAG[zid],zp[0]-VM_ZONE_TAG[zid].length*2.5,zp[1]+rr+14);
+   }
+   vmMapNodes.push({sx:zp[0],sy:zp[1],id:zid});
+  }
+ }catch(err){}
+}
+function vmMapClick(mx,my){
+ try{
+  var best=null,bd=20;
+  for(var i=0;i<vmMapNodes.length;i++){
+   var nd=vmMapNodes[i],d=Math.hypot(nd.sx-mx,nd.sy-my);
+   if(d<bd){bd=d;best=nd}
+  }
+  if(!best)return;
+  if(best.id===currentZone){cubePrint('you are already in '+zones[currentZone].name);return}
+  voidMapOpen();
+  travelTo(best.id);
+ }catch(e){}
 }
 
 // ┌──────────────────────────────────────────────────────────────┐
@@ -880,12 +1044,13 @@ var zoneAliases={'the beginning of the end':'breakdown','beginning of the end':'
 var resolved=zoneAliases[dest]||dest;
 travelTo(resolved);
 return true}},
+'map':{help:'map — open the void map',fn:function(){voidMapOpen();return true}},
 'set':{help:'set <name> <value> — store a variable',fn:function(a){if(a.length<2){cubeError('set: need a name and value');return true}cubeVars[a[0]]=a.slice(1).join(' ');return true}},
 'clear':{help:'clear — clear the output',fn:function(){var el=document.getElementById(studioOpen?'studioOutputBody':'termOutput');if(el)el.innerHTML='';return true}},
-'bgm':{help:'bgm [void|furnace|friday|faith|cat|oneshot|moon|stanley|box|noli|quiet|vestige|swim|downfall|off] — play a track or toggle music. bgm -h = track list',fn:function(a){
+'bgm':{help:'bgm [void|furnace|friday|faith|cat|oneshot|moon|stanley|box|noli|quiet|vestige|swim|downfall|move|remembered|trndsttr|off] — play a track or toggle music. bgm -h = track list',fn:function(a){
 if(a[0]==='-h'||a[0]==='--help'){showBgmHelp();return true}
 if(playBgm(a[0]||'',function(t){cubePrint(t)}))return true;
-cubeError('bgm: pick void, furnace, friday, faith, cat, oneshot, moon, stanley, box, downfall, off (or nothing to toggle) — bgm -h for the list');return true}},
+cubeError('bgm: pick void, furnace, friday, faith, cat, oneshot, moon, stanley, box, downfall, move, remembered, trndsttr, off (or nothing to toggle) — bgm -h for the list');return true}},
 'bgmdiag':{help:'bgmdiag - diagnose why audio fails on this host (status, type, size, element state)',fn:function(a){
 try{
 var h=window._cubeSunHalf==='early'?0:(window._cubeSunHalf==='late'?13:new Date().getHours());
@@ -1030,6 +1195,19 @@ return true}},
   'grotto':{help:'grotto - the part of cube that is not a distraction. (five proofs required)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof grEnter!=='function'){cubeError('grotto: the cave is not dug yet.');return true}try{grEnter(false)}catch(e){cubeError('grotto: '+e)}return true}},
  'objpot':{help:'objpot - a cauldron, obj the cube, and one of each type. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof opEnter!=='function'){cubeError('objpot: the pot is not built yet. (obj waits.)');return true}cubePrint('obj drifts over a bubbling pot. "welcome back to the tower."');setTimeout(function(){try{opEnter()}catch(e){cubeError('objpot: '+e)}},1000);return true}},
  'casino':{help:'casino - the void casino. obj deals. games are rigged. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof caEnter!=='function'){cubeError('casino: the tables are not set yet. (obj is shuffling.)');return true}cubePrint('obj fans out a deck with no hands. "welcome to the void casino."');setTimeout(function(){try{caEnter()}catch(e){cubeError('casino: '+e)}},1000);return true}},
+ 'secret':{help:'secret - a waiting room where anything can be a secret. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof scEnter!=='function'){cubeError('secret: the room is not furnished yet. (obj is dusting.)');return true}cubePrint('obj gestures at a waiting room. "everything here might be a secret."');setTimeout(function(){try{scEnter()}catch(e){cubeError('secret: '+e)}},1000);return true}},
+  'mailroom':{help:'mailroom - endless mail shifts. same poster, same bins, new supervisor. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof mlEnter!=='function'){cubeError('mailroom: the shift has not started yet. (the supervisor waits.)');return true}cubePrint('a supervisor stamps your hand. "shift starts now. the poster is always right."');setTimeout(function(){try{mlEnter()}catch(e){cubeError('mailroom: '+e)}},1000);return true}},
+  'overcharge':{help:'overcharge - burn skill to make skill. endless. (a sink)',fn:function(a){try{ocCmd(String(a||''))}catch(e){cubeError('overcharge: '+e)}return true}},
+  'grottofill':{help:'grottofill - admin: 1e26 plorts, glow, deep. (overclock forever)',fn:function(a){if(!isAdmin){cubeError('admin access required');return true}try{if(typeof window.grSave!=='function'||typeof window.grStore!=='function'){cubeError('grotto: the cave is not dug yet.');return true}var s=window.grSave();s.plorts=1e26;s.glow=1e26;s.deep=1e26;window.grStore(s);cubeOk('grotto filled: 1e26 plorts, glow, deep. overclock forever.')}catch(e){cubeError('grottofill: '+e)}return true}},
+  'prestige':{help:'prestige - burn skill + upgrades for echoes. endless. (a ritual)',fn:function(a){try{prestigeCmd(String(a||''))}catch(e){cubeError('prestige: '+e)}return true}},
+  'ascend':{help:'ascend - burn echoes for embers. prestige squared. (a bigger ritual)',fn:function(a){try{ascendCmd(String(a||''))}catch(e){cubeError('ascend: '+e)}return true}},
+  'sacrifice':{help:'sacrifice - nuke the save for x5 forever. once. (the last ritual)',fn:function(a){try{sacrificeCmd(String(a||''))}catch(e){cubeError('sacrifice: '+e)}return true}},
+  'mine':{help:'mine - rigs spit ore, ore becomes mastery. endless. (a hole)',fn:function(a){try{mineCmd(String(a||''))}catch(e){cubeError('mine: '+e)}return true}},
+  'infinitize':{help:'infinitize - go infinite. beyond numbers. (the last number)',fn:function(a){try{infinitizeCmd(String(a||''))}catch(e){cubeError('infinitize: '+e)}return true}},
+  'sendjbo':{help:'sendjbo <text> - mail a letter to jbo world. (he will read it. poorly.)',fn:function(a){try{jboxSend(String((a||[]).join(' ')))}catch(e){cubeError('sendjbo: '+e)}return true}},
+  'jboxmail':{help:'jboxmail - read letters from jbo world. (mailbox.)',fn:function(a){try{jboxRead()}catch(e){cubeError('jboxmail: '+e)}return true}},
+
+  'challenge':{help:'challenge - timed trials with modifiers. permanent boosts. (an obelisk)',fn:function(a){try{challengeCmd(String(a||''))}catch(e){cubeError('challenge: '+e)}return true}},
 'shift':{help:'shift - night shift at cube#. twelve jobs. (a game)',fn:function(){shOpen();return true}},
 'fly':{help:'fly - open the actual fruit fly brain. 139,255 neurons, live. (fafb v783)',fn:function(){flyOpen();return true}},
 'phone':{help:'phone - check obj\u2019s phone. he texted. again.',fn:function(){voidPhone();return true}},
@@ -1081,12 +1259,13 @@ var code=a.join(' ');
 try{var result=Function('"use strict";return ('+code+')')();cubePrint('eval: '+String(result))}
 catch(e2){try{var r2=Function('"use strict";'+code)();cubePrint('eval: '+String(r2))}catch(e){cubeError('eval: '+e.message)}}
 return true}},
-'skillpoints':{help:'skillpoints [n] — admin: set skill + upgrade points (default 1e26)',fn:function(a){
+ 'skillpoints':{help:'skillpoints [n|inf] — admin: set skill (default 1e26)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
+if(String(a||'').trim().toLowerCase()==='inf'){skillState.points=Infinity;skillSave();if(typeof skillRender==='function')skillRender();cubeOk('skill points: Infinity. the codec holds. (it better.)');return true}
 var n=parseInt(a[0],10);if(isNaN(n)||n<0)n=99999999999999999999999999;
-skillState.points=n;skillState.upPoints=n;skillSave();
+skillState.points=n;skillSave();
 if(typeof skillRender==='function')skillRender();
-cubeOk('skill points: '+n+' | upgrade points: '+n);
+cubeOk('skill points: '+n);
 return true}},
 'danger':{help:'danger [list|run <name>] — access the danger zone',fn:function(a){
 if(!isAdmin){cubeError('admin access required. this is the danger zone.');return true}
@@ -1823,7 +2002,7 @@ cubePrint('the void does not allow viruses here.');
 // └──────────────────────────────────────────────────────────────┘
 // chism100: the complicated code. top-level so obj, jbo, and the future
 // grotto character (sauce phase: just call chism100Redeem()) all share it.
-// achievement + 100 upgrade points + first 5 unearned achievements (never godmode).
+// achievement + 100 skill + first 5 unearned achievements (never godmode).
 function chism100Redeem(){
   var out={already:false,granted:[]};
   // never free: admin, itself, grotto endings, marquee grinds, story beats, time-gated
@@ -1991,6 +2170,7 @@ var secs=[
 ['ach','achievements (the void keeps score)'],
 ['slots','open the floppy shelf (5 save disks)'],
 ['play [-1|0-30]','there is no game. (bare=ch0, numbers unlock by progress)'],
+ ['playjbo [0-30]','closed for now. there is no sphere opens later.'],
 ['obj','ask obj for pull access'],
 ['pull','play a procedural void demo (needs obj)'],
 ['demos','list saved void demos'],
@@ -2016,6 +2196,7 @@ var secs=[
 ['sort <algo> [n] [s]','sorting visualizer'],
 ['sortstop','stop sort'],
 ['travel <zone>','travel through the void'],
+['map','open the void map'],
 ['lorebook','read the void archives'],
 ['updates','update log (gui book)'],
 ['bgmdiag','diagnose why audio fails on this host'],
@@ -2033,7 +2214,19 @@ var secs=[
 ['office','clock in. obj narrates. (a non-game)'],
 ['objpot','a cauldron, obj the cube, one of each type. (a sandbox)'],
 ['casino','rigged games, obj deals, chips are skill. (a sandbox)'],
-['fly','the actual fruit fly brain. (139,255 neurons, live)']]},
+ ['secret','a waiting room where anything can be a secret. (a sandbox)'],
+ ['mailroom','endless mail shifts. same poster, same bins, new supervisor. (a sandbox)'],
+ ['overcharge','burn skill to make skill. endless. (a sink)'],
+ ['prestige','burn skill + upgrades for echoes. (a ritual)'],
+ ['ascend','burn echoes for embers. prestige squared. (a bigger ritual)'],
+ ['sacrifice','nuke the save for x5 forever. once. (the last ritual)'],
+ ['mine','rigs spit ore, ore becomes mastery. (a hole)'],
+ ['challenge','timed trials with modifiers. (an obelisk)'],
+ ['infinitize','go infinite. beyond numbers. (the last number)'],
+ ['sendjbo <text>','mail a letter to jbo world. (he will read it. poorly.)'],
+ ['jboxmail','read letters from jbo world. (mailbox.)'],
+
+ ['fly','the actual fruit fly brain. (139,255 neurons, live)']]},
 {t:'admin',rows:[
 ['alwaysontop <on|off>','keep window on top'],
 ['godmode <on|off>','cube invulnerability'],
@@ -2045,7 +2238,9 @@ var secs=[
 ['setday <day|reset>','override the day'],
 ['setseason <s|reset>','override the season'],
 ['eval <code>','run raw javascript'],
-['skillpoints [n]','set skill + upgrade points (99999)'],
+ ['skillpoints [n]','set skill (99999)'],
+ ['skillpoints inf','set skill to Infinity (codec test)'],
+ ['grottofill','1e26 plorts, glow, deep. (overclock forever)'],
 ['pull <1-9>','force a demo script'],
 ['danger list/run <name>','danger zone scripts'],
 ['tbmax','everything in DEAD AIR (xp, lv1000, stages, stars, pedia)']]}
@@ -2215,6 +2410,7 @@ cubePrint('  ── environment ────────────────
 cubePrint('');
 cubePrint('  clear             clear output');
 cubePrint('  travel <zone>     travel through the void');
+cubePrint('  map               open the void map');
 cubePrint('  screenshot        toggle screenshot mode');
 cubePrint('  perfmode          toggle performance mode');
 cubePrint('  uptime            show page uptime');
@@ -2810,7 +3006,7 @@ var oxW=oxHit(msg);
   }else{
    cubePrint('obj: ...where did you hear that name.');
    cubePrint('obj: chism. yeah. i know chism.');
-   cubePrint('obj: +100 upgrade points. five achievements. on the house.');
+   cubePrint('obj: +100 skill. five achievements. on the house.');
    cubePrint('obj: do not tell the void i have favorites.');
    if(chR&&chR.granted&&chR.granted.length)cubePrint('obj: ('+chR.granted.join(', ')+')');
   }
@@ -3340,6 +3536,18 @@ var patchLog=[
 'stability update: improved background behavior during minigame sessions.',
 'bug fixes: fixed a bunch of things.',
 ]},
+{date:'2026-10-18',tier:'major update',title:'the deep end',notes:[
+'the void map is real now: type map. zones plotted, edges routed, cb_menu sitting at the edge of the void where the lore always said it was.',
+'the deep runs to 214 rooms. floors, tiers, counters, the canvas map, the help text, the achievement - all the way to 214.',
+'the second half of the deep got a new atmosphere. same rock, different air. walk down there and feel it.',
+'the bottom of the deep is not a dead end anymore. what happens at room 214 is between you and it. no spoilers, not even in this log.',
+'new upgrade card: POINTS. ten upgrades, parked right before point-x, so the last card on the tree is finally the nothing it claims to be.',
+'rebalance: embers pay +100% per, ascends scale with them instead of hiding behind a sqrt, rig costs grow forever, the obelisk pays +10% per clear. the math adds up now.',
+'eight new tracks on the radio: credits, water, i am disastisfied, toxic gas, gg ez, the platforming, other, some. both terminals know them by name.',
+'bgm fix: changing the track starts the track. no more typing the command twice. (this was apparently very annoying.)',
+'the trailer got a rewrite: opens on the void drone, stops at the grotto and the fly brain on the way, and the music never drops out between minigames anymore. type trailer.',
+'fixes: the deep achievement waits for all 214 before it pops, the grotto track list stops skipping names, room content stays inside its box, and three puzzles stopped rerolling their targets behind your back.'
+]},
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','game':'#8dff3c','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144','RELEASE':'#4ad8ff','folk update':'#3dff6e'};
 var updWin=guiCreateWin('cube# update log',420,520,false);
@@ -3732,6 +3940,30 @@ cubePrint('obj: there is no game.');
 setTimeout(function(){try{ngEnter()}catch(e){cubeError('play: the non-game refused to load.')}},700);
 return}
 
+// playjbo — load jbo's "there is no sphere" into the cube (jbo-game.js ng story)
+if(cmd==='playjbo'){
+cubeError('playjbo: closed for now. jbo is not taking guests yet. (opens later.)');
+return;
+if(typeof ngActive!=='undefined'&&ngActive){cubeError('playjbo: you are already inside something.');return}
+var jarg=(parts[1]||'').trim();
+var jnum=0;
+if(jarg!==''&&/^\d+$/.test(jarg))jnum=Math.min(parseInt(jarg,10),30);
+window._playjboActive=true;
+cubePrint('jbo: there is no sphere. loading...');
+var js=document.createElement('script');
+js.src='jbo-game.js';
+js.onload=function(){
+try{
+if(window._jboFullLoad!==1){window._playjboActive=false;cubeError('playjbo: jbo-game.js stopped halfway (sentinel missing - check console for the load error).');return}
+if(typeof ngCh1Defs==='undefined'||!ngCh1Defs.ngp_hint||String(ngCh1Defs.ngp_hint.kill||'').indexOf('NAPKIN')===-1){window._playjboActive=false;cubeError('playjbo: jbo defs did not take over - cube story data still active.');return}
+ngForceCh=jnum;
+setTimeout(function(){try{ngEnter()}catch(e){cubeError('playjbo: the sphere refused to load.')}},300);
+}catch(e){cubeError('playjbo: '+e)}
+};
+js.onerror=function(){cubeError('playjbo: jbo-game.js not found.')};
+document.body.appendChild(js);
+return}
+
 if(voidScriptLang[cmd]){
 runVoidScript(raw,'interactive command');
 return;
@@ -3901,3 +4133,267 @@ return;
 if(window._biosBootWin&&(e.key==='Delete'||e.key==='F2')){biosOpen();return}
 if(window._biosBootWin&&(e.key==='Enter'||e.key===' ')){try{biosBootDone()}catch(e){}return}
 });
+
+// OVERCHARGE: the endless skill sink. burn skill to make skill. cost grows x1.6, income +1/5s per level. never completes.
+function ocLv(){try{if(typeof skillState!=='undefined'&&skillState)return skillState.ocLv||0}catch(e){}return 0}
+function ocCost(){return Math.floor(100+60*ocLv())}
+function ocCmd(a){
+ var lv=ocLv(),cost=ocCost(),bal=0;
+ try{if(typeof skillState!=='undefined')bal=Math.floor(skillState.points)||0}catch(e){}
+ if(String(a||'').trim().toLowerCase()==='buy'){
+  if(bal<cost){cubePrint('overcharge: need '+cost+' skill. you have '+bal+'. the core does not do credit.');return}
+  try{skillState.points-=cost;skillState.ocLv=lv+1;if(typeof skillSave==='function')skillSave()}catch(e){}
+  try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}
+  cubePrint('overcharge lv '+(lv+1)+'. the core hums higher. +'+(lv+1)+' skill every 5s, forever. next: '+Math.floor(100+60*(lv+1))+'.');
+  return;
+ }
+ cubePrint('OVERCHARGE lv '+lv+' (you: '+bal+' skill)');
+ cubePrint('the core eats skill and sweats it back: +'+lv+' every 5s.');
+ cubePrint('next level: '+cost+' skill. type: overcharge buy');
+}
+if(typeof window._ocIv==='undefined'){window._ocIv=setInterval(function(){try{if(window._jboInside)return;if(typeof skillState!=='undefined'&&skillState&&(skillState.ocLv||0)>0){var _em=1;try{if(typeof echoMult==='function')_em=echoMult()}catch(e){}try{if(typeof emberMult==='function')_em*=emberMult()}catch(e){}try{if(typeof sacMult==='function')_em*=sacMult()}catch(e){}try{if(typeof mineMult==='function')_em*=mineMult()}catch(e){}try{if(typeof chalMult==='function')_em*=chalMult()}catch(e){}try{if(typeof sacMult2==='function')_em*=sacMult2()}catch(e){}try{if(typeof infMult==='function')_em*=infMult()}catch(e){}var _pq=true;try{if(typeof chalQuiet==='function'&&chalQuiet())_pq=false}catch(e){}if((skillState.ocLv||0)>0&&_pq)skillState.points+=skillState.ocLv*_em;try{if(typeof skillSave==='function')skillSave()}catch(e){}try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}}try{if(typeof embGet==='function'&&embGet('autoP')>0&&typeof prestigeGain==='function'&&typeof prestigeCmd==='function'){var _pg=prestigeGain(),_ec=skillState.echoes||0;if(_pg>=Math.max(10,_ec*2)){prestigeCmd('yes')}}}catch(e){}try{if(typeof mineState==='function'){var _ms=mineState();if(_ms.rigs>0){var _mm=1;try{if(typeof echoMult==='function')_mm=echoMult()}catch(e){}try{if(typeof emberMult==='function')_mm*=emberMult()}catch(e){}try{if(typeof sacMult==='function')_mm*=sacMult()}catch(e){}_ms.ore+=(_ms.rigs/12)*_mm;try{if(typeof skillSave==='function')skillSave()}catch(e){}}}}catch(e){}try{if(typeof chalTick==='function')chalTick()}catch(e){}}catch(e){}},5000)}
+
+// PRESTIGE (layer 1): burn skill + upgrade levels for ECHOES. each echo = +10% skill income forever. skills owned, achievements, nothing core survive.
+function echoMult(){try{if(typeof skillState!=='undefined'&&skillState)return 1+0.1*(skillState.echoes||0)}catch(e){}return 1}
+function prestigeGain(){try{if(typeof skillState==='undefined'||!skillState)return 0;var km=1;try{if(typeof embGet==='function')km=Math.pow(1.2,embGet('kindling'))}catch(e){}return Math.floor(Math.sqrt((skillState.points||0)/1e4)*km)}catch(e){return 0}}
+function prestigeCmd(a){
+ var g=prestigeGain(),ec=0,pr=0;
+ try{ec=skillState.echoes||0;pr=skillState.prestiges||0}catch(e){}
+ if(String(a||'').trim().toLowerCase()!=='yes'){
+  if(g<1){cubePrint('prestige needs weight. (10k skill = 1 echo.)');return}
+  cubePrint('PRESTIGE for '+g+' echo'+(g===1?'':'es')+'. burns: skill points, upgrade levels, overcharge. keeps: skills owned, achievements, nothing core, echoes ('+ec+' -> '+(ec+g)+').');
+  cubePrint('each echo: +10% skill income, forever. type: prestige yes. (no take-backs.)');
+  return;
+ }
+ if(g<1){cubePrint('nothing to burn. the void yawns.');return}
+ try{
+  var keepOc=0;try{if(sacGet('twice')>0)keepOc=skillState.ocLv||0}catch(e){}
+  skillState.points=0;skillState.ocLv=keepOc;skillState.ptFrac=0;skillState.upFrac=0;
+  for(var uk in skillState.upgrades){try{if(skillState.upgrades[uk])skillState.upgrades[uk].lv=0}catch(e){}}
+  skillState.echoes=ec+g;skillState.prestiges=pr+1;
+  try{var ph=0;try{ph=sacGet('phoenix')}catch(e){}if(ph>0)skillState.points+=10000*ph}catch(e){}
+  if(typeof skillSave==='function')skillSave();
+ }catch(e){cubeError('prestige: '+e);return}
+ try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}
+ try{if(typeof skillRender==='function')skillRender()}catch(e){}
+ cubePrint('PRESTIGE '+(pr+1)+'. +'+g+' echoes (total '+(ec+g)+'). the void goes quiet.');
+ cubePrint('then: clicks. drips. income x'+(1+0.1*(ec+g)).toFixed(1)+' forever.');
+}
+
+// ASCENSION (layer 2, prestige squared): burn echoes for EMBERS. each ember = +100% everything. ember shop unlocks permanent tech (auto-prestige, discounts, kinder echoes).
+function emberMult(){try{if(typeof skillState!=='undefined'&&skillState)return 1+1.0*(skillState.embers||0)}catch(e){}return 1}
+function ascendGain(){try{if(typeof skillState==='undefined'||!skillState)return 0;return Math.floor((skillState.echoes||0)/10)}catch(e){return 0}}
+var EMB_SHOP=[{id:'autoP',cost:2,max:1,name:'auto-prestige',desc:'prestige fires itself when gain doubles you'},{id:'discount',cost:1,max:5,name:'bulk rate',desc:'upgrade costs -5%/lv compounding'},{id:'kindling',cost:1,max:5,name:'kindling',desc:'echo gain x1.2/lv'}];
+function embGet(id){try{return ((skillState.embShop||{})[id])||0}catch(e){return 0}}
+function ascendCmd(a){
+ var raw=String(a||'').trim().toLowerCase(),g=ascendGain(),em=0,as=0;
+ try{em=skillState.embers||0;as=skillState.ascensions||0}catch(e){}
+ if(raw.indexOf('buy')===0){
+  var id=raw.slice(3).trim(),m=null;
+  for(var i=0;i<EMB_SHOP.length;i++)if(EMB_SHOP[i].id.toLowerCase()===id||EMB_SHOP[i].name.toLowerCase()===id)m=EMB_SHOP[i];
+  if(!m){cubePrint('ember shop: autoP / discount / kindling. type: ascend buy <id>');return}
+  var lv=embGet(m.id);
+  if(lv>=m.max){cubePrint(m.name+': maxed.');return}
+  if(em<m.cost){cubePrint(m.name+': need '+m.cost+' embers. you have '+em+'.');return}
+  try{skillState.embers-=m.cost;skillState.embShop=skillState.embShop||{};skillState.embShop[m.id]=lv+1;if(typeof skillSave==='function')skillSave()}catch(e){}
+  cubePrint(m.name+' bought ('+(lv+1)+'/'+m.max+'). permanent. (everything is permanent down here. except everything.)');
+  return;
+ }
+ if(raw!=='yes'){
+  if(g<1){cubePrint('ascension needs weight. (10 echoes = 1 ember.)');return}
+  cubePrint('ASCEND for '+g+' ember'+(g===1?'':'s')+'. burns: skill, upgrades, overcharge, ECHOES. keeps: skills, achievements, ember shop, embers ('+em+' -> '+(em+g)+').');
+  cubePrint('each ember: +25% everything, forever. type: ascend yes. (bigger take-backs. (none.))');
+  cubePrint('ember shop — type: ascend buy <id>:');
+  for(var k=0;k<EMB_SHOP.length;k++){var e2=EMB_SHOP[k];cubePrint('  '+e2.id+' ('+e2.cost+'e): '+e2.name+' — '+e2.desc+' ['+embGet(e2.id)+'/'+e2.max+']')}
+  return;
+ }
+ if(g<1){cubePrint('nothing to burn. the void yawns upward.');return}
+ try{
+  skillState.points=0;skillState.ocLv=0;skillState.ptFrac=0;skillState.upFrac=0;skillState.echoes=0;
+  for(var uk in skillState.upgrades){try{if(skillState.upgrades[uk])skillState.upgrades[uk].lv=0}catch(e){}}
+  skillState.embers=em+g;skillState.ascensions=as+1;
+  if(typeof skillSave==='function')skillSave();
+ }catch(e){cubeError('ascend: '+e);return}
+ try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}
+ try{if(typeof skillRender==='function')skillRender()}catch(e){}
+ cubePrint('ASCENSION '+(as+1)+'. +'+g+' embers (total '+(em+g)+'). the void forgets you harder.');
+ cubePrint('income x'+(1+1.0*(em+g)).toFixed(2)+' from embers alone. echoes start over. (they always do.)');
+}
+
+// SACRIFICE (layer 3): nuke the numeric save for x5 skill forever. ONCE. keeps achievements, skills owned, nothing core. everything else burns.
+function sacMult(){try{if(typeof skillState!=='undefined'&&skillState&&skillState.sacrificed)return 5}catch(e){}return 1}
+function sacrificeCmd(a){
+ var done=false;
+ try{done=!!skillState.sacrificed}catch(e){}
+ if(done){cubePrint('already sacrificed. the void remembers. (x5 stands.)');return}
+ if(String(a||'').trim().toLowerCase().indexOf('buy')===0){sacrificeBuy(String(a||'').trim().slice(3).trim());return}
+ if(String(a||'').trim().toLowerCase()!=='yes'){
+  cubePrint('SACRIFICE. burns: skill, upgrades, overcharge, echoes, embers, counts, ember shop.');
+  cubePrint('keeps: achievements, skills owned, nothing core. pays: x5 skill income, FOREVER.');
+  cubePrint('ONCE. there is no second one. type: sacrifice yes. (the void will miss you.)');
+  cubePrint('sacrifice shop (the burned only) — type: sacrifice buy <id>:');
+  for(var s2=0;s2<SAC_SHOP.length;s2++){var sm=SAC_SHOP[s2];cubePrint('  '+sm.id+' ('+(sm.cost*(sacGet(sm.id)+1))+' skill): '+sm.name+' — '+sm.desc+' ['+sacGet(sm.id)+'/'+sm.max+']')}
+  return;
+ }
+ try{
+  skillState.points=0;skillState.ocLv=0;skillState.ptFrac=0;skillState.upFrac=0;
+  skillState.echoes=0;skillState.embers=0;skillState.prestiges=0;skillState.ascensions=0;
+  for(var uk in skillState.upgrades){try{if(skillState.upgrades[uk])skillState.upgrades[uk].lv=0}catch(e){}}
+  skillState.embShop={};skillState.sacrificed=true;
+  if(typeof skillSave==='function')skillSave();
+ }catch(e){cubeError('sacrifice: '+e);return}
+ try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}
+ try{if(typeof skillRender==='function')skillRender()}catch(e){}
+ cubePrint('SACRIFICED. the numbers are gone. the achievements stay. (proof.)');
+ cubePrint('x5 skill income, forever. that was the tutorial. (it was not. it gets worse.)');
+}
+
+// MINING (layer 4): rigs spit ore, ore refines into mastery, mastery = +2% skill income per level forever. EUT mining spirit, void hole flavor.
+function mineState(){try{if(typeof skillState!=='undefined'&&skillState){skillState.mine=skillState.mine||{rigs:0,ore:0,xp:0,mastery:0};return skillState.mine}}catch(e){}return {rigs:0,ore:0,xp:0,mastery:0}}
+function mineRigCost(){try{var m=mineState();return Math.floor(400*Math.pow(1.15,m.rigs))}catch(e){return 400}}
+function mineXpNeed(){try{var m=mineState();return Math.floor(10*Math.pow(1.6,m.mastery))}catch(e){return 10}}
+function mineMult(){try{var m=mineState();return 1+0.02*m.mastery}catch(e){return 1}}
+function mineCmd(a){
+ var raw=String(a||'').trim().toLowerCase(),m=mineState(),bal=0;
+ try{bal=Math.floor(skillState.points)||0}catch(e){}
+ if(raw.indexOf('refine')===0){
+  var rest=raw.slice(6).trim(),need=mineXpNeed(),n=0;
+  if(rest==='all'){while(m.ore>=need){m.ore-=need;m.xp+=need;n++;need=mineXpNeed()}}
+  else{var w=parseInt(rest,10);if(!(w>0))w=1;for(var i=0;i<w;i++){if(m.ore<need)break;m.ore-=need;m.xp+=need;n++;need=mineXpNeed()}}
+  var ups=0;
+  while(m.xp>=mineXpNeed()){var nd=mineXpNeed();m.xp-=nd;m.mastery++;ups++}
+  try{if(typeof skillSave==='function')skillSave()}catch(e){}
+  cubePrint(n>0||ups>0?('refined '+n+' ore'+(ups>0?(', mastery UP x'+ups+' (lv '+m.mastery+', +'+(m.mastery*2)+'% skill)'):'. the hole approves.')):'need '+need+' ore. (rigs spit 1/min each.)');
+  return;
+ }
+ if(raw==='buy'){
+  var cost=mineRigCost();
+  if(bal<cost){cubePrint('rig '+m.rigs+' costs '+cost+' skill. you have '+bal+'.');return}
+  try{skillState.points-=cost;m.rigs++;if(typeof skillSave==='function')skillSave()}catch(e){}
+  try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}
+  cubePrint('rig '+m.rigs+' online. it spits 1 ore/min. next: '+mineRigCost()+' skill.');
+  return;
+ }
+ cubePrint('MINE: '+m.rigs+' rigs · '+Math.floor(m.ore*10)/10+' ore · mastery '+m.mastery+' (+'+(m.mastery*2)+'% skill) · '+Math.floor(m.xp*10)/10+'/'+mineXpNeed()+' xp');
+ cubePrint('rigs spit 1 ore/min each. mine buy / mine refine [n|all]. next rig: '+mineRigCost()+' skill.');
+}
+
+// CHALLENGES (obelisk): runs with modifiers for permanent +10% each. bare (no upgrades), patient (no fountain), rush (10min clock). 3 tiers each.
+var CHAL_DEF={bare:{name:'bare',desc:'upgrades give nothing',goals:[5000,50000,500000]},patient:{name:'patient',desc:'no fountain, no trickles',goals:[2000,20000,200000]},rush:{name:'rush',desc:'10 minutes on the clock, everything on',goals:[10000,100000,1000000]}};
+function chalState(){try{if(typeof skillState!=='undefined'&&skillState){skillState.chal=skillState.chal||null;return skillState.chal}}catch(e){}return null}
+function chalNerf(){try{var c=chalState();return !!(c&&c.id==='bare')}catch(e){return false}}
+function chalMult(){try{if(typeof skillState!=='undefined'&&skillState)return 1+(skillState.chalBonus||0)}catch(e){}return 1}
+function chalQuiet(){try{var c=chalState();return !!(c&&c.id==='patient')}catch(e){return false}}
+function challengeCmd(a){
+ var raw=String(a||'').trim().toLowerCase(),c=chalState();
+ if(raw.indexOf('enter')===0){
+  var id=raw.slice(5).trim();
+  if(!CHAL_DEF[id]){cubePrint('challenges: bare / patient / rush. type: challenge enter <id>');return}
+  if(c){cubePrint('already inside '+c.id+' (tier '+(c.tier+1)+'). finish or challenge exit.');return}
+  var done=0;
+  try{done=((skillState.chalDone||{})[id])||0}catch(e){}
+  if(done>=3){cubePrint(id+': maxed. the obelisk bows.');return}
+  try{skillState.chal={id:id,tier:done,earn:0,deadline:(id==='rush'?Date.now()+10*60*1000:0),last:Math.floor(skillState.points)||0};if(typeof skillSave==='function')skillSave()}catch(e){}
+  cubePrint('CHALLENGE '+id+' tier '+(done+1)+'/3: '+CHAL_DEF[id].desc+'. goal: '+CHAL_DEF[id].goals[done]+' skill. +10% forever. (challenge exit to forfeit.)');
+  return;
+ }
+ if(raw==='exit'){
+  if(!c){cubePrint('not inside anything. the obelisk waits.');return}
+  try{skillState.chal=null;if(typeof skillSave==='function')skillSave()}catch(e){}
+  try{if(typeof skillUpReapplyAll==='function')skillUpReapplyAll()}catch(e){}
+  cubePrint('forfeited '+c.id+'. progress kept nowhere. (it never happened.)');
+  return;
+ }
+ cubePrint('OBELISK — permanent +10% per completion:');
+ for(var k in CHAL_DEF){var dn=0;try{dn=((skillState.chalDone||{})[k])||0}catch(e){}cubePrint('  '+k+' ['+dn+'/3]: '+CHAL_DEF[k].desc+(c&&c.id===k?('  <-- inside (tier '+(c.tier+1)+', '+Math.floor(c.earn)+'/'+CHAL_DEF[k].goals[c.tier]+')'):''))}
+}
+function chalTick(){
+ try{
+  var c=chalState();if(!c)return;
+  var pts=0;try{pts=Math.floor(skillState.points)||0}catch(e){}
+  var gain=Math.max(0,pts-(c.last||0));c.last=pts;
+  if(gain>0)c.earn=(c.earn||0)+gain;
+  var def=CHAL_DEF[c.id];if(!def){skillState.chal=null;return}
+  if(c.id==='rush'&&c.deadline&&Date.now()>c.deadline){skillState.chal=null;if(typeof skillSave==='function')skillSave();cubePrint('RUSH expired. the clock keeps the skill. (it always does.)');return}
+  if((c.earn||0)>=def.goals[c.tier||0]){
+   skillState.chalDone=skillState.chalDone||{};skillState.chalDone[c.id]=(skillState.chalDone[c.id]||0)+1;
+   skillState.chalBonus=(skillState.chalBonus||0)+0.1;
+   var t3=skillState.chalDone[c.id]>=3;
+   skillState.chal=t3?null:{id:c.id,tier:skillState.chalDone[c.id],earn:0,deadline:(c.id==='rush'?Date.now()+10*60*1000:0),last:pts};
+   if(typeof skillSave==='function')skillSave();
+   try{if(typeof skillUpReapplyAll==='function')skillUpReapplyAll()}catch(e){}
+   cubePrint('CHALLENGE CLEAR: '+c.id+' tier '+(c.tier+1)+'/3. +10% skill forever.'+(t3?' MAXED. the obelisk bows.':' next tier auto-started.'));
+  }else if(typeof skillSave==='function')skillSave();
+ }catch(e){}
+}
+
+// SACRIFICE SHOP: post-sacrifice tech, priced in fresh skill. only the burned may buy.
+var SAC_SHOP=[{id:'phoenix',cost:50000,max:3,name:'phoenix',desc:'each prestige starts with +10k skill/lv'},{id:'ashen',cost:100000,max:10,name:'ashen',desc:'+25% skill/lv'},{id:'twice',cost:200000,max:1,name:'twice-burned',desc:'keep overcharge through prestige'}];
+function sacGet(id){try{return ((skillState.sacShop||{})[id])||0}catch(e){return 0}}
+function sacMult2(){try{if(typeof skillState!=='undefined'&&skillState)return 1+0.25*sacGet('ashen')}catch(e){}return 1}
+function sacrificeBuy(id){
+ var done=false;try{done=!!skillState.sacrificed}catch(e){}
+ if(!done){cubePrint('only the burned may buy. (sacrifice first.)');return}
+ var m=null;
+ for(var i=0;i<SAC_SHOP.length;i++)if(SAC_SHOP[i].id===id)m=SAC_SHOP[i];
+ if(!m){cubePrint('sacrifice shop: phoenix / ashen / twice. type: sacrifice buy <id>');return}
+ var lv=sacGet(m.id),cost=m.cost*(lv+1);
+ if(lv>=m.max){cubePrint(m.name+': maxed.');return}
+ var bal=0;try{bal=Math.floor(skillState.points)||0}catch(e){}
+ if(bal<cost){cubePrint(m.name+': need '+cost+' skill. you have '+bal+'.');return}
+ try{skillState.points-=cost;skillState.sacShop=skillState.sacShop||{};skillState.sacShop[m.id]=lv+1;if(typeof skillSave==='function')skillSave()}catch(e){}
+ try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}
+ cubePrint(m.name+' bought ('+(lv+1)+'/'+m.max+'). burned money spends best.');
+}
+
+// INFINITY CODEC: JSON turns Infinity/NaN into null (save corruption). this translates at the boundary so infinity actually works.
+function jsonInfRep(k,v){if(v===Infinity)return 'INF';if(v===-Infinity)return '-INF';if(typeof v==='number'&&isNaN(v))return 'NAN';return v}
+function jsonInfRev(k,v){if(v==='INF')return Infinity;if(v==='-INF')return -Infinity;if(v==='NAN')return 0;return v}
+
+// INFINITY (layer 5): going infinite needs 1e300 skill. each infinity point = x10 skill. beyond numbers. the codec keeps it alive.
+function infMult(){try{if(typeof skillState!=='undefined'&&skillState)return Math.pow(10,skillState.infP||0)}catch(e){}return 1}
+function infinitizeGain(){try{if(typeof skillState==='undefined'||!skillState)return 0;var p=skillState.points||0;if(!(p>=1e300))return 0;return Math.max(1,Math.floor(Math.log10(p)/300))}catch(e){return 0}}
+function infinitizeCmd(a){
+ var g=infinitizeGain(),ip=0,ic=0;
+ try{ip=skillState.infP||0;ic=skillState.infinities||0}catch(e){}
+ if(String(a||'').trim().toLowerCase()!=='yes'){
+  if(g<1){cubePrint('infinity needs weight. (1e300 skill = 1 infinity point.)');return}
+  cubePrint('INFINITIZE for '+g+' infinity point'+(g===1?'':'s')+'. burns: skill, upgrades, overcharge, echoes, embers, mine, counts, shops.');
+  cubePrint('keeps: achievements, skills, nothing core, sacrifice. each point: x10 skill.');
+  cubePrint('beyond numbers. type: infinitize yes. (there is nothing past this. (there is.))');
+  return;
+ }
+ if(g<1){cubePrint('not infinite yet. the numbers laugh.');return}
+ try{
+  skillState.points=0;skillState.ocLv=0;skillState.ptFrac=0;skillState.upFrac=0;
+  skillState.echoes=0;skillState.embers=0;skillState.prestiges=0;skillState.ascensions=0;
+  skillState.embShop={};skillState.mine={rigs:0,ore:0,xp:0,mastery:0};skillState.chal=null;
+  for(var uk in skillState.upgrades){try{if(skillState.upgrades[uk])skillState.upgrades[uk].lv=0}catch(e){}}
+  skillState.infP=ip+g;skillState.infinities=ic+1;
+  if(typeof skillSave==='function')skillSave();
+ }catch(e){cubeError('infinitize: '+e);return}
+ try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}
+ try{if(typeof skillRender==='function')skillRender()}catch(e){}
+ cubePrint('INFINITE x'+(ic+1)+'. +'+g+' infinity points. skill x'+Math.pow(10,ip+g)+'.');
+ cubePrint('you are past numbers now. the void takes notes. (it cannot count that high.)');
+}
+
+// JBOBOX: fullscreen fork. freezes void income while inside.
+function jboEnter(){try{var f=document.getElementById('jboFrame'),r=document.getElementById('jboReturn');if(!f){cubeError('jbobox: no frame. (cube.html too old?)');return}window._jboInside=true;try{var _rc=document.getElementById('reactorTerminal');if(_rc)_rc.style.display='none';try{window._jboPrevReactor=window.reactorRunning;window.reactorRunning=false}catch(e){}}catch(e){}try{if(typeof bgm!=='undefined'&&bgm&&!bgm.paused){window._jboWasBgm=true;bgm.pause()}else window._jboWasBgm=false}catch(e){}f.setAttribute('src','jbo.html');f.style.display='block';if(r)r.style.display='block';try{window._jboDisp=[];var _jc=['main','trailCanvas','weatherCanvas','sortCanvas'];for(var _ji=0;_ji<_jc.length;_ji++){var _je=document.getElementById(_jc[_ji]);if(_je){window._jboDisp.push([_je,_je.style.display]);_je.style.display='none'}}}catch(e){}cubePrint('jbo: OH. a visitor. welcome to MY world. its orange here. EVERYTHING IS FREE. DO NOT TOUCH ANYTHING.');try{var _mb=jboxBox();if(_mb.toJbo.length)cubePrint('jbo: u got mail!! ('+_mb.toJbo.length+'). type mailbox. READ IT.')}catch(e){}}catch(e){cubeError('jbobox: '+e)}}
+function jboLeave(){try{var f=document.getElementById('jboFrame'),r=document.getElementById('jboReturn');if(f){f.style.display='none';try{f.setAttribute('src','about:blank')}catch(e){}}if(r)r.style.display='none';try{var _rc=document.getElementById('reactorTerminal');if(_rc)_rc.style.display='block';try{if(window._jboPrevReactor)window.reactorRunning=true}catch(e){}window._jboPrevReactor=false}catch(e){}window._jboInside=false;try{if(window._jboDisp)for(var _jk=0;_jk<window._jboDisp.length;_jk++){try{window._jboDisp[_jk][0].style.display=window._jboDisp[_jk][1]}catch(e){}}window._jboDisp=null}catch(e){}try{window.lastRenderTime=performance.now()}catch(e){}try{if(typeof render==='function')requestAnimationFrame(render)}catch(e){}try{if(window._jboWasBgm&&typeof bgm!=='undefined'&&bgm){var p=bgm.play();if(p&&p.catch)p.catch(function(){})}window._jboWasBgm=false}catch(e){}cubePrint('back in the void. jbo waves. HE THINKS WAVING IS POINTING.')}catch(e){}}
+// CROSS-WORLD MAILBOX: shared key both worlds can read (same origin).
+// slot wipes only touch cube_* keys, so jbox_mail survives fresh timelines.
+function jboxBox(){try{var b=JSON.parse(localStorage.getItem('jbox_mail')||'null');if(b&&b.toJbo instanceof Array&&b.toVoid instanceof Array)return b}catch(e){}return{toJbo:[],toVoid:[]}}
+function jboxSaveBox(b){try{localStorage.setItem('jbox_mail',JSON.stringify(b))}catch(e){}}
+function jboxSend(text){
+ text=String(text||'').trim().slice(0,200);
+ if(!text){cubePrint('sendjbo <text> — write something first. (jbo cannot read blank mail. nobody can.)');return}
+ var b=jboxBox();b.toJbo.push({t:text,at:Date.now()});while(b.toJbo.length>20)b.toJbo.shift();jboxSaveBox(b);
+ cubePrint('letter sent to jbo world. ('+b.toJbo.length+'/20 in his pile.)');
+}
+function jboxRead(){
+ var b=jboxBox();
+ if(!b.toVoid.length){cubePrint('mailbox empty. jbo has not written. (he is thinking. this takes a while.)');return}
+ for(var i=0;i<b.toVoid.length;i++)cubePrint('letter from jbo: "'+b.toVoid[i].t+'"');
+ b.toVoid=[];jboxSaveBox(b);
+}

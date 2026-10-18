@@ -214,7 +214,7 @@ function tbLvl(id){return tbLevels[id]||1}
 function tbMult(id){return 1+0.15*(tbLvlEff(id)-1)}
 function tbStartBattle(ch,n,od){
 var st=tbBuildStage(ch,n,od);
-try{if(tbAud&&tbAud.paused){var bp=tbAud.play();if(bp&&bp.catch)bp.catch(function(){})}}catch(e){}
+try{if(tbAud&&tbAud.paused&&!window._trAudioLock){var bp=tbAud.play();if(bp&&bp.catch)bp.catch(function(){})}}catch(e){}
 tbB={st:st,time:0,energy:300+25*tbBaseLvEff('start'),max:500,units:[],foes:[],ebase:st.ebase,pbase:st.pbase,cds:{},cannonCd:20,worker:1,over:null,summonT:st.summonT,uid:1};
 try{tbB.geo=(typeof geoFx==='function')?geoFx():{dmg:1,xp:1,rate:0,max:0,pbase:1,cd:30}}catch(e){tbB.geo={dmg:1,xp:1,rate:0,max:0,pbase:1,cd:30}}
 if(tbB.geo.pbase&&tbB.geo.pbase!==1){tbB.pbase=Math.round(tbB.pbase*tbB.geo.pbase);tbB.st.pbase=tbB.pbase}
@@ -798,6 +798,7 @@ try{ritGlow()}catch(e){}
 // ── dead air theme: noobalert.mp3. void track ducks on enter, resumes on exit.
 var tbAud=null;
 function tbMusicStart(){
+if(window._trAudioLock){try{window._tbWasBgm=false}catch(e){}return}
 try{
 if(typeof bgm!=='undefined'&&bgm){window._tbWasBgm=!bgm.paused;try{bgm.pause()}catch(e){}}else window._tbWasBgm=false;
 }catch(e){window._tbWasBgm=false}

@@ -1,6 +1,38 @@
 // ── TRAILER MODE: ghost plays cube for the camera (for recording) ──
 (function(){
-var trActive=false,trTimers=[],trStepN=0,trSeg=[],trCutFn=null;
+var trActive=false,trTimers=[],trStepN=0,trSeg=[],trCutFn=null,trTGuard=0,trBgmT=0;
+function trAudioGuard(){
+if(!trActive){window._trAudioLock=false;return}
+try{
+var ours=(typeof _bgmBlobUrl!=='undefined'&&typeof bgm!=='undefined'&&bgm&&bgm.src===_bgmBlobUrl&&(bgm.dataset.file||'').indexOf('drone2lp.wav')!==-1);
+if(ours){
+try{if(!bgm.paused)trBgmT=bgm.currentTime}catch(e){}
+if(bgm.paused){var p=bgm.play();if(p&&p.catch)p.catch(function(){});}
+try{if(trBgmT>2&&bgm.currentTime<trBgmT-3)bgm.currentTime=trBgmT}catch(e){}
+}else{
+var pos=trBgmT;try{bgmBlobLoad('drone2lp.wav',true)}catch(e){}
+var tries=0;var iv=setInterval(function(){
+if(!trActive||++tries>50){clearInterval(iv);return}
+try{if(typeof _bgmBlobUrl!=='undefined'&&bgm.src===_bgmBlobUrl&&(bgm.dataset.file||'').indexOf('drone2lp.wav')!==-1&&bgm.readyState>=1){if(pos>1)try{bgm.currentTime=pos}catch(e){}clearInterval(iv)}}catch(e){}
+},80);
+}
+}catch(e){}
+try{if(typeof moonEl!=='undefined'&&moonEl)moonEl.pause()}catch(e){}
+try{if(typeof ngMusic!=='undefined'&&ngMusic)ngMusic.pause()}catch(e){}
+try{if(typeof ngMornAud!=='undefined'&&ngMornAud)ngMornAud.pause()}catch(e){}
+try{if(typeof ngNoliAudio!=='undefined'&&ngNoliAudio)ngNoliAudio.pause()}catch(e){}
+try{if(typeof shBgm!=='undefined'&&shBgm)shBgm.pause()}catch(e){}
+try{if(typeof tbAud!=='undefined'&&tbAud)tbAud.pause()}catch(e){}
+try{if(typeof fx!=='undefined'&&fx&&fx.aud)fx.aud.pause()}catch(e){}
+try{if(typeof grCredAudio!=='undefined'&&grCredAudio)grCredAudio.pause()}catch(e){}
+try{if(typeof flyBuzzSet==='function')flyBuzzSet(false)}catch(e){}
+try{if(typeof grAmbStop==='function')grAmbStop()}catch(e){}
+try{if(typeof grBgmA!=='undefined'&&grBgmA)grBgmA.pause()}catch(e){}
+try{if(typeof folkAud!=='undefined'&&folkAud)folkAud.pause()}catch(e){}
+try{if(typeof opAud!=='undefined'&&opAud)opAud.pause()}catch(e){}
+try{var as=document.getElementsByTagName('audio');for(var i=0;i<as.length;i++){if(as[i]!==bgm){try{as[i].pause()}catch(e){}}}}catch(e){}
+trTGuard=setTimeout(trAudioGuard,400);
+}
 function trSegNew(){trSeg=[]}
 function trSegKill(){try{for(var i=0;i<trSeg.length;i++){try{trSeg[i].dead=true;clearTimeout(trSeg[i].id)}catch(e){}}}catch(e){}trSeg=[]}
 function trEl(id){try{return document.getElementById(id)}catch(e){return null}}
@@ -93,6 +125,8 @@ if(name==='office'&&typeof stExit==='function')stExit();
 else if(name==='greyhall'&&typeof ghExit==='function')ghExit();
 else if(name==='tbb'){try{if(typeof tbAuto==='function')tbAuto(false)}catch(e){}if(typeof tbExit==='function')tbExit()}
 else if(name==='cove'&&typeof fxExit==='function')fxExit();
+else if(name==='grotto'&&typeof grExit==='function')grExit();
+else if(name==='fly'&&typeof flyClose==='function')flyClose();
 }catch(e){}
 }
 function trPlay(){
@@ -144,6 +178,16 @@ function(n,arm){trType('play',function(){
 arm(function(){try{if(typeof ngExit==='function')ngExit()}catch(e){}n()});
 trLater(7000,function(){trCutSkip(700)});
 })},
+function(n){trCut(400);trCard('THE GROTTO','214 rooms. one crack in the floor.',4000);trLater(2000,n)},
+function(n,arm){trType('grotto',function(){
+arm(function(){trCloseGame('grotto');n()});
+trLater(7000,function(){trCutSkip(700)});
+})},
+function(n){trCut(400);trCard('THE FLY BRAIN','139,255 neurons. live. not a game.',4000);trLater(2000,n)},
+function(n,arm){trType('fly',function(){
+arm(function(){trCloseGame('fly');n()});
+trLater(7000,function(){trCutSkip(700)});
+})},
 function(n){trCut(500);trCard('VOIDSCRIPT','the void has a language. watch it type.',3500);trLater(1500,n)},
 function(n){trType('void intrude voidstudio',function(){trLater(2500,n)})},
 function(n){trType('studio',function(){trLater(1800,n)})},
@@ -154,7 +198,7 @@ trLater(5000,function(){trCutSkip(700)})},
 function(n){try{var se=trEl('studioExit');if(se)se.click()}catch(e){}trLater(1000,n)},
 function(n){trType('bgm off',function(){
 trCut(500);
-trCard('CUBE','a html file.',9000);
+trCard('CUBE','a html file. 9 zones. 214 rooms. 83 endings. 30 chapters.',9000);
 trLater(9500,function(){trStop(true)});
 n();
 })}
@@ -167,16 +211,21 @@ function trStart(){
 if(trActive){trStop();return}
 try{if(typeof ngActive!=='undefined'&&ngActive){trSay('leave the game first. (the trailer waits. the trailer is patient.)');return}}catch(e){}
 trActive=true;trStepN=0;
+window._trAudioLock=true;trAudioGuard();
 trSay('trailer rolling. (ESC stops. smile.)');
 trPlay();
 }
 function trStop(done){
 trActive=false;
+window._trAudioLock=false;
+try{clearTimeout(trTGuard)}catch(e){}trTGuard=0;
 try{for(var i=0;i<trTimers.length;i++)clearTimeout(trTimers[i])}catch(e){}
 trTimers=[];
 try{var c=trEl('trCard');if(c)c.remove()}catch(e){}
 try{var c2=trEl('trCut');if(c2)c2.remove()}catch(e){}
 try{if(typeof ngActive!=='undefined'&&ngActive&&typeof ngExit==='function')ngExit()}catch(e){}
+try{if(typeof grExit==='function')grExit()}catch(e){}
+try{if(typeof flyClose==='function')flyClose()}catch(e){}
 try{if(typeof studioOpen!=='undefined'&&studioOpen&&typeof closeStudio==='function')closeStudio()}catch(e){}
 if(!done){trCloseGame('office');trCloseGame('greyhall');trCloseGame('tbb');trCloseGame('cove')}
 trSay('trailer cut.');

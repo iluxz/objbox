@@ -322,7 +322,7 @@ ghSay([line,'wake up at the station.']);
 var ghBgmPrev=null;
 function ghBgmTitle(){
 try{
-if(typeof bgm!=='undefined'&&bgm){
+if(typeof bgm!=='undefined'&&bgm&&!window._trAudioLock){
 if(!ghBgmPrev)ghBgmPrev={src:bgm.src||'',loop:bgm.loop,vol:bgm.volume,playing:!bgm.paused};
 try{bgm.pause()}catch(e){}
 try{bgm.loop=true;bgm.volume=0.28;bgm.src='drone2lp.wav';var p=bgm.play();if(p&&p.catch)p.catch(function(){})}catch(e){}

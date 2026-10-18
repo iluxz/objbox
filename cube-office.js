@@ -964,7 +964,7 @@ var f=stMusicTracks[stMusicIdx];
 if(!f){if(typeof bgm!=='undefined'&&bgm)bgm.pause();stMusicOn=false}
 else{
 stMusicOn=true;
-if(typeof bgm!=='undefined'&&bgm){
+if(typeof bgm!=='undefined'&&bgm&&!window._trAudioLock){
 try{bgm.loop=true;bgm.volume=0.35;bgm.src=f;var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){})}catch(e){}
 }
 }
@@ -1161,11 +1161,11 @@ if(typeof ngActive!=='undefined'&&ngActive){try{cubePrint('you are already insid
 stLoad();
 stActive=true;stEndingLock=false;
 stBuild();
-try{if(typeof bgm!=='undefined'&&bgm&&!bgm.paused){window._stWasBgm=true;bgm.pause()}else{window._stWasBgm=false}}catch(e){}
-try{if(typeof bgm!=='undefined'&&bgm){window._stBgmSrc=bgm.src;window._stBgmLoop=bgm.loop;window._stBgmVol=bgm.volume}}catch(e){}
+try{if(typeof bgm!=='undefined'&&bgm&&!window._trAudioLock){if(!bgm.paused){window._stWasBgm=true;bgm.pause()}else{window._stWasBgm=false}}}catch(e){}
+try{if(typeof bgm!=='undefined'&&bgm&&!window._trAudioLock){window._stBgmSrc=bgm.src;window._stBgmLoop=bgm.loop;window._stBgmVol=bgm.volume}}catch(e){}
 try{
 var _stf=stMusicTracks[stMusicIdx];
-if(_stf&&typeof bgm!=='undefined'&&bgm){try{bgm.loop=true;bgm.volume=0.35;bgm.src=_stf;var _stbp=bgm.play();if(_stbp&&_stbp.catch)_stbp.catch(function(){})}catch(e){}}
+if(_stf&&typeof bgm!=='undefined'&&bgm&&!window._trAudioLock){try{bgm.loop=true;bgm.volume=0.35;bgm.src=_stf;var _stbp=bgm.play();if(_stbp&&_stbp.catch)_stbp.catch(function(){})}catch(e){}}
 stMusicOn=stMusicIdx>0;
 }catch(e){}
 if(stClockBoots<5||stEpilogueReady){
@@ -1184,7 +1184,7 @@ try{stClosetStop()}catch(e){}
 var ov=null;try{ov=document.getElementById('stOverlay');if(ov)ov.remove()}catch(e){}
 try{stRestoreUI()}catch(e){}
 try{
-if(typeof bgm!=='undefined'&&bgm){
+if(typeof bgm!=='undefined'&&bgm&&!window._trAudioLock){
 try{if(window._stBgmSrc)bgm.src=window._stBgmSrc;if(typeof window._stBgmLoop!=='undefined')bgm.loop=window._stBgmLoop;if(typeof window._stBgmVol!=='undefined')bgm.volume=window._stBgmVol}catch(e){}
 if(window._stWasBgm){var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){})}else{bgm.pause()}
 }

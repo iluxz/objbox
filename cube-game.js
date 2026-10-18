@@ -224,13 +224,26 @@ return shapeGens[shape](0.35,r,g,b)
 // │  WEBGL SETUP                                               │
 // └──────────────────────────────────────────────────────────────┘
 var canvas=document.getElementById('main');
-var gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
+var gl=null;
+try{gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true})||canvas.getContext('experimental-webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true})}catch(e){gl=null}
+if(!gl){
+ window._noGL=true;
+ try{
+  var d=document.createElement('div');d.id='nogl';d.style.cssText='position:fixed;inset:auto 12px 12px 12px;z-index:99999;background:rgba(20,8,8,.92);border:1px solid #f66;border-radius:8px;color:#fcc;font-family:Consolas,monospace;font-size:12px;padding:10px 14px';
+  d.textContent='webgl unavailable: 3d disabled, terminal + games still work. enable hardware acceleration / webgl and reload for the cube.';
+  document.body.appendChild(d);
+ }catch(e){}
+ gl=(function(){
+  function noop(){}
+  return {viewport:noop,enable:noop,disable:noop,clearColor:noop,clear:noop,bindBuffer:noop,bufferData:noop,deleteBuffer:noop,depthMask:noop,blendFunc:noop,scissor:noop,enableVertexAttribArray:noop,disableVertexAttribArray:noop,vertexAttribPointer:noop,drawArrays:noop,useProgram:noop,uniformMatrix4fv:noop,uniformMatrix3fv:noop,uniform3fv:noop,uniform4fv:noop,uniform1f:noop,uniform1i:noop,uniform:noop,uniformMatrix:noop,createBuffer:function(){return{}},createShader:function(){return{}},shaderSource:noop,compileShader:noop,createProgram:function(){return{}},attachShader:noop,linkProgram:noop,getAttribLocation:function(){return 0},getUniformLocation:function(){return null},DEPTH_TEST:1,CULL_FACE:1,BACK:1,COLOR_BUFFER_BIT:1,DEPTH_BUFFER_BIT:1,BLEND:1,SCISSOR_TEST:1,VERTEX_SHADER:1,FRAGMENT_SHADER:1,ARRAY_BUFFER:1,DYNAMIC_DRAW:1,STATIC_DRAW:1,FLOAT:1,POINTS:1,TRIANGLES:1,LINES:1};
+ })();
+}
 var dpr=Math.min(window.devicePixelRatio||1,2);
 canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;
 canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';
-gl.viewport(0,0,canvas.width,canvas.height);
-gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK);
-gl.clearColor(0.005,0.005,0.015,1);
+try{gl.viewport(0,0,canvas.width,canvas.height)}catch(e){}
+try{gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);gl.cullFace(gl.BACK)}catch(e){}
+try{gl.clearColor(0.005,0.005,0.015,1)}catch(e){}
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  SHADERS                                                   │
@@ -957,6 +970,7 @@ gl.drawArrays(gl.TRIANGLES,0,vdSh.cnt);}
 gl.depthMask(true);gl.disable(gl.BLEND);gl.enable(gl.DEPTH_TEST);
 }
 function render(time){
+if(window._jboInside)return
 if(odActive&&time-lastRenderTime<100){requestAnimationFrame(render);return}
 var dt=time-lastRenderTime;lastRenderTime=time;
 frames++;var now=performance.now();
@@ -1996,7 +2010,7 @@ var ACH=[
 {id:'menu_30',h:'settle in.',n:'menu resident',d:'survive cb_menu 30 minutes. (touch grass after.)',c:function(){return cbMenuLive()>=1800000}},
 {id:'menu_60',h:'move into the menu.',n:'one with the menu',d:'survive cb_menu a full hour. (how.)',c:function(){return cbMenuLive()>=3600000}},
 {id:'blessed',h:'catch it winking.',n:'blessed',d:'catch the void winking 5 times. (1% per oracle.)',c:function(){return achLuck()>=5}},
-{id:'witness',h:'catch it winking. a lot.',n:'witness',d:'catch the void winking 25 times. ( 2500 asks. pays +25 upgrade points.)',c:function(){return achLuck()>=25}},
+{id:'witness',h:'catch it winking. a lot.',n:'witness',d:'catch the void winking 25 times. ( 2500 asks. pays +25 skill.)',c:function(){return achLuck()>=25}},
 {sec:'SKILL & SELF'},
 {id:'night_owl',h:'visit at an unreasonable hour.',n:'still awake?',d:'open the cube between 12am and 5am.',c:function(){var h=new Date().getHours();return h<5}},
 {id:'completionist',h:'buy everything.',n:'completionist',d:'buy every skill.',c:function(){try{return skillAllFinals()}catch(e){return false}}},
@@ -2043,6 +2057,7 @@ var ACH=[
 {id:'vandal',h:'rename the credits. five times.',n:'credits adjusted',d:'rename credits 2 names five times. the void kept receipts.',c:function(){return parseInt(achKV('cube_cred2_edits')||'0',10)>=5}},
 {id:'seen_enough',h:'declare you have seen enough.',n:'director\u2019s cut',d:'hit I HAVE SEEN ENOUGH.',c:function(){return achKV('cube_cred2_seen')==='1'}},
 {id:'hard_morning',h:'finish MORNING on hard.',n:'9 to 5',d:'finish MORNING on hard mode.',c:function(){var p=achP19();return !!(p&&p.done&&p.hard===1)}},
+{id:'night_shift',h:'the archive is full.',n:'night shift',d:'survive the mailroom shutdown drill.',c:function(){var p=achP19();return !!(p&&p.done&&p.night===1)}},
 {id:'void_mail',h:'you have mail.',n:'return to sender',d:'read your mail. (you have mail. act 2 mail.)',c:function(){return achKV('cube_mail_read')==='1'}},
 {sec:'THE GROTTO'},
 {id:'gr_lorekeeper',h:'read everything.',n:'lorekeeper',d:'read all three truth files in the grotto vault.',c:false},
@@ -2066,7 +2081,19 @@ var ACH=[
 {id:'gr_tacklebox',h:'it remembers being useful.',n:'fully rebuilt',d:'rebuild the grotto tacklebox to max tier.',c:false},
 {id:'gr_petpal',h:'it follows you.',n:'take-home slime',d:'buy a pet slime from Chism. it follows you across the void.',c:false},
 {id:'gr_menagerie',h:'all six. penned.',n:'full menagerie',d:'pen all 6 ranch slime types in the grotto.',c:false},
-{id:'gr_roundup',h:'got em.',n:'lost and found',d:'round up escaped ranch slimes in the grotto.',c:false},
+ {id:'gr_roundup',h:'got em.',n:'lost and found',d:'round up escaped ranch slimes in the grotto.',c:false},
+ {id:'gr_scuba',h:'the suit drips.',n:'pressure-tested',d:'buy the dive suit in the grotto burrows (25 deep + 5000 glow + 777 plorts).',c:false},
+ {id:'gr_drained',h:'two-three-one.',n:'pipe tuner',d:'drain the grotto sump with the valve sequence.',c:false},
+ {id:'gr_floodgate',h:'something dry.',n:'in case of dry',d:'crack the floodgate cache in the grotto.',c:false},
+ {id:'gr_deep50',h:'halfway to nowhere.',n:'deep delver',d:'map 50 rooms of the grotto deep.',c:false},
+  {id:'gr_deep100',h:'the bottom shelf.',n:'bottomed out',d:'map all 214 rooms of the grotto deep and crack the final cache.',c:false},
+ {id:'gr_botline',h:'the cave gets louder.',n:'full automation',d:'fabricate all 6 grotto automatons.',c:false},
+ {id:'gr_blackout',h:'the machines sleep.',n:'blackout',d:'run the automatons until the deep runs dry.',c:false},
+ {id:'gr_collapse',h:'burn it all.',n:'collapse',d:'collapse the grotto for lanterns.',c:false},
+ {id:'gr_mine_first',h:'past the crash.',n:'mine visitor',d:'set foot in the mines (room 108) after the elevator drop.',c:false},
+ {id:'gr_stratum_4',h:'warm rock.',n:'stratum four',d:'reach the core stratum of the mines.',c:false},
+ {id:'gr_ore1000',h:'heavy pockets.',n:'ore hoarder',d:'mine 1000 ore across the mines.',c:false},
+ {id:'gr_heart214',h:'the heart is quiet.',n:'hearted out',d:'open the still heart at room 214 and finish all 214 rooms.',c:false},
 {sec:'FOLK VALLEY'},
 {id:'folk_first',h:'go to the valley.',n:'folk visitor',d:'get transported to folk valley by telling obj.',c:false},
 {id:'folk_regular',h:'hang around.',n:'valley regular',d:'wander folk valley 25 times.',c:false},
@@ -2140,8 +2167,32 @@ var ACH=[
 {id:'ca_first',h:'paid. do not get used to it.',n:'first payout',d:'win anything at the void casino.',c:false},
 {id:'ca_jackpot',h:'three sevens. or green.',n:'house funds you',d:'hit a casino jackpot (slots sevens or spin green).',c:false},
 {id:'ca_streak',h:'five in a row.',n:'card counter',d:'win 5 higher/lower rounds in a row.',c:false},
-{id:'ca_bankrupt',h:'zero chips.',n:'lint rich',d:'lose every chip at the void casino.',c:false}
+{id:'ca_bankrupt',h:'zero chips.',n:'lint rich',d:'lose every chip at the void casino.',c:false},
+{sec:'SECRET CUBE'},
+{id:'se_first',h:'logged. framed.',n:'hello world',d:'find your first secret in the waiting room.',c:false},
+{id:'se_hunter',h:'the wiki grows.',n:'secret hunter',d:'find 6 secrets in the waiting room.',c:false},
+{id:'se_all',h:'go outside. (do not.)',n:'every ending',d:'find all 13 secrets in the waiting room.',c:false},
+{sec:'jbo'},
+{id:'no_game',h:'THERE IS NO GAME. THE LOBBY IS FREE THOUGH.',n:'free orange lobby (jbo)',d:'jbo: finish chapter 0 of there is no sphere. (welcome to the lobby. everything here is free.)',c:function(){try{var s=JSON.parse(localStorage.getItem('jbox_nogame')||'null');return !!(s&&s.ch>=1)}catch(e){return false}}},
+{id:'halfway',h:'NOWHERE. HALFWAY THERE.',n:'halfway to nowhere (jbo)',d:'jbo: reach chapter 6 of there is no sphere.',c:function(){try{var s=JSON.parse(localStorage.getItem('jbox_nogame')||'null');return !!(s&&s.ch>=6)}catch(e){return false}}},
+{id:'act1_done',h:'REACH THE END OF THE FREE PART.',n:'the end of free (jbo)',d:'jbo: finish act 1 of there is no sphere.',c:function(){try{var s=JSON.parse(localStorage.getItem('jbox_nogame')||'null');return !!(s&&s.ch>=11)}catch(e){return false}}},
+{id:'act2_walker',h:'KEEP WALKING. DO NOT READ. I CANNOT EITHER.',n:'still no game (jbo)',d:'jbo: reach chapter 14 of there is no sphere.',c:function(){try{var s=JSON.parse(localStorage.getItem('jbox_nogame')||'null');return !!(s&&s.ch>=14)}catch(e){return false}}},
+{id:'interloper_met',h:'ANSWER EVERYTHING. SURVIVE.',n:'it knows you (jbo)',d:'jbo: survive the interrogation. (I DID NOT READ THE QUESTIONS. I YELLED.)',c:function(){try{var s=JSON.parse(localStorage.getItem('jbox_nogame')||'null');return !!(s&&s.ch>=16)}catch(e){return false}}},
+{id:'act3_done',h:'STILL NO CUBE. FINISH ANYWAY.',n:'still no cube (jbo)',d:'jbo: finish act 3 of there is no sphere.',c:function(){try{var s=JSON.parse(localStorage.getItem('jbox_nogame')||'null');return !!(s&&s.ch>=30)}catch(e){return false}}},
+{id:'noli_full',h:'LISTEN TO THE WHOLE PERFORMANCE. IT IS MINE.',n:'J-B-O',d:'jbo: THANK YOU FOR LISTENING TO MY PERFORMANCE (DID I SING GOOD?? I TRIED)',c:function(){try{return localStorage.getItem('jbox_noli_full')==='1'}catch(e){return false}}},
+{id:'mercy',h:'STOP.',n:'mercy (jbo)',d:'STOP. (the void pays its debts. it was free.)',c:function(){try{return localStorage.getItem('jbox_finale')==='mercy'}catch(e){return false}}},
+{id:'brat',h:'KEEP.',n:'brat (jbo)',d:'KEEP. (hush money. it was free.)',c:function(){try{return localStorage.getItem('jbox_finale')==='brat'}catch(e){return false}}},
+{id:'hardened',h:'MAKE IT HARDER. ON PURPOSE.',n:'eleven (jbo)',d:'jbo: turn hard mode on in there is no sphere.',c:function(){try{var s=JSON.parse(localStorage.getItem('jbox_nogame')||'null');return !!(s&&s.hard)}catch(e){return false}}},
+{id:'action2',h:'BEAT ACT 2.',n:'action 2 (jbo)',d:'jbo: beat act 2 of there is no sphere.',c:function(){try{return localStorage.getItem('jbox_act2')==='1'}catch(e){return false}}},
+{id:'eleven_hour',h:'BEAT ACT 2, HARDER.',n:'eleven-hour shift (jbo)',d:'jbo: beat act 2 on hard mode.',c:function(){try{return localStorage.getItem('jbox_act2_hard')==='1'}catch(e){return false}}},
+{id:'elegant',h:'ZERO MISTAKES. THE WHOLE RUN.',n:'elegant (jbo)',d:'jbo: beat the whole free orange lobby with zero mistakes. (every buzz counts.)',c:function(){try{return localStorage.getItem('jbox_elegant')==='1'}catch(e){return false}}},
+{id:'trivial',h:'ZERO MISTAKES. HARD MODE.',n:'trivial (jbo)',d:'jbo: elegant, but on hard mode.',c:function(){try{return localStorage.getItem('jbox_elegant_hard')==='1'}catch(e){return false}}},
+{id:'brute',h:'FAST. CLEAN. HARD. UNDER FIVE.',n:'brute (jbo)',d:'jbo: the whole free orange lobby. 3 mistakes or fewer. under 5 minutes. hard mode. (good luck.)',c:function(){try{return localStorage.getItem('jbox_brute')==='1'}catch(e){return false}}},
+{id:'robbery',h:'BEAT IT IN NINETY MINUTES.',n:'professional robbery (jbo)',d:'jbo: beat the free orange lobby in under 90 minutes.',c:function(){try{var a=localStorage.getItem('jbox_act3')==='1';var m=parseInt(localStorage.getItem('jbox_run_ms')||'0',10);return a&&m>0&&m<=5400000}catch(e){return false}}},
+{id:'pwned',h:'TALK BACK IN THE NIGHTMARE.',n:'get pwned, loser (jbo)',d:'jbo: trash-talk back in the nightmare and wake up.',c:function(){try{return localStorage.getItem('jbox_pwned')==='1'}catch(e){return false}}},
+{id:'nyarch_x10',h:'SAY IT TEN TIMES.',n:'you are not a good person. you know that, right? (jbo)',d:'jbo: say nyarch 10 times. (jbo heard all ten.)',c:function(){try{var n=parseInt(localStorage.getItem('jbox_nyarch_n')||'0',10);return n>=10}catch(e){return false}}}
 ];
+if(!window._jboAchOpen){var _jb=-1;for(var _jbi=0;_jbi<ACH.length;_jbi++){if(ACH[_jbi]&&ACH[_jbi].sec==='jbo'){_jb=_jbi;break}}if(_jb>-1)ACH.length=_jb}
 function ngCh(){try{return ngLoad().ch||0}catch(e){return 0}}
 function ngAct2Done(){try{return localStorage.getItem('cube_act2')==='1'}catch(e){return false}}
 function ngAct3Done(){try{return localStorage.getItem('cube_act3')==='1'}catch(e){return false}}
@@ -2156,7 +2207,7 @@ function offRock(){try{var s=JSON.parse(localStorage.getItem('cube_office')||'{}
 function achSet(){try{var v=JSON.parse(localStorage.getItem('cube_ach')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achSave(s){try{localStorage.setItem('cube_ach',JSON.stringify(s))}catch(e){}}
 var achRW={hello_void:{s:5},regular:{s:5},resident:{s:25},no_game:{s:5},halfway:{s:10},act1_done:{s:15},act2_walker:{s:10},interloper_met:{s:15},action2:{s:25},eleven_hour:{s:25,u:10},mercy:{s:10},brat:{s:10},godmode:{s:5},collector:{s:5},chaos:{s:10},hardened:{s:5},undeletable:{s:5},deprecated:{s:5},forbidden_word:{s:5},meltdown:{s:10},grue_food:{s:5},touch_grass:{s:5},shutdown_walkout:{s:15,u:5},menu_5:{s:10},menu_10:{s:15},menu_30:{s:20},menu_60:{s:50},blessed:{s:15},witness:{u:25},caller:{s:15},night_owl:{s:5},completionist:{s:25},nothing:{s:25},hoarder:{s:15},overclocked:{s:15},archivist:{s:15},author:{s:10},silence:{s:5},shouldnt_have:{s:10},absolute_zero:{s:10},voidborn:{s:15},elegant:{s:25,u:10},trivial:{s:75,u:40},brute:{s:100,u:50},robbery:{s:25,u:10},netrun:{s:25,u:10},fiddlesticks:{s:15,u:5},nevermind:{s:15,u:5},pwned:{s:10,u:5},nyarch_x10:{s:15},oxford:{s:15},daily_10:{s:15},morning_clean:{s:15},winged_it:{s:10},rerun:{s:5},vandal:{s:10},seen_enough:{s:10},hard_morning:{s:15,u:5},void_mail:{s:5},globe_trotter:{s:20},meet_family:{s:10},shut_up:{s:10},blacksmith:{s:15},sorted:{s:10},under_pressure:{s:10},pen_pal:{s:15},btn_breach:{s:15},btn_seized:{s:15,u:5},btn_lockdown:{s:15,u:5},btn_myth:{s:10},btn_escaped:{s:20,u:10},fly_open:{s:10},fly_fed:{s:10},fly_seizure:{s:15,u:5},shift_first:{s:10},shift_perfect:{s:10},shift_ghost:{s:15},shift_blind:{s:15},shift_complaint:{s:10},shift_slips10:{s:10},shift_slips25:{s:15,u:5},shift_all:{s:25,u:15},noli_full:{s:15},stargazer:{s:15},starchart_cb:{s:15},starchart_far:{s:15},starchart_geo:{s:15},starchart_break:{s:15},starchart_fringe:{s:15},starchart_end:{s:15},starchart_x:{s:20},cartographer:{s:25,u:10},pet100:{s:10},gone_fishing:{s:10},the_big_one:{s:15},full_box:{s:20},gr_lorekeeper:{s:15},gr_gauntlet:{s:20,u:5},gr_warden:{s:25,u:10},gr_spare:{s:25},gr_kill:{s:25},gr_noskip:{s:20,u:5},chism100:{s:25,u:10},gr_chismfriend:{s:25,u:10},gr_firstdance:{s:15},gr_titan:{s:20},gr_despawn:{s:15},gr_drillmaster:{s:25,u:10},gr_lorekeeper2:{s:15},gr_oath:{s:20,u:5},gr_baker:{s:15},gr_gauntlet2:{s:20,u:5},gr_rockcameo:{s:10},gr_eventful:{s:15},gr_tacklebox:{s:20},gr_petpal:{s:15},folk_first:{s:10},folk_regular:{s:15},folk_omen:{s:20},folk_sorted:{s:15},folk_golden:{s:15},folk_barber:{s:20},folk_wall:{s:15},folk_fried:{s:15},folk_rich:{s:20},folk_pogo:{s:20},folk_sailor:{s:15},folk_huss:{s:15},folk_evil:{s:20,u:5},folk_anthem:{s:20,u:5},folk_press:{s:15},folk_headline:{s:15},folk_stamped:{s:20,u:5},folk_permit:{s:20},folk_acquitted:{s:15},folk_jailbird:{s:15},folk_festive:{s:15},folk_afterdark:{s:15},folk_dj:{s:15},folk_penpal:{s:15},folk_diploma:{s:20,u:5},folk_detention:{s:10},folk_weatherman:{s:15},folk_backlash:{s:15},folk_forgery:{s:15},folk_bribe:{s:15},folk_peace:{s:20,u:5},folk_victory:{s:25,u:10},folk_mayor:{s:20,u:5},folk_sewers:{s:20,u:5},folk_champion:{s:25,u:10},folk_bettor:{s:15},folk_mvp:{s:20},folk_pet:{s:15},folk_bestinshow:{s:20},folk_archivist:{s:20},folk_homeowner:{s:20},folk_decorator:{s:15},folk_chef:{s:15},folk_gourmet:{s:20,u:5},folk_verity:{s:15},folk_gypsy:{s:20,u:5}};
-try{achRW.op_first={s:0};achRW.op_book={s:0};achRW.op_wall={s:0};achRW.op_riddle={s:0};achRW.op_riddle2={s:0};achRW.op_mixes={s:0};achRW.op_repertoire={s:0};achRW.op_yard={s:0};achRW.op_launch={s:0};achRW.op_crank={s:0};achRW.op_gnome={s:0};achRW.op_trash={s:0};achRW.op_hoop={s:0};achRW.op_orbit={s:0};achRW.op_combo={s:0};achRW.ca_first={s:0};achRW.ca_jackpot={s:0};achRW.ca_streak={s:0};achRW.ca_bankrupt={s:0};achRW.gr_menagerie={s:0};achRW.gr_roundup={s:0};achRW.op_floors={s:0};achRW.op_trade={s:0};achRW.op_catch={s:0};achRW.op_seek={s:0};achRW.op_dream={s:0};achRW.op_memories={s:0}}catch(e){}
+try{achRW.op_first={s:0};achRW.op_book={s:0};achRW.op_wall={s:0};achRW.op_riddle={s:0};achRW.op_riddle2={s:0};achRW.op_mixes={s:0};achRW.op_repertoire={s:0};achRW.op_yard={s:0};achRW.op_launch={s:0};achRW.op_crank={s:0};achRW.op_gnome={s:0};achRW.op_trash={s:0};achRW.op_hoop={s:0};achRW.op_orbit={s:0};achRW.op_combo={s:0};achRW.ca_first={s:0};achRW.ca_jackpot={s:0};achRW.ca_streak={s:0};achRW.ca_bankrupt={s:0};achRW.gr_menagerie={s:0};achRW.gr_roundup={s:0};achRW.op_floors={s:0};achRW.op_trade={s:0};achRW.op_catch={s:0};achRW.op_seek={s:0};achRW.op_dream={s:0};achRW.op_memories={s:0};achRW.se_first={s:0};achRW.se_hunter={s:0};achRW.se_all={s:0}}catch(e){}
 function achPaid(){try{var v=JSON.parse(localStorage.getItem('cube_ach_paid')||'[]');return (v instanceof Array)?v:[]}catch(e){return[]}}
 function achPaidSave(s){try{localStorage.setItem('cube_ach_paid',JSON.stringify(s))}catch(e){}}
 function achRwOf(id){try{if(typeof achRW!=='undefined'&&achRW[id])return achRW[id]}catch(e){}return{s:5}}
@@ -2167,11 +2218,11 @@ var r=achRwOf(def.id);
 try{if(r.s&&typeof grantPts==='function'){grantPts(r.s*(typeof ptMult==='function'?ptMult():1));if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 try{if(r.u&&typeof grantUp==='function'){grantUp(r.u);if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 p.push(def.id);achPaidSave(p);
-if(def.id==='witness'){cubeDim('reward: +25 upgrade points. the void respects your dedication.')}
-else{var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' upgrade');b.push('+2% points forever');if(b.length)cubeDim('reward: '+b.join(', ')+'.')}
+if(def.id==='witness'){cubeDim('reward: +25 skill. the void respects your dedication.')}
+else{var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' skill');b.push('+2% points forever');if(b.length)cubeDim('reward: '+b.join(', ')+'.')}
 return true;
 }
-function achRwText(d){if(!d||d.sec||!d.id)return '';if(d.id==='witness')return ' (pays +25 upgrade)';var r=achRwOf(d.id);var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' upgrade');return b.length?' (pays '+b.join(', ')+')':''}
+function achRwText(d){if(!d||d.sec||!d.id)return '';if(d.id==='witness')return ' (pays +25 skill)';var r=achRwOf(d.id);var b=[];if(r.s)b.push('+'+r.s+' skill');if(r.u)b.push('+'+r.u+' skill');return b.length?' (pays '+b.join(', ')+')':''}
 function achRetro(){
 var s=achSet(),p=achPaid(),n=0,ts=0,tu=0,changed=false;
 for(var i=0;i<ACH.length;i++){var d=ACH[i];if(!d||d.sec||!d.id)continue;
@@ -2181,7 +2232,7 @@ achPaidSave(p);
 if(!n)return true;
 try{if(ts&&typeof grantPts==='function'){grantPts(ts*(typeof ptMult==='function'?ptMult():1));if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
 try{if(tu&&typeof grantUp==='function'){grantUp(tu);if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}
-cubePrint('the void backpays '+n+' old achievement'+(n===1?'':'s')+': +'+ts+' skill, +'+tu+' upgrade. (receipts.)');
+cubePrint('the void backpays '+n+' old achievement'+(n===1?'':'s')+': +'+(ts+tu)+' skill. (receipts.)');
 return true;
 }
 function ach(id){
@@ -2406,12 +2457,13 @@ voidScriptLang['buymax']={help:'buymax - toggle buy-max (needs: Buy Max, area 3)
 voidScriptLang['nothingcore']={help:'nothingcore - gaze through the nothing core (needs: ∕)',fn:function(){toggleNothingCore();return true}};
 voidScriptLang['coreview']={help:'coreview - alias of nothingcore',fn:function(){toggleNothingCore();return true}};
 voidScriptLang['upgrade']={help:'upgrade - open upgrade tree',fn:function(){openUpgradeTree();return true}};
-voidScriptLang['skillpoints']={help:'skillpoints [n] - admin: set skill + upgrade points (default 1e26)',fn:function(a){
+voidScriptLang['skillpoints']={help:'skillpoints [n|inf] - admin: set skill (default 1e26)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
+if(String((a&&a[0])||'').trim().toLowerCase()==='inf'){skillState.points=Infinity;skillSave();if(typeof skillRender==='function')skillRender();cubeOk('skill points: Infinity. the codec holds. (it better.)');return true}
 var n=parseInt(a[0],10);if(isNaN(n)||n<0)n=99999999999999999999999999;
-skillState.points=n;skillState.upPoints=n;skillSave();
+skillState.points=n;skillSave();
 if(typeof skillRender==='function')skillRender();
-cubeOk('skill points: '+n+' | upgrade points: '+n);
+cubeOk('skill points: '+n);
 return true}};
 voidScriptLang['giveach']={help:'giveach - admin: unlock every achievement (paid in full)',fn:function(a){
 if(!isAdmin){cubeError('admin access required');return true}
@@ -3887,9 +3939,12 @@ reactorPrint('  iodine           — show iodine-135 level');
 reactorPrint('  history          — show event log');
 reactorPrint('  reset            — reset reactor to initial state');
 reactorPrint('  freezedown <on|off> — freezedown difficulty (admin)');
+reactorPrint('  jbobox            - spare slot. do not. (orange.)');
 reactorPrint('  nyarch            — do not.');
 reactorPrint('  help              — show this help');
 return}
+
+if(cmd==='jbobox'){try{if(typeof jboEnter==='function'){window._jboPrevReactor=window.reactorRunning;window.reactorRunning=false;jboEnter()}}catch(e){reactorPrintErr('jbobox: '+e)}return}
 
 if(cmd==='status'){
 reactorPrint('');
@@ -4077,7 +4132,7 @@ var jboLines2=(jcr&&jcr.already)?[
 'jbo: THE CHISM?? IN MY REACTOR??',
 'jbo: okay. OKAY. you know the guy?!',
 'jbo: obj told me. obj said "hes got people" and i said WHAT PEOPLE.',
-'jbo: +100 upgrade points. FIVE achievements. ON THE HOUSE.',
+'jbo: +100 skill. FIVE achievements. ON THE HOUSE.',
 'jbo: do NOT tell the safety inspector.',
 'jbo: ...actually tell him. i want him to know i have CONNECTIONS.',
 'jbo: chism gets free coolant for life. TELL HIM I SAID THAT.'
@@ -4434,13 +4489,14 @@ ckDrawEKG(time,flash);
 }
 
 // start reactor tick loop (only runs when in reactor view)
-setInterval(function(){if(currentView==='reactor'&&!cubeMinigameOpen())reactorTick()},50);
+setInterval(function(){if(currentView==='reactor'&&!cubeMinigameOpen()&&!window._jboInside)reactorTick()},50);
 function cubeMinigameOpen(){try{var ids=['opOverlay','caOverlay','grOverlay','ghOverlay','tbOverlay','folkOverlay','stOverlay'];for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&el.style.display!=='none')return true}}catch(e){}return false}
 
 // patch render for reactor view — always reschedule RAF or the loop dies
 var _prevRender=render;
 render=function(time){
 try{
+if(window._jboInside)return;
 if(currentView==='reactor'){
 renderReactor(time);
 requestAnimationFrame(render);
@@ -4598,32 +4654,42 @@ skill_txDur:{lv:0,max:3,cost:1,name:'long-winded',desc:'transmissions stay on sc
 skill_particleBoost:{lv:0,max:5,cost:2,name:'super swarm',desc:'+150 particles per level'},
 skill_fresnelBoost:{lv:0,max:3,cost:2,name:'shiny edges',desc:'brighter fresnel rim'},
 skill_spinBoost:{lv:0,max:3,cost:2,name:'spin class',desc:'inner cubes spin faster'},
-skill_upTrickle:{lv:0,max:3,cost:2,name:'leaky faucet',desc:'slow passive upgrade pt trickle'},
+ skill_upTrickle:{lv:0,max:3,cost:2,name:'leaky faucet',desc:'slow passive skill trickle'},
 skill_trickleBoost:{lv:0,max:3,cost:2,name:'bigger drips',desc:'trickle grants +25%/lv'},
 skill_quickening:{lv:0,max:3,cost:2,name:'coffee break',desc:'all timers 10% faster/lv'},
-skill_pointWell:{lv:0,max:3,cost:2,name:'wishing well',desc:'upgrade points tick faster after finals'},
+ skill_pointWell:{lv:0,max:3,cost:2,name:'wishing well',desc:'skill ticks tick faster after finals'},
 skill_skillRate:{lv:0,max:3,cost:2,name:'fast learner',desc:'skill points tick faster'},
 skill_masterGain:{lv:0,max:1,cost:3,name:'rising tide',desc:'+25% on every upgrade effect'},
-skill_tickSurge:{lv:0,max:2,cost:3,name:'power surge',desc:'ticks grant +1 extra pt per level'},
+ skill_tickSurge:{lv:0,max:2,cost:3,name:'power surge',desc:'ticks grant +1 extra skill per level'},
 skill_cascade:{lv:0,max:3,cost:2,name:'jackpot',desc:'ticks 20%/lv chance to crit x2'},
-skill_deepWell:{lv:0,max:2,cost:3,name:'oil rig',desc:'up ticks +2/lv'},
+ skill_deepWell:{lv:0,max:2,cost:3,name:'oil rig',desc:'skill ticks +2/lv'},
 skill_buyMax:{lv:0,max:1,cost:4,name:'buy max',desc:'unlocks BUY MAX toggle: buy all levels at once'},
 skill_prestMult:{lv:0,max:5,cost:3,name:'compound interest',desc:'all point income +10%/lv'},
-skill_prestTribute:{lv:0,max:3,cost:3,name:'pilgrimage',desc:'visits grant +1 upgrade pt/lv'},
+ skill_prestTribute:{lv:0,max:3,cost:3,name:'pilgrimage',desc:'visits grant +1 skill/lv'},
 skill_darkening:{lv:0,max:1,cost:5,name:'the darkening',desc:'TRICKLES x2 (the darkening)'},
-skill_prestEcho:{lv:0,max:3,cost:3,name:'second income',desc:'skill ticks also grant upgrade pts'},
+ skill_prestEcho:{lv:0,max:3,cost:3,name:'second income',desc:'skill ticks grant bonus skill (+50%/lv)'},
 skill_goldenAge:{lv:0,max:2,cost:4,name:'good old days',desc:'entropy timer 2x/3x faster'},
 skill_graveyard:{lv:0,max:3,cost:2,name:'graveyard shift',desc:'trickles +1/lv (graveyard boost)'},
-skill_alphaCache:{lv:0,max:3,cost:2,name:'buried treasure',desc:'+3 skill +1 upgrade instantly/lv'},
+ skill_alphaCache:{lv:0,max:3,cost:2,name:'buried treasure',desc:'+4 skill instantly/lv'},
 skill_towerReset:{lv:0,max:1,cost:4,name:'demolition',desc:'RESET areas 1-3 to 0. permanent x1.5 income. one-way.'},
 skill_studFinder:{lv:0,max:3,cost:3,name:'gold stud',desc:'gold stud +0.25x/lv'},
 skill_alphaWell:{lv:0,max:3,cost:2,name:'deep trickle',desc:'skill trickle +1/lv'},
 skill_darkMarkets:{lv:0,max:3,cost:4,name:'black friday',desc:'upgrade costs -1/lv (min 0)'},
-skill_tempered:{lv:0,max:3,cost:4,name:'tempered angels',desc:'upgrade income +25%/lv'},
+ skill_tempered:{lv:0,max:3,cost:4,name:'tempered angels',desc:'skill income +25%/lv'},
 skill_entropy:{lv:0,max:1,cost:5,name:'heat death',desc:'+5% income per 10min, stacks to +50%'},
 skill_voidtech:{lv:0,max:1,cost:5,name:'voidscript technical',desc:'unlock VOIDSCRIPT TECHNICAL ops'},
 skill_singularity:{lv:0,max:1,cost:5,name:'the singularity',desc:'caps break: 3000 particles, 20 entropy'},
-skill_nothing:{lv:0,max:10000,cost:1,costScale:5,noDiscount:1,name:'the upgrade that does nothing',desc:'it does nothing. probably.'}
+ skill_goldenTouch:{lv:0,max:5,cost:6,name:'golden touch',desc:'point income +50%/lv'},
+ skill_pointFlood:{lv:0,max:3,cost:10,name:'point flood',desc:'skill ticks grant +5 skill/lv'},
+ skill_richTrickle:{lv:0,max:3,cost:8,name:'money faucet',desc:'trickle +3/lv'},
+ skill_floodgates:{lv:0,max:1,cost:15,name:'the floodgates',desc:'trickles x3 (the floodgates)'},
+ skill_goldenCascade:{lv:0,max:3,cost:12,name:'loaded vault',desc:'crit chance +20%/lv (stacks with jackpot)'},
+ skill_visitFortune:{lv:0,max:3,cost:10,name:'golden mailbox',desc:'visit bonus +10/lv'},
+ skill_growLight:{lv:0,max:3,cost:18,name:'grow light',desc:'photosynthesis +5/lv'},
+ skill_pointEmpire:{lv:0,max:1,cost:60,name:'point empire',desc:'all point gain x2'},
+ skill_pointNova:{lv:0,max:1,cost:25,name:'point nova',desc:'skill ticks pay triple'},
+ skill_bigBang:{lv:0,max:1,cost:80,name:'big bang',desc:'every skill tick also fires a trickle'},
+ skill_nothing:{lv:0,max:10000,cost:1,costScale:5,noDiscount:1,name:'the upgrade that does nothing',desc:'it does nothing. probably.'}
 };
 var upgradeAreas=[
 {id:'shell',name:'area 1 — shell',color:'rgba(43,208,208,0.9)',req:null,desc:'starter boosts on the outer shell',upgrades:['skill_particleCap','skill_txRate','skill_audioGain','skill_glitchResist','skill_visitBonus','skill_pointCache','skill_txBurst','skill_txEcho']},
@@ -4631,12 +4697,13 @@ var upgradeAreas=[
 {id:'core',name:'area 3 — void core',color:'rgba(255,122,217,0.9)',req:'lab',desc:'endgame — unlock by maxing area 2',upgrades:['skill_pointWell','skill_skillRate','skill_masterGain','skill_tickSurge','skill_cascade','skill_deepWell','skill_buyMax']},
 {id:'prestige',name:'area 4 — prestige',color:'rgba(255,210,60,0.9)',req:'core',desc:'reset theory — permanent multipliers on everything',upgrades:['skill_prestMult','skill_prestTribute','skill_darkening','skill_prestEcho','skill_goldenAge']},
 {id:'alpha',name:'area 5 — alpha',color:'rgba(80,255,130,0.9)',req:'prestige',desc:'just for fun. mostly. (the graveyard boosts trickles)',upgrades:['skill_graveyard','skill_alphaCache','skill_towerReset','skill_studFinder','skill_alphaWell']},
-{id:'pointx',name:'area 6 — point-x',color:'rgba(200,120,255,0.9)',req:'alpha',desc:'conversion tech — cheaper costs, compounding gains',upgrades:['skill_darkMarkets','skill_tempered','skill_entropy','skill_voidtech','skill_singularity','skill_nothing']}
+{id:'points',name:'area 6 — points',color:'rgba(255,245,120,0.9)',req:'alpha',desc:'skill points, distilled. expensive. worth it.',upgrades:['skill_goldenTouch','skill_pointFlood','skill_richTrickle','skill_floodgates','skill_goldenCascade','skill_visitFortune','skill_growLight','skill_pointEmpire','skill_pointNova','skill_bigBang']},
+{id:'pointx',name:'area 7 — point-x',color:'rgba(200,120,255,0.9)',req:'points',desc:'conversion tech — cheaper costs, compounding gains',upgrades:['skill_darkMarkets','skill_tempered','skill_entropy','skill_voidtech','skill_singularity','skill_nothing']}
 ];
 var skillState={points:3,owned:{},upPoints:0,upgrades:{},buyMax:false};
 (function(){for(var uk in upgradeDefs)skillState.upgrades[uk]={lv:0,max:upgradeDefs[uk].max,cost:upgradeDefs[uk].cost,desc:upgradeDefs[uk].desc,name:upgradeDefs[uk].name,costScale:upgradeDefs[uk].costScale}})();
-try{var ss=localStorage.getItem('cube_skill_state');if(ss){var p=JSON.parse(ss);if(p&&typeof p==='object'){skillState.points=p.points||0;skillState.owned=p.owned||{};skillState.upPoints=p.upPoints||0;if(p.goldStud)skillState.goldStud=2;if(typeof p.entropy==='number')skillState.entropy=Math.min(Math.max(p.entropy|0,0),10);if(typeof p.ptFrac==='number')skillState.ptFrac=p.ptFrac;if(typeof p.upFrac==='number')skillState.upFrac=p.upFrac;if(typeof p.buyMax==='boolean')skillState.buyMax=p.buyMax;if(p.nothingCore&&typeof p.nothingCore==='object'){skillState.nothingCore=p.nothingCore;if(typeof skillState.nothingCore.gaze!=='boolean')skillState.nothingCore.gaze=true}if(p.upgrades){var _mig={skill_particleCap:'skill_particleCap',skill_txRate:'skill_txRate',skill_audioGain:'skill_audioGain',skill_glitchResist:'skill_glitchResist',skill_visitBonus:'skill_visitBonus'};for(var pk in p.upgrades){var dest=_mig[pk]||pk;if(skillState.upgrades[dest]&&p.upgrades[pk]&&typeof p.upgrades[pk].lv==='number')skillState.upgrades[dest].lv=Math.min(p.upgrades[pk].lv,upgradeDefs[dest].max)}}}}}catch(e){}
-function skillSave(){try{localStorage.setItem('cube_skill_state',JSON.stringify(skillState))}catch(e){}}
+try{var ss=localStorage.getItem('cube_skill_state');if(ss){var p=JSON.parse(ss,typeof jsonInfRev==='function'?jsonInfRev:null);if(p&&typeof p==='object'){skillState.points=(typeof p.points==='number'||p.points===Infinity)?p.points:0;skillState.owned=p.owned||{};skillState.upPoints=p.upPoints||0;if(p.goldStud)skillState.goldStud=2;if(typeof p.entropy==='number')skillState.entropy=Math.min(Math.max(p.entropy|0,0),10);if(typeof p.ptFrac==='number')skillState.ptFrac=p.ptFrac;if(typeof p.upFrac==='number')skillState.upFrac=p.upFrac;if(typeof p.buyMax==='boolean')skillState.buyMax=p.buyMax;if(p.nothingCore&&typeof p.nothingCore==='object'){skillState.nothingCore=p.nothingCore;if(typeof skillState.nothingCore.gaze!=='boolean')skillState.nothingCore.gaze=true}if(p.upgrades){var _mig={skill_particleCap:'skill_particleCap',skill_txRate:'skill_txRate',skill_audioGain:'skill_audioGain',skill_glitchResist:'skill_glitchResist',skill_visitBonus:'skill_visitBonus'};for(var pk in p.upgrades){var dest=_mig[pk]||pk;if(skillState.upgrades[dest]&&p.upgrades[pk]&&typeof p.upgrades[pk].lv==='number')skillState.upgrades[dest].lv=Math.min(p.upgrades[pk].lv,upgradeDefs[dest].max)}}}}}catch(e){}
+function skillSave(){try{localStorage.setItem('cube_skill_state',JSON.stringify(skillState,jsonInfRep))}catch(e){try{localStorage.setItem('cube_skill_state',JSON.stringify(skillState))}catch(e2){}}}
 function skillHas(id){return !!(typeof skillState!=='undefined'&&skillState&&skillState.owned&&skillState.owned[id])}
 function skillUnlocked(node){
 if(!node.req)return true;
@@ -4659,14 +4726,14 @@ skillState.points-=n.cost;
 skillState.owned[id]=true;
 skillApply(id);
 if(id==='meta1'){var _m1=grantPts(2*ptMult());skillPtsRefresh();cubePrint('sapling gift: +'+_m1+' skill points')}
-if(id==='meta5'){var _m5=grantUp(2*upMult());skillPtsRefresh();cubePrint('heartwood: +'+_m5+' upgrade points')}
-if(id==='meta_final'){var _mf1=grantPts(3*ptMult());var _mf2=grantUp(2*upMult());skillPtsRefresh();cubePrint('overgrowth: +'+_mf1+' skill points, +'+_mf2+' upgrade points')}
-if(n.final)skillState.upPoints+=1;
+if(id==='meta5'){var _m5=grantUp(2*upMult());skillPtsRefresh();cubePrint('heartwood: +'+_m5+' skill')}
+if(id==='meta_final'){var _mf1=grantPts(3*ptMult());var _mf2=grantUp(2*upMult());skillPtsRefresh();cubePrint('overgrowth: +'+(_mf1+_mf2)+' skill points')}
+if(n.final)skillState.points+=1;
 skillSave();
 cubeOk('skill unlocked: '+n.name);
 skillBuyFx(n.name);
 if(n.final){cubePrint('branch complete: '+br);
-if(skillAllFinals()){skillState.upPoints+=3;skillSave();cubePrint('');cubePrint('ALL FINAL SKILLS UNLOCKED.');cubePrint('+3 upgrade points. upgrade tree is now available. type: upgrade');}
+if(skillAllFinals()){skillState.points+=3;skillSave();cubePrint('');cubePrint('ALL FINAL SKILLS UNLOCKED.');cubePrint('+3 skill. upgrade tree is now available. type: upgrade');}
 }
 skillRender();
 return;
@@ -4746,15 +4813,15 @@ var dm=document.getElementById('displayMsg');
 if(dm){dm.textContent='█ '+label+' █';dm.classList.add('active');setTimeout(function(){dm.classList.remove('active')},900)}
 }catch(e){}
 }
-function upLv(key){if(typeof skillState==='undefined'||!skillState||!skillState.upgrades)return 0;var u=skillState.upgrades[key];return u?u.lv:0}
+function upLv(key){try{if(typeof chalNerf==='function'&&chalNerf())return 0}catch(e){}if(typeof skillState==='undefined'||!skillState||!skillState.upgrades)return 0;var u=skillState.upgrades[key];return u?u.lv:0}
 function upMaster(){return 1+0.25*upLv('skill_masterGain')}
 function goldMult(){if(typeof skillState==='undefined'||!skillState||!skillState.goldStud)return 1;return 1.5+0.25*upLv('skill_studFinder')}
 function tickDiv(){return 1/(1+0.1*upLv('skill_quickening'))}
-function ptMult(){var m=1+0.1*upLv('skill_prestMult');m*=goldMult();if(typeof skillState!=='undefined'&&skillState&&skillState.entropy)m*=1+0.05*skillState.entropy;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)m*=2;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore&&skillState.nothingCore.gaze)m*=1.25;try{m*=1+0.02*achSet().length}catch(e){}return m}
-function upMult(){var m=1+0.1*upLv('skill_prestMult')+0.25*upLv('skill_tempered');m*=goldMult();if(typeof skillState!=='undefined'&&skillState&&skillState.entropy)m*=1+0.05*skillState.entropy;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)m*=2;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore&&skillState.nothingCore.gaze)m*=1.25;return m}
-function grantPts(n){if(!(n>0))return 0;skillState.ptFrac=(skillState.ptFrac||0)+n;var w=Math.floor(skillState.ptFrac);if(w>0){skillState.ptFrac-=w;skillState.points+=w;skillSave()}return w}
-function grantUp(n){if(!(n>0))return 0;skillState.upFrac=(skillState.upFrac||0)+n;var w=Math.floor(skillState.upFrac);if(w>0){skillState.upFrac-=w;skillState.upPoints+=w;skillSave()}return w}
-function upCostAt(key,lv){var u=skillState.upgrades[key];if(!u)return 999;var base=u.cost||0;if(u.costScale)base+=Math.floor((lv||0)/u.costScale);var disc=u.noDiscount?0:upLv('skill_darkMarkets');return Math.max(0,base-disc)}
+function ptMult(){var m=1+0.1*upLv('skill_prestMult');m*=goldMult();if(typeof skillState!=='undefined'&&skillState&&skillState.entropy)m*=1+0.05*skillState.entropy;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)m*=2;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore&&skillState.nothingCore.gaze)m*=1.25;try{m*=1+0.02*achSet().length}catch(e){}m*=1+0.5*upLv('skill_goldenTouch');if(upLv('skill_pointEmpire')>0)m*=2;return m}
+function upMult(){var m=1+0.1*upLv('skill_prestMult')+0.25*upLv('skill_tempered');m*=goldMult();if(typeof skillState!=='undefined'&&skillState&&skillState.entropy)m*=1+0.05*skillState.entropy;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore)m*=2;if(typeof skillState!=='undefined'&&skillState&&skillState.nothingCore&&skillState.nothingCore.gaze)m*=1.25;m*=1+0.5*upLv('skill_goldenTouch');if(upLv('skill_pointEmpire')>0)m*=2;return m}
+function grantPts(n){if(!(n>0))return 0;try{n=n*echoMult()}catch(e){}try{if(typeof emberMult==='function')n=n*emberMult()}catch(e){}try{if(typeof sacMult==='function')n=n*sacMult()}catch(e){}try{if(typeof mineMult==='function')n=n*mineMult()}catch(e){}try{if(typeof chalMult==='function')n=n*chalMult()}catch(e){}try{if(typeof sacMult2==='function')n=n*sacMult2()}catch(e){}try{if(typeof infMult==='function')n=n*infMult()}catch(e){}skillState.ptFrac=(skillState.ptFrac||0)+n;var w=Math.floor(skillState.ptFrac);if(w>0){skillState.ptFrac-=w;skillState.points+=w;skillSave()}return w}
+function grantUp(n){if(!(n>0))return 0;try{n=n*echoMult()}catch(e){}try{if(typeof emberMult==='function')n=n*emberMult()}catch(e){}try{if(typeof sacMult==='function')n=n*sacMult()}catch(e){}try{if(typeof mineMult==='function')n=n*mineMult()}catch(e){}try{if(typeof chalMult==='function')n=n*chalMult()}catch(e){}try{if(typeof sacMult2==='function')n=n*sacMult2()}catch(e){}try{if(typeof infMult==='function')n=n*infMult()}catch(e){}skillState.ptFrac=(skillState.ptFrac||0)+n;var w=Math.floor(skillState.ptFrac);if(w>0){skillState.ptFrac-=w;skillState.points+=w;skillSave()}return w}
+function upCostAt(key,lv){var u=skillState.upgrades[key];if(!u)return 999;var base=(u.cost||0)*200;if(u.costScale)base+=Math.floor((lv||0)/u.costScale)*200;var disc=u.noDiscount?0:upLv('skill_darkMarkets')*200;var tot=Math.max(0,base-disc);try{if(typeof embGet==='function'){var dl=embGet('discount');if(dl>0)tot=Math.max(0,Math.round(tot*Math.pow(0.95,dl)))}}catch(e){}return tot}
 function effUpCost(key){var u=skillState.upgrades[key];if(!u)return 999;return upCostAt(key,u.lv)}
 function toggleBuyMax(){
 if(!(upLv('skill_buyMax')>0||isAdmin)){cubeWarn('buy max locked — unlock: Buy Max (area 3)');return}
@@ -4809,40 +4876,40 @@ if(!areaUnlockedFor(key)){cubeWarn('buy every skill in the previous area first')
 if(u.lv>=u.max){cubeWarn('upgrade maxed');return}
 if((upLv('skill_buyMax')>0||isAdmin)&&skillState.buyMax){
 var _n=0,_tot=0,_lv=u.lv;
-while(_lv<u.max){var _cc=upCostAt(key,_lv);if(skillState.upPoints-_tot<_cc)break;_tot+=_cc;_lv++;_n++;if(_n>20000)break}
-if(_n<=0){cubeWarn('not enough upgrade points ('+skillState.upPoints+'/'+upCostAt(key,u.lv)+')');return}
-skillState.upPoints-=_tot;u.lv=_lv;
+while(_lv<u.max){var _cc=upCostAt(key,_lv);if(skillState.points-_tot<_cc)break;_tot+=_cc;_lv++;_n++;if(_n>20000)break}
+if(_n<=0){cubeWarn('not enough skill ('+skillState.points+'/'+upCostAt(key,u.lv)+')');return}
+skillState.points-=_tot;u.lv=_lv;
 if(key==='skill_towerReset'){
 var _rz=['shell','lab','core'];
 for(var _ai=0;_ai<upgradeAreas.length;_ai++){var _aa=upgradeAreas[_ai];if(_rz.indexOf(_aa.id)>=0){for(var _aj=0;_aj<_aa.upgrades.length;_aj++){var _uu=skillState.upgrades[_aa.upgrades[_aj]];if(_uu)_uu.lv=0}}}
 skillState.goldStud=2;
 cubePrint('tower reset: areas 1-3 wiped. gold stud earned. all income x1.5 forever.');
 }
-if(key==='skill_alphaCache'){var _ac1=grantPts(3*_n*ptMult());var _ac2=grantUp(1*_n*upMult());skillPtsRefresh();cubePrint('alpha cache x'+_n+': +'+_ac1+' skill, +'+_ac2+' upgrade')}
+if(key==='skill_alphaCache'){var _ac1=grantPts(3*_n*ptMult());var _ac2=grantUp(1*_n*upMult());skillPtsRefresh();cubePrint('alpha cache x'+_n+': +'+(_ac1+_ac2)+' skill')}
 if(key==='skill_pointCache'){var _pc=grantPts(2*_n*ptMult());skillPtsRefresh();cubePrint('cache cracked x'+_n+': +'+_pc+' skill points')}
-if(key==='skill_nothing'&&u.lv>=u.max&&!skillState.nothingCore){skillState.nothingCore={at:Date.now(),gaze:true};var _n1=grantPts(1000*ptMult());var _n2=grantUp(100*upMult());skillPtsRefresh();applyNothingGaze();cubePrint('');cubePrint('IT DID SOMETHING.');cubePrint('10000 levels of nothing condensed into a single point of everything.');cubePrint('the void hands you the NOTHING CORE (∅). all point income x2, forever.');cubePrint('it is warm. it is humming. it is waiting to be used.');cubePrint('the core turned ∅ the moment you maxed it — no typing required.');cubePrint('+'+_n1+' skill, +'+_n2+' upgrade.');cubePrint('you are the patient one. obj is scared of you now.')}
-if(key==='skill_upTrickle'){scheduleUpTrickle();cubePrint('trickle online: passive upgrade points incoming')}
+if(key==='skill_nothing'&&u.lv>=u.max&&!skillState.nothingCore){skillState.nothingCore={at:Date.now(),gaze:true};var _n1=grantPts(1000*ptMult());var _n2=grantUp(100*upMult());skillPtsRefresh();applyNothingGaze();cubePrint('');cubePrint('IT DID SOMETHING.');cubePrint('10000 levels of nothing condensed into a single point of everything.');cubePrint('the void hands you the NOTHING CORE (∅). all point income x2, forever.');cubePrint('it is warm. it is humming. it is waiting to be used.');cubePrint('the core turned ∅ the moment you maxed it — no typing required.');cubePrint('+'+(_n1+_n2)+' skill.');cubePrint('you are the patient one. obj is scared of you now.')}
+if(key==='skill_upTrickle'){scheduleUpTrickle();cubePrint('trickle online: passive skill incoming')}
 skillUpApply(key);skillSave();
-cubeOk('buy max: '+(u.name||key)+' +'+_n+' lv ('+_tot+'pt) lv '+u.lv+'/'+u.max);
+cubeOk('buy max: '+(u.name||key)+' +'+_n+' lv ('+_tot+' skill) lv '+u.lv+'/'+u.max);
 skillBuyFx((u.name||key)+' maxed x'+_n);
 skillRender();
 return}
 var _c=effUpCost(key);
-if(skillState.upPoints<_c){cubeWarn('not enough upgrade points ('+skillState.upPoints+'/'+_c+')');return}
-skillState.upPoints-=_c;u.lv++;
+if(skillState.points<_c){cubeWarn('not enough skill ('+skillState.points+'/'+_c+')');return}
+skillState.points-=_c;u.lv++;
 if(key==='skill_towerReset'){
 var _rz=['shell','lab','core'];
 for(var _ai=0;_ai<upgradeAreas.length;_ai++){var _aa=upgradeAreas[_ai];if(_rz.indexOf(_aa.id)>=0){for(var _aj=0;_aj<_aa.upgrades.length;_aj++){var _uu=skillState.upgrades[_aa.upgrades[_aj]];if(_uu)_uu.lv=0}}}
 skillState.goldStud=2;
 cubePrint('tower reset: areas 1-3 wiped. gold stud earned. all income x1.5 forever.');
 }
-if(key==='skill_alphaCache'){var _ac1=grantPts(3*ptMult());var _ac2=grantUp(1*upMult());skillPtsRefresh();cubePrint('alpha cache: +'+_ac1+' skill, +'+_ac2+' upgrade')}
-if(key==='skill_nothing'&&u.lv>=u.max&&!skillState.nothingCore){skillState.nothingCore={at:Date.now(),gaze:true};var _n1=grantPts(1000*ptMult());var _n2=grantUp(100*upMult());skillPtsRefresh();applyNothingGaze();cubePrint('');cubePrint('IT DID SOMETHING.');cubePrint('10000 levels of nothing condensed into a single point of everything.');cubePrint('the void hands you the NOTHING CORE (∅). all point income x2, forever.');cubePrint('it is warm. it is humming. it is waiting to be used.');cubePrint('the core turned ∅ the moment you maxed it — no typing required.');cubePrint('+'+_n1+' skill, +'+_n2+' upgrade.');cubePrint('you are the patient one. obj is scared of you now.')}
+if(key==='skill_alphaCache'){var _ac1=grantPts(3*ptMult());var _ac2=grantUp(1*upMult());skillPtsRefresh();cubePrint('alpha cache: +'+(_ac1+_ac2)+' skill')}
+if(key==='skill_nothing'&&u.lv>=u.max&&!skillState.nothingCore){skillState.nothingCore={at:Date.now(),gaze:true};var _n1=grantPts(1000*ptMult());var _n2=grantUp(100*upMult());skillPtsRefresh();applyNothingGaze();cubePrint('');cubePrint('IT DID SOMETHING.');cubePrint('10000 levels of nothing condensed into a single point of everything.');cubePrint('the void hands you the NOTHING CORE (∅). all point income x2, forever.');cubePrint('it is warm. it is humming. it is waiting to be used.');cubePrint('the core turned ∅ the moment you maxed it — no typing required.');cubePrint('+'+(_n1+_n2)+' skill.');cubePrint('you are the patient one. obj is scared of you now.')}
 skillUpApply(key);skillSave();
 cubeOk('upgrade purchased: '+(u.name||key)+' lv '+u.lv+'/'+u.max);
 skillBuyFx((u.name||key)+' lv '+u.lv);
 if(key==='skill_pointCache'){var _pc=grantPts(2*ptMult());skillPtsRefresh();cubePrint('cache cracked: +'+_pc+' skill points')}
-if(key==='skill_upTrickle'){scheduleUpTrickle();cubePrint('trickle online: passive upgrade points incoming')}
+if(key==='skill_upTrickle'){scheduleUpTrickle();cubePrint('trickle online: passive skill incoming')}
 skillRender();
 }
 function areaUnlockedFor(key){
@@ -4854,7 +4921,7 @@ return skillAllFinals();
 }
 function skillRender(){
 var pts=document.getElementById('skillPts');if(pts)pts.textContent=skillState.points;
-var up=document.getElementById('upPts');if(up)up.textContent=skillState.upPoints;
+var up=document.getElementById('upPts');if(up)up.textContent=skillState.points;
 var body=document.getElementById('skillBody');if(!body)return;
 body.innerHTML='';
 var branchOrder=['signal','geometry','terminal','anomaly','meta'];
@@ -4906,8 +4973,9 @@ canvas.appendChild(fan);
 var root=document.createElement('div');root.className='skill-root';
 root.innerHTML='<div class="root-name">the void</div><div class="root-desc">every path begins here</div>';
 canvas.appendChild(root);
-body.appendChild(canvas);
-renderUpgradeCol();
+ body.appendChild(canvas);
+ renderUpgradeCol();
+ try{renderLayerCards()}catch(e){}
 }
 function renderUpgradeCol(){
 var allF=skillAllFinals();
@@ -4959,7 +5027,7 @@ if(!u)continue;
 var el=document.createElement('div');
 el.className='up-node'+(u.lv>=u.max?' maxed':'');
 el.style.setProperty('--ac',a.color);
-el.innerHTML='<div class="up-name">'+(u.name||uk.replace('skill_',''))+'</div><div class="up-desc">'+u.desc+'</div><div class="up-cost">'+effUpCost(uk)+'pt</div><div class="up-lv">'+u.lv+'/'+u.max+'</div>';
+el.innerHTML='<div class="up-name">'+(u.name||uk.replace('skill_',''))+'</div><div class="up-desc">'+u.desc+'</div><div class="up-cost">'+effUpCost(uk)+' skill</div><div class="up-lv">'+u.lv+'/'+u.max+'</div>';
 if(u.lv<u.max)el.onclick=(function(k){return function(ev){if(ev)ev.stopPropagation();skillUpBuy(k)}})(uk);
 nodes.appendChild(el);
 }
@@ -4967,6 +5035,83 @@ card.appendChild(nodes);
 wrap.appendChild(card);
 }
 renderAreaNav();
+}
+// LAYER CARDS: prestige, ascension, sacrifice, mining, obelisk live here now,
+// not just the terminal. same functions, real buttons.
+function layerArm(key){try{if(window._layerArm===key){window._layerArm=null;return true}window._layerArm=key;try{skillRender()}catch(e){}return false}catch(e){return false}}
+function fmtN(n){if(n===Infinity)return '∞';if(n===-Infinity)return '-∞';if(!(n>0))return '0';if(n<1000)return (Math.floor(n*100)/100)+'';var e=Math.floor(Math.log10(n)),m=n/Math.pow(10,e);return m.toFixed(2)+'e'+e}
+function renderLayerCards(){
+ var wrap=document.getElementById('layerAreas');
+ if(!wrap)return;
+ wrap.innerHTML='';
+ var UB='display:inline-block;border:1px solid rgba(255,210,90,.5);border-radius:4px;padding:4px 12px;cursor:pointer;color:#ffe49b;font-family:Consolas,monospace;font-size:12px;letter-spacing:1px;background:rgba(255,210,90,.08)';
+ function bal(){try{return Math.floor(skillState.points)||0}catch(e){return 0}}
+ function card(id,color,name,desc,body){
+  var c=document.createElement('div');
+  c.id='upArea_'+id;
+  c.className='up-area';
+  c.style.setProperty('--ac',color);
+  c.innerHTML='<div class="up-area-head"><div class="idx">◈</div><div class="meta"><div class="name">'+name+'</div><div class="desc">'+desc+'</div></div></div><div class="up-nodes">'+body+'</div>';
+  wrap.appendChild(c);
+  return c;
+ }
+ function wire(root,attr,fn){
+  var bs=root.querySelectorAll('['+attr+']');
+  for(var i=0;i<bs.length;i++)(function(el){el.onclick=function(ev){if(ev)ev.stopPropagation();try{fn(el.getAttribute(attr))}catch(err){try{if(typeof cubeError==='function')cubeError('layer: '+(err&&err.message||err))}catch(e2){}}try{skillRender()}catch(e){}try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}}})(bs[i]);
+ }
+ var armed=null;try{armed=window._layerArm||null}catch(e){}
+ // PRESTIGE
+ var pg=0,ec=0,pr=0;
+ try{pg=prestigeGain();ec=skillState.echoes||0;pr=skillState.prestiges||0}catch(e){}
+ var pc=card('prestige','rgba(255,210,60,0.9)','prestige — layer 1','burn skill for echoes (+10% each, forever)',
+  '<div class="up-node"><div class="up-name">echoes: '+fmtN(ec)+' (run '+pr+')</div><div class="up-desc">gain now: '+fmtN(pg)+' · you: '+fmtN(bal())+' skill · 10k skill = 1 echo</div><div class="up-act"><div style="'+UB+'" data-lp="1">'+(armed==='p'?'PRESTIGE YES':'prestige')+'</div></div></div>');
+ wire(pc,'data-lp',function(){if(layerArm('p'))prestigeCmd('yes');else prestigeCmd('');});
+ // ASCENSION
+ var ag=0,em=0,as=0;
+ try{ag=ascendGain();em=skillState.embers||0;as=skillState.ascensions||0}catch(e){}
+ var ab='<div class="up-node"><div class="up-name">embers: '+fmtN(em)+' (run '+as+')</div><div class="up-desc">gain now: '+fmtN(ag)+' · echoes: '+fmtN(ec)+' · 10 echoes = 1 ember · burns echoes</div><div class="up-act"><div style="'+UB+'" data-la="1">'+(armed==='a'?'ASCEND YES':'ascend')+'</div></div></div>';
+ var shop=[['autoP','auto-prestige','2e — prestige fires itself when gain doubles you'],['discount','bulk rate','1e/lv — upgrade costs -5%/lv, compounding'],['kindling','kindling','1e/lv — echo gain x1.2/lv']];
+ for(var si=0;si<shop.length;si++){
+  var lv=0;
+  try{lv=embGet(shop[si][0])}catch(e){}
+  ab+='<div class="up-node"><div class="up-name">'+shop[si][1]+' ['+lv+']</div><div class="up-desc">'+shop[si][2]+'</div><div class="up-act"><div style="'+UB+'" data-lemb="'+shop[si][0]+'">buy</div></div></div>';
+ }
+ var ac=card('ascension','rgba(255,122,60,0.9)','ascension — layer 2','burn echoes for embers (+100% each, forever)',ab);
+ wire(ac,'data-la',function(){if(layerArm('a'))ascendCmd('yes');else ascendCmd('');});
+ wire(ac,'data-lemb',function(id){ascendCmd('buy '+id);});
+ // SACRIFICE
+ var sac=false;try{sac=!!skillState.sacrificed}catch(e){}
+ var sb='<div class="up-node"><div class="up-name">'+(sac?'SACRIFICED (x5 stands)':'unsacrificed')+'</div><div class="up-desc">burns everything numeric. keeps achievements, skills, nothing core. once.</div><div class="up-act"><div style="'+UB+'" data-ls="1">'+(armed==='s'?'SACRIFICE YES':'sacrifice')+'</div></div></div>';
+ if(sac){
+  var ss=[['phoenix','phoenix','prestiges start with +10k skill/lv'],['ashen','ashen','+25% skill/lv'],['twice','twice-burned','keep overcharge through prestige']];
+  for(var qi=0;qi<ss.length;qi++){
+   var qlv=0,qcost='?';
+   try{qlv=sacGet(ss[qi][0]);var _sm=null;for(var qk=0;qk<SAC_SHOP.length;qk++)if(SAC_SHOP[qk].id===ss[qi][0])_sm=SAC_SHOP[qk];if(_sm)qcost=fmtN(_sm.cost*(qlv+1))+' skill'}catch(e){}
+   sb+='<div class="up-node"><div class="up-name">'+ss[qi][1]+' ['+qlv+']</div><div class="up-desc">'+ss[qi][2]+' · '+qcost+'</div><div class="up-act"><div style="'+UB+'" data-lsac="'+ss[qi][0]+'">buy</div></div></div>';
+  }
+ }
+ var sc=card('sacrifice','rgba(255,60,60,0.9)','sacrifice — layer 3','nuke the numbers for x5 forever. once',sb);
+ wire(sc,'data-ls',function(){if(layerArm('s'))sacrificeCmd('yes');else sacrificeCmd('');});
+ wire(sc,'data-lsac',function(id){sacrificeBuy(id);});
+ // MINE
+ var rigs=0,ore=0,mast=0,mxp=0,mneed=10;
+ try{var mm=mineState();rigs=mm.rigs;ore=Math.floor(mm.ore*10)/10;mast=mm.mastery;mxp=Math.floor(mm.xp*10)/10;mneed=mineXpNeed()}catch(e){}
+ var rigCost=0;try{rigCost=mineRigCost()}catch(e){}
+ var mc=card('minehole','rgba(140,160,180,0.9)','mine — layer 4','rigs spit ore, ore becomes mastery (+2%/lv)',
+  '<div class="up-node"><div class="up-name">'+rigs+' rigs · '+fmtN(ore)+' ore · mastery '+mast+'</div><div class="up-desc">'+fmtN(mxp)+'/'+fmtN(mneed)+' xp · rigs spit 1 ore/min · next rig: '+fmtN(rigCost)+' skill</div><div class="up-act"><div style="'+UB+'" data-lm="buy">buy rig</div> <div style="'+UB+'" data-lm="refine">refine all</div></div></div>');
+ wire(mc,'data-lm',function(what){if(what==='buy')mineCmd('buy');else mineCmd('refine all');});
+ // OBELISK
+ var ob='',ch=null,cdn={bare:0,patient:0,rush:0};
+ try{ch=chalState();cdn=skillState.chalDone||cdn}catch(e){}
+ var ids=['bare','patient','rush'];
+ for(var oi=0;oi<ids.length;oi++){
+  var dd=(CHAL_DEF&&CHAL_DEF[ids[oi]])?CHAL_DEF[ids[oi]].desc:'';
+  var dg=(CHAL_DEF&&CHAL_DEF[ids[oi]])?' · goal: '+fmtN(CHAL_DEF[ids[oi]].goals[Math.min(((cdn[ids[oi]])||0),2)]):'';
+  ob+='<div class="up-node"><div class="up-name">'+ids[oi]+' ['+((cdn[ids[oi]])||0)+'/3]</div><div class="up-desc">'+dd+dg+'</div><div class="up-act">'+(ch&&ch.id===ids[oi]?('inside: '+Math.floor(ch.earn)+' <div style="'+UB+'" data-lcx="1">forfeit</div>')+ '' :('<div style="'+UB+'" data-lc="'+ids[oi]+'">enter</div>'))+'</div></div>';
+ }
+ var oc=card('obelisk','rgba(183,148,246,0.9)','obelisk — challenges','trials with modifiers. +10% each clear',ob);
+ wire(oc,'data-lc',function(id){challengeCmd('enter '+id);});
+ wire(oc,'data-lcx',function(){challengeCmd('exit');});
 }
 function renderAreaNav(){
 renderBuyMaxToggles();
@@ -5046,10 +5191,19 @@ panY-=e.deltaY||0;
 applySkillPan();
 },{passive:false});
 })();
-function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active')}
+function skillOpen(){var el=document.getElementById('skillTree');if(!el)return;skillRender();el.classList.add('active');try{var vp=document.getElementById('skillViewport'),w=document.getElementById('skillWorld'),col=document.getElementById('skillCol');if(vp&&w&&col){var vr=vp.getBoundingClientRect(),cr=col.getBoundingClientRect();panX+=(vr.left+120)-cr.left;panY+=(vr.top+80)-cr.top;applySkillPan()}}catch(e){}}
 function openUpgradeTree(){skillOpen();if(!skillAllFinals()){cubeWarn('upgrade locked — buy every skill');return}panSkillToUpgrade()}
 function skillClose(){var el=document.getElementById('skillTree');if(el)el.classList.remove('active')}
-var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_jedec','cube_pwned','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_hud_min','cube_run_acc','cube_run_last','cube_dial_sp','cube_speedrun','cube_office','cube_greyhall','cube_tbb','cube_geo'];
+var slotKeys=['cube_skill_state','cube_core_seen','cube_autosave','cube_last_visit_day','cube_last_visit_date','cube_last_seen','cube_visit_count','cube_demo_lib','cube_pkgs','cube_mute','cube_admin','cube_ach','cube_cbmenu_best','cube_cbmenu_enter','cube_luck','cube_oracle_n','cube_act2','cube_act3','cube_jedec','cube_pwned','cube_act1_hard','cube_act2_hard','cube_elegant','cube_elegant_hard','cube_brute','cube_run_ms','cube_run_start','cube_run_valid','cube_nyarch_n','cube_oxford','cube_ach_paid','cube_transmit_n','cube_zones_seen','cube_hud_pos','cube_hud_min','cube_run_acc','cube_run_last','cube_dial_sp','cube_speedrun','cube_office','cube_greyhall','cube_tbb','cube_geo','cube_grotto','cube_casino','cube_secret','cube_secret_seen','cube_objpot','cube_pets','cube_mail_best','cube_mail_spd','cube_fishbox','cube_fishbest','cube_chism100','cube_fly_open','cube_fly_fed','cube_fly_seizure','cube_men_summoned','cube_nogame','cube_noli_full','cube_luck','cube_daily_last','cube_daily_streak','cube_title','cube_tune_nudges','cube_last_seen','cube_outrun','cube_bn_url','cube_cubecheck','cube_cred2_edits','cube_cred3_edits','cube_finale','cube_downfall_unlocked','cube_employment_unlocked','cube_employment_warned','cube_dream_day','cube_foxy_unlocked','cube_foxy_win','cube_starcharts','cube_starchart_cb','cube_starchart_far','cube_starchart_geo','cube_starchart_break','cube_starchart_fringe','cube_starchart_end','cube_starchart_x','cube_stargazer','cube_btn_breach','cube_btn_seized','cube_btn_lockdown','cube_btn_myth','cube_btn_escaped','cube_shift_blind','cube_shift_ch','cube_shift_complaint','cube_shift_ghost','cube_shift_mute','cube_shift_perfect','cube_shift_slips','cube_folk_align','cube_folk_anthem','cube_folk_bet_day','cube_folk_betwins','cube_folk_buffs','cube_folk_clog','cube_folk_cut','cube_folk_cuts','cube_folk_debt','cube_folk_detention','cube_folk_diploma','cube_folk_evil','cube_folk_fest_day','cube_folk_fests','cube_folk_forged','cube_folk_fp','cube_folk_fries','cube_folk_fry_at','cube_folk_furn','cube_folk_goldenate','cube_folk_grades','cube_folk_heat','cube_folk_heat_at','cube_folk_huss','cube_folk_hut','cube_folk_jail_until','cube_folk_letters','cube_folk_lore','cube_folk_mail_at','cube_folk_mail_pending','cube_folk_mayor_until','cube_folk_meals','cube_folk_mischief','cube_folk_neighbor','cube_folk_nightmet','cube_folk_nods','cube_folk_orders','cube_folk_paper_day','cube_folk_paper_n','cube_folk_permits','cube_folk_pet','cube_folk_played_at','cube_folk_pogo_best','cube_folk_pressure','cube_folk_q','cube_folk_queue','cube_folk_record','cube_folk_requests','cube_folk_rest_at','cube_folk_sea_drinks','cube_folk_sewer_max','cube_folk_stampq','cube_folk_stipend_at','cube_folk_streak','cube_folk_trade_at','cube_folk_treated','cube_folk_trials','cube_folk_visits','cube_folk_wall','cube_folk_wall_n','cube_folk_wanders','cube_folk_war_end','cube_folk_wxorder','cube_admin_purge3'];
+// hermetic slots: wipe every cube_* key except the disks themselves,
+// the active marker, and admin access. new disk = new game. no ghosts.
+function slotWipeAll(){
+ try{
+  var kill=[];
+  for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('cube_')===0&&k.indexOf('cube_slot_')!==0&&k!=='cube_active_slot'&&k!=='cube_admin')kill.push(k)}
+  for(var j=0;j<kill.length;j++){try{localStorage.removeItem(kill[j])}catch(e){}}
+ }catch(e){}
+}
 var slotDefNames=['main','testing','slot 3','slot 4','slot 5'];
 function slotRead(n){try{var s=localStorage.getItem('cube_slot_'+n);if(!s)return null;var b=JSON.parse(s);if(b&&typeof b==='object')return b}catch(e){}return null}
 function slotActive(){try{var a=parseInt(localStorage.getItem('cube_active_slot')||'1',10);if(a>=1&&a<=5)return a}catch(e){}return 1}
@@ -5069,7 +5223,7 @@ try{var st=JSON.parse(b.data.cube_skill_state||'null');if(st){pts=st.points;up=s
 try{var dl=JSON.parse(b.data.cube_demo_lib||'null');if(dl&&typeof dl.length==='number')dc=dl.length}catch(e){}
 try{var pl=JSON.parse(b.data.cube_pkgs||'null');if(pl&&typeof pl.length==='number')pc=pl.length}catch(e){}
 var dt='?';try{dt=new Date(b.at).toLocaleDateString()+' '+new Date(b.at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(e){}
-info=sk+' skills · '+pts+'→ / '+up+'⬀ · '+dc+' demos · '+pc+' pkgs<br>'+dt;
+info=sk+' skills · '+pts+' skill · '+dc+' demos · '+pc+' pkgs<br>'+dt;
 }
 var d=document.createElement('div');
 d.className='floppy'+(n===act?' active':'');
@@ -5092,15 +5246,16 @@ renderSlots();
 function slotLoad(n){
 var act=slotActive();
 try{slotSave(act)}catch(e){}
-var b=slotRead(n);
-if(!b||!b.data){
-for(var i=0;i<slotKeys.length;i++){try{localStorage.removeItem(slotKeys[i])}catch(e){}}
-try{localStorage.setItem('cube_active_slot',String(n))}catch(e){}
-slotsClose();
-cubeOk('slots: disk '+n+' is blank. booting a fresh timeline...');
-setTimeout(function(){location.reload()},800);
-return}
-for(var k in b.data){try{localStorage.setItem(k,b.data[k])}catch(e){}}
+ var b=slotRead(n);
+ if(!b||!b.data){
+ slotWipeAll();
+ try{localStorage.setItem('cube_active_slot',String(n))}catch(e){}
+ slotsClose();
+ cubeOk('slots: disk '+n+' is blank. booting a fresh timeline...');
+ setTimeout(function(){location.reload()},800);
+ return}
+ slotWipeAll();
+ for(var k in b.data){try{localStorage.setItem(k,b.data[k])}catch(e){}}
 try{localStorage.setItem('cube_active_slot',String(n))}catch(e){}
 slotsClose();
 cubeOk('slots: loaded disk '+n+' ('+(b.name||slotDefNames[n-1])+'). rebooting timeline...');
@@ -8392,26 +8547,33 @@ var ngMornRulesDef=[
 {id:'r1',on:true,bin:'SHRED',text:'stamp VOID \u2192 SHRED (VOID outranks everything)',test:function(i){return i.stamp==='VOID'}},
 {id:'r2',on:true,bin:'TO JBO',text:'sender contains jbo \u2192 TO JBO',test:function(i){return i.from.indexOf('jbo')>=0}},
 {id:'r4',on:false,bin:'TO JBO',text:'',test:function(i){return i.stamp==='REDACTED'}},
-{id:'r3',on:false,bin:'SHRED',text:'number \u2265 90 \u2192 SHRED (burn the high ones)',test:function(i){return i.num>=90}}
+{id:'r3',on:false,bin:'SHRED',text:'number \u2265 90 \u2192 SHRED (burn the high ones)',test:function(i){return i.num>=90}},
+{id:'r5',on:false,bin:'ARCHIVE',text:'sender landlord → ARCHIVE (rent is due. it is always due.)',test:function(i){return i.from.indexOf('landlord')!==-1}},
+{id:'r6',on:false,bin:'SHRED',text:'stamp FURNACE → SHRED (it arrives pre-burned)',test:function(i){return i.stamp==='FURNACE'}},
+{id:'r7',on:false,bin:'TO JBO',text:'number divisible by 7 → TO JBO (he collects shiny math)',test:function(i){return i.num%7===0}}
 ];
 var ngMornCatchBin='ARCHIVE';
 var ngMornCatchText='everything else \u2192 ARCHIVE';
 var ngMornMemos=[
 {text:'MEMO 1: number \u2265 90 \u2192 SHRED. burn the high ones.',apply:function(){ngMornRules[3].on=true}},
 {text:'MEMO 2: stamp REDACTED \u2192 TO JBO. he "collects" them.',apply:function(){ngMornRules[2].on=true}},
-{text:'MEMO 3: MANAGEMENT OVERRIDE: REDACTED \u2192 SHRED. jbo lost that argument.',apply:function(){ngMornRules[2].bin='SHRED'}}
+{text:'MEMO 3: MANAGEMENT OVERRIDE: REDACTED \u2192 SHRED. jbo lost that argument.',apply:function(){ngMornRules[2].bin='SHRED'}},
+{text:'MEMO 4: sender landlord → ARCHIVE. the rent is due.',apply:function(){ngMornRules[4].on=true}},
+{text:'MEMO 5: stamp FURNACE → SHRED, and numbers divisible by 7 → TO JBO. the poster is running out of wall.',apply:function(){ngMornRules[5].on=true;ngMornRules[6].on=true}}
 ];
 var ngMornRoast=['wrong bin. the poster is RIGHT THERE.','the mail screams softly as it goes to the wrong dimension.','no. read. the. poster.','that bin has a LABEL. labels are words. words mean things.','wrong. jbo would have gotten this, and jbo cannot read.'];
-var ngMornLunchOpts=['a sandwich shaped like a problem','coffee, black like my humor','yesterday\u2019s leftover code'];
+var ngMornLunchOpts=['a sandwich shaped like a problem','coffee, black like my humor','day-old leftover code','a muffin labeled EVIDENCE (do not)','soup. the soup is also mail. file it after.'];
 var ngMornLunchTips=[
 'you ate a sandwich shaped like a problem. it tasted like quarters. +0 nutrition, +1 audacity.',
 'black coffee. the void\u2019s personality in a cup. obj approves for once: "correct."',
-'yesterday\u2019s leftover code. mostly semicolons. you feel... compiled.'
+'yesterday\u2019s leftover code. mostly semicolons. you feel... compiled.',
+'a muffin labeled EVIDENCE. crunchy. legally distinct from food. you feel watched. (you are. eat faster.)',
+'soup. hot. the bowl says PROPERTY OF MAILROOM. you drink it anyway. the mail respects that.'
 ];
 function ngMornStrikeMax(){return ngHard?3:4}
-function ngMornRoundsTotal(){return ngHard?3:2}
-function ngMornRushTotal(){return ngHard?3:2}
-function ngMornBatchSize(){var a=ngHard?[5,6,7]:[5,6];return a[ngMornRound]}
+function ngMornRoundsTotal(){return ngHard?5:4}
+function ngMornRushTotal(){return ngHard?4:3}
+function ngMornBatchSize(){var a=ngHard?[5,6,7,8,9]:[5,6,7,8];return a[ngMornRound]}
 function ngMornRushSize(){return ngHard?7:6}
 function ngMornRushLimit(){return ngHard?45000:60000}
 function ngMornFmt(ms){var s=Math.max(0,Math.ceil(ms/1000));var m=Math.floor(s/60);var ss=s%60;return m+':'+(ss<10?'0':'')+ss}
@@ -8421,6 +8583,7 @@ for(var i=0;i<ngMornRulesDef.length;i++){var d=ngMornRulesDef[i];ngMornRules.pus
 }
 function ngMornBin(it){
 for(var i=0;i<ngMornRules.length;i++){var r=ngMornRules[i];if(r.on&&r.test(it))return r.bin}
+if(ngMornPh===5)return 'SHRED';
 return ngMornCatchBin;
 }
 function ngMornTraceReset(){ngMornTraceLeft=1}
@@ -8462,8 +8625,11 @@ var r=ngMornRules[i];if(!r.on)continue;
 var it=null;
 if(r.id==='r1')it={from:ngMornFroms[ngMornRand(0,5)],stamp:'VOID',num:ngMornRand(3,89)};
 else if(r.id==='r2')it={from:'jbo relay',stamp:'PLAIN',num:ngMornRand(3,89)};
-else if(r.id==='r4')it={from:ngMornFroms[ngMornRand(0,5)],stamp:'REDACTED',num:ngMornRand(3,89)};
-else it={from:ngMornFroms[ngMornRand(0,5)],stamp:'PLAIN',num:ngMornRand(90,99)};
+ else if(r.id==='r4')it={from:ngMornFroms[ngMornRand(0,5)],stamp:'REDACTED',num:ngMornRand(3,89)};
+ else if(r.id==='r5')it={from:'landlord',stamp:'PLAIN',num:ngMornRand(3,89)};
+ else if(r.id==='r6')it={from:ngMornFroms[ngMornRand(0,5)],stamp:'FURNACE',num:ngMornRand(3,89)};
+ else if(r.id==='r7')it={from:ngMornFroms[ngMornRand(0,5)],stamp:'PLAIN',num:7*ngMornRand(1,12)};
+ else if(r.id==='r3')it={from:ngMornFroms[ngMornRand(0,5)],stamp:'PLAIN',num:ngMornRand(90,99)};
 out.push(it);
 }
 while(out.length<n)out.push({from:ngMornFroms[ngMornRand(0,5)],stamp:'PLAIN',num:ngMornRand(3,89)});
@@ -8603,7 +8769,7 @@ function ngMornStartCountdown(){
 if(!ngActive||ngChDone||ngMornReady)return;
 ngMornReady=1;
 ngMornStrikes=0;ngMornItem=0;
-ngMornBatch=ngMornGen(ngHard?64:32);ngMornTraceReset();
+ngMornBatch=ngMornGen(ngHard?80:40);ngMornTraceReset();
 try{ngSave({p19:{ph:5,strikes:0}})}catch(e){}
 try{ngMornAud=new Audio('sciences_downfall.webm');ngMornAud.volume=0.85;try{if(!audioCtx)initAudio();if(audioCtx&&audioAnalyser){if(ngMornAudSrc){try{ngMornAudSrc.disconnect()}catch(e){}}ngMornAudSrc=audioCtx.createMediaElementSource(ngMornAud);ngMornAudSrc.connect(audioAnalyser)}}catch(e){}var pr=ngMornAud.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}
 try{ngSfx('static')}catch(e){}
@@ -8743,7 +8909,8 @@ if(!ngMornReady){
 var h='<div style="color:#c8a0d0;font-family:Georgia,serif;font-size:14px;letter-spacing:2px;text-align:center;margin:10px 0 4px">SHUTDOWN DRILL \u00b7 T-MINUS 05:00</div>';
 h+='<div style="color:#d8a05a;font-family:Georgia,serif;font-size:13px;text-align:center;width:76%;margin:10px auto;line-height:1.6">at 5:00 the mailroom powers down for "maintenance". whatever is not filed gets... reassigned.<br>the stereo plays one song. the song is five minutes. i timed it. this is your warning, not mine.</div>';
 h+=ngMornRulesHtml();
-h+='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-top:8px">'+(ngHard?10:8)+' items \u00b7 one timer \u00b7 strikes reset at the gate</div>';
+h+='<div style="color:#9fb2c5;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-top:8px">'+(ngHard?80:40)+' items \u00b7 one timer \u00b7 strikes reset at the gate</div>';
+ h+='<div style="color:#ff8060;font-family:Consolas,monospace;font-size:11px;text-align:center;margin-top:6px">night rules: the ARCHIVE is full. unmatched mail burns.</div>';
 h+='<button class="ngtopt" id="ngMornReadyB" style="width:48%;font-size:14px;letter-spacing:2px;margin-top:14px">I\'M READY</button>';
 m.innerHTML=h;
 var b=document.getElementById('ngMornReadyB');
@@ -8767,7 +8934,7 @@ var ph=1;var doneF=false;
 try{var s=ngLoad();if(s.p19&&typeof s.p19==='object'){ph=Math.min(Math.max(1,s.p19.ph||1),5);if(s.p19.done)doneF=true;if(typeof s.p19.strikes==='number'&&s.p19.strikes>0)ngMornStrikesTot=s.p19.strikes;if(typeof s.p19.trace==='number'&&s.p19.trace>0)ngMornTraceUses=s.p19.trace}}catch(e){}
 if(doneF){try{var sr=ngLoad();if(sr.p19&&!sr.p19.replay){sr.p19.replay=1;ngSave({p19:sr.p19})}if(typeof achScan==='function')achScan()}catch(e){}ngChapter19Done(true);return}
 if(ph===2)ngMornMemo=1;
-if(ph>=3){ngMornRules[3].on=true;ngMornRules[2].on=true;if(ngHard)ngMornRules[2].bin='SHRED'}
+if(ph>=3){ngMornRules[3].on=true;ngMornRules[2].on=true;ngMornRules[4].on=true;ngMornRules[5].on=true;ngMornRules[6].on=true;if(ngHard)ngMornRules[2].bin='SHRED'}
 ngMornPh=ph;
 st.innerHTML='<div id="ngSub">CHAPTER 19: MORNING</div>'+
 '<div id="ngMornProg" style="color:#4a5a6a;font-size:12px;letter-spacing:2px;font-family:Consolas,monospace;margin:16px 0 4px"></div>'+
@@ -8796,7 +8963,7 @@ if(!replay){
 try{ngUnlock(20)}catch(e){}
 try{if(typeof ngMornTmrLeft!=='undefined'&&ngMornTmrLeft>=120000)localStorage.setItem('cube_outrun','1')}catch(e){}
 var keepRep=0;try{var rp=ngLoad();if(rp.p19&&rp.p19.replay)keepRep=1}catch(e){}
-try{ngSave({p19:{ph:1,strikes:ngMornStrikesTot,done:1,trace:(typeof ngMornTraceUses!=='undefined'&&ngMornTraceUses>0)?1:0,hard:ngHard?1:0,replay:keepRep}})}catch(e){}
+try{ngSave({p19:{ph:1,strikes:ngMornStrikesTot,done:1,night:1,trace:(typeof ngMornTraceUses!=='undefined'&&ngMornTraceUses>0)?1:0,hard:ngHard?1:0,replay:keepRep}})}catch(e){}
 }
 var st=document.getElementById('ngStage');if(!st)return;
 if(!replay){try{if(typeof grantPts==='function'&&typeof ptMult==='function'){grantPts(50*ptMult());if(typeof skillPtsRefresh==='function')skillPtsRefresh()}}catch(e){}}
@@ -10879,14 +11046,14 @@ if(typeof refreshHelpLocks==='function')refreshHelpLocks();
 skillReapplyAll();
 skillUpReapplyAll();
 if(typeof refreshShapeLocks==='function')refreshShapeLocks();
-try{var _vb=upLv('skill_visitBonus');if(_vb>0){var _vg=grantPts(_vb*ptMult());skillPtsRefresh();cubePrint('[skill] visit bonus: +'+_vg+' skill point'+(_vg===1?'':'s'))}var _tr=upLv('skill_prestTribute');if(_tr>0){var _tu=grantUp(_tr*upMult());skillPtsRefresh();cubePrint('[upgrade] tribute: +'+_tu+' upgrade point'+(_tu===1?'':'s'))}}catch(e){}
+try{var _vb=upLv('skill_visitBonus')+10*upLv('skill_visitFortune');if(_vb>0){var _vg=grantPts(_vb*ptMult());skillPtsRefresh();cubePrint('[skill] visit bonus: +'+_vg+' skill point'+(_vg===1?'':'s'))}var _tr=upLv('skill_prestTribute');if(_tr>0){var _tu=grantUp(_tr*upMult());skillPtsRefresh();cubePrint('[skill] tribute: +'+_tu+' skill'+(_tu===1?'':'s'))}}catch(e){}
 var metaTrickleTimer=null;
-function skillPtsRefresh(){try{var p=document.getElementById('skillPts');if(p)p.textContent=skillState.points;var u=document.getElementById('upPts');if(u)u.textContent=skillState.upPoints}catch(e){}}
+function skillPtsRefresh(){try{var p=document.getElementById('skillPts');if(p)p.textContent=skillState.points;var u=document.getElementById('upPts');if(u)u.textContent=skillState.points}catch(e){}}
 function metaMs(){return Math.round(90000*tickDiv())}
 function fireMetaTrickle(){
 metaTrickleTimer=null;
 if(!skillHas('meta2'))return;
-var _mp=grantPts((1+upLv('skill_alphaWell'))*ptMult()*(1+0.25*upLv('skill_trickleBoost')));skillPtsRefresh();
+var _mp=grantPts((1+upLv('skill_alphaWell')+5*upLv('skill_growLight'))*ptMult()*(1+0.25*upLv('skill_trickleBoost')));skillPtsRefresh();
 cubePrint('[skill] photosynthesis: +'+_mp+' skill point. total: '+skillState.points);
 metaTrickleTimer=setTimeout(fireMetaTrickle,metaMs());
 }
@@ -10904,9 +11071,10 @@ var ms=upTrickleMs();
 if(!ms)return;
 upTrickleTimer=setTimeout(function(){
 upTrickleTimer=null;
-var _tt=(1+upLv('skill_graveyard'))*(upLv('skill_darkening')>0?2:1)*(1+0.25*upLv('skill_trickleBoost'));
+try{if(typeof chalQuiet==='function'&&chalQuiet()){scheduleUpTrickle();return}}catch(e){}
+var _tt=((1+upLv('skill_graveyard'))+3*upLv('skill_richTrickle'))*(upLv('skill_floodgates')>0?3:(upLv('skill_darkening')>0?2:1))*(1+0.25*upLv('skill_trickleBoost'));
 var _tg=grantUp(_tt*upMult());skillPtsRefresh();
-cubePrint('[upgrade] trickle: +'+_tg+' upgrade point. total: '+skillState.upPoints);
+cubePrint('[skill] trickle: +'+_tg+' skill. total: '+skillState.points);
 scheduleUpTrickle();
 },ms);
 }
@@ -10914,14 +11082,17 @@ scheduleUpTrickle();
 function skillTickMs(){var lv=upLv('skill_skillRate');var steps=[480000,360000,240000,120000,60000,30000];return Math.round(steps[Math.min(Math.floor(lv),steps.length-1)]*tickDiv())}
 function upTickMs(){var lv=upLv('skill_pointWell');var steps=[480000,360000,240000,120000,60000,30000];return Math.round(steps[Math.min(Math.floor(lv),steps.length-1)]*tickDiv())}
 var upTimer=null;
-function scheduleUpTick(){if(upTimer)clearTimeout(upTimer);if(!skillAllFinals())return;upTimer=setTimeout(function(){var _b=((window._skillMetaUpSurge?1:0)+upLv('skill_tickSurge'));var _g=grantUp((1+_b)*upMult()+2*upLv('skill_deepWell'));skillPtsRefresh();cubePrint('[upgrade] +'+_g+' upgrade point'+(_g===1?'':'s')+'. total: '+skillState.upPoints);scheduleUpTick()},upTickMs())}
+function scheduleUpTick(){if(upTimer)clearTimeout(upTimer);if(!skillAllFinals())return;upTimer=setTimeout(function(){try{if(typeof chalQuiet==='function'&&chalQuiet()){scheduleUpTick();return}}catch(e){}var _b=((window._skillMetaUpSurge?1:0)+upLv('skill_tickSurge'));var _g=grantUp((1+_b)*upMult()+2*upLv('skill_deepWell'));skillPtsRefresh();cubePrint('[skill] +'+_g+'. total: '+skillState.points);scheduleUpTick()},upTickMs())}
 function scheduleSkillTick(){
 setTimeout(function(){
+try{if(typeof chalQuiet==='function'&&chalQuiet()){scheduleSkillTick();return}}catch(e){}
 var _sb=((window._skillMetaSurge?1:0)+upLv('skill_tickSurge'));
-var _samt=(1+_sb)*ptMult();
-var _crit=Math.random()<0.2*upLv('skill_cascade');
+var _samt=(1+_sb+5*upLv('skill_pointFlood'))*ptMult();
+var _crit=Math.random()<0.2*(upLv('skill_cascade')+upLv('skill_goldenCascade'));
 if(_crit)_samt*=2;
+if(upLv('skill_pointNova')>0)_samt*=3;
 var _g=grantPts(_samt);
+if(upLv('skill_bigBang')>0){var _bb=((1+upLv('skill_graveyard'))+3*upLv('skill_richTrickle'))*(upLv('skill_floodgates')>0?3:(upLv('skill_darkening')>0?2:1))*(1+0.25*upLv('skill_trickleBoost'));grantUp(_bb*upMult());}
 var _pe=upLv('skill_prestEcho');if(_pe>0)grantUp(0.5*_pe*upMult());
 if(skillAllFinals()){var _ub=((window._skillMetaUpSurge?1:0)+upLv('skill_tickSurge'));grantUp((1+_ub)*upMult());scheduleUpTick()}
 skillPtsRefresh();
@@ -11822,6 +11993,7 @@ flyStatT++;
 if(flyStatT%25===0)flyStatUpd();
 }
 function flyBuzzSet(on){
+if(window._trAudioLock)on=false;
 try{
 if(on){
 if(!flyBuzz){

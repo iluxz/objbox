@@ -16,8 +16,8 @@ var GROTTO_EXCLUDE=['godmode','chism100','gr_lorekeeper','gr_gauntlet','gr_warde
 var GROTTO_NEED_IDS=['resident','fiddlesticks','shutdown_walkout','btn_myth'];
 function grEl(id){try{return document.getElementById(id)}catch(e){return null}}
 function grSay(t){try{if(typeof cubePrint==='function')cubePrint(t)}catch(e){}}
-function grSave(){try{return JSON.parse(localStorage.getItem('cube_grotto')||'{}')}catch(e){return{}}}
-function grStore(s){try{localStorage.setItem('cube_grotto',JSON.stringify(s||{}))}catch(e){}}
+function grSave(){try{return JSON.parse(localStorage.getItem('cube_grotto')||'{}',typeof jsonInfRev==='function'?jsonInfRev:null)}catch(e){try{return JSON.parse(localStorage.getItem('cube_grotto')||'{}')}catch(e2){return{}}}}
+function grStore(s){try{localStorage.setItem('cube_grotto',JSON.stringify(s||{},typeof jsonInfRep==='function'?jsonInfRep:null))}catch(e){try{localStorage.setItem('cube_grotto',JSON.stringify(s||{}))}catch(e2){}}}
 function grNeedName(id){
   try{
     if(typeof ACH!=='undefined')for(var i=0;i<ACH.length;i++){
@@ -314,7 +314,7 @@ var GR_ROOMS={
     var h='<div>rows of low fences under the rock. ranch slimes live here. the wild phosphors visit and leave. (they are above this.)</div><div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:640px;margin-left:auto;margin-right:auto">';
     for(var i=0;i<4;i++){
       var c=corr[i];
-      h+='<div style="border:1px solid #2b4a68;background:rgba(4,12,18,.93);border-radius:8px;padding:5px;font-size:11px;text-align:left">';
+      h+='<div style="border:1px solid '+(((c.deco||{}).trim)?'#ffd770':'#2b4a68')+';background:rgba(4,12,18,.93);border-radius:8px;padding:5px;font-size:11px;text-align:left">';
       h+='<b>pen '+(i+1)+'</b> ';
       if(!c.own){
         h+='<span style="color:#5f7d99">empty dirt</span><br><button class="grBtn" data-cbuy="'+i+'" style="padding:3px 8px;font-size:11px;margin-top:4px">fence it — '+GR_CORRAL_PRICES[i]+' glow</button>';
@@ -339,6 +339,11 @@ var GR_ROOMS={
         else h+='<span style="color:#8df0c8">▦walled</span>';
         if(!c.mister)h+=' <button class="grBtn" data-cmister="'+i+'" style="padding:2px 6px;font-size:11px">mister 300g</button>';
         else h+=' <span style="color:#8df0c8">~misted</span>';
+        var dc=c.deco||{},dline='';
+        for(var dk in GR_DECO){if(dc[dk])dline+='<span style="color:#ffd770">'+GR_DECO[dk].tag+'</span> ';else dline+='<button class="grBtn" data-cdeco="'+i+':'+dk+'" style="padding:2px 6px;font-size:11px">'+dk+' '+GR_DECO[dk].cost+'g</button> '}
+        h+='<div style="font-size:11px;color:#5f7d99;margin-top:3px">decor: '+dline+'</div>';
+        if(dc.gnome)h+='<div style="font-size:11px;color:#8df0c8">a gnome supervises. morale improved.</div>';
+        if(dc.pond)h+='<div style="font-size:11px;color:#5f7d99">a tiny pond shimmers. do not drink it.</div>';
       }
       h+='</div>';
     }
@@ -351,7 +356,8 @@ var GR_ROOMS={
     if(grFight)return grFightHtml();
     var rmn=0;try{rmn=Math.min(5,(grSave().rematches||0))}catch(e){}
     return 'the dark down here inhales. slow. wet. patient.<br><br>something at the bottom is keeping a heartbeat for you. it has your rhythm wrong on purpose.<br><br><div style="font-size:40px;margin:10px">◉</div><b>THE WARDEN OF THE DEEP</b><br><span style="color:#5f7d99">it does not want you past. '+(10+rmn)+' hits to put it down'+(rmn>0?' (it has been eating. rematches do that.)':'')+'. it hits back.'+(grLost?' last time it spat you out. rude.':'')+'</span><br><br><button class="grBtn" id="grWardenGo">descend</button>';
-  }}
+  }},
+  deep:{title:'THE DEEP',html:function(){return grDeepHtml()}}
 };
 // vault puzzle: the phosphors hum a 5-note song. knock it back on the door.
 var grPlaying=false;
@@ -371,6 +377,840 @@ var GR_LORE2=[
 function grLore2AllRead(){try{var s=grSave();for(var i=0;i<GR_LORE2.length;i++){if((s.loreRead||[]).indexOf(GR_LORE2[i].id)===-1)return false}return true}catch(e){return false}}
 function grLoreById(id){for(var i=0;i<GR_LORE.length;i++)if(GR_LORE[i].id===id)return GR_LORE[i];for(var k=0;k<GR_LORE2.length;k++)if(GR_LORE2[k].id===id)return GR_LORE2[k];return null}
 function grLoreAllRead(){try{var s=grSave();for(var i=0;i<GR_LORE.length;i++){if((s.loreRead||[]).indexOf(GR_LORE[i].id)===-1)return false}return true}catch(e){return false}}
+// THE DEEP: 100 generated rooms in 5 tiers of 20. seeded, same every load.
+// rooms 10/20/.../90 are toll gates. room 100 is the final cache.
+function grSeed(n){var t=(n*2654435761)>>>0;return function(){t+=0x6D2B79F5;var z=Math.imul(t^t>>>15,1|t);z^=z+Math.imul(z^z>>>7,61|z);return((z^z>>>14)>>>0)/4294967296}}
+var GR_DEEP_FLOOD_FLAV=[
+ '{N}. the deep sprung a leak here. black water, silent. (not the sump. the sump is famous. this is just wet.)',
+ '{N}. flooded to the knees. something down there glints. dive where it winks.',
+ '{N}. water got in through a crack nobody admits to. the lantern doubles. the glints triple. (roughly.)'];
+var GR_DEEP_CAVE_FLAV=[
+ '{N}. the ceiling gave up halfway. rubble, dust, five glowing stones. (not the collapses. those are famous. this is just rubble.)',
+ '{N}. caved in last tuesday. (probably.) the stones glow through the dust. tap them back.',
+ '{N}. a fresh pile. the deep is still settling. mind the dust. solve the stones.'];
+var GR_DEEP_CAVE_BG='background:linear-gradient(180deg,#1c1410,#0e0a07 70%,#060403);border:1px solid #4a3828;border-radius:6px;padding:12px';
+var GR_DEEP_TIERS=[
+ {id:'burrow',name:'THE BURROWS',bg:'grDeepDirt',kind:'hub',flav:'dirt',
+  nouns:['the dig','the sump','the overflow','first collapse','second collapse','third collapse','floodgate'],
+  flavors:['{N}.']},
+ {id:'dirt',name:'UPPER BURROWS',bg:'grDeepDirt',kind:'dig',flav:'dirt',
+  nouns:['squeeze','den','root cellar','worm turn','soft pocket','mud lung','pebble throat','hollow knuckle','dirt chapel','grub hall','tunnel elbow','soil mouth','clay vein','burrow kink','dust loft','molehill','undercut','loam drum','pebble shrine','dark pantry'],
+  flavors:['{N}. the dirt here is warm. something was sleeping in it recently. (do not check.)','{N}. roots hang like slow wires. two soft spots. the third spot is a rock. the rock is new.','{N}. it smells like rain that never fell. dig where the ground gives.','{N}. the walls lean in to listen. ignore them. they are dirt. (mostly.)','{N}. pebbles arranged by something with opinions. pocket a few. opinions are free.']},
+ {id:'water',name:'THE DROWNED MILE',bg:'grDeepWater',kind:'dive',flav:'water',
+  nouns:['black landing','drowned stair','still lock','sunken bell','wet vault','quiet basin','lantern reef','drowned chapel','slow current','murk hollow','sunken choir','drowned loft','tide door','black pool','wet archive','sunken garden','drowned mile','still throat','murk chapel','black mirror'],
+  flavors:['{N}. black water, held breath, your lantern doubled on the surface. dive where it glints.','{N}. the water does not move. your suit says that is fine. (the suit lies about little things.)','{N}. something below rings a bell with no clapper. dive anyway. the glints are real.','{N}. drowned shelves. drowned jars. the jars are labeled. do not read them underwater.','{N}. the ceiling drips UP here. nobody knows why. the divers stopped asking at diver three.']},
+ {id:'rust',name:'RUST WARDS',bg:'grDeepRust',kind:'dig',flav:'rust',
+  nouns:['gatehouse','iron lung','bolt farm','hinge hall','nail chapel','grate moor','chain loft','rivet ward','lockjaw','scrap nave','coil crypt','flange hollow','grate garden','iron pantry','bolt shrine','chain chapel','rust choir','hinge ward','scrap landing','red gate'],
+  flavors:['{N}. rust underfoot, rust overhead. the ward creaks in its sleep. pry where it flakes.','{N}. chains hang with nothing to hold. (they hold the room up. do not touch the load-bearing chains.)','{N}. everything here was a door once. knock anyway. the grates give up their glints.','{N}. red dust. red silence. something oiled these hinges recently. be polite.','{N}. a ward that guards nothing. the nothing is valuable. dig the corners.']},
+ {id:'crystal',name:'GLASS VEINS',bg:'grDeepCrystal',kind:'puzzle',flav:'crystal',
+  nouns:['prism mouth','shard choir','lens landing','gleam ward','facet hall','mirror lung','spark nave','glass throat','opal pocket','beam chapel','shard garden','prism loft','gleam hollow','lens moor','facet pantry','spark ward','mirror stair','opal landing','beam crypt','bright gate'],
+  flavors:['{N}. crystal that hums when you look away. solve what it offers. take what it drops.','{N}. your lantern comes back in seven colors. one of them is new. name it later. puzzle first.','{N}. the veins pulse slow, like the warden upstairs but polite. the floor here teaches. listen.','{N}. glass underfoot, glass overhead. walk soft. the puzzles are load-bearing.','{N}. a geode split open like a held breath. inside: a mechanism, and glints.']},
+ {id:'abyss',name:'THE BLACK FLOOR',bg:'grDeepAbyss',kind:'mix',flav:'abyss',
+  nouns:['last landing','quiet mouth','deep nave','black chapel','still ward','hollow crown','murk throne','quiet crypt','deep pantry','black garden','still hollow','hollow choir','deep loft','black stair','quiet vault','murk nave','still throat','hollow gate','deep mirror','the bottom shelf'],
+  flavors:['{N}. the dark here has weight. your lantern burns smaller. the floor still pays.','{N}. so far down the drips gave up. silence, plus glints. take both.','{N}. the warden\'s heartbeat is faint here. it approves of persistence. (probably.)','{N}. black on black on glint. dive or dig, the floor does not mind. it is generous. (it is a trap. take the glints anyway.)','{N}. the bottom shelf of the world. dust of everything above. sift it.']}
+ ,{id:'mine',name:'THE MINE SHAFTS',bg:'grDeepMine',kind:'dig',flav:'mine',
+  nouns:['the adit','timber throat','cage landing','ore chute','lantern post','blast marks','skip shaft','winch room','grit stair','brace hollow','cart lip','drill floor','coal pocket','chalk mark','powder store','head frame','ladder drop','sieve floor','mute drift','the breach'],
+  flavors:['{N}. timber props, fresh-cut grit, a winch that refuses to explain itself. dig where the wall crumbles.','{N}. blast marks older than the elevator. whatever worked here left for someone else. the seams still pay.','{N}. a cage hangs on one cable. do not ride it. dig around it. the ore does not care about the cage.','{N}. chalk numbers on the rock. nobody remembers what they counted. two soft spots do the remembering.','{N}. the shaft breathes dust. your lantern turns it gold. pick at the gold.']},
+ {id:'vein',name:'VEIN WORKS',bg:'grDeepVein',kind:'mix',flav:'vein',
+  nouns:['seam gate','iron bloom','copper seam','pyrite hall','galena drift','vein chapel','assay floor','pick scar','ore lung','quartz thread','vein pantry','chisel ward','glint cut','mother lode','ore shrine','slag nave','bloom crypt','cut landing','seam vault','bright fault'],
+  flavors:['{N}. the wall shines wrong. fool\'s gold sulks next to the real thing. dig anyway; the real thing pays.','{N}. a seam runs through the floor like a held thought. tap it open. mind the dust.','{N}. chisel marks in neat rows. someone planned this room. the plan outlived them. finish it.','{N}. ore here comes in ribs. cut a rib, the rock shrugs, another rib appears. (eventually.)','{N}. the assay table still has yesterday\'s numbers on it. yesterday was optimistic. today is richer.']},
+ {id:'yard',name:'THE CART YARDS',bg:'grDeepYard',kind:'mix',flav:'yard',
+  nouns:['switch yard','point box','flat car','rutter hop','brake drum','siding cough','wheel turn','gauge split','buffer stop','yard lantern','points shrine','clay wagon','tipper floor','spur cut','rope haul','sleeper hall','yard mast','coupling crypt','loop landing','the terminus'],
+  flavors:['{N}. rails end here, politely. the carts keep rolling in your head. dig between the sleepers.','{N}. a switch throws itself when you look away. the yard is deciding something. let it. dig.','{N}. brake dust and ore dust, indistinguishable. both are worth money. shovel accordingly.','{N}. the yard lantern still works. someone pays the bill. (there is no bill. there is no one.)','{N}. a full cart, parked forever, half-loaded. finish the job. the ore is yours now.']},
+ {id:'sump',name:'THE SUMP SHAFTS',bg:'grDeepSump',kind:'dive',flav:'sump',
+  nouns:['drowned cage','sunk winch','wet shaft','black sump','pump floor','drip gallery','sodden ore','silt lock','wet engine','drowned rails','sump bell','brine cut','still pump','waterline vault','murk shaft','deep silt','float room','wet seam','sunk chute','the standing water'],
+  flavors:['{N}. the shaft kept the water like a grudge. suit up. the glints are down there too.','{N}. drowned machinery hums in its sleep. the sump does not drain. it just waits. dive.','{N}. silt over everything, soft as apology. something under it shines. dive and take it.','{N}. the waterline moved recently. toward you. dive fast, pocket faster.','{N}. a pump room that forgot its job. the water finished it. the ore never noticed.']},
+ {id:'brace',name:'SUPPORT GALLERY',bg:'grDeepBrace',kind:'puzzle',flav:'brace',
+  nouns:['groan brace','last timber','sag gallery','creak hall','prop throat','beam shrine','settle floor','load wall','strain arch','timber nave','shim crypt','pack cut','prop landing','brace choir','sag vault','wedge hall','holdfast','steady room','weight lung','the bent frame'],
+  flavors:['{N}. every beam in here is having a bad century. solve the mechanism before the floor solves you.','{N}. the supports talk in their sleep: creak, groan, settle. one of those is a combination.','{N}. wedges, shims, a dial nobody installed. the room holds together because it is solving itself. help it.','{N}. load-bearing noise. the puzzle is load-bearing too. turn it gently.','{N}. a gallery held up by spite and timber. keep the spite working: solve, dig, move on.']},
+ {id:'core',name:'THE CORE VEIN',bg:'grDeepCore',kind:'mix',flav:'core',
+  nouns:['heat seam','core landing','ember vault','deep drum','last vein','warm dark','the still heart'],
+  flavors:['{N}. warm rock. the planet\'s radiator. sweat, dig, keep the lantern low.','{N}. this deep, the stone remembers being liquid. it is not angry about it. dig gently.','{N}. the vein hums at a pitch your teeth know. so close now. so paid.','{N}. everything above you is weight, and none of it matters down here. dig.','{N}. the heart of the mines. quiet enough to hear the ore think. (it thinks: dig.)']}
+];
+function grDeepTierOf(n){if(n<=7)return 1;return Math.min(12,Math.ceil((n-7)/20)+1)}
+function grDeepGenIdx(n){return n-7}
+function grDeepDef(n){
+ if(n>=1&&n<=7){
+  var t0=GR_DEEP_TIERS[0];
+  var fl={
+   1:'fresh dirt. the entrance. the deep starts here, polite and dry. (it will not stay dry.)',
+   2:'black water to the ceiling. (room 2. the suit was worth it.)',
+   3:'past the sump, still and deep. one glint, far down.',
+   4:'the tunnel gave up here. rubble to the ceiling.',
+   5:'worse than the first. the dust is older.',
+   6:'the last pile. beyond it: dry air.',
+   7:'a drowned door onto something dry. IN CASE OF DRY.'
+  };
+  return {n:n,tier:1,t:t0,name:t0.nouns[n-1],flav:fl[n]||t0.nouns[n-1],gate:false,final:false,puzzle:null,spots:0,hand:true};
+ }
+ var t=GR_DEEP_TIERS[grDeepTierOf(n)-1],gidx=grDeepGenIdx(n),idx=(gidx-1)%20,rng=grSeed(n*7+3);
+ var name=t.nouns[idx]||('room '+n);
+ var flav=t.flavors[Math.floor(rng()*t.flavors.length)].split('{N}').join(name);
+ var gate=(n>107)?(n%10===0):(gidx%10===0),final=(n===107||n===214);
+ var roll=rng(),flooded=false,cavedin=false,bgOv=null;
+ if(!gate&&!final&&roll<0.08){
+  flooded=true;
+  flav=GR_DEEP_FLOOD_FLAV[Math.floor(rng()*GR_DEEP_FLOOD_FLAV.length)].split('{N}').join(name);
+ }else if(!gate&&!final&&roll<0.16){
+  cavedin=true;bgOv=GR_DEEP_CAVE_BG;
+  flav=GR_DEEP_CAVE_FLAV[Math.floor(rng()*GR_DEEP_CAVE_FLAV.length)].split('{N}').join(name);
+ }
+ var dim=false;
+ if(!gate&&!final&&n>107&&rng()<0.12)dim=true;
+ var puz=(t.kind==='puzzle'||t.kind==='mix')?['valve','rubble','wheel'][Math.floor(rng()*3)]:null;
+ if(cavedin)puz='rubble';
+ return {n:n,tier:grDeepTierOf(n),t:t,name:name+(flooded?' (flooded)':'')+(cavedin?' (caved-in)':''),flav:flav,gate:gate,final:final,
+  puzzle:puz,flooded:flooded,cavedin:cavedin,bgOv:bgOv,dim:dim,
+  spots:(t.kind==='dive')?2:2};
+}
+function grDeepToll(n){
+ return {plorts:20*n,glow:10*n,deep:Math.floor(n/20)};
+}
+function grDeepCan(n){
+ if(n<1||n>214)return false;
+ var s=grSave();
+ if(n===1){try{return grGauntClear()}catch(e){return false}}
+ try{if((s.deepV||{})[n-1]!==1)return false}catch(e){return false}
+ if(n===2){try{if(!s.scuba)return false}catch(e){return false}}
+ if(n===7){try{if(!(s.scuba||s.drained))return false}catch(e){return false}}
+ if(n>107&&!s.finRide)return false;
+ var gidx=grDeepGenIdx(n);
+ if(gidx>=21&&gidx<=40&&!s.scuba)return false;
+ if(n>107){
+  if(n>=168&&n<=187&&!s.scuba)return false;
+  if(n%10===1){try{if((s.deepGate||{})[n-1]!==1)return false}catch(e){return false}}
+ }else if(gidx>1&&(gidx-1)%10===0){try{if((s.deepGate||{})[n-1]!==1)return false}catch(e){return false}}
+ return true;
+}
+// deep rooms: burrows digs, sump dives, valves, dive suit, floodgate cache.
+function grSpotCd(field,i,cd){
+ try{var t=((grSave()[field]||[])[i])||0;var left=Math.ceil((t+cd-Date.now())/1000);return left>0?left:0}catch(e){return 0}
+}
+function grSpotMark(field,i){
+ try{var s=grSave();s[field]=s[field]||[];s[field][i]=Date.now();grStore(s)}catch(e){}
+}
+function grDig(i){
+ if(!grActive)return;
+ if(grSpotCd('burrowT',i,90000)>0){grNote('the dirt needs a minute.');return}
+ grSpotMark('burrowT',i);
+ var s=grSave(),r=Math.random();
+  if(r<0.55){var n=grLanG(3+Math.floor(Math.random()*4));s.plorts=(s.plorts||0)+n;grNote('dug up '+n+' plorts. the dirt apologizes.')}
+  else if(r<0.80){s.deep=(s.deep||0)+1;grNote('dug up 1 DEEP. it hums faintly.')}
+  else{var g=grLanG(30+Math.floor(Math.random()*30));s.glow=(s.glow||0)+g;grNote('dug up '+g+' glow. pocket lantern fuel.')}
+ grStore(s);grDeepMark(1);grRender();
+}
+function grDive(i){
+ if(!grActive)return;
+ try{if(!grSave().scuba){grNote('no suit, no swimming.');return}}catch(e){return}
+ if(grSpotCd('sumpT',i,120000)>0){grNote('the water is still settling.');return}
+ grSpotMark('sumpT',i);
+ var s=grSave(),r=Math.random();
+  if(r<0.50){var n=1+Math.floor(Math.random()*2);s.deep=(s.deep||0)+n;grNote('dredged '+n+' DEEP from the black. it is cold.')}
+  else if(r<0.80){var g=grLanG(60+Math.floor(Math.random()*60));s.glow=(s.glow||0)+g;grNote('dredged '+g+' glow. the water glows back.')}
+  else{var p=grLanG(6+Math.floor(Math.random()*6));s.plorts=(s.plorts||0)+p;grNote('dredged '+p+' plorts. waterproof. (mostly.)')}
+ grStore(s);grDeepMark(2);grRender();
+}
+function grValve(i){
+ if(!grActive)return;
+ var s=grSave();
+ if(s.drained){grNote('already drained. the pipes hum quietly.');return}
+ s.valves=s.valves||[];
+ s.valves.push(i+1);
+ var seq=[2,3,1],ok=true;
+ for(var k=0;k<s.valves.length;k++){if(s.valves[k]!==seq[k]){ok=false;break}}
+ if(!ok){s.valves=[];grStore(s);grNote('wrong order. the pipes SLAM shut. (two-three-one.)');grRender();return}
+ if(s.valves.length>=3){
+  s.valves=[];s.drained=true;grStore(s);
+  try{grAch('gr_drained')}catch(e){}
+  grDeepMark(2);
+  grNote('two. three. one. the sump gurgles away. DRAINED.');
+ }else{grStore(s);grNote('valve '+(i+1)+' turns. the pipes hum for more.')}
+ grRender();
+}
+function grGateLoot(){
+ if(!grActive)return;
+ var s=grSave();
+ if(s.gateLoot){grNote('empty. you were here.');return}
+ s.gateLoot=true;s.plorts=(s.plorts||0)+200;s.deep=(s.deep||0)+5;
+ grStore(s);grDeepMark(7);
+ try{grAch('gr_floodgate')}catch(e){}
+ grNote('cache cracked: 200 plorts, 5 deep. IN CASE OF DRY, indeed.');
+ grRender();
+}
+// BURROWS: a hub. digs + locker up top, flooded passage (sump, overflow),
+// caved-in tunnels (3 collapses), floodgate at the end of either path.
+var grBurrowView='hub';
+var grCollapseArm=0;
+var GR_CAVES=[
+ {id:'cave1',name:'first collapse',flav:'the tunnel gave up here. rubble to the ceiling, five stones glowing through the dust. tap them back in order.'},
+ {id:'cave2',name:'second collapse',flav:'worse than the first. the dust is older. the stones glow brighter. (they remember you.)'},
+ {id:'cave3',name:'third collapse',flav:'the last pile. beyond it: dry air. the stones pulse slow, like a held breath.'}
+];
+function grBurrowsHtml(){
+ var s=grSave(),h='';
+ var dirt='background:linear-gradient(180deg,#2a1c10,#140e07 70%,#0a0704);border:1px solid #5a4028;border-radius:6px;padding:12px';
+ var wet='background:linear-gradient(180deg,#06121e,#030910 70%,#01040a);border:1px solid #1e4a5a;border-radius:6px;padding:12px';
+ var cave='background:linear-gradient(180deg,#1c1410,#0e0a07 70%,#060403);border:1px solid #4a3828;border-radius:6px;padding:12px';
+ var dry='background:linear-gradient(180deg,#1a1a20,#0e0e14 70%,#060608);border:1px solid #5a5a6a;border-radius:6px;padding:12px';
+ if(grBurrowView==='sump'){
+  h+='<button class="grBtn" data-droom="1" style="padding:4px 10px;font-size:11px">◄ burrows</button><br><br><div style="'+wet+'">';
+  h+='<div style="color:#c8a0d0;letter-spacing:2px;font-size:13px">THE SUMP</div><div style="font-size:12px;margin:6px 0 8px">black water to the ceiling. your lantern shakes. the suit holds. (the suit always holds. that is what the locker said. the locker lies about little things.)</div>';
+  h+='<canvas id="grDeepCv" width="560" height="80" style="width:100%;height:64px;border-radius:4px;margin-bottom:8px"></canvas><br>';
+  for(var i=0;i<2;i++){
+   var left=grSpotCd('sumpT',i,120000);
+   h+='<button class="grBtn" data-dive="'+i+'" style="padding:4px 10px;font-size:11px;margin:0 4px"'+(left>0?' disabled':'')+'>'+(left>0?'dive ('+left+'s)':'dive '+(i+1))+'</button>';
+  }
+  h+='<br><br><span style="color:#5f7d99">— pipes —</span><br><span style="font-size:12px">three valves. the pipes hum <i>two-three-one</i>. the middle valve begs last.</span><br>';
+  if(s.drained)h+='<span style="font-size:12px;color:#ffd770">the sump gurgles away. drained. the floodgate has no excuse now.</span>';
+  else{for(var k=0;k<3;k++)h+='<button class="grBtn" data-valve="'+k+'" style="padding:4px 10px;font-size:11px;margin:0 4px">valve '+(k+1)+'</button>'}
+  h+='</div>';
+  return h;
+ }
+ if(grBurrowView==='overflow'){
+  h+='<button class="grBtn" data-droom="1" style="padding:4px 10px;font-size:11px">◄ burrows</button><br><br><div style="'+wet+'">';
+  h+='<div style="color:#c8a0d0;letter-spacing:2px;font-size:13px">THE OVERFLOW</div><div style="font-size:12px;margin:6px 0 8px">past the sump, the water goes still and deep. one glint, far down. one breath. (the suit has opinions about this one. ignore them.)</div>';
+  h+='<canvas id="grDeepCv" width="560" height="80" style="width:100%;height:64px;border-radius:4px;margin-bottom:8px"></canvas><br>';
+  var oft=grSpotCd('ofT',0,180000);
+  h+='<button class="grBtn" id="grOverflowDive" style="padding:4px 10px;font-size:11px"'+(oft>0?' disabled':'')+'>'+(oft>0?'deep dive ('+oft+'s)':'the deep dive')+'</button>';
+  h+='</div>';
+  return h;
+ }
+ if(grBurrowView.indexOf('cave')===0){
+  var ci=parseInt(grBurrowView.slice(4),10)||1,cd=GR_CAVES[ci-1];
+  h+='<button class="grBtn" data-droom="1" style="padding:4px 10px;font-size:11px">◄ burrows</button><br><br><div style="'+cave+'">';
+  h+='<div style="color:#c8a0d0;letter-spacing:2px;font-size:13px">'+cd.name.toUpperCase()+'</div><div style="font-size:12px;margin:6px 0 8px">'+cd.flav+'</div>';
+  if((s.caveDone||{})[cd.id])h+='<span style="font-size:12px;color:#ffd770">cleared. the rubble stays put. (it promised.)</span>';
+  else h+=grCavePuzzleHtml(cd.id);
+  h+='</div>';
+  return h;
+ }
+ if(grBurrowView==='floodgate'){
+  h+='<button class="grBtn" data-droom="1" style="padding:4px 10px;font-size:11px">◄ burrows</button><br><br><div style="'+dry+'">';
+  h+='<div style="color:#c8a0d0;letter-spacing:2px;font-size:13px">FLOODGATE</div><div style="font-size:12px;margin:6px 0 8px">a drowned door, now opening onto something dry. dry is a shock. dry feels illegal this far down.<br><br>a supply cache sits against the wall. stenciled: <i>IN CASE OF DRY</i>.</div>';
+  if(s.gateLoot)h+='<span style="font-size:12px;color:#5f7d99">the cache is empty. you were here. (you remember being here.)</span>';
+  else h+='<button class="grBtn" id="grGateLoot" style="padding:6px 14px">crack the cache</button>';
+  h+='</div>';
+  return h;
+ }
+ // hub
+ h+='<div style="'+dirt+'">';
+ h+='<div style="font-size:12px">fresh dirt. something big moved it for you. three soft spots. (do not think about what dug them.)</div><br>';
+ h+='<span style="font-size:12px;color:#5f7d99">plorts: <b>'+(s.plorts||0)+'</b> · deep: <b>'+(s.deep||0)+'</b> · glow: <b>'+(s.glow||0)+'</b></span><br><br>';
+ for(var j=0;j<3;j++){
+  var l2=grSpotCd('burrowT',j,90000);
+  h+='<button class="grBtn" data-dig="'+j+'" style="padding:4px 10px;font-size:11px;margin:0 4px"'+(l2>0?' disabled':'')+'>'+(l2>0?'dig ('+l2+'s)':'dig spot '+(j+1))+'</button>';
+ }
+ h+='<br><br><span style="color:#5f7d99">— dive locker —</span><br>';
+ if(s.scuba)h+='<span style="font-size:12px">the suit hangs here. it drips. (yours.)</span>';
+ else h+='<span style="font-size:12px">the locker is empty. a note, in Chism\'s handwriting:<br><i>"SUITS ARE FABRICATED IN THE LAB NOW. stop asking the locker. — management."</i></span>';
+ h+='<br><br><span style="font-size:11px;color:#5f7d99">rooms 2–7 are on the tier list. no shortcuts. (the dirt insists.)</span>';
+ h+='</div>';
+ return h;
+}
+function grCavePuzzleHtml(id){
+ var s=grSave(),pz=(s.cavePuz||{}).id===id?(s.cavePuz||{}):null;
+ if(!pz||!pz.seq){
+  var a=Math.floor(Math.random()*5),b=Math.floor(Math.random()*5),c=Math.floor(Math.random()*5);
+  return '<span style="font-size:11px">five stones glow, in order: <b>'+(a+1)+' … '+(b+1)+' … '+(c+1)+'</b>.</span><br><button class="grBtn" data-caverub="'+id+':start:'+a+','+b+','+c+'" style="padding:4px 10px;font-size:11px;margin-top:4px">start tapping</button>';
+ }
+ var h='<span style="font-size:11px">tap: '+(pz.prog||0)+'/3</span><br>';
+ for(var k=0;k<5;k++)h+='<button class="grBtn" data-caverub="'+id+':'+k+'" style="padding:4px 10px;font-size:11px;margin:0 3px">●</button>';
+ return h;
+}
+function grCaveRubble(key){
+ if(!grActive)return;
+ var p=key.split(':'),id=p[0];
+ var s=grSave();s.cavePuz=s.cavePuz||{};
+ if(p[1]==='start'){s.cavePuz={id:id,seq:p[2].split(',').map(Number),prog:0};grStore(s);grRender();return}
+ if(s.cavePuz.id!==id||!s.cavePuz.seq){grNote('start the tapping first.');return}
+ if(parseInt(p[1],10)===s.cavePuz.seq[s.cavePuz.prog||0]){
+  s.cavePuz.prog=(s.cavePuz.prog||0)+1;
+  if(s.cavePuz.prog>=3){
+   s.cavePuz={};s.caveDone=s.caveDone||{};s.caveDone[id]=1;
+   var ci=parseInt(id.slice(4),10)||1;
+   s.plorts=(s.plorts||0)+40*ci;s.deep=(s.deep||0)+ci;grStore(s);grDeepMark(ci+3);
+   grNote('stone, stone, stone. the collapse settles. +'+(40*ci)+' plorts, +'+ci+' deep.');
+  }else{grStore(s);grNote('…correct. keep going.')}
+ }else{s.cavePuz={};grStore(s);grNote('wrong stone. the glow fades. (the stones judge.)')}
+ grRender();
+}
+function grOverflowDive(){
+ if(!grActive)return;
+ try{if(!grSave().scuba){grNote('no suit, no swimming.');return}}catch(e){return}
+ if(grSpotCd('ofT',0,180000)>0){grNote('the deep glint needs time to come back.');return}
+ grSpotMark('ofT',0);
+ var s=grSave(),r=Math.random();
+ if(r<0.5){s.deep=(s.deep||0)+3;grNote('the deep dive: 3 DEEP. the water was keeping them.')}
+ else if(r<0.8){var ov=grLanG(200);s.glow=(s.glow||0)+ov;grNote('the deep dive: '+ov+' glow. the dark pays rent.')}
+ else{var op=grLanG(25);s.plorts=(s.plorts||0)+op;grNote('the deep dive: '+op+' plorts. even down here, plorts.')}
+ grStore(s);grDeepMark(3);grRender();
+}
+var grDeepTier=0,grDeepRoom=0;
+var grDeepWaterIv=null;
+// visiting means DOING: a room only counts as mapped once you dig, dive,
+// solve, pay, or loot there. looking is free. mapping is earned.
+function grDeepMark(n){
+ try{
+  var s=grSave();s.deepV=s.deepV||{};
+  if(s.deepV[n]===1)return;
+  s.deepV[n]=1;grStore(s);
+  if(n===108)try{grAch('gr_mine_first')}catch(e){}
+  if(n>=191)try{grAch('gr_stratum_4')}catch(e){}
+   var c=grDeepCount();
+   if(c>=50)try{grAch('gr_deep50')}catch(e){}
+   if(c>=214&&grSave().deepCache)try{grAch('gr_deep100')}catch(e){}
+ }catch(e){}
+}
+function grDeepCount(){try{var v=grSave().deepV||{},c=0;for(var k in v)if(v[k]===1)c++;return c}catch(e){return 0}}
+function grDeepBg(tier){
+ if(tier===1||tier===2)return 'background:linear-gradient(180deg,#2a1c10,#1a120a 60%,#0d0a06);border:1px solid #5a4028;border-radius:6px;padding:12px';
+ if(tier===3)return 'background:linear-gradient(180deg,#06121e,#040a14 60%,#01040a);border:1px solid #1e4a5a;border-radius:6px;padding:12px';
+ if(tier===4)return 'background:linear-gradient(180deg,#22100c,#140a08 60%,#0a0505);border:1px solid #6a2a1a;border-radius:6px;padding:12px';
+ if(tier===5)return 'background:linear-gradient(180deg,#101826,#0a0e1c 60%,#05070f);border:1px solid #3a5a8a;border-radius:6px;padding:12px';
+ if(tier===7)return 'background:linear-gradient(180deg,#26201a,#17120d 60%,#0b0906);border:1px solid #6a5a44;border-radius:6px;padding:12px';
+ if(tier===8)return 'background:linear-gradient(180deg,#1e1a12,#14100a 60%,#0a0805);border:1px solid #8a5a2a;border-radius:6px;padding:12px';
+ if(tier===9)return 'background:linear-gradient(180deg,#1c1414,#120c0c 60%,#080505);border:1px solid #7a3a22;border-radius:6px;padding:12px';
+ if(tier===10)return 'background:linear-gradient(180deg,#0a1418,#071014 60%,#03090c);border:1px solid #2a5a66;border-radius:6px;padding:12px';
+ if(tier===11)return 'background:linear-gradient(180deg,#1a140c,#120e08 60%,#080604);border:1px solid #7a5a30;border-radius:6px;padding:12px';
+ if(tier===12)return 'background:linear-gradient(180deg,#1a0f08,#120a05 60%,#070403);border:1px solid #a05a20;border-radius:6px;padding:12px';
+ return 'background:linear-gradient(180deg,#0a0a12,#050508 60%,#000);border:1px solid #2a2a3a;border-radius:6px;padding:12px';
+}
+function grDeepHtml(){
+ var s=grSave(),c=grDeepCount();
+ if(grDeepRoom>0)return grDeepRoomHtml(grDeepRoom);
+ if(grDeepTier>0){
+  var t=GR_DEEP_TIERS[grDeepTier-1];
+  var rStart=(grDeepTier===1)?1:(grDeepTier-2)*20+8;
+  var rEnd=Math.min((grDeepTier===1)?7:rStart+19,214);
+  var h='<button class="grBtn" data-dback="tier" style="padding:4px 10px;font-size:11px">◄ the deep</button><br><br>';
+  h+='<span style="color:#c8a0d0;letter-spacing:2px">'+t.name+'</span> <span style="font-size:11px;color:#5f7d99">rooms '+rStart+'–'+rEnd+'</span><br><br><div style="max-height:320px;overflow:auto">';
+  for(var n=rStart;n<=rEnd;n++){
+   var d=grDeepDef(n),vis=(s.deepV||{})[n]===1,can=grDeepCan(n);
+   var tag='';
+   if(d.final)tag=' ★';
+   else if(d.gate)tag=((s.deepGate||{})[n]===1?' (open)':' (TOLL)');
+   h+='<button class="grBtn" data-droom="'+n+'" style="display:block;width:92%;margin:4px auto;font-size:11px;padding:5px 8px"'+(can?'':' disabled')+'>'+(can?(vis?'✓ ':'○ ')+n+'. '+d.name+tag:n+'. ???'+(d.gate?' (TOLL)':''))+'</button>';
+  }
+  h+='</div>';
+  return h;
+ }
+  var tot=214;
+ var hh='a crack in the grotto floor. stairs. more stairs. the stairs have stairs.<br><br><span style="color:#c8a0d0;letter-spacing:2px">THE DEEP'+(s.finRide?' + THE MINES':'')+' · '+tot+' rooms</span> <span style="font-size:11px;color:#5f7d99">mapped: '+c+'/'+tot+'</span><br><br>';
+ for(var k=0;k<GR_DEEP_TIERS.length;k++){
+  var f2=(k===0)?1:(k-1)*20+8,locked=!grDeepCan(f2);
+  var lockTag='';
+  if(k===0&&locked)lockTag=' (gauntlet first)';
+  else if(locked&&k>=6&&!s.finRide)lockTag=' (the elevator first)';
+  else if(locked)lockTag=' (dig deeper)';
+  hh+='<button class="grBtn" data-dtier="'+(k+1)+'" style="display:block;width:92%;margin:6px auto"'+(locked?' disabled':'')+'>'+GR_DEEP_TIERS[k].name+lockTag+'</button>';
+ }
+ return hh;
+}
+function grDeepRoomHtml(n){
+ var d=grDeepDef(n),s=grSave();
+ if(d.hand){
+  var views={1:'hub',2:'sump',3:'overflow',4:'cave1',5:'cave2',6:'cave3',7:'floodgate'};
+  grBurrowView=views[n]||'hub';
+  grDeepTier=1;
+  if(n===1)return '<button class="grBtn" data-dback="room" style="padding:4px 10px;font-size:11px">◄ THE BURROWS</button><br><br>'+grBurrowsHtml();
+  return grBurrowsHtml();
+ }
+ var h='<button class="grBtn" data-dback="room" style="padding:4px 10px;font-size:11px">◄ '+d.t.name+'</button><br><br>';
+ h+='<div style="'+(d.bgOv||grDeepBg(d.tier))+'">';
+  h+='<div style="color:#c8a0d0;letter-spacing:2px;font-size:13px">'+n+'. '+d.name+(d.final?' ★':'')+(d.gate?' (TOLL GATE)':'')+'</div>';
+  if(d.dim&&!((s.deepLit||{})[n])){
+   h+='<div style="font-size:12px;margin:6px 0 10px;color:#5f7d99">the dark ate this room. the wick gutters. relight it (20 glow) to see what is here.</div>';
+   h+='<button class="grBtn" data-relight="'+n+'" style="padding:4px 10px;font-size:11px;margin-bottom:6px">relight (20 glow)</button>';
+  }else h+='<div style="font-size:12px;margin:6px 0 10px">'+d.flav+(d.dim?' (the lantern holds. for now.)':'')+'</div>';
+ if(d.t.id==='water'||d.t.id==='sump'||d.flooded)h+='<canvas id="grDeepCv" width="560" height="80" style="width:100%;height:64px;border-radius:4px;margin-bottom:8px"></canvas>';
+ if(d.final&&n===107){
+  if(s.deepCache)h+='<span style="font-size:12px;color:#5f7d99">the bottom shelf is bare. the elevator is gone. below: THE MINES.</span><br><button class="grBtn" data-droom="108" style="padding:6px 14px;font-size:12px;margin-top:6px">▼ descend into the mines</button>';
+  else if(!s.finToll){
+   var t=grDeepToll(grDeepGenIdx(n));
+   h+='<span style="font-size:12px">the last toll. then the last door.</span><br><span style="font-size:11px;color:#5f7d99">toll: '+t.plorts+' plorts · '+t.glow+' glow · '+t.deep+' deep</span><br><button class="grBtn" data-dgate="'+n+'" style="margin-top:6px">pay the last toll</button>';
+  }
+  else h+=grFinalHtml();
+ }else if(d.final){h+=grHeartHtml()}
+ else if(d.gate){
+  if((s.deepGate||{})[n]===1)h+='<span style="font-size:12px;color:#ffd770">gate open. paid in full. (the gate remembers. the gate respects.)</span><br>';
+  else{
+   var t2=grDeepToll(grDeepGenIdx(n));
+   h+='<span style="font-size:12px">a toll gate. it wants its cut.</span><br><span style="font-size:11px;color:#5f7d99">toll: '+t2.plorts+' plorts · '+t2.glow+' glow · '+t2.deep+' deep</span><br><button class="grBtn" data-dgate="'+n+'" style="margin-top:6px">pay the toll</button><br>';
+  }
+ }
+ var isDive=(d.t.kind==='dive'||d.flooded);
+ for(var i=0;i<2;i++){
+  var spotDive=isDive&&(d.t.kind==='dive'||i===0);
+  var cd=0;
+  try{var tt=((s.deepCd||{})[n+':'+i])||0;cd=Math.ceil((tt+(spotDive?120000:90000)-Date.now())/1000);if(cd<0)cd=0}catch(e){}
+  h+='<button class="grBtn" data-d'+(spotDive?'dive':'dig')+'="'+n+':'+i+'" style="padding:4px 10px;font-size:11px;margin:0 4px"'+(cd>0?' disabled':'')+'>'+(cd>0?(spotDive?'dive':'dig')+' ('+cd+'s)':(spotDive?'dive ':'dig ')+(i+1))+'</button>';
+ }
+ if(d.puzzle&&!((s.deepPuzDone||{})[n]===1))h+='<br><br>'+grDeepPuzzleHtml(n,d.puzzle);
+ else if(d.puzzle)h+='<br><br><span style="font-size:11px;color:#5f7d99">puzzle solved. the room stays solved. (it has no other ambitions.)</span>';
+ if(n>107&&!d.final){
+  h+='<br><br><span style="color:#5f7d99;font-size:11px">— forge — ore: <b>'+(s.mineOre||0)+'</b>'+(s.cavePick?' · cave pick ✓':'')+'</span><br>';
+  h+='<button class="grBtn" data-msmelt="1" style="padding:4px 10px;font-size:11px;margin:0 4px"'+((s.mineOre||0)>0?'':' disabled')+'>'+(s.mineOre?'smelt '+s.mineOre+' ore → '+(s.mineOre*3)+' plorts':'smelt ore (empty)')+'</button> ';
+  if(!s.cavePick)h+='<button class="grBtn" data-mcraft="pick" style="padding:4px 10px;font-size:11px">craft cave pick (400 ore)</button>';
+ }
+ h+='</div>';
+ return h;
+}
+// ROOM 107 FINALE (door-100-like): toll, three locks, elevator down.
+// no figure. the door gives up on its own. puzzles + elevator only.
+function grFinLocks(){try{var l=grSave().finLocks||{};return {v:!!l.v,r:!!l.r,w:!!l.w}}catch(e){return {v:false,r:false,w:false}}}
+function grFinalHtml(){
+ var s=grSave(),L=grFinLocks();
+ var h='<div style="color:#c8a0d0;letter-spacing:2px;font-size:13px">107. THE LAST DOOR ★</div>';
+ h+='<div style="font-size:12px;margin:6px 0 8px">a door like a held breath. behind it: an elevator, going down. the door has three locks and no keyholes. (locks without keyholes are just puzzles with confidence.)</div>';
+ if(!L.v||!L.r||!L.w){
+  h+='<span style="font-size:11px;color:#5f7d99">— locks —</span><br>';
+   if(!L.v){
+    h+='<div style="margin:6px 0"><span style="font-size:11px">lock one: pipes. they hum <i>two-three-one</i>.</span><br>';
+    for(var k=0;k<3;k++)h+='<button class="grBtn" data-finvalve="'+k+'" style="padding:4px 10px;font-size:11px;margin:0 4px">valve '+(k+1)+'</button>';
+    h+='</div>';
+   }else h+='<div style="font-size:11px;color:#ffd770">✓ lock one: the pipes sing.</div>';
+  if(!L.r){
+   var pz=(s.finPuz||{}).t==='r'?(s.finPuz||{}):null;
+   h+='<div style="margin:6px 0"><span style="font-size:11px">lock two: rubble.</span><br>';
+   if(!pz||!pz.seq){
+    var a=Math.floor(Math.random()*5),b=Math.floor(Math.random()*5),c=Math.floor(Math.random()*5);
+    h+='<span style="font-size:11px">five stones: <b>'+(a+1)+' … '+(b+1)+' … '+(c+1)+'</b>.</span><br><button class="grBtn" data-finrub="start:'+a+','+b+','+c+'" style="padding:4px 10px;font-size:11px;margin-top:4px">start tapping</button>';
+   }else{
+    h+='<span style="font-size:11px">tap: '+(pz.prog||0)+'/3</span><br>';
+    for(var k2=0;k2<5;k2++)h+='<button class="grBtn" data-finrub="'+k2+'" style="padding:4px 10px;font-size:11px;margin:0 3px">●</button>';
+   }
+   h+='</div>';
+  }else h+='<div style="font-size:11px;color:#ffd770">✓ lock two: stone, stone, stone.</div>';
+   if(!L.w){
+    var wz=(s.finPuz||{}).t==='w'?(s.finPuz||{}):null;
+    var wh=(wz&&wz.wheels)?wz.wheels:[0,0,0],tgt=(wz&&wz.tgt)?wz.tgt:null;
+    if(!tgt){tgt=[Math.floor(Math.random()*10),Math.floor(Math.random()*10),Math.floor(Math.random()*10)];s.finPuz=s.finPuz||{};s.finPuz.t='w';s.finPuz.tgt=tgt;s.finPuz.wheels=s.finPuz.wheels||[0,0,0];grStore(s)}
+     h+='<div style="margin:6px 0"><span style="font-size:11px">lock three: dials. the plaque reads <b>'+tgt[0]+' '+tgt[1]+' '+tgt[2]+'</b>.</span><br>';
+    for(var k3=0;k3<3;k3++)h+='<button class="grBtn" data-finwheel="'+k3+':'+tgt.join('')+':'+wh[k3]+'" style="padding:6px 14px;font-size:14px;margin:0 4px">'+wh[k3]+'</button>';
+    h+='</div>';
+   }else h+='<div style="font-size:11px;color:#ffd770">✓ lock three: click. click. CLICK.</div>';
+ }else{
+  h+='<div style="font-size:12px;color:#ffd770;margin:8px 0">all three locks open. the door gives up before you even touch it. (anticlimax. the deep apologizes.)<br><br>behind it: an elevator. one button. DOWN.</div>';
+  if(s.finRide)h+='<span style="font-size:12px">the elevator is gone. so are you, briefly. (see below.)</span>';
+  else h+='<button class="grBtn" id="grFinGo" style="padding:8px 18px">▼ take the elevator</button>';
+ }
+ return h;
+}
+function grFinStoreLocks(L){try{var s=grSave();s.finLocks={v:!!L.v,r:!!L.r,w:!!L.w};grStore(s)}catch(e){}}
+function grFinValve(i){
+ if(!grActive)return;
+ var s=grSave();s.finPuz=s.finPuz||{};
+ if(s.finPuz.t!=='v')s.finPuz={t:'v',seq:[]};
+ s.finPuz.seq.push(i+1);
+ var want=[2,3,1],ok=true;
+ for(var k=0;k<s.finPuz.seq.length;k++)if(s.finPuz.seq[k]!==want[k])ok=false;
+ if(!ok){s.finPuz={};grStore(s);grNote('wrong order. the pipes SLAM shut. (two-three-one.)');grRender();return}
+ if(s.finPuz.seq.length>=3){
+  s.finPuz={};var L=grFinLocks();L.v=true;s.finLocks=L;
+  s.glow=(s.glow||0)+150;grStore(s);
+  grNote('two. three. one. lock one opens. +150 glow.');
+ }else grStore(s);
+ grRender();
+}
+function grFinRub(key){
+ if(!grActive)return;
+ var s=grSave();s.finPuz=s.finPuz||{};
+ if(key.indexOf('start:')===0){
+  s.finPuz={t:'r',seq:key.slice(6).split(',').map(Number),prog:0};grStore(s);grRender();return;
+ }
+ if(s.finPuz.t!=='r'||!s.finPuz.seq){grNote('start the tapping first.');return}
+ if(parseInt(key,10)===s.finPuz.seq[s.finPuz.prog||0]){
+  s.finPuz.prog=(s.finPuz.prog||0)+1;
+  if(s.finPuz.prog>=3){
+   s.finPuz={};var L=grFinLocks();L.r=true;s.finLocks=L;
+   s.plorts=(s.plorts||0)+120;grStore(s);
+   grNote('stone, stone, stone. lock two opens. +120 plorts.');
+  }else{grStore(s);grNote('…correct. keep going.')}
+ }else{s.finPuz={};grStore(s);grNote('wrong stone. the glow fades. (the stones judge.)')}
+ grRender();
+}
+function grFinWheel(key){
+ if(!grActive)return;
+ var p=key.split(':'),w=parseInt(p[0],10),tgt=p[1].split('').map(Number),cur=parseInt(p[2],10);
+ var s=grSave();s.finPuz=s.finPuz||{};
+ if(s.finPuz.t!=='w')s.finPuz={t:'w',wheels:[0,0,0]};
+ if(s.finPuz.tgt&&s.finPuz.tgt.join('')!==p[1])s.finPuz={t:'w',wheels:[0,0,0]};
+ s.finPuz.tgt=tgt;s.finPuz.wheels=s.finPuz.wheels||[0,0,0];
+ s.finPuz.wheels[w]=((cur||0)+1)%10;
+ if(s.finPuz.wheels[0]===tgt[0]&&s.finPuz.wheels[1]===tgt[1]&&s.finPuz.wheels[2]===tgt[2]){
+  s.finPuz={};var L=grFinLocks();L.w=true;s.finLocks=L;
+  s.deep=(s.deep||0)+3;grStore(s);
+  grNote('click. click. CLICK. lock three opens. +3 deep.');
+ }else grStore(s);
+ grRender();
+}
+var grFinRiding=false;
+function grFinGo(){
+ if(!grActive||grFinRiding)return;
+ var s=grSave(),L=grFinLocks();
+ if(!(L.v&&L.r&&L.w)){grNote('three locks. the door is unimpressed by shortcuts.');return}
+ if(s.finRide||s.deepCache){grNote('the elevator is gone. so are you, briefly.');return}
+ grFinRiding=true;
+ grNote('the elevator doors close. DOWN is the only button. you press it.');
+ var steps=[
+  'the elevator drops. your stomach files a complaint.',
+  'halfway down the cables sing. (they know this song. they hate it.)',
+  'the shaft ends. the elevator does not. CRASH — dust, dark, the smell of old mines.',
+   'silence. then dripping. THE MINES. (they were never coming soon. they were always here.)'
+ ];
+ steps.forEach(function(line,i){
+  setTimeout(function(){
+   if(!grActive){grFinRiding=false;return}
+   grNote(line);
+   if(i===steps.length-1){
+    try{
+     var s2=grSave();
+     s2.finRide=true;s2.deepCache=true;
+     s2.plorts=(s2.plorts||0)+1000;s2.deep=(s2.deep||0)+20;s2.glow=(s2.glow||0)+2000;
+      grStore(s2);
+      try{if(grDeepCount()>=214)grAch('gr_deep100')}catch(e){}
+      grNote('bottom shelf cracked: 1000 plorts, 20 deep, 2000 glow. you mapped all 214. the deep applauds. (silently. it is deep.)');
+    }catch(e){}
+    grFinRiding=false;
+    grRender();
+   }
+  },1600*(i+1));
+ });
+}
+function grDeepPuzzleHtml(n,type){
+ var s=grSave(),pz=(s.deepPuz||{}).n===n?(s.deepPuz||{}):null;
+ if(type==='valve'){
+  var seq=pz&&pz.seq?pz.seq:[];
+  var h='<span style="color:#5f7d99;font-size:12px">— pipes —</span><br><span style="font-size:11px">the pipes hum <i>two-three-one</i>.</span><br>';
+  for(var k=0;k<3;k++)h+='<button class="grBtn" data-dvalve="'+n+':'+k+'" style="padding:4px 10px;font-size:11px;margin:0 4px">valve '+(k+1)+'</button>';
+  return h;
+ }
+ if(type==='rubble'){
+  if(!pz||!pz.seq){
+   var a=Math.floor(Math.random()*5),b=Math.floor(Math.random()*5),cc=Math.floor(Math.random()*5);
+   return '<span style="color:#5f7d99;font-size:12px">— rubble —</span><br><span style="font-size:11px">five stones. three of them glow, in order: <b>'+(a+1)+' … '+(b+1)+' … '+(cc+1)+'</b>. tap them back.</span><br><button class="grBtn" data-drub="'+n+':start:'+a+','+b+','+cc+'" style="padding:4px 10px;font-size:11px;margin-top:4px">start tapping</button>';
+  }
+  var h2='<span style="color:#5f7d99;font-size:12px">— rubble —</span><br><span style="font-size:11px">tap: '+(pz.prog||0)+'/3</span><br>';
+  for(var k2=0;k2<5;k2++)h2+='<button class="grBtn" data-drub="'+n+':'+k2+'" style="padding:4px 10px;font-size:11px;margin:0 3px">●</button>';
+  return h2;
+ }
+ // wheel
+ var wheels=pz&&pz.wheels?pz.wheels:[0,0,0],tgt=pz&&pz.tgt?pz.tgt:null;
+ if(!tgt){tgt=[Math.floor(Math.random()*10),Math.floor(Math.random()*10),Math.floor(Math.random()*10)];s.deepPuz=s.deepPuz||{};s.deepPuz.n=n;s.deepPuz.tgt=tgt;s.deepPuz.wheels=s.deepPuz.wheels||[0,0,0];grStore(s)}
+ var h3='<span style="color:#5f7d99;font-size:12px">— wheel —</span><br><span style="font-size:11px">three dials. the plaque reads <b>'+tgt[0]+' '+tgt[1]+' '+tgt[2]+'</b>. click a dial to turn it.</span><br>';
+ for(var k3=0;k3<3;k3++)h3+='<button class="grBtn" data-dwheel="'+n+':'+k3+':'+tgt.join('')+'" style="padding:6px 14px;font-size:14px;margin:0 4px">'+wheels[k3]+'</button>';
+ return h3;
+}
+function grDeepMult(n){var g=Math.max(1,grDeepGenIdx(n));return (1+(Math.ceil(g/20)-1)*0.6+g/100)*grLanMult()}
+function grDeepDig(key){
+ if(!grActive)return;
+ var p=key.split(':'),n=parseInt(p[0],10),i=parseInt(p[1],10);
+ var s=grSave(),cd=0,mine=n>107,cdbase=(mine&&s.cavePick)?54000:90000;
+ try{var tt=((s.deepCd||{})[key])||0;cd=Math.ceil((tt+cdbase-Date.now())/1000);if(cd<0)cd=0}catch(e){}
+ if(cd>0){grNote('the dirt needs a minute.');return}
+ s.deepCd=s.deepCd||{};s.deepCd[key]=Date.now();
+ var m=grDeepMult(n),r=Math.random(),msg='';
+ if(r<0.5){var q=Math.max(2,Math.round((3+Math.random()*4)*m));s.plorts=(s.plorts||0)+q;msg='dug up '+q+' plorts. room '+n+' provides.'}
+ else if(r<0.8){s.deep=(s.deep||0)+1;msg='dug up 1 DEEP. room '+n+' hums.'}
+  else{var g=Math.round((30+Math.random()*30)*m);s.glow=(s.glow||0)+g;msg='dug up '+g+' glow. pocket lantern fuel.'}
+ if(mine){
+  var o=2+Math.floor(Math.random()*4);
+  s.mineOre=(s.mineOre||0)+o;s.oreMined=(s.oreMined||0)+o;
+  msg+=' +'+o+' ore.';
+  if((s.oreMined||0)>=1000)try{grAch('gr_ore1000')}catch(e){}
+  if(Math.random()<0.15){s.deepCd[key]=Date.now()+cdbase+90000*(s.cavePick?0.6:1);msg+=' THE BEAMS GROAN — rockfall. (extended cooldown.)'}
+ }
+ grNote(msg);
+ grStore(s);grDeepMark(n);grRender();
+}
+function grDeepDive(key){
+ if(!grActive)return;
+ try{if(!grSave().scuba){grNote('no suit, no swimming.');return}}catch(e){return}
+ var p=key.split(':'),n=parseInt(p[0],10),i=parseInt(p[1],10);
+ var s=grSave(),cd=0,mine=n>107,cdbase=(mine&&s.cavePick)?72000:120000;
+ try{var tt=((s.deepCd||{})[key])||0;cd=Math.ceil((tt+cdbase-Date.now())/1000);if(cd<0)cd=0}catch(e){}
+ if(cd>0){grNote('the water is still settling.');return}
+ s.deepCd=s.deepCd||{};s.deepCd[key]=Date.now();
+ var m=grDeepMult(n),r=Math.random(),msg='';
+ if(r<0.5){var q=1+Math.floor(Math.random()*2);s.deep=(s.deep||0)+q;msg='dredged '+q+' DEEP. cold. worth it.'}
+ else if(r<0.8){var g=Math.round((60+Math.random()*60)*m);s.glow=(s.glow||0)+g;msg='dredged '+g+' glow. the water glows back.'}
+  else{var q2=Math.max(4,Math.round((6+Math.random()*6)*m));s.plorts=(s.plorts||0)+q2;msg='dredged '+q2+' plorts. waterproof. (mostly.)'}
+ if(mine){
+  var o=2+Math.floor(Math.random()*3);
+  s.mineOre=(s.mineOre||0)+o;s.oreMined=(s.oreMined||0)+o;
+  msg+=' +'+o+' ore.';
+  if((s.oreMined||0)>=1000)try{grAch('gr_ore1000')}catch(e){}
+ }
+ grNote(msg);
+ grStore(s);grDeepMark(n);grRender();
+}
+function grDeepGate(n){
+ if(!grActive)return;
+ var s=grSave(),t=grDeepToll(grDeepGenIdx(n)),need=[];
+ if((s.plorts||0)<t.plorts)need.push((t.plorts-(s.plorts||0))+' more plorts');
+ if((s.glow||0)<t.glow)need.push((t.glow-(s.glow||0))+' more glow');
+ if((s.deep||0)<t.deep)need.push((t.deep-(s.deep||0))+' more deep');
+ if(need.length){grNote('the gate shakes its head. need: '+need.join(', ')+'.');return}
+ s.plorts-=t.plorts;s.glow-=t.glow;s.deep-=t.deep;
+ if(n===107){
+  s.finToll=true;
+  grStore(s);grDeepMark(n);
+  grNote('last toll paid. THE LAST DOOR. three locks, no keyholes. (puzzles with confidence.)');
+ }else{
+  s.deepGate=s.deepGate||{};s.deepGate[n]=1;
+  grStore(s);grDeepMark(n);
+  grNote('toll paid. gate '+n+' swings open. the deep respects currency.');
+ }
+ grRender();
+}
+function grDeepValve(key){
+ if(!grActive)return;
+ var p=key.split(':'),n=parseInt(p[0],10),i=parseInt(p[1],10);
+ var s=grSave();s.deepPuz=s.deepPuz||{};
+ if(s.deepPuz.n!==n)s.deepPuz={n:n,seq:[]};
+ s.deepPuz.seq.push(i+1);
+ var want=[2,3,1],ok=true;
+ for(var k=0;k<s.deepPuz.seq.length;k++)if(s.deepPuz.seq[k]!==want[k])ok=false;
+ if(!ok){s.deepPuz={};grStore(s);grNote('wrong order. the pipes SLAM shut. (two-three-one.)');grRender();return}
+ if(s.deepPuz.seq.length>=3){
+  s.deepPuz={};s.deepPuzDone=s.deepPuzDone||{};s.deepPuzDone[n]=1;
+  var m=grDeepMult(n),g=Math.round(100*m);
+  s.glow=(s.glow||0)+g;grStore(s);grDeepMark(n);
+  grNote('two. three. one. the pipes sing. +'+g+' glow.');
+ }else grStore(s);
+ grRender();
+}
+function grDeepRubble(key){
+ if(!grActive)return;
+ var p=key.split(':'),n=parseInt(p[0],10);
+ var s=grSave();s.deepPuz=s.deepPuz||{};
+ if(p[1]==='start'){
+  s.deepPuz={n:n,seq:p[2].split(',').map(Number),prog:0};grStore(s);grRender();return;
+ }
+ if(s.deepPuz.n!==n||!s.deepPuz.seq){grNote('start the tapping first.');return}
+ var want=s.deepPuz.seq[s.deepPuz.prog||0];
+ if(parseInt(p[1],10)===want){
+  s.deepPuz.prog=(s.deepPuz.prog||0)+1;
+  if(s.deepPuz.prog>=3){
+   s.deepPuz={};s.deepPuzDone=s.deepPuzDone||{};s.deepPuzDone[n]=1;
+   var m=grDeepMult(n),q=Math.max(3,Math.round((4+Math.random()*4)*m));
+   s.plorts=(s.plorts||0)+q;grStore(s);grDeepMark(n);
+   grNote('stone, stone, stone. memory like a vault. +'+q+' plorts.');
+  }else{grStore(s);grNote('…correct. keep going.')}
+ }else{s.deepPuz={};grStore(s);grNote('wrong stone. the glow fades. (the stones judge.)')}
+ grRender();
+}
+function grDeepWheel(key){
+ if(!grActive)return;
+ var p=key.split(':'),n=parseInt(p[0],10),w=parseInt(p[1],10),tgt=p[2].split('').map(Number);
+ var s=grSave();s.deepPuz=s.deepPuz||{};
+ if(s.deepPuz.n!==n||!s.deepPuz.wheels)s.deepPuz={n:n,wheels:[0,0,0]};
+ s.deepPuz.wheels[w]=(s.deepPuz.wheels[w]+1)%10;
+ if(s.deepPuz.wheels[0]===tgt[0]&&s.deepPuz.wheels[1]===tgt[1]&&s.deepPuz.wheels[2]===tgt[2]){
+  s.deepPuz={};s.deepPuzDone=s.deepPuzDone||{};s.deepPuzDone[n]=1;
+  var m=grDeepMult(n);
+  s.deep=(s.deep||0)+Math.max(1,Math.round(m));s.glow=(s.glow||0)+Math.round(80*m);grStore(s);grDeepMark(n);
+  grNote('click. click. CLICK. the dials align. the room pays deep + glow.');
+ }else grStore(s);
+ grRender();
+}
+function grDeepWater(){
+ try{
+  if(grDeepWaterIv){clearInterval(grDeepWaterIv);grDeepWaterIv=null}
+  var cv=document.getElementById('grDeepCv');
+  if(!cv||!cv.getContext)return;
+  var x=cv.getContext('2d'),t=0;
+  grDeepWaterIv=setInterval(function(){
+   if(!grActive){clearInterval(grDeepWaterIv);grDeepWaterIv=null;return}
+   if(!document.getElementById('grDeepCv')){clearInterval(grDeepWaterIv);grDeepWaterIv=null;return}
+   t+=0.08;
+   x.clearRect(0,0,560,80);
+   var g=x.createLinearGradient(0,0,0,80);
+   g.addColorStop(0,'#0a2a3a');g.addColorStop(1,'#020a12');
+   x.fillStyle=g;x.fillRect(0,0,560,80);
+   x.strokeStyle='rgba(120,220,255,0.5)';x.lineWidth=2;
+   for(var r=0;r<3;r++){
+    x.beginPath();
+    for(var px=0;px<=560;px+=14){
+     var py=20+r*20+Math.sin(px*0.03+t*(1+r*0.3)+r*2)*6;
+     if(px===0)x.moveTo(px,py);else x.lineTo(px,py);
+    }
+    x.stroke();
+   }
+   var lx=280+Math.sin(t*0.7)*60;
+   var rg=x.createRadialGradient(lx,18,2,lx,18,46);
+   rg.addColorStop(0,'rgba(255,220,150,0.85)');rg.addColorStop(1,'rgba(255,220,150,0)');
+   x.fillStyle=rg;x.fillRect(0,0,560,80);
+  },66);
+ }catch(e){}
+}
+// THE MINES (108-214): ore forge, cave pick, relight, and the room-214
+// finale ("the heart"): three mine holds, then the heart takes its weight.
+function grMineSmelt(){
+ if(!grActive)return;
+ var s=grSave(),o=s.mineOre||0;
+ if(o<1){grNote('the forge is cold. no ore.');return}
+ s.plorts=(s.plorts||0)+o*3;s.mineOre=0;grStore(s);
+ grNote('smelted '+o+' ore into '+(o*3)+' plorts. the forge exhales.');
+ grRender();
+}
+function grMineCraft(){
+ if(!grActive)return;
+ var s=grSave();
+ if(s.cavePick){grNote('you already own the pick. it is right there.');return}
+ if((s.mineOre||0)<400){grNote('the cave pick costs 400 ore. ('+(s.mineOre||0)+' held.)');return}
+ s.mineOre-=400;s.cavePick=true;grStore(s);
+ grNote('cave pick crafted. mine digs + dives cool down 40% faster.');
+ grRender();
+}
+function grRelight(n){
+ if(!grActive)return;
+ var s=grSave();
+ if((s.glow||0)<20){grNote('the wick needs 20 glow.');return}
+ s.glow-=20;s.deepLit=s.deepLit||{};s.deepLit[n]=1;grStore(s);
+ grDeepMark(n);
+ grNote('flame catches. the room comes back.');
+ grRender();
+}
+function grHeartLocks(){try{var l=grSave().heartLocks||{};return {w:!!l.w,c:!!l.c,d:!!l.d}}catch(e){return {w:false,c:false,d:false}}}
+function grHeartHtml(){
+ var s=grSave(),L=grHeartLocks();
+ var h='<div style="font-size:12px;margin:6px 0 8px">the still heart. warm dark, a seam that breathes, and three holds: a timber winch, a cart switch, a core dial. below them, a door with a scale built into it.</div>';
+ if(!L.w||!L.c||!L.d){
+  h+='<span style="font-size:11px;color:#5f7d99">— holds —</span><br>';
+  if(!L.w){
+    h+='<div style="margin:6px 0"><span style="font-size:11px">hold one: the winch. it ratchets <i>two-three-one</i>.</span><br>';
+    for(var k=0;k<3;k++)h+='<button class="grBtn" data-hvalve="'+k+'" style="padding:4px 10px;font-size:11px;margin:0 4px">ratchet '+(k+1)+'</button>';
+    h+='</div>';
+  }else h+='<div style="font-size:11px;color:#ffd770">✓ hold one: the winch bites.</div>';
+  if(!L.c){
+   var pz=(s.heartPuz||{}).t==='c'?(s.heartPuz||{}):null;
+   h+='<div style="margin:6px 0"><span style="font-size:11px">hold two: the cart switch. five sleepers, three lit.</span><br>';
+   if(!pz||!pz.seq){
+    var a=Math.floor(Math.random()*5),b=Math.floor(Math.random()*5),c=Math.floor(Math.random()*5);
+    h+='<span style="font-size:11px">lit in order: <b>'+(a+1)+' … '+(b+1)+' … '+(c+1)+'</b>.</span><br><button class="grBtn" data-hrub="start:'+a+','+b+','+c+'" style="padding:4px 10px;font-size:11px;margin-top:4px">throw the switch</button>';
+   }else{
+    h+='<span style="font-size:11px">set: '+(pz.prog||0)+'/3</span><br>';
+    for(var k2=0;k2<5;k2++)h+='<button class="grBtn" data-hrub="'+k2+'" style="padding:4px 10px;font-size:11px;margin:0 3px">●</button>';
+   }
+   h+='</div>';
+  }else h+='<div style="font-size:11px;color:#ffd770">✓ hold two: the switch throws clean.</div>';
+   if(!L.d){
+    var wz=(s.heartPuz||{}).t==='d'?(s.heartPuz||{}):null;
+    var wh=(wz&&wz.wheels)?wz.wheels:[0,0,0],tgt=(wz&&wz.tgt)?wz.tgt:null;
+    if(!tgt){tgt=[Math.floor(Math.random()*10),Math.floor(Math.random()*10),Math.floor(Math.random()*10)];s.heartPuz=s.heartPuz||{};s.heartPuz.t='d';s.heartPuz.tgt=tgt;s.heartPuz.wheels=s.heartPuz.wheels||[0,0,0];grStore(s)}
+     h+='<div style="margin:6px 0"><span style="font-size:11px">hold three: the core dial. the gauge reads <b>'+tgt[0]+' '+tgt[1]+' '+tgt[2]+'</b>.</span><br>';
+    for(var k3=0;k3<3;k3++)h+='<button class="grBtn" data-hwheel="'+k3+':'+tgt.join('')+':'+wh[k3]+'" style="padding:6px 14px;font-size:14px;margin:0 4px">'+wh[k3]+'</button>';
+    h+='</div>';
+  }else h+='<div style="font-size:11px;color:#ffd770">✓ hold three: the gauge steadies.</div>';
+ }else if(s.minesDone){
+  if(!s.minesExit){
+   h+='<div style="font-size:12px;margin:8px 0">the heart is quiet. the door stands open on a shelf of warm rock — and a minecart waits on the other side. (it is now or never.)</div>';
+   h+='<button class="grBtn" data-hride="1" style="padding:8px 18px;margin-top:4px">board the minecart</button>';
+  }else{
+   h+='<div style="font-size:12px;color:#ffd770;margin:8px 0">the ladder out. open sky, cold air, a volcano breathing behind you. the mines are behind you. (floor 3 is down there somewhere. not yet.)</div>';
+  }
+ }else{
+  h+='<div style="font-size:12px;margin:8px 0">all three holds set. the heart hums once and shows its scale: it wants weight before it opens — <b>200 ore · 2000 glow · 8 deep</b>.</div>';
+  h+='<button class="grBtn" data-heartgo="1" style="padding:8px 18px;margin-top:4px">pay the heart its weight</button>';
+ }
+ return h;
+}
+function grHeartValve(i){
+ if(!grActive)return;
+ var s=grSave();s.heartPuz=s.heartPuz||{};
+ if(s.heartPuz.t!=='v')s.heartPuz={t:'v',seq:[]};
+ s.heartPuz.seq.push(i+1);
+ var want=[2,3,1],ok=true;
+ for(var k=0;k<s.heartPuz.seq.length;k++)if(s.heartPuz.seq[k]!==want[k])ok=false;
+ if(!ok){s.heartPuz={};grStore(s);grNote('wrong rhythm. the winch SLAMS back. (two-three-one.)');grRender();return}
+ if(s.heartPuz.seq.length>=3){
+  s.heartPuz={};var L=grHeartLocks();L.w=true;s.heartLocks=L;
+  s.glow=(s.glow||0)+200;grStore(s);
+  grNote('two. three. one. the winch bites. +200 glow.');
+ }else grStore(s);
+ grRender();
+}
+function grHeartRub(key){
+ if(!grActive)return;
+ var s=grSave();s.heartPuz=s.heartPuz||{};
+ if(key.indexOf('start:')===0){
+  s.heartPuz={t:'c',seq:key.slice(6).split(',').map(Number),prog:0};grStore(s);grRender();return;
+ }
+ if(s.heartPuz.t!=='c'||!s.heartPuz.seq){grNote('throw the switch to start.');return}
+ if(parseInt(key,10)===s.heartPuz.seq[s.heartPuz.prog||0]){
+  s.heartPuz.prog=(s.heartPuz.prog||0)+1;
+  if(s.heartPuz.prog>=3){
+   s.heartPuz={};var L=grHeartLocks();L.c=true;s.heartLocks=L;
+   s.plorts=(s.plorts||0)+300;grStore(s);
+   grNote('the switch throws clean. +300 plorts.');
+  }else{grStore(s);grNote('…set. keep going.')}
+ }else{s.heartPuz={};grStore(s);grNote('wrong sleeper. the cart rolls back. (it has all night.)')}
+ grRender();
+}
+function grHeartWheel(key){
+ if(!grActive)return;
+ var p=key.split(':'),w=parseInt(p[0],10),tgt=p[1].split('').map(Number),cur=parseInt(p[2],10);
+ var s=grSave();s.heartPuz=s.heartPuz||{};
+ if(s.heartPuz.t!=='d')s.heartPuz={t:'d',wheels:[0,0,0]};
+ if(s.heartPuz.tgt&&s.heartPuz.tgt.join('')!==p[1])s.heartPuz={t:'d',wheels:[0,0,0]};
+ s.heartPuz.tgt=tgt;s.heartPuz.wheels=s.heartPuz.wheels||[0,0,0];
+ s.heartPuz.wheels[w]=((cur||0)+1)%10;
+ if(s.heartPuz.wheels[0]===tgt[0]&&s.heartPuz.wheels[1]===tgt[1]&&s.heartPuz.wheels[2]===tgt[2]){
+  s.heartPuz={};var L=grHeartLocks();L.d=true;s.heartLocks=L;
+  s.glow=(s.glow||0)+300;grStore(s);
+  grNote('the gauge steadies. +300 glow. the scale is watching.');
+ }else grStore(s);
+ grRender();
+}
+function grHeartGo(){
+ if(!grActive)return;
+ var s=grSave(),L=grHeartLocks();
+ if(!(L.w&&L.c&&L.d)){grNote('three holds. the heart does not do partial payments.');return}
+ if(s.minesDone){grNote('already paid. the heart has nothing left to ask. (it asks anyway. it is a heart.)');return}
+ var need=[],ore=s.mineOre||0;
+ if(ore<200)need.push((200-ore)+' more ore');
+ if((s.glow||0)<2000)need.push((2000-(s.glow||0))+' more glow');
+ if((s.deep||0)<8)need.push((8-(s.deep||0))+' more deep');
+ if(need.length){grNote('the scale does not move. need: '+need.join(', ')+'.');return}
+  s.mineOre=ore-200;s.glow-=2000;s.deep-=8;
+  s.plorts=(s.plorts||0)+5000;s.glow+=4000;s.deep+=20;
+  s.minesDone=true;grStore(s);grDeepMark(214);
+  try{grAch('gr_heart214')}catch(e){}
+  grNote('the heart takes its weight, then overpays: 5000 plorts, 4000 glow, 20 deep. (a minecart waits on the other side of the door. it is now or never.)');
+  grRender();
+  setTimeout(function(){try{grCartRide()}catch(e){}},1600);
+}
+// MINECART ESCAPE (room 214): out through a collapsing cave that turns out
+// to be a volcano. no derailing — there is no rail left to leave.
+var grCartRiding=false;
+function grCartRide(){
+ if(!grActive||grCartRiding)return;
+ var s=grSave();
+ if(!s.minesDone)return;
+ if(s.minesExit){grNote('the ladder is behind you. the mines are done.');return}
+ grCartRiding=true;
+ grNote('you climb into the minecart. the lever is warm.');
+ var steps=[
+  'the cart lurches — and the cave falls apart around you.',
+  'behind the falling rock: a volcano. you were inside a volcano the whole time. (the grotto does not do small geology.)',
+  'the rails go with the cave. there is no derailing when there is no rail left to leave.',
+  'the cart\u2019s tire digs into the hot rock. it climbs. it was always going to climb.',
+  'end of the room. a ladder — rungs like old teeth. up. the mines end here.'
+ ];
+ steps.forEach(function(line,i){
+  setTimeout(function(){
+   if(!grActive){grCartRiding=false;return}
+   grNote(line);
+   if(i===steps.length-1){
+    try{var s2=grSave();s2.minesExit=true;grStore(s2)}catch(e){}
+    grNote('you climb into open sky. the volcano breathes behind you. the mines are behind you. (floor 3 is down there somewhere. not yet.)');
+    grCartRiding=false;
+    grRender();
+   }
+  },1600*(i+1));
+ });
+}
 // phosphor skill tree: cloned from the void skill tree (same classes,
 // same lanes/fan/root), grotto branches, glow currency.
 var grSkillDefs={
@@ -442,7 +1282,7 @@ function grUpRender(body){
         var uk=a.upgrades[k],u=grUpDefs[uk],lv=grUpLv(uk);
         var el=document.createElement('div');
         el.className='up-node'+(lv>=u.max?' maxed':'');
-        el.innerHTML='<div class="up-name">'+u.name+'</div><div class="up-desc">'+u.desc+'</div><div class="up-cost">'+u.cost+' deep</div><div class="up-lv">'+lv+'/'+u.max+'</div>';
+        el.innerHTML='<div class="up-name">'+u.name+'</div><div class="up-desc">'+u.desc+'</div><div class="up-cost">'+u.cost+' skill</div><div class="up-lv">'+lv+'/'+u.max+'</div>';
         if(lv<u.max)el.onclick=(function(key){return function(ev){if(ev)ev.stopPropagation();grUpBuy(key)}})(uk);
         nodes.appendChild(el);
       }
@@ -691,22 +1531,24 @@ function grSkillOpen(){
   grSkillRender();
 }
 // grotto UPGRADE tree: cloned from the void upgrade columns (same classes,
-// area cards, leveled nodes). deep points: whales pay 2/sale, hush pays 3.
+// area cards, leveled nodes). priced in SKILL (deep was too slow a drip).
 var grUpAreas=[
  {id:'shallows',name:'area 1 — shallows',req:null,desc:'starter dredging',upgrades:['up_sieve','up_glowworm','up_longline']},
  {id:'twilight',name:'area 2 — twilight',req:'shallows',desc:'midwater — max the shallows',upgrades:['up_pressure','up_sonararr','up_chumworks']},
  {id:'trench',name:'area 3 — trench',req:'twilight',desc:'hadal — max twilight',upgrades:['up_leviathan','up_hushmoney','up_abyssal']}
 ];
+function grSkillBal(){try{if(typeof skillState!=='undefined')return Math.floor(skillState.points)||0}catch(e){}return 0}
+function grSkillTake(n){try{if(typeof skillState==='undefined'||Math.floor(skillState.points)<n)return false;skillState.points-=n;try{if(typeof skillSave==='function')skillSave()}catch(e){}try{if(typeof skillPtsRefresh==='function')skillPtsRefresh()}catch(e){}return true}catch(e){return false}}
 var grUpDefs={
- up_sieve:{max:5,cost:2,name:'plort sieve',desc:'+1 plort/click per level'},
- up_glowworm:{max:3,cost:3,name:'glowworm',desc:'+1 glow per plort sold per level'},
- up_longline:{max:4,cost:2,name:'long line',desc:'fishing cooldown -5s per level'},
- up_pressure:{max:3,cost:4,name:'pressure',desc:'drips drop plorts, +2% chance per level'},
- up_sonararr:{max:3,cost:4,name:'sonar array',desc:'gold visits +20% more often per level'},
- up_chumworks:{max:2,cost:5,name:'chum works',desc:'whale chum +1 charge per level'},
- up_leviathan:{max:3,cost:6,name:'leviathan',desc:'whales stay +15s per level'},
- up_hushmoney:{max:3,cost:6,name:'hush money',desc:'the hush pays +25 glow per level'},
- up_abyssal:{max:5,cost:8,name:'abyssal',desc:'all sale income +5% per level'}
+ up_sieve:{max:5,cost:300,name:'plort sieve',desc:'+1 plort/click per level'},
+ up_glowworm:{max:3,cost:450,name:'glowworm',desc:'+1 glow per plort sold per level'},
+ up_longline:{max:4,cost:300,name:'long line',desc:'fishing cooldown -5s per level'},
+ up_pressure:{max:3,cost:600,name:'pressure',desc:'drips drop plorts, +2% chance per level'},
+ up_sonararr:{max:3,cost:600,name:'sonar array',desc:'gold visits +20% more often per level'},
+ up_chumworks:{max:2,cost:800,name:'chum works',desc:'whale chum +1 charge per level'},
+ up_leviathan:{max:3,cost:900,name:'leviathan',desc:'whales stay +15s per level'},
+ up_hushmoney:{max:3,cost:900,name:'hush money',desc:'the hush pays +25 glow per level'},
+ up_abyssal:{max:5,cost:1200,name:'abyssal',desc:'all sale income +5% per level'}
 };
 function grUpLv(key){try{var s=grSave();return (s.grUp&&s.grUp[key])||0}catch(e){return 0}}
 function grAreaComplete(id){
@@ -731,8 +1573,9 @@ function grUpBuy(key){
   var area=null;
   for(var i=0;i<grUpAreas.length;i++)if(grUpAreas[i].upgrades.indexOf(key)!==-1)area=grUpAreas[i];
   if(area&&!grAreaUnlocked(area)){grSideSay('locked — max every upgrade in '+(area.req||'the previous area')+' first.');grSideHead();return}
-  if(s.deep<u.cost){grSideSay('not enough deep. ('+u.cost+' needed. the trench does not do credit.)');grSideHead();return}
-  s.deep-=u.cost;s.grUp[key]=lv+1;grStore(s);
+  if(grSkillBal()<u.cost){grSideSay('not enough skill. ('+u.cost+' needed. the trench accepts confetti.)');grSideHead();return}
+  if(!grSkillTake(u.cost)){grSideSay('skill slipped away. try again.');grSideHead();return}
+  s.grUp[key]=lv+1;grStore(s);
   grSideSay('upgrade: '+u.name+' lv '+(lv+1)+'/'+u.max+'.');
   grSideHead();grSkillRender();
 }
@@ -788,6 +1631,275 @@ function grToothWire(){
     };
   }catch(e){}
 }
+// FULL MAP: GTA-style. pannable, zoomable. surface on the left (void entrance),
+// the deep extending right to room 214. click a room to travel.
+var GR_MAP_SURF=[
+ {id:'mouth',x:0,y:0},{id:'phosphor',x:120,y:-60},{id:'meadow',x:120,y:80},
+ {id:'vault',x:250,y:-60},{id:'gauntlet',x:250,y:80},{id:'hollow',x:380,y:0},
+ {id:'farm',x:510,y:-80},{id:'lab',x:510,y:60},{id:'pens',x:510,y:170},
+ {id:'dripworks',x:640,y:-20},{id:'sea',x:770,y:-70},{id:'roost',x:770,y:50},
+ {id:'below',x:640,y:150}
+];
+var grMapCam={x:0,y:0,z:1},grMapNodes=[],grMapPulseIv=null;
+function grMapTierCol(n){
+ try{
+  if(n<=7)return '#ffd770';
+  var d=grDeepDef(n);
+  if(d.flooded)return '#5fd4e8';
+  if(d.cavedin)return '#c98a4a';
+  var tid=d.t?d.t.id:'';
+  if(tid==='water')return '#5fa8e8';
+  if(tid==='rust')return '#e86a4a';
+  if(tid==='crystal')return '#b89aff';
+  if(tid==='abyss')return '#6a5a9a';
+  if(tid==='mine')return '#d4a843';
+  if(tid==='vein')return '#c97b3a';
+  if(tid==='yard')return '#8a9a4a';
+  if(tid==='sump')return '#3a8a9a';
+  if(tid==='brace')return '#7a7a8a';
+  if(tid==='core')return '#e85a5a';
+  return '#a87848';
+ }catch(e){return '#5f7d99'}
+}
+function grMapOpen(){
+ if(!grActive)return;
+ try{
+  var old=document.getElementById('grMapOv');if(old){old.remove();try{if(grMapPulseIv)clearInterval(grMapPulseIv);grMapPulseIv=null}catch(e){}return}
+  var ov=document.createElement('div');ov.id='grMapOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:2014;background:rgba(1,3,6,0.96);font-family:Consolas,monospace;overflow:hidden';
+  ov.innerHTML='<canvas id="grMapCv" style="position:absolute;inset:0;cursor:grab"></canvas>'+
+  '<div style="position:absolute;top:12px;left:14px;font-size:13px;letter-spacing:4px;color:#8df0c8">GROTTO MAP</div>'+
+  '<div style="position:absolute;top:32px;left:14px;font-size:11px;color:#5f7d99">drag to pan · wheel to zoom · click a room to travel · ESC closes</div>'+
+  '<button id="grMapX" style="position:absolute;top:12px;right:14px;background:none;border:1px solid #3a5a6a;color:#8df0c8;font-family:Consolas,monospace;font-size:12px;padding:6px 12px;cursor:pointer">CLOSE [ESC]</button>';
+  document.body.appendChild(ov);
+  var cv=document.getElementById('grMapCv');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  // start centered on current room
+  var wx=0,wy=0;
+  try{
+   if(grRoom==='deep'&&grDeepRoom>0){var p=grMapDeepPos(grDeepRoom);wx=p.x;wy=p.y}
+   else{for(var i=0;i<GR_MAP_SURF.length;i++)if(GR_MAP_SURF[i].id===grRoom){wx=GR_MAP_SURF[i].x;wy=GR_MAP_SURF[i].y}}
+  }catch(e){}
+  grMapCam={x:wx,y:wy,z:1};
+  var drag=null;
+  cv.onpointerdown=function(e){drag={x:e.clientX,y:e.clientY,cx:grMapCam.x,cy:grMapCam.y};cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(err){}};
+  cv.onpointermove=function(e){if(!drag)return;grMapCam.x=drag.cx-(e.clientX-drag.x)/grMapCam.z;grMapCam.y=drag.cy-(e.clientY-drag.y)/grMapCam.z;grBigMapDraw()};
+  cv.onpointerup=function(e){
+   cv.style.cursor='grab';
+   if(drag&&Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)<6)grMapClick(e.clientX,e.clientY);
+   drag=null;
+  };
+  cv.onwheel=function(e){e.preventDefault();var nz=grMapCam.z*(e.deltaY>0?0.87:1.15);grMapCam.z=Math.min(2.5,Math.max(0.4,nz));grBigMapDraw()};
+  document.getElementById('grMapX').onclick=function(){grMapOpen()};
+  try{document.addEventListener('keydown',grMapKey)}catch(e){}
+  grBigMapDraw();
+  try{if(grMapPulseIv)clearInterval(grMapPulseIv)}catch(e){}
+  grMapPulseIv=setInterval(function(){if(!document.getElementById('grMapOv')){clearInterval(grMapPulseIv);grMapPulseIv=null;return}grBigMapDraw()},700);
+ }catch(e){}
+}
+function grMapDeepPos(n){
+ var y=-240+(n-1)*36,x=1240+Math.sin((n-1)*0.35)*60;
+ return {x:x,y:y};
+}
+function grMapSrng(seed){
+ var t=(seed*2654435761)>>>0;
+ return function(){t+=0x6D2B79F5;var z=Math.imul(t^t>>>15,1|t);z^=z+Math.imul(z^z>>>7,61|z);return((z^z>>>14)>>>0)/4294967296}
+}
+var GR_MAP_ISLE={
+ mouth:'#6a7a68',phosphor:'#3fa8a0',meadow:'#5aa84f',vault:'#7a8494',gauntlet:'#c07a3a',
+ hollow:'#8a6a4a',farm:'#c8a84f',lab:'#4a8a8a',dripworks:'#a85a3a',sea:'#3a6ac8',
+ roost:'#8a5ac8',pens:'#7a8a4a',below:'#5a3a7a'
+};
+function grBlob(x,sx,sy,r,seed,col,dim,glow){
+ var rng=grMapSrng(seed),i,ox,oy,rr;
+ if(glow){x.strokeStyle='rgba(255,255,255,0.85)';x.lineWidth=2.5;x.beginPath();x.arc(sx,sy,r*1.12+2*Math.sin(Date.now()/240),0,6.283);x.stroke()}
+ for(i=0;i<9;i++){
+  ox=(rng()-0.5)*r*1.1;oy=(rng()-0.5)*r*0.9;rr=r*(0.5+rng()*0.5);
+  x.beginPath();x.arc(sx+ox,sy+oy,rr,0,6.283);
+  x.fillStyle=dim?'#0c1216':col;x.fill();
+ }
+ if(!dim){
+  x.strokeStyle='rgba(0,0,0,0.55)';x.lineWidth=3;
+  x.beginPath();x.arc(sx,sy,r*0.95,0,6.283);x.stroke();
+  x.fillStyle='rgba(255,255,255,0.16)';
+  for(i=0;i<10;i++){ox=(rng()-0.5)*r*1.2;oy=(rng()-0.5)*r;x.beginPath();x.arc(sx+ox,sy+oy,1.5+rng()*2.5,0,6.283);x.fill()}
+ }
+}
+function grBigMapDraw(){
+ var cv=null;
+ try{
+  cv=document.getElementById('grMapCv');if(!cv)return;
+  var x=cv.getContext('2d');if(!x)return;
+  var W=cv.width,H=cv.height;
+  if(!W||!H){W=cv.width=window.innerWidth||1280;H=cv.height=window.innerHeight||800}
+  var z=grMapCam.z;
+  var bg=x.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#07222c');bg.addColorStop(.6,'#05161d');bg.addColorStop(1,'#02090d');
+  x.fillStyle=bg;x.fillRect(0,0,W,H);
+  var s=grSave(),v=s.deepV||{};
+  grMapNodes=[];
+  grBigMapSurf(x,W,H,z,s);
+  grBigMapDeep(x,W,H,z,s,v);
+  grBigMapLegend(x,H);
+ }catch(err){
+  try{
+   if(!cv)cv=document.getElementById('grMapCv');
+   if(cv){var x2=cv.getContext('2d');if(x2){x2.fillStyle='#010306';x2.fillRect(0,0,cv.width||800,cv.height||600);x2.fillStyle='#ff8a91';x2.font='13px Consolas,monospace';x2.fillText('map broke: '+String((err&&err.message)||err).slice(0,160),20,40)}}
+  }catch(e2){}
+ }
+}
+function grBigMapSurf(x,W,H,z,s){
+  function P(wx,wy){return [(wx-grMapCam.x)*z+W/2,(wy-grMapCam.y)*z+H/2]}
+  // slime-sea wave marks across the view
+  var wr=grMapSrng(77),wi;
+  x.strokeStyle='rgba(120,200,220,0.10)';x.lineWidth=1.5;
+  for(wi=0;wi<70;wi++){
+   var wwx=grMapCam.x+(wr()-0.5)*W/z,wwy=grMapCam.y+(wr()-0.5)*H/z;
+   var wp=P(wwx,wwy);
+   x.beginPath();x.moveTo(wp[0]-9,wp[1]);
+   x.quadraticCurveTo(wp[0]-4.5,wp[1]-4,wp[0],wp[1]);
+   x.quadraticCurveTo(wp[0]+4.5,wp[1]+4,wp[0]+9,wp[1]);
+   x.stroke();
+  }
+  // void entrance arrow
+  var pv=P(-140,0);
+  x.fillStyle='rgba(150,120,220,0.9)';x.font=Math.round(12*z+4)+'px Consolas,monospace';
+  x.fillText('VOID ⟶',pv[0]-30*z-30,pv[1]+4);
+  // surface links (dotted paths)
+  var links=[['mouth','phosphor'],['mouth','meadow'],['phosphor','vault'],['meadow','gauntlet'],['vault','hollow'],['gauntlet','hollow'],['hollow','farm'],['hollow','lab'],['lab','pens'],['farm','dripworks'],['lab','dripworks'],['dripworks','sea'],['dripworks','roost'],['dripworks','below'],['pens','below']];
+  function sPos(id){for(var i=0;i<GR_MAP_SURF.length;i++)if(GR_MAP_SURF[i].id===id)return GR_MAP_SURF[i];return null}
+  x.strokeStyle='rgba(200,220,230,0.4)';x.lineWidth=2;x.setLineDash([2,7]);x.lineCap='round';
+  for(var li=0;li<links.length;li++){
+   var a=sPos(links[li][0]),b=sPos(links[li][1]);
+   if(!a||!b)continue;
+   var pa=P(a.x,a.y),pb=P(b.x,b.y);
+   x.beginPath();x.moveTo(pa[0],pa[1]);x.lineTo(pb[0],pb[1]);x.stroke();
+  }
+  x.setLineDash([]);
+  // below -> shaft entrance
+  var bp=P(640,150),sp0=P(grMapDeepPos(1).x,grMapDeepPos(1).y);
+  x.strokeStyle='rgba(255,215,112,0.55)';x.lineWidth=2;x.setLineDash([7,5]);
+  x.beginPath();x.moveTo(bp[0],bp[1]);x.lineTo(sp0[0],sp0[1]);x.stroke();x.setLineDash([]);
+  x.fillStyle='rgba(255,215,112,0.85)';x.font='11px Consolas,monospace';
+  x.fillText('THE DEEP',(bp[0]+sp0[0])/2-24,(bp[1]+sp0[1])/2-10);
+  // islands (blobs first, labels after so nothing covers text)
+  var isl=[];
+  for(var si2=0;si2<GR_MAP_SURF.length;si2++){
+   var sn=GR_MAP_SURF[si2],ip=P(sn.x,sn.y),ir=46*z+8;
+   var cur=(grRoom===sn.id&&!(grRoom==='deep'));
+   var seen=false;
+   try{seen=(s.seen||[]).indexOf(sn.id)!==-1}catch(e){}
+   var seed=0;for(var ci=0;ci<sn.id.length;ci++)seed+=sn.id.charCodeAt(ci)*7;
+   grBlob(x,ip[0],ip[1],ir,seed,GR_MAP_ISLE[sn.id]||'#5f7d99',!(seen||cur),cur);
+   isl.push({sn:sn,ip:ip,ir:ir,cur:cur,seen:seen});
+   grMapNodes.push({sx:ip[0],sy:ip[1],kind:'surf',id:sn.id});
+  }
+  for(var li2=0;li2<isl.length;li2++){
+   var it=isl[li2],nm=it.sn.id.toUpperCase();
+   x.fillStyle=it.seen||it.cur?'#e8f2f8':'rgba(120,140,150,0.6)';x.font='bold '+(9*z+3)+'px Consolas,monospace';
+   x.fillText(nm,it.ip[0]-nm.length*3.4,it.ip[1]+it.ir+14);
+  }
+  // compass (screen-fixed, SR-style)
+  var ccx=W-96,ccy=92,cr2=34;
+  x.strokeStyle='rgba(200,220,230,0.75)';x.lineWidth=2;
+  x.beginPath();x.arc(ccx,ccy,cr2,0,6.283);x.stroke();
+  x.beginPath();x.arc(ccx,ccy,cr2-9,0,6.283);x.stroke();
+  x.fillStyle='rgba(200,220,230,0.9)';x.font='bold 12px Consolas,monospace';
+  x.fillText('N',ccx-4,ccy-cr2-5);x.fillText('S',ccx-4,ccy+cr2+14);
+  x.fillText('W',ccx-cr2-13,ccy+4);x.fillText('E',ccx+cr2+5,ccy+4);
+  x.fillStyle='rgba(255,215,112,0.9)';
+  x.beginPath();x.moveTo(ccx,ccy-14);x.lineTo(ccx-6,ccy+8);x.lineTo(ccx+6,ccy+8);x.closePath();x.fill();
+}
+function grBigMapDeep(x,W,H,z,s,v){
+  function P(wx,wy){return [(wx-grMapCam.x)*z+W/2,(wy-grMapCam.y)*z+H/2]}
+  // shaft frame
+  var f1=P(1080,-320),f2=P(1420,7620);
+  x.strokeStyle='rgba(200,170,90,0.4)';x.lineWidth=2;
+  x.strokeRect(f1[0],f1[1],f2[0]-f1[0],f2[1]-f1[1]);
+  x.fillStyle='rgba(200,170,90,0.75)';x.font='bold 13px Consolas,monospace';
+  x.fillText('▼ THE DEEP · rooms 1–214 ▼',f1[0]+40,f1[1]-10);
+  // tunnel rock (thick path through all rooms)
+  var widths=[[64,'#12101a'],[44,'#1c1524'],[26,'#251b2e']];
+  for(var w=0;w<widths.length;w++){
+   x.strokeStyle=widths[w][1];x.lineWidth=widths[w][0]*z;x.lineJoin='round';x.lineCap='round';
+   x.beginPath();
+    for(var tn=1;tn<=214;tn++){
+    var tp=grMapDeepPos(tn),tq=P(tp.x,tp.y);
+    if(tn===1)x.moveTo(tq[0],tq[1]);else x.lineTo(tq[0],tq[1]);
+   }
+   x.stroke();
+  }
+  // deep nodes
+  for(var dn=1;dn<=214;dn++){
+   var dd=grDeepDef(dn),vis=v[dn]===1,can=grDeepCan(dn);
+   var dp2=grMapDeepPos(dn),qp=P(dp2.x,dp2.y),rr=(dd.gate||dd.final)?9*z+2:7*z+1.5;
+   var cur2=(grRoom==='deep'&&grDeepRoom===dn);
+   var pulse=cur2?(0.5+0.5*Math.sin(Date.now()/240)):0;
+   x.beginPath();x.arc(qp[0],qp[1],rr+(cur2?pulse*3:0),0,6.283);
+   if(cur2){x.fillStyle='#fff';x.fill()}
+   else if(vis){x.fillStyle=grMapTierCol(dn);x.fill()}
+   else if(can){x.fillStyle='#141020';x.fill();x.strokeStyle=grMapTierCol(dn);x.lineWidth=2;x.stroke()}
+   else{x.fillStyle='#0a0810';x.fill();x.strokeStyle='rgba(80,70,90,0.4)';x.lineWidth=1;x.stroke()}
+   if(dd.gate&&!dd.final){x.strokeStyle=vis?'#ffd770':'rgba(255,215,112,0.5)';x.lineWidth=2;x.beginPath();x.arc(qp[0],qp[1],rr+4,0,6.283);x.stroke()}
+   if(dd.final){
+    x.fillStyle='rgba(255,255,255,0.25)';x.beginPath();x.arc(qp[0],qp[1],rr+10,0,6.283);x.fill();
+    x.fillStyle='#fff';x.font='bold '+(12*z+4)+'px Consolas,monospace';x.fillText('★',qp[0]-8,qp[1]+6);
+   }
+   else if(z>0.6&&(vis||can)){x.fillStyle=vis?'rgba(235,240,245,0.9)':'rgba(140,150,160,0.75)';x.font='bold 10px Consolas,monospace';x.fillText(String(dn),qp[0]-9,qp[1]-rr-6)}
+   grMapNodes.push({sx:qp[0],sy:qp[1],kind:'deep',id:dn,can:can});
+  }
+}
+function grBigMapLegend(x,H){
+  // legend
+  x.fillStyle='rgba(140,160,180,0.9)';x.font='11px Consolas,monospace';
+  var ly=H-24;
+  x.fillText('○ surface',14,ly);x.fillStyle='#ffd770';x.fillText('● burrows 1-7',100,ly);
+  x.fillStyle='#5fa8e8';x.fillText('● drowned',210,ly);x.fillStyle='#e86a4a';x.fillText('● rust',300,ly);
+  x.fillStyle='#b89aff';x.fillText('● glass',370,ly);x.fillStyle='#6a5a9a';x.fillText('● black floor',450,ly);
+  x.fillStyle='#d4a843';x.fillText('● mine',555,ly);x.fillStyle='#c97b3a';x.fillText('● vein',620,ly);
+  x.fillStyle='#8a9a4a';x.fillText('● yard',685,ly);x.fillStyle='#3a8a9a';x.fillText('● sump',750,ly);
+  x.fillStyle='#7a7a8a';x.fillText('● brace',815,ly);x.fillStyle='#e85a5a';x.fillText('● core',880,ly);
+  x.fillStyle='rgba(140,160,180,0.9)';x.fillText('○ ring = toll gate · ★ = room 107 / 214',940,ly);
+}
+function grMapClick(mx,my){
+ try{
+  var best=null,bd=16;
+  for(var i=0;i<grMapNodes.length;i++){
+   var nd=grMapNodes[i],d=Math.hypot(nd.sx-mx,nd.sy-my);
+   if(d<bd){bd=d;best=nd}
+  }
+  if(!best)return;
+  if(best.kind==='surf'){grMapOpen();grTravelTo(best.id);return}
+  var n=best.id,vis=false;
+  try{vis=(grSave().deepV||{})[n]===1}catch(e){}
+  if(!vis){grNote('unmapped. walk there first. (the tier list is the only road.)');return}
+  grMapOpen();
+  grRoom='deep';grDeepTier=(n<=7)?1:Math.min(6,Math.ceil((n-7)/20)+1);grDeepRoom=n;
+  grLoreView=null;grChismView=null;grMapUp=false;
+  try{var s=grSave();s.seen=s.seen||[];if(s.seen.indexOf('deep')===-1){s.seen.push('deep');grStore(s)}}catch(e){}
+  grRender();
+ }catch(e){}
+}
+function grMapKey(e){
+ try{
+  if(!document.getElementById('grMapOv')){document.removeEventListener('keydown',grMapKey);return}
+  if(e.key==='Escape'){e.preventDefault();grMapOpen()}
+ }catch(err){}
+}
+function grBotsCmd(arg){
+ if(!grActive)return;
+ var s=grSave(),any=false;
+ for(var i=0;i<GR_BOTS.length;i++){
+  var b=GR_BOTS[i],own=s.bots&&s.bots[b.id];
+  if(!own)continue;
+  any=true;
+  var oc=(s.botOc&&s.botOc[b.id])||0;
+  grSideSay((own.on&&!s.botDead?'● ':'○ ')+b.name+' ('+b.drain+'/min)'+(oc>0?' +'+(oc*10)+'%':'')+' — '+(own.on?(s.botDead?'asleep (no deep)':'running'):'off'));
+ }
+ if(!any)grSideSay('no automatons. the lab fabricates them. (plorts + glow each.)');
+ else grSideSay('fuel: '+((Math.floor((s.deep||0)*10)/10))+' deep · burn '+grBotDrain().toFixed(2)+'/min. fabricate + toggle: lab.');
+ grSideHead();
+}
 // HELP AS UI: the reference outgrew the tooth. fullscreen panel, sections,
 // close button. like the achievementpane up top, but honest.
 var GR_HELP_SECTIONS=[
@@ -819,8 +1931,12 @@ var GR_HELP_SECTIONS=[
   ['oath [tend|guard|remember]','swear Chism\u2019s oath (after his quests)'],
   ['pet','check on your pet slime (buy it first: hollow)'],
   ['club','read your regulars tab (Chism tracks everything)'],
-  ['who','who are you (here)'],
-  ['obj','do not.']]}
+   ['who','who are you (here)'],
+   ['obj','do not.'],
+   ['bgm [track]','void tracks + remembered (bgm cave = drips again)'],
+    ['map','the whole grotto. pan it. surface + all 214 deep. click to travel'],
+   ['bots','automatons run the cave while you watch (fabricate: lab)'],
+   ['collapse','burn the run for lanterns, +10% income each (lab)']]}
 ];
 function grHelpOpen(){
   if(!grActive)return;
@@ -907,6 +2023,10 @@ function grTermRun(raw){
     else if(arg==='all'||arg==='everything')grSell(true);
     else if(parseInt(arg,10)>0){var s2=grSave(),have=s2.plorts||0,want=parseInt(arg,10);if(want>have){grSideSay('you only have '+have+'. the tooth does not do credit.')}else{var kk=Math.min(want,have),uu=grUnit(s2.price);s2.plorts=have-kk;var pp=grCutPay(kk*uu,false);s2.glow=(s2.glow||0)+pp;s2.lifePlorts=(s2.lifePlorts||0)+kk;grStore(s2);try{grClubCheck()}catch(e){}grSideSay('sold '+kk+' for '+pp+' glow. glow: '+s2.glow+'.');grSideHead();return}}
     else grSell(false);
+  }else if(c==='bgm'||c==='music'||c==='tune'){grBgmCmd(arg);return
+  }else if(c==='map'){grMapOpen();return
+  }else if(c==='bots'){grBotsCmd(arg);return
+  }else if(c==='collapse'){grCollapseCmd(arg);return
   }else if(c==='phosphors'||c==='tree'||c==='skills'){
     grSideSay('the tree unfolds above. look up.');
     grTreeTab='skills';
@@ -1898,6 +3018,142 @@ function grMix(id){
   grNote('mixed: '+m.name+'. do not lick the vat.');
   grRender();
 }
+function grSuitFab(){
+ if(!grActive)return;
+ var s=grSave();
+ if(s.scuba){grNote('you already own the suit. it drips.');return}
+ var need=[];
+ if((s.deep||0)<25)need.push((25-(s.deep||0))+' more deep');
+ if((s.glow||0)<5000)need.push((5000-(s.glow||0))+' more glow');
+ if((s.plorts||0)<777)need.push((777-(s.plorts||0))+' more plorts');
+ if(need.length){grNote('the fabricator shakes its head. need: '+need.join(', ')+'.');return}
+ s.deep-=25;s.glow-=5000;s.plorts-=777;s.scuba=true;
+ grStore(s);
+ try{grAch('gr_scuba')}catch(e){}
+  grNote('fabricated: dive suit. the sump is open. do not think about the dripping.');
+  grRender();
+}
+// AUTOMATONS: equipment that works the cave while you watch (Needle-in-a-Haystack
+// spirit: assemble the setup, feed it power, let it run). fuel is DEEP, drained
+// per minute while ON. no deep = blackout. runs in grTick + offline catchup.
+var GR_BOTS=[
+ {id:'clicker',name:'clicker rig',costP:100,costG:200,drain:0.10,per:30,desc:'clicks a phosphor every 30s (+sieve bonus plorts)'},
+ {id:'seller',name:'auto-seller',costP:150,costG:300,drain:0.10,per:60,desc:'sells 10 plorts at market every 60s'},
+ {id:'fisher',name:'fisher drone',costP:120,costG:250,drain:0.10,per:120,desc:'drags the void sea every 120s (plorts, sometimes deep)'},
+ {id:'feeder',name:'feeder lines',costP:80,costG:150,drain:0.10,per:45,desc:'feeds the hungriest pen when it drops below half'},
+ {id:'digger',name:'trench tap',costP:200,costG:400,drain:0.15,per:90,desc:'works dead seams every 90s (plorts/deep/glow trickle)'},
+ {id:'oven',name:'pie oven',costP:60,costG:100,drain:0.05,per:120,desc:'bakes a pie whenever 3+ fruit sits around'}
+];
+function grBotOn(id){try{var b=(grSave().bots||{})[id];return !!(b&&b.on)}catch(e){return false}}
+function grBotDrain(){var d=0;for(var i=0;i<GR_BOTS.length;i++){try{if(grBotOn(GR_BOTS[i].id))d+=GR_BOTS[i].drain}catch(e){}}return d}
+function grBotFab(id){
+ if(!grActive)return;
+ var m=null;
+ for(var i=0;i<GR_BOTS.length;i++)if(GR_BOTS[i].id===id)m=GR_BOTS[i];
+ if(!m)return;
+ var s=grSave();s.bots=s.bots||{};
+ if(s.bots[id]){grNote('already fabricated. it hums.');return}
+ if((s.plorts||0)<m.costP||(s.glow||0)<m.costG){grNote('need '+m.costP+'p + '+m.costG+' glow. the fabricator does not haggle.');return}
+ s.plorts-=m.costP;s.glow-=m.costG;
+ s.bots[id]={on:true};s.botT=s.botT||{};s.botT[id]=m.per;
+ grStore(s);
+ var n=0;for(var k in s.bots)n++;
+ if(n>=GR_BOTS.length)try{grAch('gr_botline')}catch(e){}
+ grNote('fabricated: '+m.name+'. it clicks on. feed it deep.');
+ grRender();
+}
+function grBotToggle(id){
+ if(!grActive)return;
+ var s=grSave();s.bots=s.bots||{};
+ if(!s.bots[id])return;
+ s.bots[id].on=!s.bots[id].on;
+ if(s.bots[id].on){s.botDead=false;for(var i=0;i<GR_BOTS.length;i++)if(GR_BOTS[i].id===id){s.botT=s.botT||{};s.botT[id]=GR_BOTS[i].per}}
+ grStore(s);
+ grNote(s.bots[id].on?'online. the cave gets louder.':'offline. the cave exhales.');
+ grRender();
+}
+// one quiet work cycle. returns true if anything happened.
+function grBotYield(s,id){
+ var oc=(1+0.1*((s.botOc&&s.botOc[id])||0))*grLanMult();
+ if(id==='clicker'){s.plorts=(s.plorts||0)+Math.max(1,Math.round((1+grUpLv('up_sieve'))*oc));return true}
+ if(id==='seller'){
+  var n=Math.min(10,s.plorts||0);if(n<=0)return false;
+  s.plorts-=n;var pay=Math.round(n*grUnit(s.price||5)*oc);s.glow=(s.glow||0)+pay;s.lifePlorts=(s.lifePlorts||0)+n;return true;
+ }
+ if(id==='fisher'){
+  var r=Math.random();
+  if(r<0.70)s.plorts=(s.plorts||0)+Math.max(2,Math.round((2+Math.random()*3)*oc));
+  else if(r<0.85)s.deep=Math.round(((s.deep||0)+Math.max(1,Math.round(oc)))*10)/10;
+  else s.glow=(s.glow||0)+Math.round(50*oc);
+  return true;
+ }
+ if(id==='feeder'){
+  try{
+   var corr=grCorrals(s),bi=-1,bh=50;
+   for(var i=0;i<corr.length;i++){if(corr[i].own&&corr[i].type&&(corr[i].n||0)>0&&(corr[i].hunger||0)<bh){bh=corr[i].hunger;bi=i}}
+   if(bi<0)return false;
+   var c=corr[bi],def=GR_SLIMES[c.type];if(!def)return false;
+   s.fruitInv=s.fruitInv||[];
+   if(s.fruitInv.length&&(def.diet==='fruit'||def.diet==='any')){s.fruitInv.shift();c.hunger=Math.min(100,(c.hunger||0)+18*oc);return true}
+   if((s.eggInv||0)>0&&(def.diet==='eggs'||def.diet==='any')){s.eggInv--;c.hunger=Math.min(100,(c.hunger||0)+30*oc);return true}
+  }catch(e){}
+  return false;
+ }
+ if(id==='digger'){
+  var r2=Math.random();
+  if(r2<0.5)s.plorts=(s.plorts||0)+Math.max(2,Math.round((2+Math.random()*3)*oc));
+  else if(r2<0.75)s.deep=Math.round(((s.deep||0)+1)*10)/10;
+  else s.glow=(s.glow||0)+Math.round(30*oc);
+  return true;
+ }
+ if(id==='oven'){
+  s.fruitInv=s.fruitInv||[];
+  if(s.fruitInv.length<3)return false;
+  var raw=0;
+  for(var k=0;k<3;k++){var it=s.fruitInv.shift();raw+=Math.round((GR_FRUIT_BASE[it.seed]||4)*it.w*(GR_FRUIT_MUT[it.mut]||1))}
+  var tot=grCutPay(Math.round(raw*1.6*oc),false);
+  s.glow=(s.glow||0)+tot;s.bakes=(s.bakes||0)+1;return true;
+ }
+ return false;
+}
+function grBotOcCost(id){try{var lv=((grSave().botOc||{})[id])||0;return {g:Math.round(400*Math.pow(2,lv)),p:Math.round(50*Math.pow(2,lv)),lv:lv}}catch(e){return {g:400,p:50,lv:0}}}
+function grBotOcBuy(id){
+ if(!grActive)return;
+ var m=null;
+ for(var i=0;i<GR_BOTS.length;i++)if(GR_BOTS[i].id===id)m=GR_BOTS[i];
+ if(!m)return;
+ var s=grSave();s.bots=s.bots||{};
+ if(!s.bots[id]){grNote('fabricate it first.');return}
+ var c=grBotOcCost(id);
+ if((s.glow||0)<c.g||(s.plorts||0)<c.p){grNote('overclock '+m.name+' needs '+c.g+' glow + '+c.p+' plorts.');return}
+ s.glow-=c.g;s.plorts-=c.p;
+ s.botOc=s.botOc||{};s.botOc[id]=(s.botOc[id]||0)+1;
+ grStore(s);
+ grNote('overclocked '+m.name+' to +'+(s.botOc[id]*10)+'%. the hum gets higher.');
+ grRender();
+}
+function grBotsTick(s){
+ var any=false;
+ for(var i=0;i<GR_BOTS.length;i++){try{if(grBotOn(GR_BOTS[i].id)){any=true;break}}catch(e){}}
+ if(!any){if(s.botDead){s.botDead=false}return false}
+ var need=grBotDrain()/60;
+ if((s.deep||0)<need){
+  if(!s.botDead){s.botDead=true;grStore(s);grNote('BLACKOUT. the deep ran dry. the machines sleep. (feed them deep.)');try{grAch('gr_blackout')}catch(e){}}
+  return false;
+ }
+ if(s.botDead&&((s.deep||0)>=1)){s.botDead=false;grNote('power hums back. the machines stretch.')}
+ s.deep=Math.max(0,(s.deep||0)-need);
+ var dirty=true;
+ s.botT=s.botT||{};
+ for(var j=0;j<GR_BOTS.length;j++){
+  var b=GR_BOTS[j];
+  if(!grBotOn(b.id))continue;
+  s.botT[b.id]=(s.botT[b.id]==null?b.per:s.botT[b.id])-1;
+  if(s.botT[b.id]<=0){s.botT[b.id]=b.per;try{grBotYield(s,b.id)}catch(e){}}
+ }
+ try{grStore(s)}catch(e){}
+ return dirty;
+}
 function grLabHtml(){
   var s=grSave();
   var h='a ranch lab stapled to a cave wall. a fabricator the size of a fridge. vats bubbling with intent.<br><br><span style="color:#5f7d99">FABRICATOR (glow: <b>'+(s.glow||0)+'</b>)</span><div style="margin-top:6px">';
@@ -1914,6 +3170,27 @@ function grLabHtml(){
     h+=(got?'✓ <b>'+mx.name+'</b>':'<b>'+mx.name+'</b> — '+mx.costP+'p + '+mx.costG+' glow <button class="grBtn" data-mix="'+mx.id+'" style="padding:2px 8px;font-size:11px">mix</button>');
     h+='<br><span style="color:#5f7d99">'+mx.desc+'</span></div>';
   }
+  h+='</div><br><span style="color:#5f7d99">DIVE SUIT (deep: <b>'+(s.deep||0)+'</b>)</span><div style="margin-top:6px">';
+  if(s.scuba)h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">✓ <b>dive suit</b><br><span style="color:#5f7d99">it drips. (yours.) the sump is open.</span></div>';
+  else h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px"><b>dive suit</b> — 25 deep + 5000 glow + 777 plorts <button class="grBtn" data-suit="1" style="padding:2px 8px;font-size:11px">fabricate</button><br><span style="color:#5f7d99">for the sump. black water. no suit, no swimming.</span></div>';
+  h+='</div><br><span style="color:#5f7d99">AUTOMATONS (fuel: deep <b>'+(Math.floor((s.deep||0)*10)/10)+'</b> · burn: <b>'+grBotDrain().toFixed(2)+'</b>/min'+(s.botDead?' · <b style="color:#ff8a91">BLACKOUT</b>':'')+')</span><div style="margin-top:6px">';
+  for(var bi=0;bi<GR_BOTS.length;bi++){
+   var bot=GR_BOTS[bi],own=s.bots&&s.bots[bot.id];
+   h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">';
+   if(own){
+    var ocL=(s.botOc&&s.botOc[bot.id])||0,occ={g:Math.round(400*Math.pow(2,ocL)),p:Math.round(50*Math.pow(2,ocL))};
+    h+=((own.on&&!s.botDead)?'● ':'○ ')+'<b>'+bot.name+'</b> ('+bot.drain+'/min)'+(ocL>0?' +'+(ocL*10)+'%':'')+' <button class="grBtn" data-bottoggle="'+bot.id+'" style="padding:2px 8px;font-size:11px">'+(own.on?'turn off':'turn on')+'</button>';
+    h+=' <button class="grBtn" data-botoc="'+bot.id+'" style="padding:2px 8px;font-size:11px">overclock ('+occ.g+'g + '+occ.p+'p)</button>';
+   }
+   else h+='<b>'+bot.name+'</b> — '+bot.costP+'p + '+bot.costG+' glow <button class="grBtn" data-botfab="'+bot.id+'" style="padding:2px 8px;font-size:11px">fabricate</button>';
+   h+='<br><span style="color:#5f7d99">'+bot.desc+'</span></div>';
+  }
+  h+='</div><br><span style="color:#5f7d99">COLLAPSE (lanterns: <b>'+(s.lanterns||0)+'</b> · collapses: <b>'+(s.collapses||0)+'</b> · +'+((s.lanterns||0)*10)+'% income)</span><div style="margin-top:6px">';
+  var cg=grCollapseGain();
+  h+='<div style="margin:6px auto;max-width:440px;font-size:12px;background:rgba(4,12,18,.93);border:1px solid rgba(43,74,104,.6);border-radius:8px;padding:6px 8px">';
+  if(cg>=1)h+='burn it all for <b>'+cg+' lantern'+(cg===1?'':'s')+'</b> <button class="grBtn" data-collapserun="1" style="padding:2px 8px;font-size:11px">collapse</button><br><span style="color:#5f7d99">keeps: rooms, achievements, suit, pet. burns: everything else. (tooth: collapse)</span>';
+  else h+='<span style="font-size:12px;color:#5f7d99">nothing worth burning yet. (earn 100k plorts, 1M glow, or 50 deep of weight.)</span>';
+  h+='</div>';
   h+='</div><br><span style="color:#5f7d99">EXTRACTORS (dig sites dug: pick one, it works while you aren\u2019t looking)</span><div style="margin-top:6px">'+grExtHtml()+'</div>';
   return h+'</div>';
 }
@@ -2271,7 +3548,8 @@ var grMapUp=false;
 var GR_MAP=[
  ['mouth','← mouth'],['phosphor','phosphor light'],['meadow','the meadow'],['hollow','the hollow'],
   ['lab','the lab'],['farm','the farm'],['dripworks','dripworks'],['sea','void sea'],['roost','the roost'],['pens','the pens'],
-  ['vault','the vault'],['gauntlet','the gauntlet'],['below','below']
+  ['vault','the vault'],['gauntlet','the gauntlet'],['below','below'],
+  ['deep','the deep · 214 rooms']
 ];
 function grMapToggle(){
   if(!grActive)return;
@@ -2295,6 +3573,7 @@ function grMapDraw(){
       else if(id==='below'&&!grGauntClear()){dis=true;tag=' (gauntlet first)'}
       if(id==='vault')tag=s.vaultOpen?' (open)':' (sealed)';
       if(id==='below'&&!dis)tag=' (breathing)';
+      if(id==='deep'&&!grGauntClear()){dis=true;tag=' (gauntlet first)'}
       h+='<button class="grBtn" data-mgo="'+id+'"'+(dis?' disabled':'')+' style="padding:8px 10px;font-size:12px">'+label+tag+'</button>';
     }
     m.innerHTML=h;
@@ -2306,6 +3585,7 @@ function grMapDraw(){
         if(g==='below'&&!grLoreAllRead()){grNote('read first. the dark wants you informed.');return}
         if(g==='below'&&!grGauntClear()){grNote('the gauntlet holds the way down. (3 gates. toll + tune.)');return}
         if(g==='sea'){try{if(!grSave().vaultOpen){grNote('sealed. the vault opens the way down. (finish the door song first.)');return}}catch(e){}}
+        if(g==='deep'&&!grGauntClear()){grNote('the gauntlet holds the way down. (3 gates. toll + tune.)');return}
         grMapUp=false;
         grTravelTo(g);
       };
@@ -2514,6 +3794,7 @@ function grDig(i){
 function grGo(room){
   grRoom=room;
   grLoreView=null;grChismView=null;grMapUp=false;
+  if(room==='deep'){grDeepTier=0;grDeepRoom=0}
   if(room!=='below')grFightEnd();
   grTint=(room==='phosphor')?1:0;
   try{
@@ -2521,8 +3802,40 @@ function grGo(room){
   }catch(e){}
   grRender();
 }
-function grUnit(price){var s=grSave();return (price||5)+((s.gup&&s.gup.press)?1:0)+((s.blessing)?1:0)+((s.oath==='guard')?1:0)+grUpLv('up_glowworm')}
-function grCutPay(pay,all){var s=grSave();if(s.shop&&s.shop.cut)pay=Math.round(pay*1.1);if(all&&s.gup&&s.gup.monopoly)pay=Math.round(pay*1.15);var ab=grUpLv('up_abyssal');if(ab>0)pay=Math.round(pay*(1+0.05*ab));return pay}
+function grUnit(price){var s=grSave();return grLanG((price||5)+((s.gup&&s.gup.press)?1:0)+((s.blessing)?1:0)+((s.oath==='guard')?1:0)+grUpLv('up_glowworm'))}
+function grCutPay(pay,all){var s=grSave();if(s.shop&&s.shop.cut)pay=Math.round(pay*1.1);if(all&&s.gup&&s.gup.monopoly)pay=Math.round(pay*1.15);var ab=grUpLv('up_abyssal');if(ab>0)pay=Math.round(pay*(1+0.05*ab));return grLanG(pay)}
+// COLLAPSE (prestige layer 1): burn the run for lanterns. each lantern = +10%
+// grotto income, forever. rooms stay mapped, achievements stay. all else burns.
+function grLanterns(){try{return grSave().lanterns||0}catch(e){return 0}}
+function grLanMult(){return 1+0.1*grLanterns()}
+function grLanG(n){if(!(n>0))return n;return Math.max(1,Math.round(n*grLanMult()))}
+function grCollapseGain(){
+ try{
+  var s=grSave();
+  return Math.floor(Math.sqrt((s.plorts||0)/1e5)+Math.sqrt((s.glow||0)/1e6)+(s.deep||0)/50);
+ }catch(e){return 0}
+}
+function grCollapseCmd(arg){
+ if(!grActive)return;
+ var g=grCollapseGain();
+ if(String(arg||'').trim().toLowerCase()!=='yes'){
+  if(g<1){grSideSay('collapse needs something to burn. (earn: 100k plorts, 1M glow, or 50 deep worth.)');grSideHead();return}
+  grSideSay('COLLAPSE for '+g+' lantern'+(g===1?'':'s')+'. burns: plorts, glow, deep, bots, upgrades, extractors, ranch, farm. keeps: rooms mapped, achievements, suit, pet.');
+  grSideSay('each lantern: +10% grotto income, forever. you have '+grLanterns()+'. type: collapse yes. (no take-backs. the dark keeps receipts.)');
+  grSideHead();return;
+ }
+ if(g<1){grSideSay('nothing to burn. the dark yawns.');grSideHead();return}
+ var s=grSave(),keep={
+  lanterns:(s.lanterns||0)+g,collapses:(s.collapses||0)+1,
+  deepV:s.deepV||{},loreRead:s.loreRead||[],scuba:!!s.scuba,gateLoot:!!s.gateLoot,
+  pet:s.pet||null,tackleTier:s.tackleTier||0,seen:s.seen||[]
+ };
+ grStore(keep);
+ try{grAch('gr_collapse')}catch(e){}
+ grSideSay('COLLAPSE '+keep.collapses+'. +'+g+' lanterns (total '+keep.lanterns+'). the cave goes dark.');
+ grSideSay('then: drips. moss. a phosphor, fat and unbothered. run '+(keep.collapses+1)+' pays +'+(keep.lanterns*10)+'%.');
+ grSideHead();grRender();
+}
 // VFX: floating popups, color flashes, screen shake.
 function grPop(fx,fy,text,color){
   if(!grActive)return;
@@ -2702,8 +4015,26 @@ function grCorralMister(i){
   if(!c||!c.own||c.mister)return;
   if((s.glow||0)<300){grNote('misters cost 300 glow.');return}
   s.glow-=300;c.mister=true;grStore(s);
-  grNote('pen '+(i+1)+' misted. hunger drains half as fast. the slimes approve. (moistly.)');
-  grRender();
+ grNote('pen '+(i+1)+' misted. hunger drains half as fast. the slimes approve. (moistly.)');
+ grRender();
+}
+var GR_DECO={
+ lights:{cost:150,tag:'✨lit',blurb:'string lights. the pen glows. the slimes stay up late.'},
+ trim:{cost:120,tag:'▦trimmed',blurb:'painted fence trim. curb appeal. the ranch looks intentional now.'},
+ gnome:{cost:250,tag:'◎gnome',blurb:'a gnome supervises. morale improved. he judges the hungry.'},
+ pond:{cost:400,tag:'≈pond',blurb:'a tiny pond. slimes stare into it. it stares back.'}
+};
+function grCorralDeco(i,id){
+ if(!grActive)return;
+ var d=GR_DECO[id];if(!d)return;
+ var s=grSave(),corr=grCorrals(s),c=corr[i];
+ if(!c||!c.own){grNote('fence a pen first. decor needs dirt.');return}
+ c.deco=c.deco||{};
+ if(c.deco[id])return;
+ if((s.glow||0)<d.cost){grNote(id+' costs '+d.cost+' glow.');return}
+ s.glow-=d.cost;c.deco[id]=true;grStore(s);
+ grNote('pen '+(i+1)+' decorated: '+d.blurb);
+ grRender();
 }
 function grRoundup(){
   if(!grActive)return;
@@ -3012,6 +4343,7 @@ function grTick(){
         }
       }
     }
+    try{grBotsTick(s)}catch(e){}
     try{s.tickAt=Date.now();grStore(s)}catch(e){}
     try{grFarmTick()}catch(e){}
     try{grExtTick()}catch(e){}
@@ -3118,6 +4450,109 @@ function grRender(){
     if(es2)es2.onclick=function(){grEggSell()};
     var rk=grEl('grRockBtn');
     if(rk)rk.onclick=function(){grRockTalk()};
+    var dg=b.querySelectorAll('[data-dig]');
+    for(var dgI=0;dgI<dg.length;dgI++)(function(el){
+      el.onclick=function(){grDig(parseInt(el.getAttribute('data-dig'),10)||0)};
+    })(dg[dgI]);
+    var dv=b.querySelectorAll('[data-dive]');
+    for(var dvI=0;dvI<dv.length;dvI++)(function(el){
+      el.onclick=function(){grDive(parseInt(el.getAttribute('data-dive'),10)||0)};
+    })(dv[dvI]);
+    var vv=b.querySelectorAll('[data-valve]');
+    for(var vvI=0;vvI<vv.length;vvI++)(function(el){
+      el.onclick=function(){grValve(parseInt(el.getAttribute('data-valve'),10)||0)};
+    })(vv[vvI]);
+    var gl=grEl('grGateLoot');
+    if(gl)gl.onclick=function(){grGateLoot()};
+    var od=grEl('grOverflowDive');
+    if(od)od.onclick=function(){grOverflowDive()};
+    var fv=b.querySelectorAll('[data-finvalve]');
+    for(var fvi=0;fvi<fv.length;fvi++)(function(el){
+      el.onclick=function(){grFinValve(parseInt(el.getAttribute('data-finvalve'),10)||0)};
+    })(fv[fvi]);
+    var fr=b.querySelectorAll('[data-finrub]');
+    for(var fri=0;fri<fr.length;fri++)(function(el){
+      el.onclick=function(){grFinRub(el.getAttribute('data-finrub'))};
+    })(fr[fri]);
+    var fw=b.querySelectorAll('[data-finwheel]');
+    for(var fwi=0;fwi<fw.length;fwi++)(function(el){
+      el.onclick=function(){grFinWheel(el.getAttribute('data-finwheel'))};
+    })(fw[fwi]);
+    var fg=grEl('grFinGo');
+    if(fg)fg.onclick=function(){grFinGo()};
+    var cr=b.querySelectorAll('[data-caverub]');
+    for(var cri=0;cri<cr.length;cri++)(function(el){
+      el.onclick=function(){grCaveRubble(el.getAttribute('data-caverub'))};
+    })(cr[cri]);
+    var dt=b.querySelectorAll('[data-dtier]');
+    for(var dti=0;dti<dt.length;dti++)(function(el){
+      el.onclick=function(){grDeepTier=parseInt(el.getAttribute('data-dtier'),10)||0;grDeepRoom=0;grRender()};
+    })(dt[dti]);
+    var dr=b.querySelectorAll('[data-droom]');
+    for(var dri=0;dri<dr.length;dri++)(function(el){
+      el.onclick=function(){var n=parseInt(el.getAttribute('data-droom'),10)||0;if(!grDeepCan(n)){grNote('dig deeper first. (room '+(n-1)+' first.)');return}grDeepRoom=n;grRender()};
+    })(dr[dri]);
+    var db=b.querySelectorAll('[data-dback]');
+    for(var dbi=0;dbi<db.length;dbi++)(function(el){
+      el.onclick=function(){if(el.getAttribute('data-dback')==='room'){grDeepRoom=0}else{grDeepTier=0;grDeepRoom=0}grRender()};
+    })(db[dbi]);
+    var dd=b.querySelectorAll('[data-ddig]');
+    for(var ddi=0;ddi<dd.length;ddi++)(function(el){
+      el.onclick=function(){grDeepDig(el.getAttribute('data-ddig'))};
+    })(dd[ddi]);
+    var ddv=b.querySelectorAll('[data-ddive]');
+    for(var ddvi=0;ddvi<ddv.length;ddvi++)(function(el){
+      el.onclick=function(){grDeepDive(el.getAttribute('data-ddive'))};
+    })(ddv[ddvi]);
+    var dg2=b.querySelectorAll('[data-dgate]');
+    for(var dgi=0;dgi<dg2.length;dgi++)(function(el){
+      el.onclick=function(){grDeepGate(parseInt(el.getAttribute('data-dgate'),10)||0)};
+    })(dg2[dgi]);
+    var dvl=b.querySelectorAll('[data-dvalve]');
+    for(var dvi=0;dvi<dvl.length;dvi++)(function(el){
+      el.onclick=function(){grDeepValve(el.getAttribute('data-dvalve'))};
+    })(dvl[dvi]);
+    var drb=b.querySelectorAll('[data-drub]');
+    for(var drbi=0;drbi<drb.length;drbi++)(function(el){
+      el.onclick=function(){grDeepRubble(el.getAttribute('data-drub'))};
+    })(drb[drbi]);
+    var dwh=b.querySelectorAll('[data-dwheel]');
+    for(var dwhi=0;dwhi<dwh.length;dwhi++)(function(el){
+      el.onclick=function(){grDeepWheel(el.getAttribute('data-dwheel'))};
+    })(dwh[dwhi]);
+    var msm=b.querySelectorAll('[data-msmelt]');
+    for(var msmi=0;msmi<msm.length;msmi++)(function(el){
+      el.onclick=function(){grMineSmelt()};
+    })(msm[msmi]);
+    var mc=b.querySelectorAll('[data-mcraft]');
+    for(var mci=0;mci<mc.length;mci++)(function(el){
+      el.onclick=function(){grMineCraft()};
+    })(mc[mci]);
+    var rlt=b.querySelectorAll('[data-relight]');
+    for(var rlti=0;rlti<rlt.length;rlti++)(function(el){
+      el.onclick=function(){grRelight(parseInt(el.getAttribute('data-relight'),10)||0)};
+    })(rlt[rlti]);
+    var hv=b.querySelectorAll('[data-hvalve]');
+    for(var hvi=0;hvi<hv.length;hvi++)(function(el){
+      el.onclick=function(){grHeartValve(parseInt(el.getAttribute('data-hvalve'),10)||0)};
+    })(hv[hvi]);
+    var hr=b.querySelectorAll('[data-hrub]');
+    for(var hri=0;hri<hr.length;hri++)(function(el){
+      el.onclick=function(){grHeartRub(el.getAttribute('data-hrub'))};
+    })(hr[hri]);
+    var hw=b.querySelectorAll('[data-hwheel]');
+    for(var hwi=0;hwi<hw.length;hwi++)(function(el){
+      el.onclick=function(){grHeartWheel(el.getAttribute('data-hwheel'))};
+    })(hw[hwi]);
+    var hg=b.querySelectorAll('[data-heartgo]');
+    for(var hgi=0;hgi<hg.length;hgi++)(function(el){
+      el.onclick=function(){grHeartGo()};
+    })(hg[hgi]);
+    var hr=b.querySelectorAll('[data-hride]');
+    for(var hri=0;hri<hr.length;hri++)(function(el){
+      el.onclick=function(){grCartRide()};
+    })(hr[hri]);
+    try{grDeepWater()}catch(e){}
     var ch=b.querySelectorAll('.grChime');
     for(var m=0;m<ch.length;m++)(function(el){
       if(el.getAttribute('data-g')!==null){el.onclick=function(){grGauntKnock(parseInt(el.getAttribute('data-g'),10)||0,el)}}
@@ -3192,6 +4627,30 @@ function grRender(){
     for(var m2=0;m2<mx2.length;m2++)(function(el){
       el.onclick=function(){grMix(el.getAttribute('data-mix'))};
     })(mx2[m2]);
+    var su=b.querySelectorAll('[data-suit]');
+    for(var su2=0;su2<su.length;su2++)(function(el){
+      el.onclick=function(){grSuitFab()};
+    })(su[su2]);
+    var bf=b.querySelectorAll('[data-botfab]');
+    for(var bfi=0;bfi<bf.length;bfi++)(function(el){
+      el.onclick=function(){grBotFab(el.getAttribute('data-botfab'))};
+    })(bf[bfi]);
+    var bt=b.querySelectorAll('[data-bottoggle]');
+    for(var bti=0;bti<bt.length;bti++)(function(el){
+      el.onclick=function(){grBotToggle(el.getAttribute('data-bottoggle'))};
+    })(bt[bti]);
+    var bo=b.querySelectorAll('[data-botoc]');
+    for(var boi=0;boi<bo.length;boi++)(function(el){
+      el.onclick=function(){grBotOcBuy(el.getAttribute('data-botoc'))};
+    })(bo[boi]);
+    var cl=b.querySelectorAll('[data-collapserun]');
+    for(var cli=0;cli<cl.length;cli++)(function(el){
+      el.onclick=function(){
+       var now=Date.now();
+       if(!grCollapseArm||now-grCollapseArm>10000){grCollapseArm=now;grNote('that button burns EVERYTHING. click again within 10s to mean it.');return}
+       grCollapseArm=0;grCollapseCmd('yes');
+      };
+    })(cl[cli]);
     var ef=b.querySelectorAll('[data-extfab]');
     for(var ef2=0;ef2<ef.length;ef2++)(function(el){
       el.onclick=function(){var v=el.getAttribute('data-extfab').split(':');grExtFab(v[0],parseInt(v[1],10)||0)};
@@ -3275,6 +4734,10 @@ function grRender(){
     for(var cm2=0;cm2<cm.length;cm2++)(function(el){
       el.onclick=function(){grCorralMister(parseInt(el.getAttribute('data-cmister'),10)||0)};
     })(cm[cm2]);
+    var cd=b.querySelectorAll('[data-cdeco]');
+    for(var cd2=0;cd2<cd.length;cd2++)(function(el){
+      el.onclick=function(){var v=el.getAttribute('data-cdeco').split(':');grCorralDeco(parseInt(v[0],10)||0,v[1])};
+    })(cd[cd2]);
     var cc2=b.querySelectorAll('[data-ccollect]');
     for(var cc3=0;cc3<cc2.length;cc3++)(function(el){
       el.onclick=function(){grCorralCollect(parseInt(el.getAttribute('data-ccollect'),10)||0)};
@@ -3321,6 +4784,31 @@ function grRender(){
 }
 // fixed-camera 3d diorama: cave, light shaft, drips, floorboards over a pit.
 var grRAF=0,grDrops=[],grRipples=[],grSparks=[],grMotes=[],grBubbles=[],grT=0,grTint=0,grBright=0,grLastDrop=0;
+// room-reactive palette: the actual background changes with the room.
+function grScenePal(){
+ var d={sh:'200,230,255',mo:'210,230,255',gl:'120,200,255',amt:1};
+ try{
+  if(grRoom==='deep'&&typeof grDeepDef==='function'&&grDeepRoom>0){
+   var dd=grDeepDef(grDeepRoom);
+   if(dd.hand){
+    var v=(typeof grBurrowView!=='undefined')?grBurrowView:'hub';
+    if(v==='sump'||v==='overflow')return {sh:'120,220,235',mo:'140,220,240',gl:'80,200,230',amt:.9};
+    if(v&&v.indexOf('cave')===0)return {sh:'230,170,110',mo:'230,180,130',gl:'220,150,100',amt:.85};
+    if(v==='floodgate')return {sh:'205,205,215',mo:'200,200,210',gl:'170,170,190',amt:.7};
+    return {sh:'215,175,125',mo:'220,180,135',gl:'200,150,100',amt:.9};
+   }
+   if(dd.flooded)return {sh:'120,220,235',mo:'140,220,240',gl:'80,200,230',amt:.9};
+   if(dd.cavedin)return {sh:'230,170,110',mo:'230,180,130',gl:'220,150,100',amt:.85};
+   var tid=dd.t?dd.t.id:'';
+   if(tid==='water')return {sh:'120,220,235',mo:'140,220,240',gl:'80,200,230',amt:.9};
+   if(tid==='rust')return {sh:'235,140,90',mo:'235,150,110',gl:'220,120,80',amt:.9};
+   if(tid==='crystal')return {sh:'175,155,255',mo:'180,165,255',gl:'150,130,255',amt:.95};
+   if(tid==='abyss')return {sh:'130,110,190',mo:'130,115,195',gl:'110,95,180',amt:.6};
+   if(tid==='dirt'||tid==='burrow')return {sh:'215,175,125',mo:'220,180,135',gl:'200,150,100',amt:.9};
+  }
+ }catch(e){}
+ return d;
+}
 function grSceneInit(){
   grDrops=[];grRipples=[];grSparks=[];grMotes=[];grBubbles=[];grT=0;grLastDrop=0;
   for(var i=0;i<46;i++)grMotes.push({x:Math.random(),y:Math.random(),s:Math.random()*1.6+.5,v:Math.random()*.00045+.00015,o:Math.random()*.5+.25,ph:Math.random()*6.28});
@@ -3340,12 +4828,17 @@ function grFrame(ts){
     var W=c.width,H=c.height;if(!W||!H)return;
     grT+=1/60;
     var t=grT;
-    // cave dark
+    // cave dark (floor 2 = volcano: basalt above, ember heat below)
+    var isVolcano=(grRoom==='deep'&&((grDeepRoom>107)||(grDeepRoom===0&&grDeepTier>=7)));
     var g=x.createLinearGradient(0,0,0,H);
-    g.addColorStop(0,'#060b14');g.addColorStop(.55,'#04070d');g.addColorStop(1,'#010203');
+    if(isVolcano){g.addColorStop(0,'#0c0406');g.addColorStop(.55,'#160605');g.addColorStop(1,'#280b04')}
+    else{g.addColorStop(0,'#060b14');g.addColorStop(.55,'#04070d');g.addColorStop(1,'#010203')}
     x.fillStyle=g;x.fillRect(0,0,W,H);
     var cx=W/2,boardY=grBoardY(H);
     var isLab=(grRoom==='lab'),isRapids=(grRoom==='dripworks'),isSea=(grRoom==='sea');
+    var SC={sh:'200,230,255',mo:'210,230,255',gl:'120,200,255',amt:1};
+    try{SC=grScenePal()}catch(e){}
+    if(isVolcano)SC={sh:'255,130,60',mo:'255,120,50',gl:'255,80,30',amt:.8};
     var landY=isSea?Math.floor(H*0.62):(isRapids?Math.floor(H*0.70):boardY);
     // open sky outside the cave (no walls, no ceiling, no shaft)
     if(isSea){
@@ -3364,26 +4857,51 @@ function grFrame(ts){
       x.fillStyle=hz;x.fillRect(0,landY-26,W,32);
     } else {
     // rock walls left/right (layered silhouettes)
-    x.fillStyle='#0a1220';
+    x.fillStyle=isVolcano?'#200c08':'#0a1220';
     x.beginPath();x.moveTo(0,0);
     for(var wx=0;wx<=H;wx+=40)x.lineTo(30+Math.sin(wx*.013+2)*36+Math.sin(wx*.05)*8,wx);
     x.lineTo(0,H);x.closePath();x.fill();
     x.beginPath();x.moveTo(W,0);
     for(var vx=0;vx<=H;vx+=40)x.lineTo(W-30-Math.sin(vx*.011+4)*36-Math.sin(vx*.045+1)*8,vx);
     x.lineTo(W,H);x.closePath();x.fill();
-    x.fillStyle='#070d17';
+    x.fillStyle=isVolcano?'#160705':'#070d17';
     x.beginPath();x.moveTo(0,0);
     for(var ux=0;ux<=H;ux+=60)x.lineTo(90+Math.sin(ux*.009)*44,ux);
     x.lineTo(0,H);x.closePath();x.fill();
     x.beginPath();x.moveTo(W,0);
     for(var zx=0;zx<=H;zx+=60)x.lineTo(W-90-Math.sin(zx*.008+3)*44,zx);
     x.lineTo(W,H);x.closePath();x.fill();
+    // volcano: glowing cracks along the inner wall edges
+    if(isVolcano){
+      x.strokeStyle='rgba(255,120,45,0.4)';x.lineWidth=1.5;
+      x.beginPath();x.moveTo(30+Math.sin(2)*36,0);
+      for(var ex=0;ex<=H;ex+=40)x.lineTo(30+Math.sin(ex*.013+2)*36+Math.sin(ex*.05)*8,ex);
+      x.stroke();
+      x.beginPath();x.moveTo(W-30-Math.sin(4)*36,0);
+      for(var ey=0;ey<=H;ey+=40)x.lineTo(W-30-Math.sin(ey*.011+4)*36-Math.sin(ey*.045+1)*8,ey);
+      x.stroke();
+    }
     } // end cave walls (sea has sky instead)
     // the pit (under the boards: near-black). not in rapids, sea, or meadow.
-    if(!isRapids&&!isSea&&grRoom!=='meadow'){
+    // volcano has no black pit — it has lava.
+    if(!isRapids&&!isSea&&grRoom!=='meadow'&&!isVolcano){
     x.fillStyle='#000';
     x.fillRect(cx-190,boardY,W-(cx-190)-(W-(cx+190)),H-boardY);
     x.fillRect(0,boardY+34,W,H-boardY-34);
+    }
+    if(isVolcano){
+    var lg=x.createLinearGradient(0,boardY,0,H);
+    lg.addColorStop(0,'rgba(140,35,10,0)');
+    lg.addColorStop(.55,'rgba(190,55,12,'+(0.30+Math.sin(t*1.4)*.05).toFixed(3)+')');
+    lg.addColorStop(1,'rgba(255,110,25,0.55)');
+    x.fillStyle=lg;x.fillRect(0,boardY,W,H-boardY);
+    for(var lp=0;lp<3;lp++){
+      var lpx=cx+Math.sin(t*(0.6+lp*0.25)+lp*2.1)*170;
+      var pool=x.createRadialGradient(lpx,H-26,4,lpx,H-26,130);
+      pool.addColorStop(0,'rgba(255,165,55,'+(0.22+Math.sin(t*2+lp)*.07).toFixed(3)+')');
+      pool.addColorStop(1,'rgba(255,80,10,0)');
+      x.fillStyle=pool;x.fillRect(lpx-130,H-160,260,160);
+    }
     }
     // rapids + sea water
     if(isRapids||isSea){
@@ -3400,9 +4918,9 @@ function grFrame(ts){
     var shaftH=(isSea||isRapids)?landY:boardY;
     var shaftBase=(isRapids||grRoom==='meadow')?0:0.12;
     var sg=x.createLinearGradient(0,0,0,shaftH);
-    sg.addColorStop(0,'rgba(200,230,255,'+(flick+shaftBase)+')');
-    sg.addColorStop(.6,'rgba(160,200,240,'+flick+')');
-    sg.addColorStop(1,'rgba(140,180,230,0)');
+    sg.addColorStop(0,'rgba('+SC.sh+','+(flick+shaftBase)+')');
+    sg.addColorStop(.6,'rgba('+SC.sh+','+flick+')');
+    sg.addColorStop(1,'rgba('+SC.sh+',0)');
     x.fillStyle=sg;
     x.beginPath();
     x.moveTo(cx-26,0);x.lineTo(cx+26,0);x.lineTo(cx+120,shaftH);x.lineTo(cx-120,shaftH);
@@ -3410,7 +4928,7 @@ function grFrame(ts){
     // opening glow at top (cave only, not sea or dripworks)
     if(!isSea&&!isRapids){
     var og=x.createRadialGradient(cx,0,4,cx,0,90);
-    og.addColorStop(0,'rgba(230,244,255,.5)');og.addColorStop(1,'rgba(230,244,255,0)');
+    og.addColorStop(0,'rgba('+SC.sh+',.5)');og.addColorStop(1,'rgba('+SC.sh+',0)');
     x.fillStyle=og;x.fillRect(cx-90,0,180,90);
     }
     // dripworks: boards overhead (continuity — you walk on them up there).
@@ -3440,18 +4958,18 @@ function grFrame(ts){
       var mx=cx+(m.x-.5)*200*(0.3+0.7*(1-m.y));
       var my=m.y*boardY;
       var tw=m.o*(0.6+0.4*Math.sin(t*2+m.ph));
-      x.fillStyle='rgba(210,230,255,'+tw.toFixed(3)+')';
+      x.fillStyle='rgba('+SC.mo+','+tw.toFixed(3)+')';
       x.fillRect(mx,my,m.s,m.s);
     }
     }
     // phosphor glow, cave only (stronger in phosphor room)
     if(!isSea){
-    var glow=(grTint>0?0.30:0.16)+Math.sin(t*1.2)*0.02+(grBright?0.08:0);
+    var glow=((grTint>0?0.30:0.16)+Math.sin(t*1.2)*0.02+(grBright?0.08:0))*SC.amt;
     var sides=[cx-260,cx+260];
     for(var si=0;si<2;si++){
       var pg=x.createRadialGradient(sides[si],boardY-70,4,sides[si],boardY-70,150);
-      pg.addColorStop(0,'rgba(120,200,255,'+glow.toFixed(3)+')');
-      pg.addColorStop(1,'rgba(120,200,255,0)');
+      pg.addColorStop(0,'rgba('+SC.gl+','+glow.toFixed(3)+')');
+      pg.addColorStop(1,'rgba('+SC.gl+',0)');
       x.fillStyle=pg;x.fillRect(sides[si]-150,boardY-220,300,300);
     }
     }
@@ -3735,6 +5253,7 @@ function grSceneStart(){grSceneInit();try{if(grRAF)cancelAnimationFrame(grRAF)}c
 // cheap when they can't agree on where the loop is.
 var grAmbA=null,grAmbB=null;
 function grAmbStart(){
+  if(window._trAudioLock)return;
   try{
     try{if(typeof bgm!=='undefined'&&bgm&&bgm.paused)return}catch(e){}
     if(!grAmbA){
@@ -3750,8 +5269,75 @@ function grAmbStart(){
   }catch(e){}
 }
 function grAmbStop(){
-  try{if(grAmbA)grAmbA.pause()}catch(e){}
-  try{if(grAmbB)grAmbB.pause()}catch(e){}
+ try{if(grAmbA)grAmbA.pause()}catch(e){}
+ try{if(grAmbB)grAmbB.pause()}catch(e){}
+}
+// grotto bgm: void tracks + remembered, own element. cave drips stay default.
+var grBgmA=null,grBgmTrack='cave';
+var GR_BGMS=[
+ ['void','drone2lp.wav','void drone'],['drone','drone2lp.wav','void drone'],
+ ['furnace','the_furnace.mp3','the furnace'],
+ ['friday','friday.mp3','landscaping'],['landscaping','friday.mp3','landscaping'],
+ ['faith','friendly_faith_plate.mp3','friendly faith plate'],['plate','friendly_faith_plate.mp3','friendly faith plate'],
+ ['cat','little_cat_feet.mp3','on little cat feet'],['feet','little_cat_feet.mp3','on little cat feet'],['kitty','little_cat_feet.mp3','on little cat feet'],
+ ['noob','noobalert.mp3','noob alert'],['noobalert','noobalert.mp3','noob alert'],
+ ['oneshot','oneshot_trap.mp4','trap remix'],['os','oneshot_trap.mp4','trap remix'],['trap','oneshot_trap.mp4','trap remix'],
+ ['stanley','Wakeupstanley.mp3','stanley'],['wakeup','Wakeupstanley.mp3','stanley'],
+ ['box','bro is in a box lmao imagine.mp3','bro is in a box'],['bro','bro is in a box lmao imagine.mp3','bro is in a box'],
+ ['noli','noli.webm','noli'],
+ ['quiet','lordverity.webm','i miss the quiet'],['verity','lordverity.webm','i miss the quiet'],
+ ['vestige','vestige.mp3','vestige'],
+ ['coffee','coffee.mp3','coffee corner'],
+ ['swim','artisticswimming.webm','artistic swimming'],['artistic','artisticswimming.webm','artistic swimming'],
+ ['soundosund','soundosund.mp3','soundosund'],['sund','soundosund.mp3','soundosund'],
+ ['move','move.webm','let me see ya move'],
+ ['remembered','remembered.webm','remembered'],['remember','remembered.webm','remembered'],
+ ['credits','CREDITSmusic.webm','credits'],['credit','CREDITSmusic.webm','credits'],
+ ['water','WATERmusic.webm','water'],
+ ['dissatisfied','iamDISASTISFIEDmusic].webm','i am disastisfied'],['disastisfied','iamDISASTISFIEDmusic].webm','i am disastisfied'],
+ ['toxicgas','TOXICGASmusic.webm','toxic gas'],['toxic','TOXICGASmusic.webm','toxic gas'],
+ ['ggez','GGEZmusic.webm','gg ez'],['gg','GGEZmusic.webm','gg ez'],
+ ['platforming','THEPLATFORMINGmusic.webm','the platforming'],['platform','THEPLATFORMINGmusic.webm','the platforming'],
+ ['other','OTHERmusic.webm','other'],
+ ['some','SOMEmusic.webm','some']
+];
+function grBgmFind(v){
+ v=String(v||'').toLowerCase().trim();
+ for(var i=0;i<GR_BGMS.length;i++)if(GR_BGMS[i][0]===v||GR_BGMS[i][2].toLowerCase().indexOf(v)!==-1)return GR_BGMS[i];
+ return null;
+}
+function grBgmPlay(file,label){
+ grAmbStop();
+ try{
+  if(!grBgmA){grBgmA=new Audio()}
+  grBgmA.src=file;try{grBgmA.load()}catch(e){}
+  grBgmA.loop=true;grBgmA.volume=0.3;
+  var p=grBgmA.play();if(p&&p.catch)p.catch(function(){});
+ }catch(e){}
+ grBgmTrack=file;
+ grSideSay('now playing: '+label+'. the cave drips quietly in the corner.');
+}
+function grBgmCave(){
+ try{if(grBgmA)grBgmA.pause()}catch(e){}
+ grBgmTrack='cave';
+ grAmbStart();
+ grSideSay('back to drips. the cave missed you. (it did not.)');
+}
+function grBgmCmd(arg){
+ var v=String(arg||'').toLowerCase().trim();
+ if(!v||v==='-h'||v==='--help'||v==='help'||v==='list'){
+   var names=[];for(var i=0;i<GR_BGMS.length;i++)names.push(GR_BGMS[i][0]);
+  grSideSay('tracks: '+names.join(' · ')+' · cave. (bgm <name>, bgm cave.)');
+  grSideHead();return;
+ }
+ if(v==='cave'||v==='off'||v==='drips'){grBgmCave();grSideHead();return}
+ if(v==='downfall'){var ok=false;try{ok=bgmDownfallUnlocked()}catch(e){}if(!ok){grSideSay('downfall is locked. (leave during the shutdown. you know the drill.)');grSideHead();return}grBgmPlay('sciences_downfall.webm',"science's downfall");grSideHead();return}
+ if(v==='foxy'||v==='cove'){var ok2=false;try{ok2=bgmFoxyUnlocked()}catch(e){}if(!ok2){grSideSay('foxy is locked. (the curtain remembers.)');grSideHead();return}grBgmPlay('foxy.webm',"foxy's night");grSideHead();return}
+ if(v==='employment'||v==='job'){var ok3=false;try{ok3=bgmEmploymentUnlocked()}catch(e){}if(!ok3){grSideSay('employment is locked. (sit through the credits. all of it.)');grSideHead();return}grBgmPlay('IHateEmployment.webm','i hate employment');grSideHead();return}
+ if(v==='noli'){var ok4=true;try{if(typeof noliUnlocked==='function')ok4=noliUnlocked()}catch(e){}if(!ok4){grSideSay('obj: ...not yet. (chapter 29 first.)');grSideHead();return}}
+ var t=grBgmFind(v);
+ if(!t){grSideSay('no such track. (bgm with no arg lists.)');grSideHead();return}
+ grBgmPlay(t[1],t[2]);grSideHead();
 }
 function grBuild(){
   grCss();
@@ -3822,6 +5408,25 @@ function grOfflineCatchup(){
   if(s.mix&&s.mix.puddle){s.pudT=(s.pudT||30)-el;if(s.pudT<=0){s.pudT=30;s.plorts=(s.plorts||0)+1;msg.push('the puddle sweated once')}}
   if(s.gadgets&&s.gadgets.drone){s.droneT=(s.droneT||30)-el;if(s.droneT<=0){s.droneT=30;s.fruitInv=s.fruitInv||[];var dp=grPlots(s);for(var di=0;di<dp.length;di++){if(dp[di].fruits&&dp[di].fruits.length&&s.fruitInv.length<60){var df=dp[di].fruits.shift();s.fruitInv.push({seed:dp[di].seed,w:df.w,mut:df.mut});msg.push('drone picked one');break}}}}
   try{
+   var bon=[],bdr=0;
+   for(var bi3=0;bi3<GR_BOTS.length;bi3++){var bb3=GR_BOTS[bi3];try{if(grBotOn(bb3.id)){bon.push(bb3);bdr+=bb3.drain}}catch(e){}}
+   if(bon.length&&bdr>0){
+    var asecs=Math.min(el,((s.deep||0)*60)/bdr);
+    if(asecs>=10){
+     var used=0;
+     for(var bo=0;bo<bon.length;bo++){
+      var cyc=Math.floor(asecs/bon[bo].per);
+      for(var cy=0;cy<cyc;cy++){try{grBotYield(s,bon[bo].id)}catch(e){}}
+      used+=cyc*bon[bo].per;
+     }
+     var mins=Math.min(el/60,((s.deep||0))/bdr);
+     s.deep=Math.max(0,(s.deep||0)-mins*bdr);
+     msg.push('automatons ran '+Math.floor(Math.min(asecs,el)/60)+'m on deep');
+     if(asecs<el)msg.push('then BLACKOUT');
+    }else msg.push('automatons slept (no deep)');
+   }
+  }catch(e){}
+  try{
     var plots=grPlots(s),grew=false;
     var vFarm=false;try{vFarm=(s.valve||'slimes')==='farm'}catch(e){}
     var moistFloor=(s.gadgets&&s.gadgets.probe)?20:0;
@@ -3861,7 +5466,8 @@ function grEnter(force){
   // duck the void drone: pause main bgm, remember state for exit.
   // (ambience starts first: it reads bgm.paused to respect music-off.)
   try{
-    if(typeof bgm!=='undefined'&&bgm){
+    if(window._trAudioLock)window._grWasBgm=false;
+    else if(typeof bgm!=='undefined'&&bgm){
       window._grWasBgm=!bgm.paused;
       bgm.pause();
     }else window._grWasBgm=false;
@@ -3881,6 +5487,8 @@ function grExit(){
   try{document.body.classList.remove('grPerfOn')}catch(e){}
   grTreeUp=false;
   grAmbStop();
+  try{if(grBgmA)grBgmA.pause()}catch(e){}
+  grBgmTrack='cave';
   try{
     if(typeof bgm!=='undefined'&&bgm){
       if(window._grWasBgm){var bp=bgm.play();if(bp&&bp.catch)bp.catch(function(){})}
@@ -3916,6 +5524,8 @@ window.grAllowed=grAllowed;
 window.grProgressFrac=grProgressFrac;
 window.grProgress=grRequired;
 window.grFarSay=grFarSay;
+window.grSave=grSave;
+window.grStore=grStore;
 // VOID PET: a slime Chism sells you. follows you across the whole site,
 // not just the grotto. saves. wiggles. judges a little.
 var grPetMX=0,grPetMY=0,grPetX=0,grPetY=0,grPetRAF=0,grPetHop=0,grPetTick=0;
