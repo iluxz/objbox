@@ -26,7 +26,7 @@ if(window._bgmStarted||activeTrack==='moon1857')return;
 if(bgmDead()){loadDayBgm(true);return}
 if(bgm.paused)bgm.play().catch(function(){});
 }catch(e){}});
-if(activeTrack!=='moon1857')bgm.play().catch(function(){});
+if(activeTrack!=='moon1857'){try{if(!document.userActivation||document.userActivation.hasBeenActive)bgm.play().catch(function(){})}catch(e){}};
 bgm.addEventListener('play',function(){try{window._bgmStarted=true}catch(e){}if(window._trAudioLock)return;if(typeof currentZone!=='undefined'&&currentZone==='cb_menu'){bgm.pause();if(typeof ngMusicMode!=='undefined'&&ngMusicMode!==1){ngMusicMode=1;ngMusicApply()}}});
 
 // ┌──────────────────────────────────────────────────────────────┐
@@ -459,7 +459,7 @@ var extHelp={
 'backdoor':'backdoor — knock (needs: root)',
 'winget':'winget <install|list|search> — the windows joke package manager',
  'play':'play [chapter] — there is no game. (chapters 0-30, resumes where you left)',
- 'playjbo':'playjbo [chapter] — CLOSED FOR NOW. there is no sphere opens later.',
+ 'playjbo':'playjbo [chapter] — there is no sphere. jbo\'s version of the non-game. (loads jbo-game.js, chapters 0-30, exits reload the cube)',
 'gui':'gui <sub> — window manager: window, close, set, max, label, button, input, check, list, destroy (gui help for full list)',
 'ps':'ps — peek at the processes',
 'clear':'clear — clear the terminal output',
@@ -743,6 +743,112 @@ function voidMapOpen(){
 function vmMapKey(e){
  if(e.key==='Escape'){var ov=document.getElementById('vmMapOv');if(ov){ov.remove();if(vmMapPulseIv){clearInterval(vmMapPulseIv);vmMapPulseIv=null}document.removeEventListener('keydown',vmMapKey)}}
 }
+// VOLCANO: the exchanger. sacrifice skill points at the rim, the volcano
+// spews equal-or-better stuff back. standalone command (like map/trailer).
+var volcanoKey=function(e){if(e.key==='Escape'){var ov=document.getElementById('volcanoOv');if(ov){ov.remove();document.removeEventListener('keydown',volcanoKey)}}};
+function fmtBig(v){try{if(v>=1e12)return v.toExponential(2);return String(Math.floor(v))}catch(e){return String(v)}}
+function volcanoLog(t,col){
+ try{
+  var el=document.getElementById('volcanoLog');if(!el)return;
+  var d=document.createElement('div');
+  d.style.cssText='margin-top:4px;color:'+(col||'#ffb46a');
+  d.textContent=t;
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+ }catch(e){}
+}
+function volcanoBal(){
+ try{
+  var el=document.getElementById('volcanoBal');
+  if(el){var p=(typeof skillState!=='undefined')?skillState.points:0;el.textContent='skill: '+(p===Infinity?'Infinity':(isNaN(p)?0:p))}
+ }catch(e){}
+}
+function volcanoRoll(n){
+ try{
+  if(typeof skillState==='undefined'){volcanoLog('the volcano is not built yet.','#ff6a6a');return}
+  var bal=skillState.points||0;
+  if(bal!==Infinity&&(!isFinite(bal)||!(bal>=n)||!(n>0))){volcanoLog('not enough skill. the rim does not do credit.','#ff6a6a');return}
+  if(!isFinite(n))n=1e27;
+  if(bal!==Infinity)skillState.points=bal-n;
+  if(typeof skillSave==='function')skillSave();
+  if(typeof skillPtsRefresh==='function')skillPtsRefresh();
+  volcanoBal();
+  volcanoLog('you throw '+n+' into the hole...','#8fb8d8');
+  var r=Math.random(),gain=0,msg='',col='#ffb46a';
+  if(r<0.05){gain=n*(2+Math.random()*3);msg='JACKPOT. the volcano spews back x'+(gain/n).toFixed(1)+' — +'+Math.floor(gain)+' skill.';col='#ffd770'}
+  else if(r<0.70){gain=n*(1+Math.random()*0.5);msg='equal or better: x'+(gain/n).toFixed(2)+' — +'+Math.floor(gain)+' skill.';col='#8dff3c'}
+  else if(r<0.92){gain=n*0.35;msg='ash. the mountain keeps the rest. — +'+Math.floor(gain)+' skill.';col='#8a8a96'}
+  else if(r<0.97){
+    var c=(bal===Infinity)?0:Math.min(6,Math.max(0,bal-n));
+    if(bal!==Infinity){skillState.points=bal-n-c;if(typeof skillSave==='function')skillSave();if(typeof skillPtsRefresh==='function')skillPtsRefresh()}
+    msg='the 6 rejects you. poison. — -'+c+' extra skill.';col='#ff3144';
+  }
+  else{gain=n*6;msg='the exchanger honors you x6 — +'+fmtBig(gain)+' skill. (it does not do this often.)';col='#c878ff'}
+  if(gain>0&&typeof grantPts==='function')grantPts(gain);
+  else if(gain>0&&bal!==Infinity){skillState.points=(skillState.points||0)+gain;if(typeof skillSave==='function')skillSave();if(typeof skillPtsRefresh==='function')skillPtsRefresh()}
+  volcanoLog(msg,col);
+  volcanoBal();
+ }catch(e){volcanoLog('the volcano coughs: '+e,'#ff6a6a')}
+}
+function volcanoOpen(){
+ try{
+  var old=document.getElementById('volcanoOv');
+  if(old){old.remove();document.removeEventListener('keydown',volcanoKey);return}
+  var ov=document.createElement('div');ov.id='volcanoOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:2016;background:rgba(8,3,2,0.97);font-family:Consolas,monospace;overflow:hidden';
+  ov.innerHTML=
+   '<div style="position:absolute;top:12px;left:14px;font-size:13px;letter-spacing:4px;color:#ff8a2a">VOLCANO · THE EXCHANGER</div>'+
+   '<div id="volcanoBal" style="position:absolute;top:32px;left:14px;font-size:11px;color:#c98a4a"></div>'+
+   '<div style="position:absolute;top:12px;right:14px;font-size:11px;color:#5f7d99">equal or better. mostly. · ESC closes</div>'+
+   '<div style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);text-align:center">'+
+   '<div style="font-size:64px;line-height:1">🌋</div>'+
+   '<div style="font-size:12px;color:#8fb8d8;margin-top:8px">throw skill into the hole. the volcano throws stuff back.</div>'+
+   '<div style="margin-top:12px">'+
+   '<button class="grBtn" id="volB10" style="padding:6px 14px;font-size:12px;margin:3px">sacrifice 10</button>'+
+   '<button class="grBtn" id="volB100" style="padding:6px 14px;font-size:12px;margin:3px">sacrifice 100</button>'+
+   '<button class="grBtn" id="volB1k" style="padding:6px 14px;font-size:12px;margin:3px">sacrifice 1000</button>'+
+   '<button class="grBtn" id="volBall" style="padding:6px 14px;font-size:12px;margin:3px">throw it ALL</button>'+
+   '</div></div>'+
+   '<div id="volcanoLog" style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:min(560px,86vw);max-height:30vh;overflow-y:auto;font-size:12px;text-align:left;border-top:1px solid #3a2a1a;padding-top:8px"></div>';
+  document.body.appendChild(ov);
+  document.getElementById('volB10').onclick=function(){volcanoRoll(10)};
+  document.getElementById('volB100').onclick=function(){volcanoRoll(100)};
+  document.getElementById('volB1k').onclick=function(){volcanoRoll(1000)};
+  document.getElementById('volBall').onclick=function(){volcanoRoll(Math.floor(skillState.points||0))};
+  volcanoBal();
+  volcanoLog('the rim is warm. the hole goes down farther than the light does.','#c98a4a');
+  document.addEventListener('keydown',volcanoKey);
+ }catch(e){}
+}
+// SHADER: complementary mode. a global look that relights everything.
+function shaderApply(on){
+ try{
+  var el=document.getElementById('shaderFx');
+  if(!on){if(el)el.remove();try{if(typeof window.glShaderSet==='function')window.glShaderSet(false)}catch(e){}return}
+  if(!el){
+    el=document.createElement('div');el.id='shaderFx';
+    document.body.appendChild(el);
+  }
+  el.style.cssText='position:fixed;inset:0;z-index:2600;pointer-events:none;'+
+   'background:radial-gradient(ellipse at center,rgba(0,0,0,0) 46%,rgba(0,0,0,0.34) 100%),'+
+   'linear-gradient(115deg,rgba(255,240,210,0.10) 0%,rgba(255,240,210,0) 42%);'+
+   'backdrop-filter:saturate(1.12) contrast(1.05);-webkit-backdrop-filter:saturate(1.12) contrast(1.05)';
+  try{if(typeof window.glShaderSet==='function')window.glShaderSet(true)}catch(e){}
+ }catch(e){}
+}
+function shaderCmd(a){
+ var arg=(a&&a[0])?String(a[0]).toLowerCase():'';
+ var on=!window._shaderMode;
+ if(arg==='on'||arg==='enable')on=true;
+ else if(arg==='off'||arg==='disable')on=false;
+ window._shaderMode=on;
+ try{localStorage.setItem('cube_shader',on?'1':'0')}catch(e){}
+ shaderApply(on);
+ if(typeof cubePrint==='function')cubePrint(on
+  ?'complementary mode ON. the reactor, the core, the void and the grotto run relit. (vignette + light shaft + grade.)'
+  :'complementary mode OFF. back to raw void.');
+ return true;
+}
+try{if(localStorage.getItem('cube_shader')==='1'){window._shaderMode=true;shaderApply(true)}}catch(e){}
 function vmMapDraw(){
  try{
   var cv=document.getElementById('vmMapCv');if(!cv)return;
@@ -1193,6 +1299,8 @@ return true}},
  'cove':{help:'cove - watch the curtain. do not blink. (a game)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof fxEnter!=='function'){cubeError('cove: the curtain is not hung yet.');return true}cubePrint('you take the night shift. the cove is already watching.');setTimeout(function(){try{fxEnter()}catch(e){cubeError('cove: '+e)}},1200);return true}},
  'trailer':{help:'trailer - ghost plays cube for the camera. (ESC stops)',fn:function(a){if(typeof trailerEnter!=='function'){cubeError('trailer: no camera crew.');return true}try{trailerEnter()}catch(e){cubeError('trailer: '+e)}return true}},
   'grotto':{help:'grotto - the part of cube that is not a distraction. (five proofs required)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof grEnter!=='function'){cubeError('grotto: the cave is not dug yet.');return true}try{grEnter(false)}catch(e){cubeError('grotto: '+e)}return true}},
+   'volcano':{help:'volcano - the exchanger. sacrifice skill at the rim, get equal or better back. (a sink)',fn:function(a){try{volcanoOpen()}catch(e){cubeError('volcano: '+e)}return true}},
+   'shader':{help:'shader [on|off] - complementary mode. relights everything. (a look)',fn:function(a){try{shaderCmd(a)}catch(e){cubeError('shader: '+e)}return true}},
  'objpot':{help:'objpot - a cauldron, obj the cube, and one of each type. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof opEnter!=='function'){cubeError('objpot: the pot is not built yet. (obj waits.)');return true}cubePrint('obj drifts over a bubbling pot. "welcome back to the tower."');setTimeout(function(){try{opEnter()}catch(e){cubeError('objpot: '+e)}},1000);return true}},
  'casino':{help:'casino - the void casino. obj deals. games are rigged. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof caEnter!=='function'){cubeError('casino: the tables are not set yet. (obj is shuffling.)');return true}cubePrint('obj fans out a deck with no hands. "welcome to the void casino."');setTimeout(function(){try{caEnter()}catch(e){cubeError('casino: '+e)}},1000);return true}},
  'secret':{help:'secret - a waiting room where anything can be a secret. (a sandbox)',fn:function(a){if(typeof ngActive!=='undefined'&&ngActive){cubePrint('you are already inside something. leave first.');return true}if(typeof scEnter!=='function'){cubeError('secret: the room is not furnished yet. (obj is dusting.)');return true}cubePrint('obj gestures at a waiting room. "everything here might be a secret."');setTimeout(function(){try{scEnter()}catch(e){cubeError('secret: '+e)}},1000);return true}},
@@ -2163,6 +2271,7 @@ var secs=[
 {t:'misc',rows:[
 ['loop <n> <cmd>','run a command n times'],
 ['display <0-4>','change display mode'],
+['backstory','enter obj’s backstory'],
 ['screenshot','toggle screenshot mode (F2)'],
 ['perfmode','toggle performance mode'],
 ['uptime','show how long page has been open'],
@@ -2170,7 +2279,7 @@ var secs=[
 ['ach','achievements (the void keeps score)'],
 ['slots','open the floppy shelf (5 save disks)'],
 ['play [-1|0-30]','there is no game. (bare=ch0, numbers unlock by progress)'],
- ['playjbo [0-30]','closed for now. there is no sphere opens later.'],
+ ['playjbo [0-30]','there is no sphere. jbo\'s version of the non-game.'],
 ['obj','ask obj for pull access'],
 ['pull','play a procedural void demo (needs obj)'],
 ['demos','list saved void demos'],
@@ -2221,6 +2330,8 @@ var secs=[
  ['ascend','burn echoes for embers. prestige squared. (a bigger ritual)'],
  ['sacrifice','nuke the save for x5 forever. once. (the last ritual)'],
  ['mine','rigs spit ore, ore becomes mastery. (a hole)'],
+ ['volcano','sacrifice skill at the rim, get equal or better back. (a sink)'],
+ ['shader [on|off]','complementary mode. relights everything. (a look)'],
  ['challenge','timed trials with modifiers. (an obelisk)'],
  ['infinitize','go infinite. beyond numbers. (the last number)'],
  ['sendjbo <text>','mail a letter to jbo world. (he will read it. poorly.)'],
@@ -3546,8 +3657,14 @@ var patchLog=[
 'eight new tracks on the radio: credits, water, i am disastisfied, toxic gas, gg ez, the platforming, other, some. both terminals know them by name.',
 'bgm fix: changing the track starts the track. no more typing the command twice. (this was apparently very annoying.)',
 'the trailer got a rewrite: opens on the void drone, stops at the grotto and the fly brain on the way, and the music never drops out between minigames anymore. type trailer.',
-'fixes: the deep achievement waits for all 214 before it pops, the grotto track list stops skipping names, room content stays inside its box, and three puzzles stopped rerolling their targets behind your back.'
-]},
+ 'fixes: the deep achievement waits for all 214 before it pops, the grotto track list stops skipping names, room content stays inside its box, and three puzzles stopped rerolling their targets behind your back.'
+ ]},
+ {date:'2026-10-18',tier:'update',title:'the yard hole',notes:[
+ 'type volcano: the exchanger. throw skill points into the rim and the volcano spews equal-or-better stuff back. mostly. (a sink, standalone like map and trailer.)',
+ 'the grotto grew a new room: the yard hole. a square pit cut into packed dirt, white light from the bottom, and a sign that says BASEMENT. the void keeps everything you throw in. all of it. (it runs a mob farm down there. the drops belong to it.)',
+ 'type shader: complementary mode. a global look that relights the reactor, the core, the void and the grotto background. toggle anytime, survives reload.',
+ 'fixes: none. this one is just new stuff.'
+ ]},
 ];
 var tierColorHex={'bug fix':'#8a8a96','patch':'#78b4ff','update':'#64ffa0','game':'#8dff3c','major update':'#ffc83c','unreasonably massive':'#ff8a2a','full on rework basically':'#c878ff','beyond rework':'#ff4ad8','EMERGENCY':'#ff3144','RELEASE':'#4ad8ff','folk update':'#3dff6e'};
 var updWin=guiCreateWin('cube# update log',420,520,false);
@@ -3914,6 +4031,16 @@ cubePrint('looping '+loopCmd+' x'+count+'...');
 for(var li=0;li<count;li++){cubeEval(loopCmd)}
 return}
 
+// obj's backstory — DOM story mode, separate from the non-game.
+if(cmd==='backstory'){
+if(typeof ngActive!=='undefined'&&ngActive){cubeError('backstory: leave the non-game first.');return}
+if(typeof demoPlaying!=='undefined'&&demoPlaying){cubeError('backstory: finish your demo first.');return}
+if(typeof travelling!=='undefined'&&travelling){cubeError('backstory: wait for the void to arrive first.');return}
+if(typeof cubeBackstoryEnter!=='function'){cubeError('backstory: the story module did not load.');return}
+cubePrint('obj: no. you found that door already?');
+setTimeout(function(){try{cubeBackstoryEnter()}catch(e){cubeError('backstory: '+e)}},250);
+return}
+
 // there is no cube — step 1: entry (terminal command, NOT voidscript)
 if(cmd==='play'){
 if(typeof ngActive!=='undefined'&&ngActive){cubeError('play: you are already in the non-game.');return}
@@ -3942,14 +4069,17 @@ return}
 
 // playjbo — load jbo's "there is no sphere" into the cube (jbo-game.js ng story)
 if(cmd==='playjbo'){
-cubeError('playjbo: closed for now. jbo is not taking guests yet. (opens later.)');
-return;
 if(typeof ngActive!=='undefined'&&ngActive){cubeError('playjbo: you are already inside something.');return}
 var jarg=(parts[1]||'').trim();
 var jnum=0;
 if(jarg!==''&&/^\d+$/.test(jarg))jnum=Math.min(parseInt(jarg,10),30);
 window._playjboActive=true;
 cubePrint('jbo: there is no sphere. loading...');
+// jbo-game.js was written for the dead jbobox, whose script-language table was
+// called skyScriptLang (lived in jbo-engine.js, which no longer exists). the live
+// cube calls that same table voidScriptLang. hand jbo-game the alias before it runs
+// or it throws on its first command registration (line 2031) and the whole file dies.
+if(typeof window.skyScriptLang==='undefined'&&typeof voidScriptLang!=='undefined')window.skyScriptLang=voidScriptLang;
 var js=document.createElement('script');
 js.src='jbo-game.js';
 js.onload=function(){

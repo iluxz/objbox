@@ -456,6 +456,7 @@ canvas#main{display:block;position:fixed;top:0;left:0;z-index:0}
 .up-node .up-desc{font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;line-height:1.35}
 .up-node.maxed .up-desc{color:rgba(255,255,255,0.5)}
 .up-node .up-cost{position:absolute;top:6px;right:8px;font-size:9px;color:rgba(255,255,50,0.75)}
+.up-node .up-act{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .up-node .up-lv{display:inline-block;margin-top:6px;font-size:10px;color:rgba(255,255,50,0.85);font-weight:bold;letter-spacing:1px}
 .up-node.maxed .up-lv{color:rgba(100,255,100,0.9)}
 .up-area .up-lockmsg{padding:16px;font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:1px;text-align:center}
@@ -562,8 +563,89 @@ the source code is a lie. the render is the truth.
 <!-- the 8 fragments are trying to reassemble. do not let them. -->
 <!-- END LOG // SESSION 404 // STATUS: IRREVERSIBLE -->
 <body>
+<!-- ── BIOS password gate: boots first, blocks all input until the right password ── -->
+<style>
+#biosGate{position:fixed;inset:0;z-index:999999;background:#000;color:#a8a8b8;font-family:'Consolas','Courier New',monospace;display:flex;align-items:center;justify-content:center;transition:opacity .5s;cursor:default}
+#biosGate::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(255,255,255,0.035) 0 1px,transparent 1px 3px)}
+#biosBox{width:min(700px,94vw);background:#05050e;border:1px solid #2b2b46;box-shadow:0 0 0 1px #0a0a18,0 0 80px rgba(20,20,90,0.45)}
+#biosHead{background:linear-gradient(180deg,#161636,#0d0d24);color:#c9c9ea;padding:8px 14px;font-size:13px;letter-spacing:1px;border-bottom:1px solid #2b2b46;display:flex;justify-content:space-between}
+#biosBody{padding:18px 22px 14px;font-size:13.5px;line-height:1.9}
+#biosBody .dim{color:#5c5c74}
+#biosTabs{color:#7a7a9a;letter-spacing:2px;font-size:12px;margin-bottom:14px}
+#biosTabs b{color:#e8e8ff;background:#22224e;padding:2px 8px;font-weight:normal}
+#biosPrompt{margin-top:16px;color:#e4e4f4;font-size:15px}
+#biosDots{color:#ffe066;letter-spacing:3px}
+#biosCur{animation:blink 1s steps(1) infinite;color:#e4e4f4}
+@keyframes blink{50%{opacity:0}}
+#biosMsg{min-height:22px;margin-top:10px;font-size:13px;color:#ff5f5f;text-shadow:0 0 10px rgba(255,60,60,0.5)}
+#biosMsg.warn{color:#ffcc40;text-shadow:0 0 10px rgba(255,190,60,0.4)}
+#biosFoot{border-top:1px solid #1d1d34;padding:8px 14px;font-size:11.5px;color:#54546e;letter-spacing:1px}
+#biosInput{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;left:-9999px}
+</style>
+<div id="biosGate">
+ <div id="biosBox">
+  <div id="biosHead"><span>PhoenixBIOS&#8482; Setup Utility</span><span>Ver. 4.51PG</span></div>
+  <div id="biosBody">
+   <div class="dim">Main Processor&nbsp;&nbsp;: CUBE 3.14GHz</div>
+   <div class="dim">Memory Testing&nbsp;&nbsp;: 65536K OK</div>
+   <div class="dim">Detecting IDE drives ... <span style="color:#8a8ab0">this machine isn't yours.</span></div>
+   <div id="biosTabs"><b> Main </b>&nbsp; Advanced &nbsp; Boot &nbsp; <b> Security </b>&nbsp; Exit</div>
+   <div id="biosPrompt">Enter Password: <span id="biosDots"></span><span id="biosCur">&#9608;</span></div>
+   <div id="biosMsg"></div>
+  </div>
+  <div id="biosFoot">F1 Help&nbsp;&nbsp; Esc Exit&nbsp;&nbsp; &#8593;&#8595; Move Highlight&nbsp;&nbsp; Enter Select</div>
+ </div>
+ <input id="biosInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+</div>
+<script>
+(function(){
+  var KEY=[105,116,95,105,115,110,116,95,116,104,97,116,95,101,97,115,121,95,116,111,95,102,105,110,100,95,109,121,95,119,101,98,115,105,116,101,115,95,98,117,100,100,121];
+  var gate=document.getElementById('biosGate'),input=document.getElementById('biosInput'),
+      dots=document.getElementById('biosDots'),msg=document.getElementById('biosMsg');
+  var locked=true,strikes=0;
+  function dec(){var s='';for(var i=0;i<KEY.length;i++)s+=String.fromCharCode(KEY[i]);return s}
+  function block(e){ if(!locked)return; if(e.target&&gate.contains(e.target))return;
+    e.stopImmediatePropagation(); if(e.cancelable)e.preventDefault(); }
+  ['keydown','keyup','pointerdown','pointerup','mousedown','mouseup','click','dblclick','wheel','contextmenu','touchstart','touchend','dragstart','paste'].forEach(function(t){window.addEventListener(t,block,true)});
+  function boot(){ try{window.location.replace('about:blank')}catch(e){} }
+  input.addEventListener('input',function(){ dots.textContent=new Array(input.value.length+1).join('*'); });
+  input.addEventListener('keydown',function(e){
+    e.stopImmediatePropagation();
+    if(e.key!=='Enter'){return}
+    e.preventDefault();
+    if(input.value===dec()){
+      locked=false; dots.textContent=''; msg.style.color='#7dff9a'; msg.className='';
+      msg.textContent='Password correct. Booting ...';
+      try{sessionStorage.setItem('cubeBiosOk','1')}catch(err){}
+      gate.style.opacity='0';
+      setTimeout(function(){ if(gate.parentNode)gate.parentNode.removeChild(gate); },600);
+      return;
+    }
+    strikes++;
+    input.value=''; dots.textContent='';
+    if(strikes<2){
+      msg.className='warn';
+      msg.textContent='!! INVALID PASSWORD !!  you get one more.';
+      input.focus();
+    }else{
+      msg.className='';
+      msg.textContent='!! INVALID PASSWORD !!  wrong machine. logging off ...';
+      input.blur();
+      setTimeout(boot,1100);
+    }
+  });
+  if((function(){try{return sessionStorage.getItem('cubeBiosOk')==='1'}catch(e){return false}})()){
+    locked=false; if(gate.parentNode)gate.parentNode.removeChild(gate);
+  }else{
+    gate.addEventListener('click',function(){input.focus()});
+    setTimeout(function(){try{input.focus()}catch(e){}},60);
+  }
+})();
+</script>
 <iframe id="legacyFrame" title="source" style="position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9000;display:none;background:#000"></iframe>
 <div id="legacyReturn" onclick="try{travelTo('void')}catch(e){}" style="position:fixed;top:340px;right:20px;z-index:100000;display:none;padding:8px 14px;font-family:Consolas,monospace;font-size:12px;color:#0ff;background:rgba(0,20,20,0.78);border:1px solid rgba(43,208,208,0.5);border-radius:8px;cursor:pointer;letter-spacing:1px">&#8592; leave the source</div>
+<iframe id="jboFrame" title="jbobox" style="position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9000;display:none;background:#000"></iframe>
+<div id="jboReturn" onclick="try{jboLeave()}catch(e){}" style="position:fixed;top:340px;right:20px;z-index:100000;display:none;padding:8px 14px;font-family:Consolas,monospace;font-size:12px;color:#ffa03c;background:rgba(20,10,0,0.78);border:1px solid rgba(255,150,40,0.5);border-radius:8px;cursor:pointer;letter-spacing:1px">&#8592; leave jbo</div>
 <canvas id="main"></canvas>
 <canvas id="trailCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5"></canvas>
 <canvas id="weatherCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:8"></canvas>
@@ -607,7 +689,6 @@ the source code is a lie. the render is the truth.
 <div id="areaNav"></div>
 <div id="upLock" class="up-lock" style="display:none">buy every skill<span class="sub">unlock all 5 final skills to open upgrade areas</span></div>
 <div id="upAreas"></div>
-</div>
 </div>
 </div>
 </div>
@@ -927,6 +1008,7 @@ END LOG
 <audio id="moon1857" loop preload="none" src="moon_rot_1857.mp3"></audio>
 <script src="cube-engine.js"></script>
 <script src="cube-game.js"></script>
+<script src="cube-backstory.js"></script>
 <script src="cube-ch18.js"></script>
 <script src="cube-office.js"></script>
 <script src="cube-greyhall.js"></script>
@@ -937,6 +1019,8 @@ END LOG
 <script src="cube-grotto.js"></script>
 <script src="cube-objpot.js"></script>
 <script src="cube-casino.js"></script>
+<script src="cube-secret.js"></script>
+<script src="cube-mail.js"></script>
 <script src="cube-folk.js"></script>
 </body>
 </html>

@@ -768,7 +768,7 @@ function opMemoryNote(note){
   if(match){
    opMemoryBeat=[];
    if(readout)readout.textContent='memory found: '+memory.title;
-    opEnterMemoryScene(memory);return;
+    opEnterMemoryScene(memory);
    opLogLine('memory recovered: '+memory.title,'st');
    opSfx('discover');
    try{opRing(opW-140,opH*0.48,'210,180,255',180)}catch(e){}

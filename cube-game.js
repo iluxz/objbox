@@ -252,11 +252,19 @@ function mkS(ctx,type,src){var s=ctx.createShader(type);ctx.shaderSource(s,src);
 function mkP(ctx,vs,fs){var p=ctx.createProgram();ctx.attachShader(p,mkS(ctx,ctx.VERTEX_SHADER,vs));ctx.attachShader(p,mkS(ctx,ctx.FRAGMENT_SHADER,fs));ctx.linkProgram(p);return p}
 
 var VS='attribute vec3 aPos,aNorm,aCol;uniform mat4 uMVP,uMod;uniform mat3 uNM;varying vec3 vC,vN,vW;void main(){vec4 w=uMod*vec4(aPos,1.0);vW=w.xyz;vN=normalize(uNM*aNorm);vC=aCol;gl_Position=uMVP*vec4(aPos,1.0);}';
-var FS='precision highp float;varying vec3 vC,vN,vW;uniform vec3 uCam;uniform float uEm,uAl,uInv,uFr;float cL(vec3 lp,float li,vec3 n){vec3 ld=normalize(lp-vW);float d=max(dot(n,ld),0.0);float ds=length(lp-vW);return d*li/(1.0+0.003*ds*ds);}void main(){vec3 n=normalize(vN),vd=normalize(uCam-vW),al=vC;float light=.32+cL(vec3(6,8,6),1.0,n)+cL(vec3(-5,4,-3),.7,n)+cL(vec3(0,-4,5),.5,n);vec3 l=al*(light+uEm);vec3 h=normalize(normalize(vec3(6,8,6)-vW)+vd);float spec=pow(max(dot(n,h),0.0),64.0)*0.12;float ndv=max(dot(vd,n),0.0);float fr=pow(1.0-ndv,3.0)*0.12+pow(1.0-ndv,6.0)*0.45;vec3 fc=l+al*uEm+fr*al*.3*uFr+vec3(spec)*(0.25+0.45*uFr);fc=pow(fc/(fc+vec3(1.0)),vec3(1.0/2.2));fc=mix(fc,1.0-fc,uInv);gl_FragColor=vec4(fc,uAl);}';
+var FS_CORE='precision highp float;varying vec3 vC,vN,vW;uniform vec3 uCam;uniform float uEm,uAl,uInv,uFr;float cL(vec3 lp,float li,vec3 n){vec3 ld=normalize(lp-vW);float d=max(dot(n,ld),0.0);float ds=length(lp-vW);return d*li/(1.0+0.003*ds*ds);}void main(){vec3 n=normalize(vN),vd=normalize(uCam-vW),al=vC;float light=.32+cL(vec3(6,8,6),1.0,n)+cL(vec3(-5,4,-3),.7,n)+cL(vec3(0,-4,5),.5,n);vec3 l=al*(light+uEm);vec3 h=normalize(normalize(vec3(6,8,6)-vW)+vd);float spec=pow(max(dot(n,h),0.0),64.0)*0.12;float ndv=max(dot(vd,n),0.0);float fr=pow(1.0-ndv,3.0)*0.12+pow(1.0-ndv,6.0)*0.45;vec3 fc=l+al*uEm+fr*al*.3*uFr+vec3(spec)*(0.25+0.45*uFr);fc=pow(fc/(fc+vec3(1.0)),vec3(1.0/2.2));';
+var FS_TAIL='fc=mix(fc,1.0-fc,uInv);gl_FragColor=vec4(fc,uAl);}';
+var FS_GRADE='vec2 suv=gl_FragCoord.xy/uRes;fc*=vec3(1.05,1.0,0.95);float lum=dot(fc,vec3(.299,.587,.114));fc=mix(vec3(lum),fc,1.26);fc=smoothstep(vec3(0.0),vec3(1.0),fc)*0.96+0.02;fc+=vec3(.015,.02,.05)*(1.0-smoothstep(0.0,.35,lum));fc+=fr*vec3(1.0,.72,.4)*.3;float vig=smoothstep(.95,.3,distance(suv,vec2(.5)));fc*=mix(.6,1.07,vig);';
+function fsSrc(on){
+ var head=FS_CORE;
+ if(on)head=head.replace('uniform vec3 uCam;','uniform vec3 uCam;uniform vec2 uRes;')+FS_GRADE;
+ return head+FS_TAIL;
+}
+var FS=fsSrc(false);
 var PVS='attribute vec3 aP;attribute float aS,aA;attribute vec3 aC;uniform mat4 uPr,uVw;varying vec3 vC;varying float vA;void main(){vec4 vp=uVw*vec4(aP,1.0);gl_Position=uPr*vp;gl_PointSize=max(aS*1500.0/-vp.z,6.0);vC=aC;vA=aA;}';
 var PFS='precision highp float;varying vec3 vC;varying float vA;uniform float uSoft;void main(){vec2 c=gl_PointCoord-0.5;float d=length(c);if(d>0.5)discard;gl_FragColor=vec4(vC,vA*mix(1.0,1.0-smoothstep(0.08,0.5,d),uSoft));}';
 
-var prog=mkP(gl,VS,FS);
+var prog=mkP(gl,VS,fsSrc(false));
 var pprog=mkP(gl,PVS,PFS);
 var LVS='attribute vec3 aP;attribute vec4 aC;uniform mat4 uPr,uVw;varying vec4 vC;void main(){gl_Position=uPr*uVw*vec4(aP,1.0);vC=aC;}';
 var LFS='precision highp float;varying vec4 vC;void main(){gl_FragColor=vC;}';
@@ -274,6 +282,7 @@ var uEm=gl.getUniformLocation(prog,'uEm');
 var uAl=gl.getUniformLocation(prog,'uAl');
 var uInv=gl.getUniformLocation(prog,'uInv');
 var uFr=gl.getUniformLocation(prog,'uFr');
+var uRes=gl.getUniformLocation(prog,'uRes');
 var lAP=gl.getAttribLocation(lprog,'aP');
 var lAC=gl.getAttribLocation(lprog,'aC');
 var lPr=gl.getUniformLocation(lprog,'uPr');
@@ -286,6 +295,29 @@ var ppAA=gl.getAttribLocation(pprog,'aA');
 var ppPJ=gl.getUniformLocation(pprog,'uPr');
 var ppVW=gl.getUniformLocation(pprog,'uVw');
 var ppSoft=gl.getUniformLocation(pprog,'uSoft');
+
+// complementary mode: swap the real fragment shader (grade/vignette/rim per-pixel).
+window.glShaderSet=function(on){
+ try{
+  var fs=mkS(gl,gl.FRAGMENT_SHADER,fsSrc(!!on));
+  if(!gl.getShaderParameter(fs,gl.COMPILE_STATUS))return false;
+  var np=gl.createProgram();
+  gl.attachShader(np,mkS(gl,gl.VERTEX_SHADER,VS));
+  gl.attachShader(np,fs);
+  gl.linkProgram(np);
+  if(!gl.getProgramParameter(np,gl.LINK_STATUS))return false;
+  try{gl.deleteProgram(prog)}catch(e){}
+  prog=np;
+  aPos=gl.getAttribLocation(prog,'aPos');aNorm=gl.getAttribLocation(prog,'aNorm');aCol=gl.getAttribLocation(prog,'aCol');
+  uMVP=gl.getUniformLocation(prog,'uMVP');uMod=gl.getUniformLocation(prog,'uMod');uNM=gl.getUniformLocation(prog,'uNM');
+  uCam=gl.getUniformLocation(prog,'uCam');uEm=gl.getUniformLocation(prog,'uEm');uAl=gl.getUniformLocation(prog,'uAl');
+  uInv=gl.getUniformLocation(prog,'uInv');uFr=gl.getUniformLocation(prog,'uFr');uRes=gl.getUniformLocation(prog,'uRes');
+  gl.useProgram(prog);
+  if(uRes)gl.uniform2f(uRes,canvas.width,canvas.height);
+  return true;
+ }catch(e){return false}
+};
+try{if(localStorage.getItem('cube_shader')==='1'){window._shaderMode=true;window.glShaderSet(true)}}catch(e){}
 
 function upBuf(data){var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return b}
 function bindM(buf){gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,S,0);gl.enableVertexAttribArray(aNorm);gl.vertexAttribPointer(aNorm,3,gl.FLOAT,false,S,12);gl.enableVertexAttribArray(aCol);gl.vertexAttribPointer(aCol,3,gl.FLOAT,false,S,24)}
@@ -1349,7 +1381,7 @@ requestAnimationFrame(render);
 // ┌──────────────────────────────────────────────────────────────┐
 // │  WINDOW RESIZE                                             │
 // └──────────────────────────────────────────────────────────────┘
-window.addEventListener('resize',function(){var dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';gl.viewport(0,0,canvas.width,canvas.height)});
+window.addEventListener('resize',function(){var dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=window.innerWidth*dpr;canvas.height=window.innerHeight*dpr;canvas.style.width=window.innerWidth+'px';canvas.style.height=window.innerHeight+'px';gl.viewport(0,0,canvas.width,canvas.height);try{if(window._shaderMode){gl.useProgram(prog);gl.uniform2f(uRes,canvas.width,canvas.height)}}catch(e){}});
 
 // ┌──────────────────────────────────────────────────────────────┐
 // │  VOIDSCRIPT STUDIO IDE                                     │

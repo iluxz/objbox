@@ -349,6 +349,16 @@ var GR_ROOMS={
     }
     return h+'</div><div style="margin-top:6px;font-size:12px;color:#5f7d99">starving pens lose slimes out the sides. walls prevent this. favorites pay double.</div>';
   }},
+  yard:{title:'THE YARD HOLE',html:function(){
+    var s=grSave(),n=s.yardToss||0;
+    var h='packed dirt under a flat grey sky that does not move. in the middle of the yard: a square hole, walls of dirt, cut clean like a shovel never slipped.<br><br>white light comes up from the bottom. not glow. not lava. just white, patient, and very far down. a hand-painted sign is staked at the edge:<br><br><i style="color:#e8e2d0">"BASEMENT"</i><br><br>';
+    h+='<span style="font-size:12px;color:#5f7d99">things thrown in: <b>'+n+'</b>. the void keeps everything. all of it. (it runs a mob farm down there. the drops belong to it.)</span><br><br>';
+    h+='<button class="grBtn" data-toss="0" style="padding:4px 10px;font-size:11px">toss something in</button> ';
+    h+='<button class="grBtn" data-toss="1" style="padding:4px 10px;font-size:11px">peer over the edge</button> ';
+    h+='<button class="grBtn" data-toss="2" style="padding:4px 10px;font-size:11px">read the sign again</button>';
+    h+='<div style="margin-top:6px;font-size:12px;color:#5f7d99">sometimes a mob falls in and the pit spits up a bit of its cut.</div>';
+    return h;
+  }},
   below:{title:'BELOW',html:function(){
     var s=grSave();
     if(grEnd==='spare'||grEnd==='kill')return grEndHtml(grEnd);
@@ -1638,7 +1648,7 @@ var GR_MAP_SURF=[
  {id:'vault',x:250,y:-60},{id:'gauntlet',x:250,y:80},{id:'hollow',x:380,y:0},
  {id:'farm',x:510,y:-80},{id:'lab',x:510,y:60},{id:'pens',x:510,y:170},
  {id:'dripworks',x:640,y:-20},{id:'sea',x:770,y:-70},{id:'roost',x:770,y:50},
- {id:'below',x:640,y:150}
+ {id:'below',x:640,y:150},{id:'yard',x:120,y:190}
 ];
 var grMapCam={x:0,y:0,z:1},grMapNodes=[],grMapPulseIv=null;
 function grMapTierCol(n){
@@ -3549,6 +3559,7 @@ var GR_MAP=[
  ['mouth','← mouth'],['phosphor','phosphor light'],['meadow','the meadow'],['hollow','the hollow'],
   ['lab','the lab'],['farm','the farm'],['dripworks','dripworks'],['sea','void sea'],['roost','the roost'],['pens','the pens'],
   ['vault','the vault'],['gauntlet','the gauntlet'],['below','below'],
+  ['yard','the yard hole'],
   ['deep','the deep · 214 rooms']
 ];
 function grMapToggle(){
@@ -4130,6 +4141,26 @@ var GR_ROCK_LINES=[
  'the warden has a heartbeat. i do not. advantage: rock.',
  'chism owes me money. that stays between us. and chism.'
 ];
+function grYardToss(k){
+  if(!grActive||grRoom!=='yard')return;
+  var s=grSave();
+  if(k===1){
+    var lines=['the white at the bottom does not get closer no matter how long you look. it looks back politely.','you drop a pebble. no sound. ever. the void is not done with it.','the dirt walls are packed hard. someone dug this fast and left.'];
+    grNote(lines[(s.yardPeek||0)%lines.length]);s.yardPeek=(s.yardPeek||0)+1;grStore(s);return;
+  }
+  if(k===2){grNote('the sign says BASEMENT in paint that dripped once and stopped. there is no basement. there never was. (the hole goes down forever.)');return}
+  s.yardToss=(s.yardToss||0)+1;
+  var loot='';
+  if(Math.random()<0.25){
+    var g2=1+Math.floor(Math.random()*4);
+    s.glow=(s.glow||0)+g2;
+    loot=' something fell in first and the pit paid you its cut: +'+g2+' glow.';
+    grPop(50,45,'+'+g2+' glow','#ffd770');
+  }
+  grStore(s);
+  grNote('you toss it in. the white takes it without a sound. the void keeps everything.'+loot);
+  grRender();
+}
 function grRockTalk(){
   if(!grActive)return;
   var s=grSave(),n=s.rockN||0;
@@ -4458,6 +4489,10 @@ function grRender(){
     for(var dvI=0;dvI<dv.length;dvI++)(function(el){
       el.onclick=function(){grDive(parseInt(el.getAttribute('data-dive'),10)||0)};
     })(dv[dvI]);
+    var ts2=b.querySelectorAll('[data-toss]');
+    for(var tsI=0;tsI<ts2.length;tsI++)(function(el){
+      el.onclick=function(){grYardToss(parseInt(el.getAttribute('data-toss'),10)||0)};
+    })(ts2[tsI]);
     var vv=b.querySelectorAll('[data-valve]');
     for(var vvI=0;vvI<vv.length;vvI++)(function(el){
       el.onclick=function(){grValve(parseInt(el.getAttribute('data-valve'),10)||0)};
@@ -4787,8 +4822,9 @@ var grRAF=0,grDrops=[],grRipples=[],grSparks=[],grMotes=[],grBubbles=[],grT=0,gr
 // room-reactive palette: the actual background changes with the room.
 function grScenePal(){
  var d={sh:'200,230,255',mo:'210,230,255',gl:'120,200,255',amt:1};
- try{
-  if(grRoom==='deep'&&typeof grDeepDef==='function'&&grDeepRoom>0){
+  try{
+   if(grRoom==='yard')return {sh:'255,248,230',mo:'235,225,195',gl:'255,255,250',amt:.85};
+   if(grRoom==='deep'&&typeof grDeepDef==='function'&&grDeepRoom>0){
    var dd=grDeepDef(grDeepRoom);
    if(dd.hand){
     var v=(typeof grBurrowView!=='undefined')?grBurrowView:'hub';
@@ -4830,8 +4866,10 @@ function grFrame(ts){
     var t=grT;
     // cave dark (floor 2 = volcano: basalt above, ember heat below)
     var isVolcano=(grRoom==='deep'&&((grDeepRoom>107)||(grDeepRoom===0&&grDeepTier>=7)));
+    var isYard=(grRoom==='yard');
     var g=x.createLinearGradient(0,0,0,H);
-    if(isVolcano){g.addColorStop(0,'#0c0406');g.addColorStop(.55,'#160605');g.addColorStop(1,'#280b04')}
+    if(isYard){g.addColorStop(0,'#1d160d');g.addColorStop(.55,'#140f08');g.addColorStop(1,'#060403')}
+    else if(isVolcano){g.addColorStop(0,'#0c0406');g.addColorStop(.55,'#160605');g.addColorStop(1,'#280b04')}
     else{g.addColorStop(0,'#060b14');g.addColorStop(.55,'#04070d');g.addColorStop(1,'#010203')}
     x.fillStyle=g;x.fillRect(0,0,W,H);
     var cx=W/2,boardY=grBoardY(H);
@@ -4839,6 +4877,8 @@ function grFrame(ts){
     var SC={sh:'200,230,255',mo:'210,230,255',gl:'120,200,255',amt:1};
     try{SC=grScenePal()}catch(e){}
     if(isVolcano)SC={sh:'255,130,60',mo:'255,120,50',gl:'255,80,30',amt:.8};
+    if(isYard)SC={sh:'255,250,235',mo:'235,225,195',gl:'255,255,250',amt:.85};
+    if(window._shaderMode)SC.amt=Math.min(1.4,SC.amt*1.35);
     var landY=isSea?Math.floor(H*0.62):(isRapids?Math.floor(H*0.70):boardY);
     // open sky outside the cave (no walls, no ceiling, no shaft)
     if(isSea){
@@ -4857,14 +4897,14 @@ function grFrame(ts){
       x.fillStyle=hz;x.fillRect(0,landY-26,W,32);
     } else {
     // rock walls left/right (layered silhouettes)
-    x.fillStyle=isVolcano?'#200c08':'#0a1220';
+    x.fillStyle=isYard?'#241a10':(isVolcano?'#200c08':'#0a1220');
     x.beginPath();x.moveTo(0,0);
     for(var wx=0;wx<=H;wx+=40)x.lineTo(30+Math.sin(wx*.013+2)*36+Math.sin(wx*.05)*8,wx);
     x.lineTo(0,H);x.closePath();x.fill();
     x.beginPath();x.moveTo(W,0);
     for(var vx=0;vx<=H;vx+=40)x.lineTo(W-30-Math.sin(vx*.011+4)*36-Math.sin(vx*.045+1)*8,vx);
     x.lineTo(W,H);x.closePath();x.fill();
-    x.fillStyle=isVolcano?'#160705':'#070d17';
+    x.fillStyle=isYard?'#171009':(isVolcano?'#160705':'#070d17');
     x.beginPath();x.moveTo(0,0);
     for(var ux=0;ux<=H;ux+=60)x.lineTo(90+Math.sin(ux*.009)*44,ux);
     x.lineTo(0,H);x.closePath();x.fill();
@@ -4884,10 +4924,31 @@ function grFrame(ts){
     } // end cave walls (sea has sky instead)
     // the pit (under the boards: near-black). not in rapids, sea, or meadow.
     // volcano has no black pit — it has lava.
-    if(!isRapids&&!isSea&&grRoom!=='meadow'&&!isVolcano){
+    if(!isRapids&&!isSea&&grRoom!=='meadow'&&!isVolcano&&!isYard){
     x.fillStyle='#000';
     x.fillRect(cx-190,boardY,W-(cx-190)-(W-(cx+190)),H-boardY);
     x.fillRect(0,boardY+34,W,H-boardY-34);
+    }
+    // the yard hole: square pit, dirt walls, white void glow at the bottom.
+    if(isYard){
+      var pw=Math.min(360,W*0.44),px0=cx-pw/2,py0=boardY-6;
+      x.fillStyle='#050403';
+      x.fillRect(px0,py0,pw,H-py0);
+      x.strokeStyle='rgba(70,52,30,0.9)';x.lineWidth=3;
+      x.strokeRect(px0,py0,pw,H-py0);
+      x.fillStyle='#2a1f12';
+      for(var dyI=0;dyI<5;dyI++){x.fillRect(px0,py0+dyI*((H-py0)/5),pw,3)}
+      var pgY=x.createRadialGradient(cx,H-8,6,cx,H-8,pw*0.8);
+      pgY.addColorStop(0,'rgba(255,255,250,'+(0.55+Math.sin(t*1.3)*.12).toFixed(3)+')');
+      pgY.addColorStop(.35,'rgba(255,255,240,0.16)');
+      pgY.addColorStop(1,'rgba(255,255,240,0)');
+      x.fillStyle=pgY;x.fillRect(px0-40,H-pw*0.8,pw+80,pw*0.8);
+      for(var fyI=0;fyI<8;fyI++){
+        var fx2=px0+8+((fyI*97)%Math.max(1,pw-16));
+        var fy2=py0+((t*26+fyI*73)%Math.max(1,H-py0));
+        x.fillStyle='rgba(255,255,245,'+(0.25+0.2*Math.sin(t*2+fyI)).toFixed(3)+')';
+        x.fillRect(fx2,fy2,1.6,1.6);
+      }
     }
     if(isVolcano){
     var lg=x.createLinearGradient(0,boardY,0,H);

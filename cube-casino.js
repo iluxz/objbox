@@ -89,7 +89,7 @@ function caCSS(){
  '#caNarr{display:flex;align-items:center;gap:12px;min-height:42px;padding:7px 22px;border-bottom:1px solid #55352c;background:linear-gradient(90deg,#28171a,#17121a 48%,#24181b);color:#f1d8b0;font-size:13px;line-height:1.4}'+
  '#caNarr .who{flex:none;color:#ffbd69;font-size:10px;letter-spacing:2px;text-transform:uppercase}#caNarrText{min-width:0}'+
  '#caMain{flex:1;min-height:0;display:flex;position:relative}'+
- '#caFloor{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,1.35fr) minmax(230px,.8fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"slots cards" "slots spin";gap:14px;padding:16px 22px;overflow:auto;background:radial-gradient(ellipse at 48% 50%,rgba(106,45,34,.13),transparent 65%)}'+
+ '#caFloor{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,1.35fr) minmax(230px,.8fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr);grid-template-areas:"slots cards" "slots spin" "jack jack";gap:14px;padding:16px 22px;overflow:auto;background:radial-gradient(ellipse at 48% 50%,rgba(106,45,34,.13),transparent 65%)}'+
  '.caGame{position:relative;isolation:isolate;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;overflow:hidden;padding:18px 16px;border:1px solid #6e4a38;background:linear-gradient(145deg,rgba(48,28,27,.92),rgba(20,16,21,.98));box-shadow:0 8px 22px #0008,inset 0 0 30px #ffcc6810}'+
  '.caGame h3{position:relative;z-index:1;margin:0;color:#ffe2aa;font-size:13px;letter-spacing:4px;font-weight:normal;text-align:center}.caGame .sub{position:relative;z-index:1;max-width:360px;color:#b29a84;font-size:11px;line-height:1.5;text-align:center}'+
  '.caGame .out{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-height:54px;padding:10px 14px;color:#fff2d5;text-align:center;font-size:17px;letter-spacing:2px}'+
@@ -107,6 +107,10 @@ function caCSS(){
  '#caSpin:before{content:"";position:absolute;width:150px;height:150px;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;background:conic-gradient(#cf3850 0 30deg,#19151e 30deg 60deg,#cf3850 60deg 90deg,#19151e 90deg 120deg,#cf3850 120deg 150deg,#19151e 150deg 180deg,#cf3850 180deg 210deg,#19151e 210deg 240deg,#cf3850 240deg 270deg,#19151e 270deg 300deg,#cf3850 300deg 330deg,#27a879 330deg 360deg);border:7px double #d9bd75;box-shadow:0 0 0 5px #231a2d,0 0 22px #b18be855;opacity:.32;z-index:0;animation:caWheel 24s linear infinite}'+
  '#caSpin .out{min-width:126px;min-height:52px;border:1px solid #c6ac6c;border-radius:30px;background:#17111ee8;color:#f4dfaa;font-weight:bold;box-shadow:0 0 14px #0008}'+
  '#caSpin .caBtn{border-color:#9b7bc2;background:#302044;color:#eee0ff}#caSpin .caBtn:hover{background:#533767}'+
+ '#caJack{grid-area:jack;border:2px solid #d4af5e;border-radius:10px;background:linear-gradient(160deg,#1a2b4a,#0e1524 70%);box-shadow:0 0 22px #4a7bd633,inset 0 0 34px #d4af5e14}'+
+ '#caJack:before{content:"\\2660  BLACKJACK  \\2665";position:absolute;top:10px;left:0;right:0;color:#e8cd82;font-size:11px;letter-spacing:8px;text-align:center;opacity:.7}'+
+ '#caJack .out{min-width:min(92%,520px);border:1px solid #e8cd82;border-radius:6px;background:linear-gradient(135deg,#f4ead0,#d9c89e);box-shadow:0 7px 0 #0a1526,0 9px 18px #0009;color:#1c2b47;font-family:Georgia,serif;font-weight:bold;letter-spacing:1px}'+
+ '#caJack .caBtn{border-color:#d4af5e;background:#24365c;color:#f4e6bd}#caJack .caBtn:hover{background:#31497c}'+
  '.caRow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.caBtn{border:1px solid #927750;border-radius:3px;background:#2b211e;color:#edd9b3;font-family:Consolas,monospace;font-size:11px;letter-spacing:1px;padding:6px 11px;cursor:pointer;transition:transform .12s,background .12s,box-shadow .12s}.caBtn:hover{background:#453126;color:#fff4dc;box-shadow:0 0 10px #dfa95444}.caBtn:focus-visible,#caInput:focus-visible,#caLeave:focus-visible{outline:2px solid #fff0aa;outline-offset:2px}.caBtn.dim{border-color:#705c42;color:#c2aa82;background:#211a1b}'+
  '#caBottom{flex:none;border-top:1px solid #8b613b;background:#100d12;box-shadow:0 -8px 25px #0008}'+
  '#caLog{height:66px;overflow:auto;padding:7px 18px;font-size:12px;line-height:1.5;color:#c0aa91;background:linear-gradient(90deg,#171117,#20151a,#171117)}'+
@@ -123,16 +127,17 @@ function caCSS(){
 function caBuild(){
  caCSS();
  var ov=document.createElement('div');ov.id='caOverlay';ov.style.display='none';
- ov.innerHTML='<header id="caHeader"><div class="caBrand"><div class="caSign"><strong>VOID</strong><small>★ OPEN ★</small></div><div class="caBrandText"><div class="caEyebrow">the house always remembers</div><div class="caTitle">VOID CASINO</div><div class="caSubtitle">three tables · one suspicious dealer · no refunds</div></div></div>'+ 
+ ov.innerHTML='<header id="caHeader"><div class="caBrand"><div class="caSign"><strong>VOID</strong><small>★ OPEN ★</small></div><div class="caBrandText"><div class="caEyebrow">the house always remembers</div><div class="caTitle">VOID CASINO</div><div class="caSubtitle">four tables · one suspicious dealer · no refunds</div></div></div>'+ 
  '<div id="caBank"><div class="caBankLabel">house ledger · skill-point chips</div><div id="caBal"></div><div id="caStats"></div><div class="caBetRow"><button class="caBtn dim" data-ca="bet:10">BET 10</button><button class="caBtn dim" data-ca="bet:25">BET 25</button><button class="caBtn dim" data-ca="bet:100">BET 100</button><button class="caBtn dim" data-ca="bet:500">BET 500</button></div></div></header>'+
  '<div id="caNarr"><span class="who">obj · dealer</span><span id="caNarrText"></span></div>'+
  '<main id="caMain"><div id="caFloor">'+
   '<section class="caGame" id="caSlots"><h3>SLOTS</h3><div class="sub">three sevens pays 100× · any pair pays 2× · full match pays 10×</div><div class="out" id="caSlotsOut">— · — · —</div><div class="caRow"><button class="caBtn" data-ca="slots">PULL</button></div></section>'+
   '<section class="caGame" id="caCards"><h3>HIGHER / LOWER</h3><div class="sub">draw, call the next card. ties go to the house. streaks pay 3×, 5×.</div><div class="out" id="caCardsOut">no card. draw.</div><div class="caRow"><button class="caBtn" data-ca="draw">DRAW</button><button class="caBtn" data-ca="higher">HIGHER</button><button class="caBtn" data-ca="lower">LOWER</button></div></section>'+
   '<section class="caGame" id="caSpin"><h3>VOID SPIN</h3><div class="sub">red / black pays 2× · green pays 14×</div><div class="out" id="caSpinOut">place your bets.</div><div class="caRow"><button class="caBtn" data-ca="spin:red">RED</button><button class="caBtn" data-ca="spin:black">BLACK</button><button class="caBtn" data-ca="spin:green">GREEN</button></div></section>'+
+  '<section class="caGame" id="caJack"><h3>BLACKJACK</h3><div class="sub">beat the dealer to 21. blackjack pays 5:2. dealer stands on 17.</div><div class="out" id="caJackOut">take a seat. deal.</div><div class="caRow"><button class="caBtn" data-ca="jack">DEAL</button><button class="caBtn" data-ca="hit">HIT</button><button class="caBtn" data-ca="stand">STAND</button></div></section>'+
  '</div></main>'+
  '<footer id="caBottom"><div id="caLog"></div>'+ 
- '<div id="caRow"><span style="color:#b5956a;font-size:12px">›</span><input id="caInput" autocomplete="off" spellcheck="false" placeholder="slots 25 / draw / higher / spin red 50 / chips / leave"><button id="caLeave">LEAVE</button></div></footer>';
+ '<div id="caRow"><span style="color:#b5956a;font-size:12px">›</span><input id="caInput" autocomplete="off" spellcheck="false" placeholder="slots 25 / draw / spin red 50 / jack / hit / stand / chips / leave"><button id="caLeave">LEAVE</button></div></footer>';
  document.body.appendChild(ov);
  try{
   var btns=ov.querySelectorAll('[data-ca]');
@@ -296,6 +301,47 @@ function caSpin(rest){
  }else caResult(false,bet,0,out+'. the wheel has no memory. i do.');
 }
 
+var CA_SUITS=['♠','♥','♦','♣'];
+var caJack=null;
+function caJackCard(){return {v:1+Math.floor(Math.random()*13),s:CA_SUITS[Math.floor(Math.random()*4)]}}
+function caJackVal(hand){var t=0,a=0,i,v;for(i=0;i<hand.length;i++){v=hand[i].v;if(v===1){a++;t+=11}else if(v>10)t+=10;else t+=v}while(t>21&&a>0){t-=10;a--}return t}
+function caJackShow(h,hide){var p=[];for(var i=0;i<h.length;i++){if(i===1&&hide)p.push('[?]');else p.push(caCardName(h[i].v)+h[i].s)}return p.join(' ')}
+function caJackStart(rest){
+ if(caJack&&!caJack.done){caLogLine('finish this hand first. hit or stand.','hi');return}
+ var bet=caBetAmount(rest);
+ if(!caTake(bet)){caLogLine('no chips for that. the ATM is a skill tree. go earn.','bad');return}
+ caJack={bet:bet,phand:[caJackCard(),caJackCard()],dhand:[caJackCard(),caJackCard()],done:false};
+ var pv=caJackVal(caJack.phand),dv=caJackVal(caJack.dhand);
+ if(pv===21){
+  caJack.done=true;
+  if(dv===21){caSetOut('caJackOut','you ['+caJackShow(caJack.phand)+'] = 21 · dealer ['+caJackShow(caJack.dhand)+'] = 21');caGive(bet);caLogLine('double blackjack. push. bet back. the void blinks.','hi')}
+  else{caSetOut('caJackOut','BLACKJACK ['+caJackShow(caJack.phand)+'] · dealer ['+caJackShow(caJack.dhand,true)+']');caResult(true,bet,2.5,'BLACKJACK. the dealer applauds with one hand.')}
+  caRenderSide();return;
+ }
+ caSetOut('caJackOut','you ['+caJackShow(caJack.phand)+'] = '+pv+' · dealer ['+caJackShow(caJack.dhand,true)+']');
+ caLogLine('dealt for '+bet+'. hit or stand.','hi');
+}
+function caJackHit(){
+ if(!caJack||caJack.done){caLogLine('deal first. the deck is shy.','hi');return}
+ caJack.phand.push(caJackCard());
+ var pv=caJackVal(caJack.phand);
+ if(pv>21){caJack.done=true;caSetOut('caJackOut','you ['+caJackShow(caJack.phand)+'] = '+pv+' BUST');caResult(false,caJack.bet,0,'bust at '+pv+'. the dealer smiles. he practices it.')}
+ else if(pv===21){caSetOut('caJackOut','you ['+caJackShow(caJack.phand)+'] = 21');caJackStand()}
+ else{caSetOut('caJackOut','you ['+caJackShow(caJack.phand)+'] = '+pv+' · dealer ['+caJackShow(caJack.dhand,true)+']');caLogLine(pv+'. hit or stand.','hi')}
+}
+function caJackStand(){
+ if(!caJack||caJack.done){caLogLine('deal first. the deck is shy.','hi');return}
+ caJack.done=true;
+ var dv=caJackVal(caJack.dhand);
+ while(dv<17){caJack.dhand.push(caJackCard());dv=caJackVal(caJack.dhand)}
+ var pv=caJackVal(caJack.phand);
+ caSetOut('caJackOut','you ['+caJackShow(caJack.phand)+'] = '+pv+' · dealer ['+caJackShow(caJack.dhand)+'] = '+dv);
+ if(dv>21)caResult(true,caJack.bet,2,'dealer busts at '+dv+'. the house blames the deck.');
+ else if(pv>dv)caResult(true,caJack.bet,2,pv+' beats '+dv+'. paid.');
+ else if(pv<dv)caResult(false,caJack.bet,0,pv+' loses to '+dv+'. the dealer keeps a straight face. (smug.)');
+ else{caGive(caJack.bet);caLogLine('push at '+pv+'. bet back. the house is merciful. (rarely.)','hi');caRenderSide()}
+}
+
 // ══ commands ══
 function caClick(spec){
  var parts=String(spec||'').split(':');
@@ -305,6 +351,9 @@ function caClick(spec){
  if(parts[0]==='higher'){caSubmit('higher');return}
  if(parts[0]==='lower'){caSubmit('lower');return}
  if(parts[0]==='spin'){caSubmit('spin '+parts[1]+' '+caBet);return}
+ if(parts[0]==='jack'){caSubmit('blackjack '+caBet);return}
+ if(parts[0]==='hit'){caSubmit('hit');return}
+ if(parts[0]==='stand'){caSubmit('stand');return}
 }
 function caSubmit(str){
  if(!caActive)return;
@@ -318,17 +367,20 @@ function caSubmit(str){
  if(cmd==='lower'||cmd==='low'||cmd==='l'){caGuess('lower');return}
  if(cmd==='fold'||cmd==='pass'){caFold();return}
  if(cmd==='spin'||cmd==='roulette'||cmd==='wheel'){caSpin(rest);return}
+ if(cmd==='blackjack'||cmd==='jack'||cmd==='21'||cmd==='deal'){caJackStart(rest);return}
+ if(cmd==='hit'||cmd==='h'){caJackHit();return}
+ if(cmd==='stand'||cmd==='st'||cmd==='stay'){caJackStand();return}
  if(cmd==='bet'||cmd==='chips'||cmd==='balance'||cmd==='bal'){if(cmd==='bet'&&parseInt(parts[1],10)>0){caBet=Math.max(1,Math.min(500,parseInt(parts[1],10)));caLogLine('default bet: '+caBet+'.','hi')}else caLogLine('chips: '+caBal()+'. default bet '+caBet+'.','hi');caRenderSide();return}
  if(cmd==='rigged'||cmd==='rig'||cmd==='fair'){caLine('rig');return}
  if(cmd==='talk'||cmd==='obj'||cmd==='dealer'||cmd==='hello'||cmd==='hi'){caLine('idle');return}
  if(cmd==='help'||cmd==='commands'||cmd==='?'){caHelp();return}
  if(cmd==='leave'||cmd==='exit'||cmd==='quit'||cmd==='out'){caExit();return}
- caNarr('that is not a game. the games are: slots, draw, spin.');
- caLogLine('try: slots 25 · draw · higher · spin red 50 · chips · leave');
+ caNarr('that is not a game. the games are: slots, draw, spin, blackjack.');
+ caLogLine('try: slots 25 · draw · higher · spin red 50 · jack · hit · stand · chips · leave');
 }
 function caHelp(){
- caLogLine('games: slots [bet] · draw [bet] then higher/lower/fold · spin <red|black|green> [bet] · bet <n> · chips · leave','hi');
- caNarr('three games. all rigged. one dealer. chips are skill points. do not cry when they are gone.');
+ caLogLine('games: slots [bet] · draw [bet] then higher/lower/fold · spin <red|black|green> [bet] · blackjack [bet] then hit/stand · bet <n> · chips · leave','hi');
+ caNarr('four games. all rigged. one dealer. chips are skill points. do not cry when they are gone.');
 }
 
 // ══ enter / exit ══
@@ -341,7 +393,7 @@ function caEnter(){
   ov.style.display='flex';
  }catch(e){return}
  caActive=true;
- caPity=0;caStreak=0;caDuel=null;
+ caPity=0;caStreak=0;caDuel=null;caJack=null;
  try{document.addEventListener('keydown',caGlobalKey)}catch(e){}
  try{
   var tf=document.getElementById('termField');if(tf){tf.disabled=true;tf.blur()}
@@ -351,7 +403,7 @@ function caEnter(){
  }catch(e){}
  caRenderSide();
  try{var lg=document.getElementById('caLog');if(lg)lg.innerHTML=''}catch(e){}
- caSetOut('caSlotsOut','— · — · —');caSetOut('caCardsOut','no card. draw.');caSetOut('caSpinOut','place your bets.');
+ caSetOut('caSlotsOut','— · — · —');caSetOut('caCardsOut','no card. draw.');caSetOut('caSpinOut','place your bets.');caSetOut('caJackOut','take a seat. deal.');
  caLine('greet');
  try{var inp=document.getElementById('caInput');if(inp)setTimeout(function(){try{inp.focus()}catch(e){}},60)}catch(e){}
 }
